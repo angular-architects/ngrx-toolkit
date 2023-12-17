@@ -1,0 +1,84 @@
+{
+  "name": "ngrx-toolkit",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "ngrx-toolkit",
+  "sourceRoot": "apps/ngrx-toolkit/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/ngrx-toolkit",
+        "index": "apps/ngrx-toolkit/src/index.html",
+        "browser": "apps/ngrx-toolkit/src/main.ts",
+        "polyfills": ["zone.js"],
+        "tsConfig": "apps/ngrx-toolkit/tsconfig.app.json",
+        "assets": [
+          "apps/ngrx-toolkit/src/favicon.ico",
+          "apps/ngrx-toolkit/src/assets"
+        ],
+        "styles": ["apps/ngrx-toolkit/src/styles.css"],
+        "scripts": [],
+        "server": "apps/ngrx-toolkit/src/main.server.ts",
+        "prerender": true,
+        "ssr": {
+          "entry": "apps/ngrx-toolkit/server.ts"
+        }
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "2kb",
+              "maximumError": "4kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "ngrx-toolkit:build:production"
+        },
+        "development": {
+          "buildTarget": "ngrx-toolkit:build:development"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "buildTarget": "ngrx-toolkit:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/ngrx-toolkit/jest.config.ts"
+      }
+    }
+  }
+}
