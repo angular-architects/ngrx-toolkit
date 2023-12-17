@@ -1,0 +1,53 @@
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">Passenger Edit</h2>
+  </div>
+
+  <div class="card-body">
+    <form [formGroup]="editForm">
+      <div class="form-group">
+        <label>ID:</label>
+        <input formControlName="id" type="number" class="form-control" />
+      </div>
+      <div class="form-group">
+        <label>Firstname:</label>
+        <input formControlName="firstName" class="form-control" />
+      </div>
+      <div class="form-group">
+        <label>Lastname:</label>
+        <input formControlName="name" class="form-control" />
+      </div>
+      <div class="form-group">
+        <label>Bonus Miles:</label>
+        <input
+          formControlName="bonusMiles"
+          type="number"
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Status:</label>
+        <input formControlName="passengerStatus" class="form-control" />
+      </div>
+      <div
+        *ngIf="editForm.controls.passengerStatus.hasError('passengerStatus')"
+        class="alert alert-danger"
+      >
+        Please enter a valid passenger status.<br>
+        The following values are allowed:
+        {{ editForm.controls.passengerStatus.errors?.['passengerStatus'].validStatus.join(', ') }}
+      </div>
+
+      <div class="form-group">
+        <button
+          (click)="save()"
+          [disabled]="!editForm.valid"
+          class="btn btn-default"
+        >
+          Save
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,42 @@
+<div class="sidebar-wrapper">
+  <div class="logo">
+    <a href="http://angulararchitects.io" class="simple-text logo-mini">
+      <div class="logo-image-small">
+        <img src="assets/paper-design/angular_gradient.png" alt="Angular Logo" />
+      </div>
+    </a>
+    <a href="http://angulararchitects.io" class="simple-text logo-normal">
+      Flights 42
+    </a>
+  </div>
+  <ul class="nav">
+    <li routerLinkActive="active">
+      <a routerLink="/home">
+        <i class="nc-icon nc-bank"></i>
+        <p>Home</p>
+      </a>
+    </li>
+
+    <li routerLinkActive="active">
+      <a routerLink="/booking/flight">
+        <i class="nc-icon nc-send"></i>
+        <p>
+          Flights
+          @if (flightCount(); as count) {
+            <span class="badge badge-pill badge-info">
+              {{ count }}
+            </span>
+          }
+        </p>
+      </a>
+    </li>
+
+    <li routerLinkActive="active">
+      <a routerLink="/booking/passenger">
+        <i class="nc-icon nc-single-02"></i>
+        <p>Passengers</p>
+      </a>
+    </li>
+
+  </ul>
+</div>

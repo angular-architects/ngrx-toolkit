@@ -1,0 +1,53 @@
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+}
+
+input.ng-dirty.ng-invalid {
+  border-left: darkred 5px solid;
+}
+
+input.ng-dirty.ng-valid {
+  border-left: darkgreen 5px solid;
+}
+
+a {
+  cursor: pointer;
+}
+
+.status,
+.status:visited {
+  text-decoration: underline;
+  color: navy;
+}
+
+.status:hover {
+  text-decoration: underline;
+  color: darkgoldenrod;
+}
+
+.p40 {
+  padding: 20px;
+}
+
+.mr5 {
+  margin-right: 5px;
+}
+
+.ml5 {
+  margin-left: 5px;
+}
+
+.nav a,
+.nav a:visited {
+  text-decoration: underline;
+  color: black;
+}
+
+.nav a:hover {
+  text-decoration: underline;
+  color: darkgoldenrod;
+}

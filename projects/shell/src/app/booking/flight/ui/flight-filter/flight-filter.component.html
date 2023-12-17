@@ -1,0 +1,42 @@
+<div class="form-group">
+  <label for="filterSelect">Previous Filters:</label>
+  <select
+    [formControl]="selectedFilterControl"
+    class="form-control"
+    id="filterSelect"
+  >
+    <option *ngFor="let filter of localStore.filters()" [ngValue]="filter">
+      {{ filter?.from }} - {{ filter?.to }}
+    </option>
+  </select>
+</div>
+
+<form [formGroup]="inputFilterForm">
+  <div class="form-group">
+    <label>From:</label>
+    <input formControlName="from" class="form-control" />
+  </div>
+  <div class="form-group">
+    <label>To:</label>
+    <input formControlName="to" class="form-control" />
+  </div>
+  <div class="form-group">
+    <label>
+      <input formControlName="urgent" type="checkbox" />
+      Urgent (When it's urgent it fails -- like in real life ;-))
+    </label>
+  </div>
+
+  <div class="form-group">
+    <button
+      (click)="localStore.triggerSearch()"
+      [disabled]="!inputFilterForm.valid"
+      class="btn btn-default"
+    >
+      Search
+    </button>
+
+    <ng-content select=".flight-filter-button"></ng-content>
+    <ng-content select=".flight-filter-info"></ng-content>
+  </div>
+</form>

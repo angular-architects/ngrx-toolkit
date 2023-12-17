@@ -1,0 +1,78 @@
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">Passenger Search</h2>
+  </div>
+
+  <div class="card-body">
+    <form>
+      <div class="form-group">
+        <label>Firstname:</label>
+        <input [(ngModel)]="firstname" name="firstname" class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <label>Lastname:</label>
+        <input [(ngModel)]="lastname" name="lastname" class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <button
+          (click)="search()"
+          [disabled]="!(firstname || lastname)"
+          class="btn btn-default"
+        >
+          Search
+        </button>
+
+        <div>{{ passengers.length }} passengers found!</div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card" *ngIf="passengers.length">
+  <table class="table table-condensed">
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Firstname</th>
+        <th>Lastname</th>
+        <th>Bonus Miles</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        *ngFor="let passenger of passengers"
+        [class.table-active]="selectedPassenger === passenger"
+      >
+        <td>
+          <span class="badge badge-pill badge-info">
+            {{ passenger.id }}
+          </span>
+        </td>
+        <td>{{ passenger.firstName }}</td>
+        <td>{{ passenger.name }}</td>
+        <td>{{ passenger.bonusMiles }}</td>
+        <td>{{ passenger.passengerStatus }}</td>
+        <td>
+          <button
+            (click)="select(passenger)"
+            class="btn btn-info btn-sm"
+            style="min-width: 85px; margin-right: 5px"
+          >
+            Select
+          </button>
+          <a
+            [routerLink]="['../edit', passenger.id]"
+            class="btn btn-success btn-sm"
+            style="min-width: 85px; margin-right: 5px"
+          >
+            Edit
+          </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
