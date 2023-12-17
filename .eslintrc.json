@@ -63,14 +63,6 @@
         "jest": true
       },
       "rules": {}
-    },
-    {
-      "files": [
-        "*.ts"
-      ],
-      "extends": [
-        "plugin:@softarc/sheriff/default"
-      ]
     }
   ]
 }
