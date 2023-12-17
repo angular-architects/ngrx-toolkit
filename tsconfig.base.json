@@ -14,7 +14,10 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@ngrx-toolkit/nx-toolkit": ["libs/nx-toolkit/src/index.ts"],
+      "ngrx-toolkit": ["libs/ngrx-toolkit/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

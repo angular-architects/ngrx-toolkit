@@ -1,14 +1,14 @@
 {
-  "name": "ngrx-toolkit-e2e",
+  "name": "demo-e2e",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "sourceRoot": "apps/ngrx-toolkit-e2e/src",
+  "sourceRoot": "apps/demo-e2e/src",
   "targets": {
     "e2e": {
       "executor": "@nx/playwright:playwright",
-      "outputs": ["{workspaceRoot}/dist/.playwright/apps/ngrx-toolkit-e2e"],
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/demo-e2e"],
       "options": {
-        "config": "apps/ngrx-toolkit-e2e/playwright.config.ts"
+        "config": "apps/demo-e2e/playwright.config.ts"
       }
     },
     "lint": {
@@ -16,5 +16,5 @@
       "outputs": ["{options.outputFile}"]
     }
   },
-  "implicitDependencies": ["ngrx-toolkit"]
+  "implicitDependencies": ["demo"]
 }

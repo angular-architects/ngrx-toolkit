@@ -3,7 +3,7 @@ export default {
   displayName: 'ngrx-toolkit',
   preset: '../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory: '../../coverage/apps/ngrx-toolkit',
+  coverageDirectory: '../../coverage/libs/ngrx-toolkit',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',
