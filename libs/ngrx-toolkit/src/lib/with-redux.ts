@@ -1,8 +1,5 @@
-import { map, Observable, of, pipe, switchMap, tap } from 'rxjs';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { HttpClient } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { signalStore, SignalStoreFeature } from '@ngrx/signals';
+import { Observable } from 'rxjs';
+import { SignalStoreFeature } from '@ngrx/signals';
 import {
   EmptyFeatureResult,
   SignalStoreFeatureResult,
@@ -23,15 +20,17 @@ type ActionsCreator<Spec extends ActionsSpec> = Extract<
   'private' | 'public'
 > extends never
   ? {
-      [ActionName in keyof Spec]: Spec[ActionName] & { type: ActionName };
+      [ActionName in keyof Spec]: Spec[ActionName] & {
+        type: ActionName & string;
+      };
     }
   : {
       [ActionName in keyof Spec['private']]: Spec['private'][ActionName] & {
-        type: ActionName;
+        type: ActionName & string;
       };
     } & {
       [ActionName in keyof Spec['public']]: Spec['public'][ActionName] & {
-        type: ActionName;
+        type: ActionName & string;
       };
     };
 
@@ -40,11 +39,13 @@ type PublicActions<Spec extends ActionsSpec> = Extract<
   'private' | 'public'
 > extends never
   ? {
-      [ActionName in keyof Spec]: Spec[ActionName] & { type: ActionName };
+      [ActionName in keyof Spec]: Spec[ActionName] & {
+        type: ActionName & string;
+      };
     }
   : {
       [ActionName in keyof Spec['public']]: Spec['public'][ActionName] & {
-        type: ActionName;
+        type: ActionName & string;
       };
     };
 
@@ -58,18 +59,12 @@ export declare function createActions<Spec extends ActionsSpec>(
   spec: Spec
 ): ActionsCreator<Spec>;
 
-type ActionsFactory<StateActions extends Actions> = () => StateActions;
-
 type ReducerFn<A extends Action = Action> = (
   action: A,
   reducerFn: (action: A, state: State) => State
 ) => void;
 
 type ReducerFactory<A extends Actions> = (on: ReducerFn, actions: A) => void;
-
-type EffectFn<A extends Action = Action> = {
-  (action: A, effect: (action: Observable<A>) => Observable<Action>): void;
-};
 
 type EffectsFactory<StateActions extends Actions> = (
   actions: StateActions,
@@ -90,14 +85,14 @@ type EffectsFactory<StateActions extends Actions> = (
  */
 export declare function withRedux<
   Spec extends ActionsSpec,
-  StateActions extends Actions,
-  Input extends SignalStoreFeatureResult
+  Input extends SignalStoreFeatureResult,
+  StoreActions extends ActionsCreator<Spec> = ActionsCreator<Spec>,
+  PublicStoreActions extends PublicActions<Spec> = PublicActions<Spec>
 >(redux: {
-  actions: StateActions;
-  // actions: (actionsCreator: (spec: ActionsSpec) => StateActions) => void;
-  reducer: ReducerFactory<StateActions>;
-  effects: EffectsFactory<StateActions>;
+  actions: Spec;
+  reducer: ReducerFactory<StoreActions>;
+  effects: EffectsFactory<StoreActions>;
 }): SignalStoreFeature<
   Input,
-  EmptyFeatureResult & { methods: { actions: () => StateActions } }
+  EmptyFeatureResult & { methods: { actions: () => PublicStoreActions } }
 >;
