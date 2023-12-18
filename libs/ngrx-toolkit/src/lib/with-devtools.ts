@@ -3,14 +3,7 @@ import {
   SignalStoreFeature,
 } from '@ngrx/signals';
 import { SignalStoreFeatureResult } from '@ngrx/signals/src/signal-store-models';
-import {
-  effect,
-  EffectRef,
-  inject,
-  PLATFORM_ID,
-  signal,
-  Signal,
-} from '@angular/core';
+import { effect, inject, PLATFORM_ID, signal, Signal } from '@angular/core';
 import { isPlatformServer } from '@angular/common';
 
 declare global {
@@ -92,8 +85,12 @@ export function withDevtools<Input extends SignalStoreFeatureResult>(
 ): SignalStoreFeature<Input, EmptyFeatureResult> {
   return (store) => {
     const isServer = isPlatformServer(inject(PLATFORM_ID));
+    if (isServer) {
+      return store;
+    }
+
     const extensions = window.__REDUX_DEVTOOLS_EXTENSION__;
-    if (isServer || !extensions) {
+    if (!extensions) {
       return store;
     }
 
