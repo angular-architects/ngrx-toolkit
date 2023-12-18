@@ -5,6 +5,7 @@ import { FlightEditComponent } from "./features/flight-edit/flight-edit.componen
 import { FlightSearchComponent } from "./features/flight-search/flight-search.component";
 import { FlightTypeaheadComponent } from "./features/flight-typeahead/flight-typeahead.component";
 import { flightsResolverConfig } from "./logic/data-access/flight.resolver";
+import { isDevMode } from "@angular/core";
 
 
 export const FLIGHT_ROUTES: Routes = [
@@ -14,7 +15,7 @@ export const FLIGHT_ROUTES: Routes = [
     providers: [
       // provideState(ticketFeature),
       // provideEffects([TicketEffects]),
-      provideTicketStore()
+      provideTicketStore(isDevMode())
     ],
     children: [
       {

@@ -23,10 +23,10 @@
       "dom"
     ],
     "paths": {
-      "@angular-architects/ngrx-extensions": [
+      "@angular-architects/ngrx-toolkit": [
         "./projects/shell/src/app/shared/ngrx-signals-redux/index.ts"
       ],
-      "@angular-architects/ngrx-extensions/rxjs-interop": [
+      "@angular-architects/ngrx-toolkit/rxjs-interop": [
         "./projects/shell/src/app/shared/ngrx-signals-redux/rxjs-interop/index.ts"
       ]
     }

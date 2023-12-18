@@ -30,7 +30,7 @@ export type CreateReduxState<
   StoreName extends string,
   STORE extends Store
 > = {
-  [K in StoreName as `provide${Capitalize<K>}Store`]: () => EnvironmentProviders
+  [K in StoreName as `provide${Capitalize<K>}Store`]: (connectReduxDevtools?: boolean) => EnvironmentProviders
 } & {
   [K in StoreName as `inject${Capitalize<K>}Store`]: () => InjectableReduxSlice<STORE>
 };

@@ -1,5 +1,5 @@
-import { createReduxState, mapAction, withActionMappers } from '@angular-architects/ngrx-extensions';
-import { reduxMethod } from '@angular-architects/ngrx-extensions/rxjs-interop';
+import { createReduxState, mapAction, withActionMappers } from '@angular-architects/ngrx-toolkit';
+import { reduxMethod } from '@angular-architects/ngrx-toolkit/rxjs-interop';
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, type, withComputed, withMethods } from '@ngrx/signals';
 import { removeAllEntities, setAllEntities, updateEntity, withEntities } from '@ngrx/signals/entities';

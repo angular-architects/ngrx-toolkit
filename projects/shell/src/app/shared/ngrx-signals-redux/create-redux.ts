@@ -1,5 +1,6 @@
 import { ENVIRONMENT_INITIALIZER, inject, makeEnvironmentProviders } from "@angular/core";
 import { ActionCreator, ActionType } from "@ngrx/store/src/models";
+import { addStoreToReduxDevtools } from "../redux-devtools";
 import { CreateReduxState, ExtractActionTypes, MapperTypes, Store } from "./model";
 import { SignalReduxStore, injectReduxDispatch } from "./signal-redux-store";
 import { capitalize, isActionCreator } from "./util";
@@ -80,7 +81,7 @@ export function createReduxState<
   // TODO: Internal API access. Provider info needs to be accessible from signalStore.
   const isRootProvider = (signalStore as any)?.ɵprov?.providedIn === 'root';
   return {
-    [`provide${capitalize(storeName)}Store`]: () => makeEnvironmentProviders([
+    [`provide${capitalize(storeName)}Store`]: (connectReduxDevtools = false) => makeEnvironmentProviders([
       isRootProvider? [] : signalStore,
       {
         provide: ENVIRONMENT_INITIALIZER,
@@ -88,9 +89,14 @@ export function createReduxState<
         useFactory: (
           signalReduxStore = inject(SignalReduxStore),
           store = inject(signalStore)
-        ) => () => signalReduxStore.connectFeatureStore(
-          withActionMappers(store)
-        )
+        ) => () => {
+          if (connectReduxDevtools) {
+            addStoreToReduxDevtools(store, storeName, false);
+          }
+          signalReduxStore.connectFeatureStore(
+            withActionMappers(store)
+          );
+        }
       }
     ]),
     [`inject${capitalize(storeName)}Store`]: () => Object.assign(

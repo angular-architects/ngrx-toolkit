@@ -17,6 +17,6 @@ export const appConfig: ApplicationConfig = {
     provideStore(),
     provideEffects(),
     provideRouterFeature(),
-    isDevMode() ? provideStoreDevtools() : []
+    // isDevMode() ? provideStoreDevtools() : []
   ]
 };

@@ -71,8 +71,8 @@ export class FlightSearchComponent {
     }));
   }
 
-  protected delay(): void {
-    const oldFlight = this.localState.flights()[0];
+  protected delay(flight: Flight): void {
+    const oldFlight = flight;
     const oldDate = new Date(oldFlight.date);
 
     const newDate = new Date(oldDate.getTime() + 1000 * 60 * 5); // Add 5 min

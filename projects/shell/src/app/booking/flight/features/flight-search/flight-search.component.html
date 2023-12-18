@@ -15,11 +15,6 @@
           </div>
         }
         @if (localState.flights().length) {
-          <button (click)="delay()"
-            class="btn btn-default flight-filter-button"
-          >Delay</button>
-        }
-        @if (localState.flights().length) {
           <button (click)="reset()"
             class="btn btn-default flight-filter-button"
           >Reset</button>
@@ -36,6 +31,7 @@
         [item]="flight"
         [selected]="localState.basket()[flight.id]"
         (selectedChange)="updateBasket(flight.id, $event)"
+        (delayTrigger)="delay($event)"
       />
     </div>
   }

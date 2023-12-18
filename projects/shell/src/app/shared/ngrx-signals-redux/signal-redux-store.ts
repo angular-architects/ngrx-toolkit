@@ -1,7 +1,8 @@
 import { Injectable, inject } from "@angular/core";
 import { rxMethod } from "@ngrx/signals/rxjs-interop";
 import { Action, ActionCreator } from "@ngrx/store";
-import { map, pipe, tap } from "rxjs";
+import { pipe, tap } from "rxjs";
+import { dispatchActionToReduxDevtools } from "../redux-devtools";
 import { MapperTypes } from "./model";
 import { isUnsubscribable } from "./util";
 
@@ -15,7 +16,7 @@ import { isUnsubscribable } from "./util";
 export class SignalReduxStore {
   private mapperDict: Record<string, {
     storeMethod: (...args: unknown[]) => unknown,
-    resultMethod?: (...args: unknown[]) => unknown
+    resultMethod?: (...args: unknown[]) => unknown,
   }> = {};
 
   dispatch = rxMethod<Action>(pipe(
@@ -26,14 +27,19 @@ export class SignalReduxStore {
           isUnsubscribable(callbacks.storeMethod) &&
           callbacks.resultMethod
         ) {
-          return callbacks.storeMethod(action, callbacks.resultMethod) as any;
+          return callbacks.storeMethod(action, (a: Action) => {
+            const resultAction = callbacks.resultMethod?.(a) as Action;
+            this.dispatch(resultAction);
+          });
         }
 
         return callbacks?.storeMethod(action);
       }
 
-      return action;
-    })
+      return;
+    }),
+    //TODO: Refactor to DI token with optional callback
+    tap(action => dispatchActionToReduxDevtools(action))
   ));
 
   connectFeatureStore(mappers: MapperTypes<ActionCreator<any, any>[]>[]): void {

@@ -3,7 +3,8 @@ import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { PassengerService } from '../../logic/data-access/passenger.service';
-import { Passenger } from '../../logic/model/passenger';
+import { Passenger, initialPassenger } from '../../logic/model/passenger';
+import { injectPassengerStore, passengerActions } from '../../+state/passenger.signal.store';
 
 
 @Component({
@@ -17,6 +18,8 @@ import { Passenger } from '../../logic/model/passenger';
   templateUrl: './passenger-search.component.html'
 })
 export class PassengerSearchComponent {
+  private store = injectPassengerStore();
+
   firstname = '';
   lastname = 'Smith';
   selectedPassenger?: Passenger;
@@ -24,6 +27,14 @@ export class PassengerSearchComponent {
 
   get passengers() {
     return this.#passengerService.passengers;
+  }
+
+  constructor() {
+    this.store.dispatch(
+      passengerActions.passengersLoaded({
+        passengers: [initialPassenger]
+      })
+    );
   }
 
   search(): void {

@@ -1,7 +1,6 @@
 import { Injector, Signal, inject } from "@angular/core";
 import { rxMethod } from "@ngrx/signals/rxjs-interop";
-import { Observable, Unsubscribable, map, pipe, tap } from "rxjs";
-import { SignalReduxStore } from "../signal-redux-store";
+import { Observable, Unsubscribable, map, pipe } from "rxjs";
 
 
 type RxMethodInput<Input> = Input | Observable<Input> | Signal<Input>;
@@ -33,7 +32,6 @@ export function reduxMethod<Input, MethodInput = Input, MethodResult = unknown>(
   }
 ): RxMethod<Input, MethodInput, MethodResult>  {
   const injector = inject(Injector);
-  const store = inject(SignalReduxStore);
 
   if (typeof resultMethodOrConfig === 'function') {
     let unsubscribable: Unsubscribable;
@@ -44,8 +42,7 @@ export function reduxMethod<Input, MethodInput = Input, MethodResult = unknown>(
 
       const rxMethodWithResult = rxMethod<Input>(pipe(
         generator,
-        map(resultMethod),
-        tap(action => store.dispatch(action as any))
+        map(resultMethod)
       ), {
         ...(config || {}),
         injector: config?.injector || injector
