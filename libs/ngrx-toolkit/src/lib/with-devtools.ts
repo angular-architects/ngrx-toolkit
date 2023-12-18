@@ -1,32 +1,32 @@
 import {
-  PartialStateUpdater,
   patchState as originalPatchState,
-  signalState,
-  signalStore,
-  signalStoreFeature,
   SignalStoreFeature,
-  withState,
 } from '@ngrx/signals';
 import { SignalStoreFeatureResult } from '@ngrx/signals/src/signal-store-models';
-import { effect, inject, PLATFORM_ID, signal, Signal } from '@angular/core';
+import {
+  effect,
+  EffectRef,
+  inject,
+  PLATFORM_ID,
+  signal,
+  Signal,
+} from '@angular/core';
 import { isPlatformServer } from '@angular/common';
 
 declare global {
   interface Window {
-    __REDUX_DEVTOOLS_EXTENSION__: {
-      connect: (options: { name: string }) => {
-        send: (action: Action) => void;
-      };
-    };
+    __REDUX_DEVTOOLS_EXTENSION__:
+      | {
+          connect: (options: { name: string }) => {
+            send: (action: Action, state: Record<string, unknown>) => void;
+          };
+        }
+      | undefined;
   }
 }
 
-/**
- * `storeRegistry` holds
- */
-
 type EmptyFeatureResult = { state: {}; signals: {}; methods: {} };
-type Action = { type: string };
+export type Action = { type: string };
 
 const storeRegistry = signal<Record<string, Signal<unknown>>>({});
 
@@ -71,9 +71,18 @@ function getStoreSignal(store: unknown): Signal<unknown> {
 }
 
 type ConnectResponse = {
-  send: (action: Action, state: unknown) => void;
+  send: (action: Action, state: Record<string, unknown>) => void;
 };
 let connection: ConnectResponse | undefined;
+
+/**
+ * required for testing. is not exported during build
+ */
+export function reset() {
+  connection = undefined;
+  synchronizationInitialized = false;
+  storeRegistry.set({});
+}
 
 /**
  * @param name store's name as it should appear in the DevTools
@@ -83,12 +92,13 @@ export function withDevtools<Input extends SignalStoreFeatureResult>(
 ): SignalStoreFeature<Input, EmptyFeatureResult> {
   return (store) => {
     const isServer = isPlatformServer(inject(PLATFORM_ID));
-    if (isServer || !window.__REDUX_DEVTOOLS_EXTENSION__) {
+    const extensions = window.__REDUX_DEVTOOLS_EXTENSION__;
+    if (isServer || !extensions) {
       return store;
     }
 
     if (!connection) {
-      connection = window.__REDUX_DEVTOOLS_EXTENSION__.connect({
+      connection = extensions.connect({
         name: 'NgRx Signal Store',
       });
     }
