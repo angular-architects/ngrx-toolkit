@@ -4,50 +4,45 @@ import {
   EmptyFeatureResult,
   SignalStoreFeatureResult,
 } from '@ngrx/signals/src/signal-store-models';
+import { StateSignal } from '@ngrx/signals/src/state-signal';
 
-type Action = { type: string };
-
-type Actions = Record<string, Action>;
-
-type State = Record<string, unknown>;
+/** Actions **/
 
 type Payload = Record<string, unknown>;
 
+type ActionFn<
+  Type extends string = string,
+  ActionPayload extends Payload = Payload
+> = ((payload: ActionPayload) => ActionPayload & { type: Type }) & {
+  type: Type;
+};
+
+type ActionFns = Record<string, ActionFn>;
+
 type ActionsSpec = Record<string, Payload>;
 
-type ActionsCreator<Spec extends ActionsSpec> = Extract<
-  keyof Spec,
-  'private' | 'public'
-> extends never
-  ? {
-      [ActionName in keyof Spec]: Spec[ActionName] & {
-        type: ActionName & string;
-      };
-    }
-  : {
-      [ActionName in keyof Spec['private']]: Spec['private'][ActionName] & {
-        type: ActionName & string;
-      };
-    } & {
-      [ActionName in keyof Spec['public']]: Spec['public'][ActionName] & {
-        type: ActionName & string;
-      };
-    };
+type ActionFnCreator<Spec extends ActionsSpec> = {
+  [ActionName in keyof Spec]: ((
+    payload: Spec[ActionName]
+  ) => Spec[ActionName] & { type: ActionName }) & { type: ActionName & string };
+};
 
-type PublicActions<Spec extends ActionsSpec> = Extract<
-  keyof Spec,
-  'private' | 'public'
-> extends never
-  ? {
-      [ActionName in keyof Spec]: Spec[ActionName] & {
-        type: ActionName & string;
-      };
-    }
-  : {
-      [ActionName in keyof Spec['public']]: Spec['public'][ActionName] & {
-        type: ActionName & string;
-      };
-    };
+type ActionFnPayload<Action> = Action extends (payload: infer Payload) => void
+  ? Payload
+  : never;
+
+type ActionFnsCreator<Spec extends ActionsSpec> = Spec extends {
+  private: Record<string, Payload>;
+  public: Record<string, Payload>;
+}
+  ? ActionFnCreator<Spec['private']> & ActionFnCreator<Spec['public']>
+  : ActionFnCreator<Spec>;
+
+type PublicActionFns<Spec extends ActionsSpec> = Spec extends {
+  public: Record<string, Payload>;
+}
+  ? ActionFnCreator<Spec['public']>
+  : ActionFnCreator<Spec>;
 
 export function payload<Type extends Payload>(): Type {
   return {} as Type;
@@ -55,22 +50,23 @@ export function payload<Type extends Payload>(): Type {
 
 export const noPayload = {};
 
-export declare function createActions<Spec extends ActionsSpec>(
-  spec: Spec
-): ActionsCreator<Spec>;
+/** Reducer **/
 
-type ReducerFn<A extends Action = Action> = (
-  action: A,
-  reducerFn: (action: A, state: State) => State
+type ReducerFactory<StateActionFns extends ActionFns, State> = (
+  actions: StateActionFns,
+  on: <ReducerAction>(
+    action: ReducerAction,
+    reducerFn: (action: ActionFnPayload<ReducerAction>, state: State) => void
+  ) => void
 ) => void;
 
-type ReducerFactory<A extends Actions> = (on: ReducerFn, actions: A) => void;
+/** Effect **/
 
-type EffectsFactory<StateActions extends Actions> = (
-  actions: StateActions,
-  forAction: <EffectAction extends Action>(
+type EffectsFactory<StateActionFns extends ActionFns> = (
+  actions: StateActionFns,
+  create: <EffectAction>(
     action: EffectAction
-  ) => Observable<EffectAction>
+  ) => Observable<ActionFnPayload<EffectAction>>
 ) => void;
 
 /**
@@ -83,16 +79,21 @@ type EffectsFactory<StateActions extends Actions> = (
  * actions are passed to reducer and effects, but it is also possible to use other actions.
  * effects provide forAction and do not return anything. that is important because effects should stay inaccessible
  */
-export declare function withRedux<
+export function withRedux<
   Spec extends ActionsSpec,
   Input extends SignalStoreFeatureResult,
-  StoreActions extends ActionsCreator<Spec> = ActionsCreator<Spec>,
-  PublicStoreActions extends PublicActions<Spec> = PublicActions<Spec>
+  StateActionFns extends ActionFnsCreator<Spec> = ActionFnsCreator<Spec>,
+  PublicStoreActionFns extends PublicActionFns<Spec> = PublicActionFns<Spec>
 >(redux: {
   actions: Spec;
-  reducer: ReducerFactory<StoreActions>;
-  effects: EffectsFactory<StoreActions>;
+  reducer: ReducerFactory<StateActionFns, StateSignal<Input['state']>>;
+  effects: EffectsFactory<StateActionFns>;
 }): SignalStoreFeature<
   Input,
-  EmptyFeatureResult & { methods: { actions: () => PublicStoreActions } }
->;
+  EmptyFeatureResult & { methods: PublicStoreActionFns }
+> {
+  return (store) => {
+    const methods: PublicStoreActionFns = {} as unknown as PublicStoreActionFns;
+    return { ...store, methods };
+  };
+}

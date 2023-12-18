@@ -1,6 +1,6 @@
-import { signalStore } from '@ngrx/signals';
+import { patchState, signalStore, withState } from '@ngrx/signals';
 import { inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, switchMap } from 'rxjs';
 import { noPayload, payload, withRedux } from './with-redux';
 
@@ -9,6 +9,7 @@ type Flight = { id: number };
 describe('with redux', () => {
   it('should load flights', () => {
     const FlightsStore = signalStore(
+      withState({ flights: [] as Flight[] }),
       withRedux({
         actions: {
           public: {
@@ -20,21 +21,22 @@ describe('with redux', () => {
           },
         },
 
-        reducer: (on, actions) => {
-          on(actions.loadFlights, (action, state) => state);
-          on(actions.flightsLoaded, (action, state) => state);
+        reducer: (actions, on) => {
+          on(actions.flightsLoaded, ({ flights }, state) => {
+            patchState(state, { flights });
+          });
         },
 
         effects: (actions, create) => {
           const httpClient = inject(HttpClient);
 
           create(actions.loadFlights).pipe(
-            switchMap(({ from, to }) =>
-              httpClient.get<Flight[]>('www.angulararchitects.io', {
-                params: { from, to },
-              })
-            ),
-            map((flights) => actions.flightsLoaded)
+            switchMap(({ from, to }) => {
+              return httpClient.get<Flight[]>('www.angulararchitects.io', {
+                params: new HttpParams().set('from', from).set('to', to),
+              });
+            }),
+            map((flights) => actions.flightsLoaded({ flights }))
           );
         },
       })
