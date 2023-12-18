@@ -1,1 +1,1 @@
-export * from './lib/with-devtools';
+export * from './lib/redux-devtools';

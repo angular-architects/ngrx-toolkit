@@ -11,6 +11,7 @@ type Flight = {
 
 describe('Devtools', () => {
   it('should not fail if no Redux Devtools are available', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const Flights = signalStore(withEntities<Flight>());
   });
   it.todo('add a state');
