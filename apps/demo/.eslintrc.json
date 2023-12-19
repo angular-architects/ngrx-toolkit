@@ -13,7 +13,7 @@
           "error",
           {
             "type": "attribute",
-            "prefix": "ngrxToolkit",
+            "prefix": "demo",
             "style": "camelCase"
           }
         ],
@@ -21,7 +21,7 @@
           "error",
           {
             "type": "element",
-            "prefix": "ngrx-toolkit",
+            "prefix": "demo",
             "style": "kebab-case"
           }
         ]

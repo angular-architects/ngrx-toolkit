@@ -1,26 +1,19 @@
-import { SelectionModel } from '@angular/cdk/collections';
 import { Component, effect, inject } from '@angular/core';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { Todo, TodoStore } from './todo-store';
 import { MatIconModule } from '@angular/material/icon';
-import { CategoryStore } from './category.store';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { Todo, TodoStore } from '../todo-store';
+import { CategoryStore } from '../category.store';
+import { SelectionModel } from '@angular/cdk/collections';
 
 @Component({
-  selector: 'demo-root',
-  templateUrl: './app.component.html',
+  selector: 'demo-todo',
+  templateUrl: 'todo.component.html',
+  styleUrl: 'todo.component.scss',
   standalone: true,
-  imports: [
-    MatTableModule,
-    MatCheckboxModule,
-    MatIconModule,
-    RouterLink,
-    RouterOutlet,
-  ],
-  styleUrl: './app.component.css',
+  imports: [MatCheckboxModule, MatIconModule, MatTableModule],
 })
-export class AppComponent {
+export class TodoComponent {
   todoStore = inject(TodoStore);
   categoryStore = inject(CategoryStore);
 
