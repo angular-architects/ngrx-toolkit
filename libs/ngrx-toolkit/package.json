@@ -1,5 +1,5 @@
 {
-  "name": "ngrx-toolkit",
+  "name": "@angular-architects/ngrx-toolkit",
   "version": "0.0.1",
   "peerDependencies": {
     "@angular/common": "^17.0.0",
