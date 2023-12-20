@@ -1,6 +1,5 @@
 import { ENVIRONMENT_INITIALIZER, inject, makeEnvironmentProviders } from "@angular/core";
 import { ActionCreator, ActionType } from "@ngrx/store/src/models";
-import { addStoreToReduxDevtools } from "../redux-devtools";
 import { CreateReduxState, ExtractActionTypes, MapperTypes, Store } from "./model";
 import { SignalReduxStore, injectReduxDispatch } from "./signal-redux-store";
 import { capitalize, isActionCreator } from "./util";
@@ -91,7 +90,7 @@ export function createReduxState<
           store = inject(signalStore)
         ) => () => {
           if (connectReduxDevtools) {
-            addStoreToReduxDevtools(store, storeName, false);
+            // addStoreToReduxDevtools(store, storeName, false);
           }
           signalReduxStore.connectFeatureStore(
             withActionMappers(store)

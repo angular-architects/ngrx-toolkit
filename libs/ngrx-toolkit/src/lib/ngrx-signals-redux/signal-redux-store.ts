@@ -2,7 +2,6 @@ import { Injectable, inject } from "@angular/core";
 import { rxMethod } from "@ngrx/signals/rxjs-interop";
 import { Action, ActionCreator } from "@ngrx/store";
 import { pipe, tap } from "rxjs";
-import { dispatchActionToReduxDevtools } from "../redux-devtools";
 import { MapperTypes } from "./model";
 import { isUnsubscribable } from "./util";
 
@@ -39,7 +38,7 @@ export class SignalReduxStore {
       return;
     }),
     //TODO: Refactor to DI token with optional callback
-    tap(action => dispatchActionToReduxDevtools(action))
+    // tap(action => dispatchActionToReduxDevtools(action))
   ));
 
   connectFeatureStore(mappers: MapperTypes<ActionCreator<any, any>[]>[]): void {
