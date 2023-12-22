@@ -8,6 +8,7 @@
   },
   "private": true,
   "dependencies": {
+    "@angular-architects/paper-design": "^1.0.3",
     "@angular/animations": "~17.0.0",
     "@angular/cdk": "^17.0.4",
     "@angular/common": "~17.0.0",

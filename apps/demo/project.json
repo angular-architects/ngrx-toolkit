@@ -24,6 +24,8 @@
           "apps/demo/src/assets"
         ],
         "styles": [
+          "node_modules/@angular-architects/paper-design/assets/css/bootstrap.css",
+          "node_modules/@angular-architects/paper-design/assets/scss/paper-dashboard.scss",
           "@angular/material/prebuilt-themes/deeppurple-amber.css",
           "apps/demo/src/styles.css"
         ],
