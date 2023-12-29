@@ -11,6 +11,7 @@ import { SelectionModel } from '@angular/cdk/collections';
   templateUrl: 'todo.component.html',
   styleUrl: 'todo.component.scss',
   imports: [MatCheckboxModule, MatIconModule, MatTableModule],
+  providers: [TodoStore],
 })
 export class TodoComponent {
   todoStore = inject(TodoStore);

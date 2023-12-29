@@ -18,7 +18,6 @@ export interface Todo {
 export type AddTodo = Omit<Todo, 'id'>;
 
 export const TodoStore = signalStore(
-  { providedIn: 'root' },
   withDevtools('todo'),
   withEntities<Todo>(),
   withMethods((store) => {
