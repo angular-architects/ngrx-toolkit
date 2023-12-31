@@ -1,12 +1,15 @@
 <demo-sidebar-cmp>
-
   <div class="nav">
     <mat-nav-list>
       <a mat-list-item routerLink="/todo">DevTools</a>
       <a mat-list-item routerLink="/flight-search">withRedux</a>
-      <a mat-list-item routerLink="/flight-search-data-service-simple">withDataService (Simple)</a>
-      <a mat-list-item routerLink="/flight-search-data-service-dynamic">withDataService (Dynamic)</a>
-
+      <a mat-list-item routerLink="/flight-search-data-service-simple"
+        >withDataService (Simple)</a
+      >
+      <a mat-list-item routerLink="/flight-search-data-service-dynamic"
+        >withDataService (Dynamic)</a
+      >
+      <a mat-list-item routerLink="/todo-storage-sync">withStorageSync</a>
     </mat-nav-list>
   </div>
 
@@ -19,5 +22,4 @@
       <router-outlet></router-outlet>
     </div>
   </div>
-
 </demo-sidebar-cmp>
