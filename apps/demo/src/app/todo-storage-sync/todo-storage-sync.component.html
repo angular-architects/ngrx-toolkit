@@ -1,0 +1,43 @@
+<mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+  <!-- Checkbox Column -->
+  <ng-container matColumnDef="finished">
+    <mat-header-cell *matHeaderCellDef></mat-header-cell>
+    <mat-cell *matCellDef="let row" class="actions">
+      <mat-checkbox
+        (click)="$event.stopPropagation()"
+        (change)="checkboxLabel(row)"
+        [checked]="row.finished"
+      >
+      </mat-checkbox>
+      <mat-icon (click)="removeTodo(row)">delete</mat-icon>
+    </mat-cell>
+  </ng-container>
+
+  <!-- Name Column -->
+  <ng-container matColumnDef="name">
+    <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+    <mat-cell *matCellDef="let element">{{ element.name }}</mat-cell>
+  </ng-container>
+
+  <!-- Description Column -->
+  <ng-container matColumnDef="description">
+    <mat-header-cell *matHeaderCellDef>Description</mat-header-cell>
+    <mat-cell *matCellDef="let element">{{ element.description }}</mat-cell>
+  </ng-container>
+
+  <!-- Deadline Column -->
+  <ng-container matColumnDef="deadline">
+    <mat-header-cell mat-header-cell *matHeaderCellDef
+      >Deadline</mat-header-cell
+    >
+    <mat-cell mat-cell *matCellDef="let element">{{
+      element.deadline
+    }}</mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row
+    *matRowDef="let row; columns: displayedColumns"
+    (click)="selection.toggle(row)"
+  ></mat-row>
+</mat-table>
