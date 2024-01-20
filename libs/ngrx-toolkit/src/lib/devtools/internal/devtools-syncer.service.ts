@@ -1,6 +1,15 @@
-import { effect, Injectable, OnDestroy, Signal, signal } from '@angular/core';
+import {
+  effect,
+  inject,
+  Injectable,
+  OnDestroy,
+  PLATFORM_ID,
+  Signal,
+  signal,
+} from '@angular/core';
 import { throwIfNull } from '../../shared/throw-if-null';
 import { currentActionNames } from './currrent-action-names';
+import { isPlatformServer } from '@angular/common';
 
 /**
  * A service provided by the root injector is
@@ -13,11 +22,47 @@ import { currentActionNames } from './currrent-action-names';
  * process would shut down once the component gets
  * destroyed.
  */
-@Injectable({ providedIn: 'root' })
-export class DevtoolsSyncer implements OnDestroy {
+@Injectable({
+  providedIn: 'root',
+  useFactory: () => {
+    const isServer = isPlatformServer(inject(PLATFORM_ID));
+    if (isServer) {
+      return new DummyDevtoolsSyncer();
+    }
+
+    const isToolkitMissing = !window.__REDUX_DEVTOOLS_EXTENSION__;
+    if (isToolkitMissing) {
+      return new DummyDevtoolsSyncer();
+    }
+
+    return new DefaultDevtoolsSyncer();
+  },
+})
+export abstract class DevtoolsSyncer implements OnDestroy {
+  abstract addStore(name: string, store: Signal<unknown>): void;
+
+  abstract removeStore(name: string): void;
+
+  abstract renameStore(currentName: string, newName: string): void;
+
+  abstract ngOnDestroy(): void;
+}
+
+class DummyDevtoolsSyncer implements DevtoolsSyncer {
+  addStore(): void {}
+
+  removeStore(): void {}
+
+  renameStore(): void {}
+
+  ngOnDestroy(): void {}
+}
+
+@Injectable()
+class DefaultDevtoolsSyncer implements OnDestroy {
   readonly #stores = signal<Record<string, Signal<unknown>>>({});
   readonly #connection = throwIfNull(
-    window.__REDUX_DEVTOOLS_EXTENSION__
+    window.__REDUX_DEVTOOLS_EXTENSION__,
   ).connect({
     name: 'NgRx Signal Store',
   });
@@ -70,7 +115,7 @@ export class DevtoolsSyncer implements OnDestroy {
   renameStore(oldName: string, newName: string) {
     if (this.#syncedStoreNames.has(oldName)) {
       throw new Error(
-        `NgRx Toolkit/DevTools: cannot rename from ${oldName} to ${newName}. ${oldName} has already been send to DevTools.`
+        `NgRx Toolkit/DevTools: cannot rename from ${oldName} to ${newName}. ${oldName} has already been send to DevTools.`,
       );
     }
 
@@ -79,7 +124,7 @@ export class DevtoolsSyncer implements OnDestroy {
       for (const storeName in stores) {
         if (storeName === newName) {
           throw new Error(
-            `NgRx Toolkit/DevTools: cannot rename from ${oldName} to ${newName}. ${newName} already exists.`
+            `NgRx Toolkit/DevTools: cannot rename from ${oldName} to ${newName}. ${newName} already exists.`,
           );
         }
         if (storeName === oldName) {

@@ -6,18 +6,6 @@ import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { devtoolsTest, setupExtensions } from './helpers';
 
-/**
- * In order to test store instances with destroy hooks, a store
- * providedIn root would fail, because it doesn't get access to
- * the Injection Context (TestBed resets outside of Injection Context).
- *
- * That's why, we have to create an artificial component, where
- * the Store is provided, thus creating a nested Injection Context.
- *
- * Once the test ends, the router switch to another component which
- * causes the store to be destroyed.
- */
-
 describe('Devtools', () => {
   it(
     'should dispatch todo state',
@@ -25,9 +13,9 @@ describe('Devtools', () => {
       runEffects();
       expect(sendSpy).toHaveBeenCalledWith(
         { type: 'Store Update' },
-        { flight: { entityMap: {}, ids: [] } }
+        { flight: { entityMap: {}, ids: [] } },
       );
-    })
+    }),
   );
 
   it(
@@ -43,7 +31,7 @@ describe('Devtools', () => {
         'category',
         'booking',
       ]);
-    })
+    }),
   );
 
   it('should remove the state once destroyed', async () => {
@@ -76,7 +64,7 @@ describe('Devtools', () => {
     const harness = await RouterTestingHarness.create('flight');
     expect(sendSpy).toHaveBeenCalledWith(
       { type: 'Store Update' },
-      { flight: {} }
+      { flight: {} },
     );
     await harness.navigateByUrl('/');
     TestBed.flushEffects();
@@ -91,10 +79,10 @@ describe('Devtools', () => {
       runEffects();
       expect(sendSpy.mock).toHaveBeenCalledWith(
         { type: 'State Update' },
-        { flight: {}, 'flight-1': {} }
+        { flight: {}, 'flight-1': {} },
       );
       expect(true).toBe(false);
-    })
+    }),
   );
   it.todo('should provide a patch method with action names');
   it.todo('should index store names by default');

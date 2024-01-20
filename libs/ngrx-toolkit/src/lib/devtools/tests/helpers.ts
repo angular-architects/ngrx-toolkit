@@ -3,7 +3,7 @@ import { Component, inject, PLATFORM_ID } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideLocationMocks } from '@angular/common/testing';
 import { signalStore, withState } from '@ngrx/signals';
-import { TestBed, waitForAsync } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { jest } from '@jest/globals';
 
@@ -27,7 +27,6 @@ export type Flight = {
   date: Date;
   delayed: boolean;
 };
-
 function assertNotNull<T>(obj: T): asserts obj is NonNullable<T> {
   if (obj === null || obj === undefined) {
     throw new Error('value cannot be null or undefined');
@@ -74,12 +73,12 @@ function setupTestRouting(StoreClass: undefined | (new () => unknown)) {
 
 export function devtoolsTest(
   options: Partial<SetupOptions>,
-  testFn: (testData: TestData) => void
+  testFn: (testData: TestData) => void,
 ): () => void;
 export function devtoolsTest(testFn: (testData: TestData) => void): () => void;
 export function devtoolsTest(
   arg1: Partial<SetupOptions> | ((testData: TestData) => void),
-  arg2?: (testData: TestData) => void
+  arg2?: (testData: TestData) => void,
 ): () => void {
   return async () => {
     const defaultOptions: SetupOptions = {
@@ -97,7 +96,7 @@ export function devtoolsTest(
 
     const Store = signalStore(
       withState({ okay: true }),
-      withDevtools('flight')
+      withDevtools('flight'),
     );
 
     TestBed.configureTestingModule({

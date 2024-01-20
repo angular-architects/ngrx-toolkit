@@ -1,6 +1,5 @@
 import { signalStoreFeature, withHooks, withMethods } from '@ngrx/signals';
-import { effect, inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformServer } from '@angular/common';
+import { inject } from '@angular/core';
 import { DevtoolsSyncer } from './internal/devtools-syncer.service';
 import { getStoreSignal } from '../shared/get-store-signal';
 
@@ -23,7 +22,7 @@ declare global {
  *
  * By default, the action name is 'Store Update'. You can
  * change that via the `patch` method, which has as second
- * paramter the action name.
+ * parameter the action name.
  *
  * It adds the method `renameDevtoolsName` which allows
  * you to rename the features store after instantiation.
@@ -36,16 +35,6 @@ declare global {
 export function withDevtools(name: string) {
   return signalStoreFeature(
     withMethods((store) => {
-      const isServer = isPlatformServer(inject(PLATFORM_ID));
-      if (isServer) {
-        return { renameDevtoolsName() {} };
-      }
-
-      const extensions = window.__REDUX_DEVTOOLS_EXTENSION__;
-      if (!extensions) {
-        return { renameDevtoolsName() {} };
-      }
-
       const syncer = inject(DevtoolsSyncer);
       syncer.addStore(name, getStoreSignal(store));
 
@@ -55,8 +44,9 @@ export function withDevtools(name: string) {
         },
       };
     }),
-    withHooks({
-      onDestroy: () => inject(DevtoolsSyncer).removeStore(name),
-    })
+    withHooks(() => {
+      const syncer = inject(DevtoolsSyncer);
+      return { onDestroy: () => syncer.removeStore(name) };
+    }),
   );
 }
