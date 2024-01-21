@@ -96,7 +96,14 @@ class DefaultDevtoolsSyncer implements OnDestroy {
   }
 
   addStore(name: string, store: Signal<unknown>) {
-    this.#stores.update((stores) => ({ ...stores, [name]: store }));
+    let storeName = name;
+    const names = Object.keys(this.#stores());
+
+    for (let i = 1; names.includes(storeName); i++) {
+      storeName = `${name}-${i}`;
+    }
+
+    this.#stores.update((stores) => ({ ...stores, [storeName]: store }));
   }
 
   removeStore(name: string) {
