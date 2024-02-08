@@ -14,6 +14,7 @@ export interface DataService<E extends Entity, F extends Filter> {
     loadById(id: EntityId): Promise<E>;
     create(entity: E): Promise<E>;
     update(entity: E): Promise<E>;
+    updateAll(entity: E[]): Promise<E[]>;
     delete(entity: E): Promise<void>;
 }
 
@@ -35,6 +36,7 @@ export function getDataServiceKeys(options: { collection?: string }) {
     const setCurrentKey = options.collection ? `setCurrent${capitalize(options.collection)}` : 'setCurrent';
     const createKey = options.collection ? `create${capitalize(options.collection)}` : 'create';
     const updateKey = options.collection ? `update${capitalize(options.collection)}` : 'update';
+    const updateAllKey = options.collection ? `updateAll${capitalize(options.collection)}` : 'updateAll';
     const deleteKey = options.collection ? `delete${capitalize(options.collection)}` : 'delete';
 
     // TODO: Take these from @ngrx/signals/entities, when they are exported
@@ -58,6 +60,7 @@ export function getDataServiceKeys(options: { collection?: string }) {
         setCurrentKey,
         createKey,
         updateKey,
+        updateAllKey,
         deleteKey
     };
 }
@@ -111,6 +114,9 @@ export type NamedDataServiceMethods<E extends Entity, F extends Filter, Collecti
         [K in Collection as `update${Capitalize<K>}`]: (entity: E) => Promise<void>;
     } &
     {
+        [K in Collection as `updateAll${Capitalize<K>}`]: (entity: E[]) => Promise<void>;
+    } &
+    {
         [K in Collection as `delete${Capitalize<K>}`]: (entity: E) => Promise<void>;
     };
 
@@ -125,6 +131,7 @@ export type DataServiceMethods<E extends Entity, F extends Filter> =
         loadById(id: EntityId): Promise<void>;
         create(entity: E): Promise<void>;
         update(entity: E): Promise<void>;
+        updateAll(entities: E[]): Promise<void>;
         delete(entity: E): Promise<void>;
     }
 
@@ -133,7 +140,7 @@ export type Empty = Record<string, never>
 export function withDataService<E extends Entity, F extends Filter, Collection extends string>(options: { dataServiceType: ProviderToken<DataService<E, F>>, filter: F, collection: Collection }): SignalStoreFeature<
     {
         state: Emtpy,
-        // These alternatives break type inference: 
+        // These alternatives break type inference:
         // state: { callState: CallState } & NamedEntityState<E, Collection>,
         // state: NamedEntityState<E, Collection>,
 
@@ -173,6 +180,7 @@ export function withDataService<E extends Entity, F extends Filter, Collection e
         currentKey,
         createKey,
         updateKey,
+        updateAllKey,
         deleteKey,
         loadByIdKey,
         setCurrentKey
@@ -269,6 +277,19 @@ export function withDataService<E extends Entity, F extends Filter, Collection e
                         store[callStateKey] && patchState(store, setError(e, prefix));
                         throw e;
                     }
+                },
+                [updateAllKey]: async (entities: E[]): Promise<void> => {
+                  store[callStateKey] && patchState(store, setLoading(prefix));
+
+                  try {
+                    const result = await dataService.updateAll(entities);
+                    patchState(store, prefix ? setAllEntities(result, { collection: prefix }) : setAllEntities(result));
+                    store[callStateKey] && patchState(store, setLoaded(prefix));
+                  }
+                  catch (e) {
+                    store[callStateKey] && patchState(store, setError(e, prefix));
+                    throw e;
+                  }
                 },
                 [deleteKey]: async (entity: E): Promise<void> => {
                     patchState(store, { [currentKey]: entity });
