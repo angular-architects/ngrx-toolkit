@@ -36,6 +36,7 @@ export class SignalReduxStore {
     })
   ));
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   connectFeatureStore(mappers: MapperTypes<ActionCreator<any, any>[]>[]): void {
     mappers.forEach(
       mapper => mapper.types.forEach(
