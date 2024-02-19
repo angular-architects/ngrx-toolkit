@@ -1,0 +1,17 @@
+<div class="card" [ngClass]="{ 'active-card' : selected }">
+
+    <div class="card-header">
+        <h2 class="title">{{item.from}} - {{item.to}}</h2>
+    </div>
+
+    <div class="card-body">
+        <p>Flight-No.: #{{item.id}}</p>
+        <p>Date: {{item.date | date:'dd.MM.yyyy HH:mm:ss'}}</p>
+        <p>
+            <button class="btn btn-default" *ngIf="!selected" (click)="select()">Select</button>
+            <button class="btn btn-default" *ngIf="selected" (click)="deselect()">Remove</button>
+            <ng-content></ng-content>
+        </p>
+    </div>
+
+</div>
