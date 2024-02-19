@@ -1,6 +1,11 @@
 {
   "name": "@angular-architects/ngrx-toolkit",
-  "version": "0.0.4",
+  "version": "0.0.5",
+  "license": "MIT",
+  "repository": {
+    "type": "GitHub",
+    "url": "https://github.com/angular-architects/ngrx-toolkit"
+  },
   "peerDependencies": {
     "@angular/common": "^17.0.0",
     "@angular/core": "^17.0.0",
