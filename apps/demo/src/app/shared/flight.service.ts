@@ -31,6 +31,7 @@ export class FlightService implements DataService<Flight, FlightFilter> {
     return firstValueFrom(this.save(entity));
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateAll(entity: Flight[]): Promise<Flight[]> {
     throw new Error('updateAll method not implemented.');
   }

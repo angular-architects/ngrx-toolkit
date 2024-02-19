@@ -1,9 +1,9 @@
 
-export interface Flight {
-  id: number;   
+export type Flight = {
+  id: number;
   from: string;
   to: string;
-  date: string; 
+  date: string;
   delayed: boolean;
 }
 
