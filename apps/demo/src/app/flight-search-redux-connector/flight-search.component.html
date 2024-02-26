@@ -1,0 +1,60 @@
+<h2 class="title">Flight Search (Redux Connector)</h2>
+
+<form #form="ngForm">
+
+  <div class="form-group">
+    <label>From:</label>
+    <input
+      name="from"
+      [ngModel]="localState.filter.from()"
+      (ngModelChange)="patchFilter({ from: $event })"
+      class="form-control"
+    >
+  </div>
+
+  <div class="form-group">
+    <label>To:</label>
+    <input
+      name="to"
+      [ngModel]="localState.filter.to()"
+      (ngModelChange)="patchFilter({ to: $event })"
+      class="form-control"
+    >
+  </div>
+
+  <div class="form-group">
+    <button
+      (click)="search()"
+      [disabled]="!localState.filter.from() || !localState.filter.to()"
+      class="btn btn-default"
+    >
+      Search
+    </button>
+
+    @if (flights().length) {
+      <button
+        (click)="reset()"
+        class="btn btn-default"
+      >
+        Reset
+      </button>
+    }
+  </div>
+
+</form>
+
+<div class="row">
+  @for (flight of flights(); track flight.id) {
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-3">
+      <demo-flight-card
+        [item]="flight"
+        [selected]="localState.basket()[flight.id]"
+        (selectedChange)="select(flight.id, $event)"
+      >
+      </demo-flight-card>
+    </div>
+  }
+</div>
+
+<pre>{{ localState.basket() | json}}</pre>
+

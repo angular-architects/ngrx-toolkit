@@ -1,4 +1,4 @@
-import { Observable, Subject, Subscription } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { SignalStoreFeature } from '@ngrx/signals';
 import {
   EmptyFeatureResult,
@@ -6,7 +6,6 @@ import {
 } from '@ngrx/signals/src/signal-store-models';
 import { StateSignal } from '@ngrx/signals/src/state-signal';
 import { assertActionFnSpecs } from './assertions/assertions';
-import { effect } from '@angular/core';
 
 /** Actions **/
 
@@ -55,15 +54,15 @@ export const noPayload = {};
 /** Reducer **/
 
 type ReducerFunction<ReducerAction, State> = (
-  action: ActionFnPayload<ReducerAction>,
-  state: State
+  state: State,
+  action: ActionFnPayload<ReducerAction>
 ) => void;
 
 type ReducerFactory<StateActionFns extends ActionFns, State> = (
   actions: StateActionFns,
   on: <ReducerAction extends { type: string }>(
     action: ReducerAction,
-    reducerFn: ReducerFunction<ActionFnPayload<ReducerAction>, State>
+    reducerFn: ReducerFunction<ReducerAction, State>
   ) => void
 ) => void;
 
@@ -80,7 +79,7 @@ function createActionFns<Spec extends ActionsFnSpecs>(
   actionFnSpecs: Spec,
   reducerRegistry: Record<
     string,
-    (payload: ActionFnPayload<unknown>, state: unknown) => void
+    (state: unknown, payload: ActionFnPayload<unknown>) => void
   >,
   effectsRegistry: Record<string, Subject<ActionFnPayload<unknown>>>,
   state: unknown
@@ -92,9 +91,9 @@ function createActionFns<Spec extends ActionsFnSpecs>(
       const fullPayload = { ...payload, type };
       const reducer = reducerRegistry[type];
       if (reducer) {
-        (reducer as (payload: unknown, state: unknown) => void)(
-          fullPayload as unknown,
-          state
+        (reducer as (state: unknown, payload: unknown) => void)(
+          state,
+          fullPayload as unknown
         );
       }
       const effectSubject = effectsRegistry[type];
@@ -114,7 +113,7 @@ function createPublicAndAllActionsFns<Spec extends ActionsFnSpecs>(
   actionFnSpecs: Spec,
   reducerRegistry: Record<
     string,
-    (payload: ActionFnPayload<unknown>, state: unknown) => void
+    (state: unknown, payload: ActionFnPayload<unknown>) => void
   >,
   effectsRegistry: Record<string, Subject<ActionFnPayload<unknown>>>,
   state: unknown
@@ -160,12 +159,12 @@ function fillReducerRegistry(
   actionFns: ActionFns,
   reducerRegistry: Record<
     string,
-    (payload: ActionFnPayload<unknown>, state: unknown) => void
+    (state: unknown, payload: ActionFnPayload<unknown>) => void
   >
 ) {
   function on(
     action: { type: string },
-    reducerFn: (payload: ActionFnPayload<unknown>, state: unknown) => void
+    reducerFn: (state: unknown, payload: ActionFnPayload<unknown>) => void
   ) {
     reducerRegistry[action.type] = reducerFn;
   }
@@ -202,7 +201,7 @@ function processRedux<Spec extends ActionsFnSpecs, ReturnType>(
 ) {
   const reducerRegistry: Record<
     string,
-    (payload: ActionFnPayload<unknown>, state: unknown) => void
+    (state: unknown, payload: ActionFnPayload<unknown>) => void
   > = {};
   const effectsRegistry: Record<string, Subject<ActionFnPayload<unknown>>> = {};
   const actionsMap = createPublicAndAllActionsFns(

@@ -6,6 +6,8 @@ import { FlightEditSimpleComponent } from './flight-search-data-service-simple/f
 import { FlightSearchDynamicComponent } from './flight-search-data-service-dynamic/flight-search.component';
 import { FlightEditDynamicComponent } from './flight-search-data-service-dynamic/flight-edit.component';
 import { TodoStorageSyncComponent } from './todo-storage-sync/todo-storage-sync.component';
+import { FlightSearchReducConnectorComponent } from './flight-search-redux-connector/flight-search.component';
+import { provideFlightStore } from './flight-search-redux-connector/+state/redux';
 
 export const appRoutes: Route[] = [
   { path: 'todo', component: TodoComponent },
@@ -21,4 +23,9 @@ export const appRoutes: Route[] = [
   },
   { path: 'flight-edit-dynamic/:id', component: FlightEditDynamicComponent },
   { path: 'todo-storage-sync', component: TodoStorageSyncComponent },
+  {
+    path: 'flight-search-redux-connector',
+    providers: [provideFlightStore()],
+    component: FlightSearchReducConnectorComponent
+  },
 ];

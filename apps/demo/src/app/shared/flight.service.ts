@@ -17,7 +17,7 @@ export class FlightService implements DataService<Flight, FlightFilter> {
   baseUrl = `https://demo.angulararchitects.io/api`;
 
   constructor(private http: HttpClient) {}
- 
+
   loadById(id: EntityId): Promise<Flight> {
     return firstValueFrom(this.findById('' + id));
   }
@@ -29,6 +29,11 @@ export class FlightService implements DataService<Flight, FlightFilter> {
 
   update(entity: Flight): Promise<Flight> {
     return firstValueFrom(this.save(entity));
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  updateAll(entity: Flight[]): Promise<Flight[]> {
+    throw new Error('updateAll method not implemented.');
   }
 
   delete(entity: Flight): Promise<void> {

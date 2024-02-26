@@ -6,9 +6,6 @@ import { MapperTypes } from "./model";
 import { isUnsubscribable } from "./util";
 
 
-// TODO: Make rxMethod optional.
-// TODO: Observable intergration for effects as offical rxMethod signature?
-// TODO: Guards against reducer and effects mixed in one method.
 @Injectable({
   providedIn: 'root'
 })
@@ -36,11 +33,10 @@ export class SignalReduxStore {
       }
 
       return;
-    }),
-    //TODO: Refactor to DI token with optional callback
-    // tap(action => dispatchActionToReduxDevtools(action))
+    })
   ));
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   connectFeatureStore(mappers: MapperTypes<ActionCreator<any, any>[]>[]): void {
     mappers.forEach(
       mapper => mapper.types.forEach(

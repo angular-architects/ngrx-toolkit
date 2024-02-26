@@ -5,10 +5,6 @@ import { SignalReduxStore, injectReduxDispatch } from "./signal-redux-store";
 import { capitalize, isActionCreator } from "./util";
 
 
-// TODO: Improve typing if method is missing.
-// TODO: Improve typing if actions have different payload.
-// TODO: Array of result actions per mapAction.
-// TODO: Add action to action mapper.
 export function mapAction<
   Creators extends readonly ActionCreator[]
 >(
@@ -56,19 +52,12 @@ export function mapAction<
   };
 }
 
-// TODO: Add auto mappers.
 export function withActionMappers(
   ...mappers: MapperTypes<ActionCreator<any, any>[]>[]
 ): MapperTypes<ActionCreator<any, any>[]>[] {
   return mappers;
 }
 
-// TODO: Add auto action creator.
-// TODO: Add feature state signal.
-// TODO: Add state connector.
-// TODO: Add local provider setup as opt-in config.
-// TODO: Add logging to console feature.
-// TODO: Add Redux DevTools integration.
 export function createReduxState<
   StoreName extends string,
   STORE extends Store
@@ -77,7 +66,6 @@ export function createReduxState<
   signalStore: STORE,
   withActionMappers: (store: InstanceType<STORE>) => MapperTypes<ActionCreator<any, any>[]>[],
 ): CreateReduxState<StoreName, STORE> {
-  // TODO: Internal API access. Provider info needs to be accessible from signalStore.
   const isRootProvider = (signalStore as any)?.ɵprov?.providedIn === 'root';
   return {
     [`provide${capitalize(storeName)}Store`]: (connectReduxDevtools = false) => makeEnvironmentProviders([

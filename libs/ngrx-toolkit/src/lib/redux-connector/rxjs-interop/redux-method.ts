@@ -10,7 +10,6 @@ type RxMethod<Input, MethodInput = Input, MethodResult = unknown> = ((
   resultMethod: (input: MethodInput) => MethodResult
 ) => Unsubscribable) & Unsubscribable;
 
-// TODO: Refactor direct store access.
 export function reduxMethod<Input, MethodInput = Input>(
   generator: (source$: Observable<Input>) => Observable<MethodInput>,
   config?: { injector?: Injector }
