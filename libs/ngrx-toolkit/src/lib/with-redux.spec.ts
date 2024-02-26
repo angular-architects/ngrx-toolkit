@@ -5,7 +5,7 @@ import {
   HttpParams,
   provideHttpClient,
 } from '@angular/common/http';
-import { map, switchMap, tap } from 'rxjs';
+import { map, switchMap } from 'rxjs';
 import { noPayload, payload, withRedux } from './with-redux';
 import { TestBed } from '@angular/core/testing';
 import {
@@ -58,7 +58,7 @@ describe('with redux', () => {
           },
 
           reducer: (actions, on) => {
-            on(actions.flightsLoaded, ({ flights }, state) => {
+            on(actions.flightsLoaded, (state, { flights }) => {
               patchState(state, { flights });
             });
           },
@@ -73,14 +73,14 @@ describe('with redux', () => {
                     'https://www.angulararchitects.io',
                     {
                       params: new HttpParams().set('from', from).set('to', to),
-                    }
+                    },
                   );
                 }),
-                map((flights) => actions.flightsLoaded({ flights }))
+                map((flights) => actions.flightsLoaded({ flights })),
               ),
             };
           },
-        })
+        }),
       );
 
       const flightsStore = new FlightsStore();
@@ -88,7 +88,7 @@ describe('with redux', () => {
       const flight = createFlight();
       controller
         .expectOne((req) =>
-          req.url.startsWith('https://www.angulararchitects.io')
+          req.url.startsWith('https://www.angulararchitects.io'),
         )
         .flush([flight]);
 

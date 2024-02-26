@@ -27,7 +27,7 @@ export const FlightStore = signalStore(
     },
 
     reducer: (actions, on) => {
-      on(actions.flightsLoaded, ({ flights }, state) => {
+      on(actions.flightsLoaded, (state, { flights }) => {
         patchState(state, 'flights loaded', { flights });
       });
     },
