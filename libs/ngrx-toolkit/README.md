@@ -40,7 +40,7 @@ This extension is very easy to use. Just add it to a `signalStore`. Example:
 export const FlightStore = signalStore(
   { providedIn: 'root' },
   withDevtools('flights'), // <-- add this
-  withState({ flights: [] as Flight[] }),
+  withState({ flights: [] as Flight[] })
   // ...
 );
 ```
@@ -76,18 +76,15 @@ export const FlightStore = signalStore(
       return {
         load$: create(actions.load).pipe(
           switchMap(({ from, to }) =>
-            httpClient.get<Flight[]>(
-              'https://demo.angulararchitects.io/api/flight',
-              {
-                params: new HttpParams().set('from', from).set('to', to),
-              },
-            ),
+            httpClient.get<Flight[]>('https://demo.angulararchitects.io/api/flight', {
+              params: new HttpParams().set('from', from).set('to', to),
+            })
           ),
-          tap((flights) => actions.loaded({ flights })),
+          tap((flights) => actions.loaded({ flights }))
         ),
       };
     },
-  }),
+  })
 );
 ```
 
@@ -103,18 +100,18 @@ export const SimpleFlightBookingStore = signalStore(
   withCallState(),
   withEntities<Flight>(),
   withDataService({
-    dataServiceType: FlightService, 
+    dataServiceType: FlightService,
     filter: { from: 'Paris', to: 'New York' },
   }),
-  withUndoRedo(),
+  withUndoRedo()
 );
 ```
 
-The features ``withCallState`` and ``withUndoRedo`` are optional, but when present, they enrich each other.
+The features `withCallState` and `withUndoRedo` are optional, but when present, they enrich each other.
 
-The Data Service needs to implement the ``DataService`` interface:
+The Data Service needs to implement the `DataService` interface:
 
-```typescript 
+```typescript
 @Injectable({
   providedIn: 'root'
 })
@@ -172,30 +169,30 @@ export class FlightSearchSimpleComponent {
 
 ## DataService with Dynamic Properties
 
-To avoid naming conflicts, the properties set up by ``withDataService`` and the connected features can be configured in a typesafe way:
+To avoid naming conflicts, the properties set up by `withDataService` and the connected features can be configured in a typesafe way:
 
 ```typescript
 export const FlightBookingStore = signalStore(
   { providedIn: 'root' },
   withCallState({
-    collection: 'flight'
+    collection: 'flight',
   }),
-  withEntities({ 
-    entity: type<Flight>(), 
-    collection: 'flight'
+  withEntities({
+    entity: type<Flight>(),
+    collection: 'flight',
   }),
   withDataService({
-    dataServiceType: FlightService, 
+    dataServiceType: FlightService,
     filter: { from: 'Graz', to: 'Hamburg' },
-    collection: 'flight'
+    collection: 'flight',
   }),
   withUndoRedo({
     collections: ['flight'],
-  }),
+  })
 );
 ```
 
-This setup makes them use ``flight`` as part of the used property names. As these implementations respect the Type Script type system, the compiler will make sure these properties are used in a typesafe way:
+This setup makes them use `flight` as part of the used property names. As these implementations respect the Type Script type system, the compiler will make sure these properties are used in a typesafe way:
 
 ```typescript
 @Component(...)
@@ -235,6 +232,44 @@ export class FlightSearchDynamicComponent {
 
 }
 ```
+
+## Storage Sync `withStorageSync()`
+
+`withStorageSync` adds automatic or manual synchronization with Web Storage (`localstorage`/`sessionstorage`).
+
+> [!WARNING]  
+> As Web Storage only works in browser environments it will fallback to a stub implementation on server environments.
+
+Example:
+
+```ts
+const SyncStore = signalStore(
+  withStorageSync<User>({
+    key: 'synced', // key used when writing to/reading from storage
+    autoSync: false, // read from storage on init and write on state changes - `true` by default
+    select: (state: User) => Partial<User>, // projection to keep specific slices in sync
+    parse: (stateString: string) => State, // custom parsing from storage - `JSON.parse` by default
+    stringify: (state: User) => string, // custom stringification - `JSON.stringify` by default
+    storage: () => sessionstorage, // factory to select storage to sync with
+  })
+);
+```
+
+```ts
+@Component(...)
+public class SyncedStoreComponent {
+  private syncStore = inject(SyncStore);
+
+  updateFromStorage(): void {
+    this.syncStore.readFromStorage(); // reads the stored item from storage and patches the state
+  }
+
+  updateStorage(): void {
+    this.syncStore.writeToStorage(); // writes the current state to storage
+  }
+
+  clearStorage(): void {
+    this.syncStore.clearStorage(); // clears the stored item in storage
 
 ## Redux Connector for the NgRx Signal Store `createReduxState()`
 

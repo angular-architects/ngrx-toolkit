@@ -3,7 +3,7 @@ export * from './lib/with-redux';
 
 export * from './lib/with-call-state';
 export * from './lib/with-undo-redo';
-export * from './lib/with-data-service';
-
+export * from './lib/with-data-service'
+export { withStorageSync, SyncConfig } from './lib/with-storage-sync';
 export * from './lib/redux-connector';
 export * from './lib/redux-connector/rxjs-interop';

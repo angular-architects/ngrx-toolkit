@@ -15,7 +15,7 @@ export interface Todo {
   deadline?: Date;
 }
 
-type AddTodo = Omit<Todo, 'id'>;
+export type AddTodo = Omit<Todo, 'id'>;
 
 export const TodoStore = signalStore(
   { providedIn: 'root' },
