@@ -23,13 +23,17 @@ export type NamedCallStateSignals<Prop extends string> = {
     [K in Prop as `${K}Loaded`]: Signal<boolean>;
   } & {
     [K in Prop as `${K}Error`]: Signal<string | null>;
-  } 
+  }
 
 export type CallStateSignals = {
   loading: Signal<boolean>;
   loaded: Signal<boolean>;
   error: Signal<string | null>
-} 
+}
+
+export type SetCallState<Prop extends string | undefined> = Prop extends string
+  ? NamedCallStateSlice<Prop>
+  : CallStateSlice;
 
 export function getCallStateKeys(config?: { collection?: string }) {
   const prop = config?.collection;
@@ -83,33 +87,32 @@ export function withCallState<Collection extends string>(config?: {
   );
 }
 
-export function setLoading<Prop extends string>(
+export function setLoading<Prop extends string | undefined = undefined>(
   prop?: Prop
-): NamedCallStateSlice<Prop> | CallStateSlice {
+): SetCallState<Prop> {
   if (prop) {
-    return { [`${prop}CallState`]: 'loading' } as NamedCallStateSlice<Prop>;
+    return { [`${prop}CallState`]: 'loading' } as SetCallState<Prop>;
   }
 
-  return { callState: 'loading' };
+  return { callState: 'loading' } as SetCallState<Prop>;
 }
 
-export function setLoaded<Prop extends string>(
+export function setLoaded<Prop extends string | undefined = undefined>(
   prop?: Prop
-): NamedCallStateSlice<Prop> | CallStateSlice {
+): SetCallState<Prop> {
 
   if (prop) {
-    return { [`${prop}CallState`]: 'loaded' } as NamedCallStateSlice<Prop>;
+    return { [`${prop}CallState`]: 'loaded' } as SetCallState<Prop>;
   }
   else {
-    return { callState: 'loaded' };
-
+    return { callState: 'loaded' } as SetCallState<Prop>;
   }
 }
 
-export function setError<Prop extends string>(
+export function setError<Prop extends string | undefined = undefined>(
   error: unknown,
   prop?: Prop,
-  ): NamedCallStateSlice<Prop> | CallStateSlice {
+  ): SetCallState<Prop> {
 
     let errorMessage = '';
 
@@ -125,9 +128,9 @@ export function setError<Prop extends string>(
     
 
     if (prop) {
-      return { [`${prop}CallState`]: { error: errorMessage } } as NamedCallStateSlice<Prop>;
+      return { [`${prop}CallState`]: { error: errorMessage } } as SetCallState<Prop>;
     }
     else {
-      return { callState: { error: errorMessage } };
+      return { callState: { error: errorMessage } } as SetCallState<Prop>;
     }
 }
