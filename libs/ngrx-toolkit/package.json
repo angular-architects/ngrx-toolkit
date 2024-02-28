@@ -9,10 +9,9 @@
   "peerDependencies": {
     "@angular/common": "^17.0.0",
     "@angular/core": "^17.0.0",
-    "@ngrx/signals": "^17.0.0"
-  },
-  "dependencies": {
-    "tslib": "^2.3.0"
+    "@ngrx/signals": "^17.0.0",
+    "@ngrx/store": "^17.0.0",
+    "rxjs": "^6.5.3 || ^7.5.0"
   },
   "sideEffects": false
 }
