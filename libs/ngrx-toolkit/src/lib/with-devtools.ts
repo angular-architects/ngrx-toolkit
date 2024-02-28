@@ -5,6 +5,7 @@ import {
 import { SignalStoreFeatureResult } from '@ngrx/signals/src/signal-store-models';
 import { effect, inject, PLATFORM_ID, signal, Signal } from '@angular/core';
 import { isPlatformServer } from '@angular/common';
+import { Empty } from './shared/empty';
 
 declare global {
   interface Window {
@@ -18,7 +19,7 @@ declare global {
   }
 }
 
-type EmptyFeatureResult = { state: {}; signals: {}; methods: {} };
+type EmptyFeatureResult = { state: Empty; signals: Empty; methods: Empty };
 export type Action = { type: string };
 
 const storeRegistry = signal<Record<string, Signal<unknown>>>({});
