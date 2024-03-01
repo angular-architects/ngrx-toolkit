@@ -8,7 +8,7 @@ import {
   withHooks,
   withMethods,
 } from '@ngrx/signals';
-import { Empty } from './shared/empty';
+import { Emtpy } from './shared/empty';
 
 type SignalStoreFeatureInput<State> = Pick<
   Parameters<SignalStoreFeature>[0],
@@ -20,8 +20,8 @@ type SignalStoreFeatureInput<State> = Pick<
 const NOOP = () => {};
 
 type WithStorageSyncFeatureResult = {
-  state: Empty;
-  signals: Empty;
+  state: Emtpy;
+  signals: Emtpy;
   methods: {
     clearStorage(): void;
     readFromStorage(): void;
