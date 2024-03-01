@@ -1,31 +1,23 @@
 import { Route } from '@angular/router';
-import { TodoComponent } from './todo/todo.component';
-import { FlightSearchComponent } from './flight-search/flight-search.component';
-import { FlightSearchSimpleComponent } from './flight-search-data-service-simple/flight-search-simple.component';
-import { FlightEditSimpleComponent } from './flight-search-data-service-simple/flight-edit-simple.component';
-import { FlightSearchDynamicComponent } from './flight-search-data-service-dynamic/flight-search.component';
-import { FlightEditDynamicComponent } from './flight-search-data-service-dynamic/flight-edit.component';
-import { TodoStorageSyncComponent } from './todo-storage-sync/todo-storage-sync.component';
-import { FlightSearchReducConnectorComponent } from './flight-search-redux-connector/flight-search.component';
 import { provideFlightStore } from './flight-search-redux-connector/+state/redux';
 
 export const appRoutes: Route[] = [
-  { path: 'todo', component: TodoComponent },
-  { path: 'flight-search', component: FlightSearchComponent },
+  { path: 'todo', loadComponent: () => import('./todo/todo.component').then(m => m.TodoComponent) },
+  { path: 'flight-search', loadComponent: () => import('./flight-search/flight-search.component').then(m => m.FlightSearchComponent) },
   {
     path: 'flight-search-data-service-simple',
-    component: FlightSearchSimpleComponent,
+    loadComponent: () => import('./flight-search-data-service-simple/flight-search-simple.component').then(m => m.FlightSearchSimpleComponent)
   },
-  { path: 'flight-edit-simple/:id', component: FlightEditSimpleComponent },
+  { path: 'flight-edit-simple/:id', loadComponent: () => import('./flight-search-data-service-simple/flight-edit-simple.component').then(m => m.FlightEditSimpleComponent) },
   {
     path: 'flight-search-data-service-dynamic',
-    component: FlightSearchDynamicComponent,
+    loadComponent: () => import('./flight-search-data-service-dynamic/flight-search.component').then(m => m.FlightSearchDynamicComponent)
   },
-  { path: 'flight-edit-dynamic/:id', component: FlightEditDynamicComponent },
-  { path: 'todo-storage-sync', component: TodoStorageSyncComponent },
+  { path: 'flight-edit-dynamic/:id', loadComponent: () => import('./flight-search-data-service-dynamic/flight-edit.component').then(m => m.FlightEditDynamicComponent) },
+  { path: 'todo-storage-sync', loadComponent: () => import('./todo-storage-sync/todo-storage-sync.component').then(m => m.TodoStorageSyncComponent) },
   {
     path: 'flight-search-redux-connector',
     providers: [provideFlightStore()],
-    component: FlightSearchReducConnectorComponent
+    loadComponent: () => import('./flight-search-redux-connector/flight-search.component').then(m => m.FlightSearchReducConnectorComponent)
   },
 ];
