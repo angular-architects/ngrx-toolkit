@@ -47,6 +47,9 @@
     ],
     "sharedGlobals": []
   },
+  "release": {
+    "projects": ["ngrx-toolkit"]
+  },
   "generators": {
     "@nx/angular:application": {
       "style": "css",
