@@ -48,7 +48,15 @@
     "sharedGlobals": []
   },
   "release": {
-    "projects": ["ngrx-toolkit"]
+    "projects": ["ngrx-toolkit"],
+    "version": {
+      "conventionalCommits": true
+    },
+    "changelog": {
+      "workspaceChangelog": {
+        "createRelease": "github"
+      }
+    }
   },
   "generators": {
     "@nx/angular:application": {
