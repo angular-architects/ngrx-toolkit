@@ -1,3 +1,15 @@
+## 0.2.0 (2024-03-02)
+
+
+### 🚀 Features
+
+- update to nx 18 ([111a389](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/111a389))
+- update to nx 18 ([c92fbd3](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/c92fbd3))
+
+### ❤️  Thank You
+
+- Rainer Hahnekamp @rainerhahnekamp
+
 ## 0.1.0 (2024-03-02)
 
 
