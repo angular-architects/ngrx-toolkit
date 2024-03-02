@@ -20,8 +20,9 @@
 
 ### ❤️  Thank You
 
-- Basti Hoffmann
-- Anders Finserås Graneng
-- Manfred Steyer
+- Basti Hoffmann @bohoffi
+- Anders Finserås Graneng @andersfgraneng
+- Derrick Brown @ricochetbrown
+- Manfred Steyer @manfredsteyer
 - mikezks @mikezks
-- Rainer Hahnekamp
+- Rainer Hahnekamp @rainerhahnekamp
