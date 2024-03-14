@@ -13,8 +13,8 @@ export interface DataService<E extends Entity, F extends Filter> {
     load(filter: F): Promise<E[]>;
     loadById(id: EntityId): Promise<E>;
     create(entity: E): Promise<E>;
-    update(entity: E): Promise<E>;
-    updateAll(entity: E[]): Promise<E[]>;
+    update(entity: Partial<E>): Promise<E>;
+    updateAll(entity: Array<Partial<E>[]>): Promise<E[]>;
     delete(entity: E): Promise<void>;
 }
 
@@ -111,10 +111,10 @@ export type NamedDataServiceMethods<E extends Entity, F extends Filter, Collecti
         [K in Collection as `create${Capitalize<K>}`]: (entity: E) => Promise<void>;
     } &
     {
-        [K in Collection as `update${Capitalize<K>}`]: (entity: E) => Promise<void>;
+        [K in Collection as `update${Capitalize<K>}`]: (entity: Partial<E>) => Promise<void>;
     } &
     {
-        [K in Collection as `updateAll${Capitalize<K>}`]: (entity: E[]) => Promise<void>;
+        [K in Collection as `updateAll${Capitalize<K>}`]: (entity: Array<Partial<E>[]>) => Promise<void>;
     } &
     {
         [K in Collection as `delete${Capitalize<K>}`]: (entity: E) => Promise<void>;
@@ -130,8 +130,8 @@ export type DataServiceMethods<E extends Entity, F extends Filter> =
         setCurrent(entity: E): void;
         loadById(id: EntityId): Promise<void>;
         create(entity: E): Promise<void>;
-        update(entity: E): Promise<void>;
-        updateAll(entities: E[]): Promise<void>;
+        update(entity: Partial<E>): Promise<void>;
+        updateAll(entities: Array<Partial<E>[]>): Promise<void>;
         delete(entity: E): Promise<void>;
     }
 
@@ -261,8 +261,7 @@ export function withDataService<E extends Entity, F extends Filter, Collection e
                         throw e;
                     }
                 },
-                [updateKey]: async (entity: E): Promise<void> => {
-                    patchState(store, { [currentKey]: entity });
+                [updateKey]: async (entity: Partial<E>): Promise<void> => {
                     store[callStateKey] && patchState(store, setLoading(prefix));
 
                     try {
@@ -278,7 +277,7 @@ export function withDataService<E extends Entity, F extends Filter, Collection e
                         throw e;
                     }
                 },
-                [updateAllKey]: async (entities: E[]): Promise<void> => {
+                [updateAllKey]: async (entities: Array<Partial<E>[]>): Promise<void> => {
                   store[callStateKey] && patchState(store, setLoading(prefix));
 
                   try {
