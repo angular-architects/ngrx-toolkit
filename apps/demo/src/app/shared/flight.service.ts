@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
 import { EntityId } from '@ngrx/signals/entities';
-import { DataService } from 'ngrx-toolkit';
+import { DataService, EntityUpdate } from 'ngrx-toolkit';
 import { Flight } from './flight';
 
 export type FlightFilter = {
@@ -27,12 +27,12 @@ export class FlightService implements DataService<Flight, FlightFilter> {
     return firstValueFrom(this.save(entity));
   }
 
-  update(entity: Flight): Promise<Flight> {
+  update(entity: EntityUpdate<Flight>): Promise<Flight> {
     return firstValueFrom(this.save(entity));
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updateAll(entity: Flight[]): Promise<Flight[]> {
+  updateAll(entities: Array<EntityUpdate<Flight>>): Promise<Flight[]> {
     throw new Error('updateAll method not implemented.');
   }
 
@@ -66,7 +66,7 @@ export class FlightService implements DataService<Flight, FlightFilter> {
     return this.http.get<Flight>(url, reqObj);
   }
 
-  private save(flight: Flight): Observable<Flight> {
+  private save(flight: Flight | EntityUpdate<Flight>): Observable<Flight> {
     const url = [this.baseUrl, 'flight'].join('/');
     return this.http.post<Flight>(url, flight);
   }
