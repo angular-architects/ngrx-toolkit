@@ -33,6 +33,8 @@ export function getUndoRedoKeys(collections?: string[]): string[] {
     return ['entityMap', 'ids', 'selectedIds', 'filter'];
 }
 
+type InnerSignalStore = Parameters<ReturnType<typeof signalStoreFeature>>[0];
+
 export function withUndoRedo<Collection extends string>(options?: { maxStackSize?: number; collections: Collection[] }): SignalStoreFeature<
     {
         state: Emtpy,
@@ -77,108 +79,113 @@ export function withUndoRedo<Collection extends string>(options: {
 } = {}): 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 SignalStoreFeature<any, any> {
-    let previous: StackItem | null = null;
-    let skipOnce = false;
 
-    const normalized = {
-        ...defaultOptions,
-        ...options
-    };
-
-    //
-    // Design Decision: This feature has its own
-    // internal state.
-    //
-
-    const undoStack: StackItem[] = [];
-    const redoStack: StackItem[] = [];
-
-    const canUndo = signal(false);
-    const canRedo = signal(false);
-
-    const updateInternal = () => {
-        canUndo.set(undoStack.length !== 0);
-        canRedo.set(redoStack.length !== 0);
-    };
-
-    const keys = getUndoRedoKeys(normalized?.collections);
-
-    return signalStoreFeature(
-
-        withComputed(() => ({
-            canUndo: canUndo.asReadonly(),
-            canRedo: canRedo.asReadonly()
-        })),
-        withMethods((store) => ({
-            undo(): void {
-                const item = undoStack.pop();
-
-                if (item && previous) {
-                    redoStack.push(previous);
-                }
-
-                if (item) {
-                    skipOnce = true;
-                    patchState(store, item);
-                    previous = item;
-                }
-
-                updateInternal();
-            },
-            redo(): void {
-                const item = redoStack.pop();
-
-                if (item && previous) {
-                    undoStack.push(previous);
-                }
-
-                if (item) {
-                    skipOnce = true;
-                    patchState(store, item);
-                    previous = item;
-                }
-
-                updateInternal();
-            }
-        })),
-        withHooks({
-            onInit(store: Record<string, unknown>) {
-                effect(() => {
-
-                    const cand = keys.reduce((acc, key) => {
-                        const s = store[key];
-                        if (s && isSignal(s)) {
-                            return {
-                                ...acc,
-                                [key]: s()
-                            }
-                        }
-                        return acc;
-                    }, {});
-
-                    if (skipOnce) {
-                        skipOnce = false;
-                        return;
+    return (store: InnerSignalStore) => {
+        let previous: StackItem | null = null;
+        let skipOnce = false;
+    
+        const normalized = {
+            ...defaultOptions,
+            ...options
+        };
+    
+        //
+        // Design Decision: This feature has its own
+        // internal state.
+        //
+    
+        const undoStack: StackItem[] = [];
+        const redoStack: StackItem[] = [];
+    
+        const canUndo = signal(false);
+        const canRedo = signal(false);
+    
+        const updateInternal = () => {
+            canUndo.set(undoStack.length !== 0);
+            canRedo.set(redoStack.length !== 0);
+        };
+    
+        const keys = getUndoRedoKeys(normalized?.collections);
+    
+        const feature = signalStoreFeature(
+    
+            withComputed(() => ({
+                canUndo: canUndo.asReadonly(),
+                canRedo: canRedo.asReadonly()
+            })),
+            withMethods((store) => ({
+                undo(): void {
+                    const item = undoStack.pop();
+    
+                    if (item && previous) {
+                        redoStack.push(previous);
                     }
-
-                    // Clear redoStack after recorded action
-                    redoStack.splice(0);
-
-                    if (previous) {
+    
+                    if (item) {
+                        skipOnce = true;
+                        patchState(store, item);
+                        previous = item;
+                    }
+    
+                    updateInternal();
+                },
+                redo(): void {
+                    const item = redoStack.pop();
+    
+                    if (item && previous) {
                         undoStack.push(previous);
                     }
-
-                    if (redoStack.length > normalized.maxStackSize) {
-                        undoStack.unshift();
+    
+                    if (item) {
+                        skipOnce = true;
+                        patchState(store, item);
+                        previous = item;
                     }
+    
+                    updateInternal();
+                }
+            })),
+            withHooks({
+                onInit(store: Record<string, unknown>) {
+                    effect(() => {
+    
+                        const cand = keys.reduce((acc, key) => {
+                            const s = store[key];
+                            if (s && isSignal(s)) {
+                                return {
+                                    ...acc,
+                                    [key]: s()
+                                }
+                            }
+                            return acc;
+                        }, {});
+    
+                        if (skipOnce) {
+                            skipOnce = false;
+                            return;
+                        }
+    
+                        // Clear redoStack after recorded action
+                        redoStack.splice(0);
+    
+                        if (previous) {
+                            undoStack.push(previous);
+                        }
+    
+                        if (redoStack.length > normalized.maxStackSize) {
+                            undoStack.unshift();
+                        }
+    
+                        previous = cand;
+    
+                        // Don't propogate current reactive context
+                        untracked(() => updateInternal());
+                    })
+                }
+            })
+    
+        );
 
-                    previous = cand;
-
-                    // Don't propogate current reactive context
-                    untracked(() => updateInternal());
-                })
-            }
-        })
-
-    )
+        return feature(store);
+    }
 }
