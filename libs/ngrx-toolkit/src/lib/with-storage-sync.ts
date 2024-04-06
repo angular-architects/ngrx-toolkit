@@ -10,6 +10,52 @@ import {
 } from '@ngrx/signals';
 import { Emtpy } from './shared/empty';
 
+/**
+ * Wraps JSON.parse to provide support for Bigint serialization. It provides a custom reviver function that understands the Return Type of the serialization function
+ * @param value  A valid JSON string.
+ * @param reviver A function that transforms the results. This function is called for each member of the object. If a member contains nested objects, the nested objects are transformed before the parent object is
+ */
+export function withBigIntRehydration(
+  value: Parameters<typeof JSON.parse>[0],
+  reviver?: Parameters<typeof JSON.parse>[1]
+): ReturnType<typeof JSON.parse> {
+  const customReviver: Parameters<typeof JSON.parse>[1] = (key, value) => {
+    // trying to enforce validation on serialized signature
+    const isSerializedBigint =
+      typeof value === 'object' &&
+      Object.keys(value).length === 2 &&
+      '$type' in value &&
+      '$bigint' in value &&
+      value.$type === 'bigint' &&
+      typeof value.$bigint === 'string';
+
+    return isSerializedBigint ? BigInt(value.$bigint) : value;
+  };
+  return JSON.parse(value, reviver ?? customReviver);
+}
+
+/**
+ * Wraps JSON.stringify to provide support for Bigint serialization It provides a custom replacer function that performs the actual operation on bigints
+ * @param value — A JavaScript value, usually an object or array, to be converted.
+ * @param replacer — A function that transforms the results.
+ */
+export function withBigIntReplacement(
+  value: Parameters<typeof JSON.stringify>[0],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  replacer?: (this: any, key: string, value: any) => any
+): ReturnType<typeof JSON.stringify> {
+
+  const customReplacer: typeof replacer = (key, value) => {
+    return typeof value === 'bigint'
+      ? {
+          $type: 'bigint',
+          $bigint: (value as bigint).toString(),
+        }
+      : value;
+  };
+  return JSON.stringify(value, replacer ?? customReplacer);
+}
+
 type SignalStoreFeatureInput<State> = Pick<
   Parameters<SignalStoreFeature>[0],
   'signals' | 'methods'
@@ -58,15 +104,20 @@ export type SyncConfig<State> = {
   /**
    * Function used to parse the state coming from storage.
    *
-   * `JSON.parse()` by default
+   * ~~`JSON.parse()` by default~~
+   * Proposal:
+   * `withBigIntRehydration` by default.
+   *
    */
   parse?: (stateString: string) => State;
   /**
    * Function used to tranform the state into a string representation.
    *
-   * `JSON.stringify()` by default
+   * ~~`JSON.stringify()` by default~~
+   * Proposal:
+   * `withBigIntReplacement` by default.
    */
-  stringify?: (state: State) => string;
+  stringify?: (state: Partial<State>) => string;
   /**
    * Factory function used to select the storage.
    *
@@ -100,8 +151,8 @@ export function withStorageSync<
     key,
     autoSync = true,
     select = (state: State) => state,
-    parse = JSON.parse,
-    stringify = JSON.stringify,
+    parse = withBigIntRehydration,
+    stringify = withBigIntReplacement,
     storage: storageFactory = () => localStorage,
   } = typeof configOrKey === 'string' ? { key: configOrKey } : configOrKey;
 
