@@ -15,7 +15,7 @@ type PatchFn = typeof originalPatchState extends (
  * @param action name of the action for DevTools
  * @param rest updateFns or patchedValues
  */
-export const patchState: PatchFn = (state, action, ...rest) => {
+export const tkPatchState: PatchFn = (state, action, ...rest) => {
   currentActionNames.add(action);
   return originalPatchState(state, ...rest);
 };

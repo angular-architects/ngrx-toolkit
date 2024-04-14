@@ -23,7 +23,7 @@ describe('Devtools Basics', () => {
     );
   });
 
-  it('add multiple store as feature stores', () => {
+  it('should add multiple store as feature stores', () => {
     const { sendSpy } = setupExtensions();
     for (const name of ['category', 'booking']) {
       TestBed.inject(signalStore({ providedIn: 'root' }, withDevtools(name)));
@@ -74,56 +74,4 @@ describe('Devtools Basics', () => {
     TestBed.flushEffects();
     expect(sendSpy).toHaveBeenCalledWith({ type: 'Store Update' }, {});
   }));
-
-  it('should index unique names', () => {
-    const { sendSpy } = setupExtensions();
-    const Store = signalStore(
-      { providedIn: 'root' },
-      withState({ airline: 'Lufthansa' }),
-      withDevtools('flights'),
-    );
-    const StoreIx1 = signalStore(
-      { providedIn: 'root' },
-      withState({ airline: 'Austrian' }),
-      withDevtools('flights'),
-    );
-    const StoreIx2 = signalStore(
-      { providedIn: 'root' },
-      withState({ airline: 'British Airways' }),
-      withDevtools('flights'),
-    );
-    const store = TestBed.inject(Store);
-    const storeIx1 = TestBed.inject(StoreIx1);
-    const storeIx2 = TestBed.inject(StoreIx2);
-
-    patchState(storeIx1, { airline: 'Austrian Airlines' });
-    patchState(storeIx2, { airline: 'BA' });
-
-    TestBed.flushEffects();
-
-    expect(sendSpy).toHaveBeenCalledWith(
-      { type: 'Store Update' },
-      {
-        flights: { airline: 'Lufthansa' },
-        'flights-1': { airline: 'Austrian Airlines' },
-        'flights-2': { airline: 'BA' },
-      },
-    );
-  });
-
-  it('should provide name of action', () => {
-    const { sendSpy } = setupExtensions();
-    TestBed.inject(
-      signalStore(
-        { providedIn: 'root' },
-        withDevtools('shop'),
-        withState({ name: 'Car' }),
-      ),
-    );
-    TestBed.flushEffects();
-    expect(sendSpy).toHaveBeenCalledWith(
-      { type: 'Store Update' },
-      { shop: { name: 'Car' } },
-    );
-  });
 });

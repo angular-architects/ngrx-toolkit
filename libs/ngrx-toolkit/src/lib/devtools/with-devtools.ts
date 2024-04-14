@@ -17,6 +17,12 @@ declare global {
   }
 }
 
+export type DevtoolsOptions = {
+  indexNames: boolean;
+};
+
+const existingNames: Record<string, unknown> = {};
+
 /**
  * Adds this store as a feature state to the Redux DevTools.
  *
@@ -32,11 +38,21 @@ declare global {
  *
  * @param name name of the store as it should appear in the DevTools
  */
-export function withDevtools(name: string) {
+export function withDevtools(
+  name: string,
+  options: Partial<DevtoolsOptions> = {},
+) {
+  if (name in existingNames) {
+    throw new Error(
+      `A store with name ${name} has already been registered for the Devtools`,
+    );
+  }
+  existingNames[name] = true;
+  const finalOptions: DevtoolsOptions = { ...{ indexNames: true }, ...options };
   return signalStoreFeature(
     withMethods((store) => {
       const syncer = inject(DevtoolsSyncer);
-      syncer.addStore(name, getStoreSignal(store));
+      syncer.addStore(name, getStoreSignal(store), finalOptions);
 
       return {
         renameDevtoolsName(newName: string): void {

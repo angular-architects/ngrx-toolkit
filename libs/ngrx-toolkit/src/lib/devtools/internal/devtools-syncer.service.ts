@@ -10,6 +10,7 @@ import {
 import { throwIfNull } from '../../shared/throw-if-null';
 import { currentActionNames } from './currrent-action-names';
 import { isPlatformServer } from '@angular/common';
+import { DevtoolsOptions } from '../with-devtools';
 
 /**
  * A service provided by the root injector is
@@ -39,7 +40,11 @@ import { isPlatformServer } from '@angular/common';
   },
 })
 export abstract class DevtoolsSyncer implements OnDestroy {
-  abstract addStore(name: string, store: Signal<unknown>): void;
+  abstract addStore(
+    name: string,
+    store: Signal<unknown>,
+    options: DevtoolsOptions,
+  ): void;
 
   abstract removeStore(name: string): void;
 
@@ -58,9 +63,14 @@ class DummyDevtoolsSyncer implements DevtoolsSyncer {
   ngOnDestroy(): void {}
 }
 
+type StoreRegistry = Record<
+  string,
+  { store: Signal<unknown>; options: DevtoolsOptions }
+>;
+
 @Injectable()
-class DefaultDevtoolsSyncer implements OnDestroy {
-  readonly #stores = signal<Record<string, Signal<unknown>>>({});
+class DefaultDevtoolsSyncer implements OnDestroy, DevtoolsSyncer {
+  readonly #stores = signal<StoreRegistry>({});
   readonly #connection = throwIfNull(
     window.__REDUX_DEVTOOLS_EXTENSION__,
   ).connect({
@@ -79,7 +89,7 @@ class DefaultDevtoolsSyncer implements OnDestroy {
       const rootState: Record<string, unknown> = {};
       for (const name in stores) {
         this.#syncedStoreNames.add(name);
-        const store = stores[name];
+        const { store } = stores[name];
         rootState[name] = store();
       }
 
@@ -95,23 +105,37 @@ class DefaultDevtoolsSyncer implements OnDestroy {
     currentActionNames.clear();
   }
 
-  addStore(name: string, store: Signal<unknown>) {
+  addStore(name: string, store: Signal<unknown>, options: DevtoolsOptions) {
     let storeName = name;
     const names = Object.keys(this.#stores());
+
+    if (names.includes(storeName)) {
+      const { options } = this.#stores()[storeName];
+      if (!options.indexNames) {
+        throw new Error(
+          `An instance of the store ${storeName} already exists. Use a name,
+          rename it upon instantiation or enable automatic indexing:
+          (withDevTools('${storeName}', {indexNames: true}))`,
+        );
+      }
+    }
 
     for (let i = 1; names.includes(storeName); i++) {
       storeName = `${name}-${i}`;
     }
 
-    this.#stores.update((stores) => ({ ...stores, [storeName]: store }));
+    this.#stores.update((stores) => ({
+      ...stores,
+      [storeName]: { store, options },
+    }));
   }
 
   removeStore(name: string) {
-    this.#stores.update((stores) => {
-      const newStore: Record<string, Signal<unknown>> = {};
-      for (const storeName in stores) {
+    this.#stores.update((value) => {
+      const newStore: StoreRegistry = {};
+      for (const storeName in value) {
         if (storeName !== name) {
-          newStore[storeName] = stores[storeName];
+          newStore[storeName] = value[storeName];
         }
       }
 
@@ -127,7 +151,7 @@ class DefaultDevtoolsSyncer implements OnDestroy {
     }
 
     this.#stores.update((stores) => {
-      const newStore: Record<string, Signal<unknown>> = {};
+      const newStore: StoreRegistry = {};
       for (const storeName in stores) {
         if (storeName === newName) {
           throw new Error(
