@@ -13,7 +13,7 @@ type Payload = Record<string, unknown>;
 
 type ActionFn<
   Type extends string = string,
-  ActionPayload extends Payload = Payload
+  ActionPayload extends Payload = Payload,
 > = ((payload: ActionPayload) => ActionPayload & { type: Type }) & {
   type: Type;
 };
@@ -24,7 +24,7 @@ export type ActionsFnSpecs = Record<string, Payload>;
 
 type ActionFnCreator<Spec extends ActionsFnSpecs> = {
   [ActionName in keyof Spec]: ((
-    payload: Spec[ActionName]
+    payload: Spec[ActionName],
   ) => Spec[ActionName] & { type: ActionName }) & { type: ActionName & string };
 };
 
@@ -55,15 +55,15 @@ export const noPayload = {};
 
 type ReducerFunction<ReducerAction, State> = (
   state: State,
-  action: ActionFnPayload<ReducerAction>
+  action: ActionFnPayload<ReducerAction>,
 ) => void;
 
 type ReducerFactory<StateActionFns extends ActionFns, State> = (
   actions: StateActionFns,
   on: <ReducerAction extends { type: string }>(
     action: ReducerAction,
-    reducerFn: ReducerFunction<ReducerAction, State>
-  ) => void
+    reducerFn: ReducerFunction<ReducerAction, State>,
+  ) => void,
 ) => void;
 
 /** Effect **/
@@ -71,9 +71,18 @@ type ReducerFactory<StateActionFns extends ActionFns, State> = (
 type EffectsFactory<StateActionFns extends ActionFns> = (
   actions: StateActionFns,
   create: <EffectAction extends { type: string }>(
-    action: EffectAction
-  ) => Observable<ActionFnPayload<EffectAction>>
+    action: EffectAction,
+  ) => Observable<ActionFnPayload<EffectAction>>,
 ) => Record<string, Observable<unknown>>;
+
+// internal types
+
+/**
+ * Record which holds all effects for a specific action type.
+ * The values are Subject which the effect are subscribed to.
+ * `createActionFns` will call next on these subjects.
+ */
+type EffectsRegistry = Record<string, Subject<ActionFnPayload<unknown>>[]>;
 
 function createActionFns<Spec extends ActionsFnSpecs>(
   actionFnSpecs: Spec,
@@ -81,8 +90,8 @@ function createActionFns<Spec extends ActionsFnSpecs>(
     string,
     (state: unknown, payload: ActionFnPayload<unknown>) => void
   >,
-  effectsRegistry: Record<string, Subject<ActionFnPayload<unknown>>>,
-  state: unknown
+  effectsRegistry: EffectsRegistry,
+  state: unknown,
 ) {
   const actionFns: Record<string, ActionFn> = {};
 
@@ -93,12 +102,14 @@ function createActionFns<Spec extends ActionsFnSpecs>(
       if (reducer) {
         (reducer as (state: unknown, payload: unknown) => void)(
           state,
-          fullPayload as unknown
+          fullPayload as unknown,
         );
       }
-      const effectSubject = effectsRegistry[type];
-      if (effectSubject) {
-        (effectSubject as unknown as Subject<unknown>).next(fullPayload);
+      const effectSubjects = effectsRegistry[type];
+      if (effectSubjects?.length) {
+        for (const effectSubject of effectSubjects) {
+          (effectSubject as unknown as Subject<unknown>).next(fullPayload);
+        }
       }
       return fullPayload;
     };
@@ -115,8 +126,8 @@ function createPublicAndAllActionsFns<Spec extends ActionsFnSpecs>(
     string,
     (state: unknown, payload: ActionFnPayload<unknown>) => void
   >,
-  effectsRegistry: Record<string, Subject<ActionFnPayload<unknown>>>,
-  state: unknown
+  effectsRegistry: EffectsRegistry,
+  state: unknown,
 ): { all: ActionFns; publics: ActionFns } {
   if ('public' in actionFnSpecs || 'private' in actionFnSpecs) {
     const privates = actionFnSpecs['private'] || {};
@@ -129,13 +140,13 @@ function createPublicAndAllActionsFns<Spec extends ActionsFnSpecs>(
       privates,
       reducerRegistry,
       effectsRegistry,
-      state
+      state,
     );
     const publicActionFns = createActionFns(
       publics,
       reducerRegistry,
       effectsRegistry,
-      state
+      state,
     );
 
     return {
@@ -148,7 +159,7 @@ function createPublicAndAllActionsFns<Spec extends ActionsFnSpecs>(
     actionFnSpecs,
     reducerRegistry,
     effectsRegistry,
-    state
+    state,
   );
 
   return { all: actionFns, publics: actionFns };
@@ -160,11 +171,11 @@ function fillReducerRegistry(
   reducerRegistry: Record<
     string,
     (state: unknown, payload: ActionFnPayload<unknown>) => void
-  >
+  >,
 ) {
   function on(
     action: { type: string },
-    reducerFn: (state: unknown, payload: ActionFnPayload<unknown>) => void
+    reducerFn: (state: unknown, payload: ActionFnPayload<unknown>) => void,
   ) {
     reducerRegistry[action.type] = reducerFn;
   }
@@ -177,11 +188,14 @@ function fillReducerRegistry(
 function fillEffects(
   effects: EffectsFactory<ActionFns>,
   actionFns: ActionFns,
-  effectsRegistry: Record<string, Subject<ActionFnPayload<unknown>>> = {}
+  effectsRegistry: EffectsRegistry = {},
 ): Observable<unknown>[] {
   function create(action: { type: string }) {
     const subject = new Subject<ActionFnPayload<unknown>>();
-    effectsRegistry[action.type] = subject;
+    if (!(action.type in effectsRegistry)) {
+      effectsRegistry[action.type] = [];
+    }
+    effectsRegistry[action.type].push(subject);
     return subject.asObservable();
   }
 
@@ -197,18 +211,19 @@ function processRedux<Spec extends ActionsFnSpecs, ReturnType>(
   actionFnSpecs: Spec,
   reducer: ReducerFactory<ActionFns, unknown>,
   effects: EffectsFactory<ActionFns>,
-  store: unknown
+  store: unknown,
 ) {
   const reducerRegistry: Record<
     string,
     (state: unknown, payload: ActionFnPayload<unknown>) => void
   > = {};
-  const effectsRegistry: Record<string, Subject<ActionFnPayload<unknown>>> = {};
+  const effectsRegistry: Record<string, Subject<ActionFnPayload<unknown>>[]> =
+    {};
   const actionsMap = createPublicAndAllActionsFns(
     actionFnSpecs,
     reducerRegistry,
     effectsRegistry,
-    store
+    store,
   );
   const actionFns = actionsMap.all;
   const publicActionsFns = actionsMap.publics;
@@ -237,7 +252,7 @@ export function withRedux<
   Spec extends ActionsFnSpecs,
   Input extends SignalStoreFeatureResult,
   StateActionFns extends ActionFnsCreator<Spec> = ActionFnsCreator<Spec>,
-  PublicStoreActionFns extends PublicActionFns<Spec> = PublicActionFns<Spec>
+  PublicStoreActionFns extends PublicActionFns<Spec> = PublicActionFns<Spec>,
 >(redux: {
   actions: Spec;
   reducer: ReducerFactory<StateActionFns, StateSignal<Input['state']>>;
@@ -251,7 +266,7 @@ export function withRedux<
       redux.actions,
       redux.reducer as ReducerFactory<ActionFns, unknown>,
       redux.effects as EffectsFactory<ActionFns>,
-      store
+      store,
     );
     return {
       ...store,

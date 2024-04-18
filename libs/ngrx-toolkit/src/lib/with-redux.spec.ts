@@ -12,6 +12,7 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
+import { Action } from 'ngrx-toolkit';
 
 interface Flight {
   id: number;
@@ -96,5 +97,46 @@ describe('with redux', () => {
 
       controller.verify();
     });
+  });
+
+  it('should allow multiple effects listening to the same action', () => {
+    const FlightsStore = signalStore(
+      withState({ flights: [] as Flight[], effect1: false, effect2: false }),
+      withRedux({
+        actions: {
+          init: noPayload,
+          updateEffect1: payload<{ value: boolean }>(),
+          updateEffect2: payload<{ value: boolean }>(),
+        },
+        reducer(actions, on) {
+          on(actions.updateEffect1, (state, { value }) => {
+            patchState(state, { effect1: value });
+          });
+
+          on(actions.updateEffect2, (state, { value }) => {
+            patchState(state, { effect2: value });
+          });
+        },
+        effects(actions, create) {
+          return {
+            init1$: create(actions.init).pipe(
+              map(() => actions.updateEffect1({ value: true })),
+            ),
+            init2$: create(actions.init).pipe(
+              map(() => actions.updateEffect2({ value: true })),
+            ),
+          };
+        },
+      }),
+    );
+
+    const flightStore = TestBed.configureTestingModule({
+      providers: [FlightsStore],
+    }).inject(FlightsStore);
+
+    flightStore.init({});
+
+    expect(flightStore.effect1()).toBe(true);
+    expect(flightStore.effect2()).toBe(true);
   });
 });
