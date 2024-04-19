@@ -12,7 +12,6 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
-import { Action } from 'ngrx-toolkit';
 
 interface Flight {
   id: number;
@@ -99,6 +98,27 @@ describe('with redux', () => {
     });
   });
 
+  it('should allow a noPayload action to call without parameters', () => {
+    const FlightsStore = signalStore(
+      withState({ flights: [] as Flight[] }),
+      withRedux({
+        actions: {
+          init: noPayload,
+        },
+        reducer() {},
+        effects() {
+          return {};
+        },
+      }),
+    );
+
+    const flightStore = TestBed.configureTestingModule({
+      providers: [FlightsStore],
+    }).inject(FlightsStore);
+
+    flightStore.init();
+  });
+
   it('should allow multiple effects listening to the same action', () => {
     const FlightsStore = signalStore(
       withState({ flights: [] as Flight[], effect1: false, effect2: false }),
@@ -134,7 +154,7 @@ describe('with redux', () => {
       providers: [FlightsStore],
     }).inject(FlightsStore);
 
-    flightStore.init({});
+    flightStore.init();
 
     expect(flightStore.effect1()).toBe(true);
     expect(flightStore.effect2()).toBe(true);
