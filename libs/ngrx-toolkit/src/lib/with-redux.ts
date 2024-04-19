@@ -23,9 +23,13 @@ type ActionFns = Record<string, ActionFn>;
 export type ActionsFnSpecs = Record<string, Payload>;
 
 type ActionFnCreator<Spec extends ActionsFnSpecs> = {
-  [ActionName in keyof Spec]: ((
-    payload: Spec[ActionName],
-  ) => Spec[ActionName] & { type: ActionName }) & { type: ActionName & string };
+  [ActionName in keyof Spec]: (Record<never, never> extends Spec[ActionName]
+    ? () => Spec[ActionName] & { type: ActionName }
+    : (
+        payload: Spec[ActionName],
+      ) => Spec[ActionName] & { type: ActionName }) & {
+    type: ActionName & string;
+  };
 };
 
 type ActionFnPayload<Action> = Action extends (payload: infer Payload) => void
@@ -262,7 +266,7 @@ export function withRedux<
   EmptyFeatureResult & { methods: PublicStoreActionFns }
 > {
   return (store) => {
-    const { methods, subscriptions } = processRedux<Spec, PublicStoreActionFns>(
+    const { methods } = processRedux<Spec, PublicStoreActionFns>(
       redux.actions,
       redux.reducer as ReducerFactory<ActionFns, unknown>,
       redux.effects as EffectsFactory<ActionFns>,
