@@ -4,7 +4,7 @@ import {
   payload,
   withDevtools,
   withRedux,
-  patchState,
+  updateState,
 } from 'ngrx-toolkit';
 import { inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -28,7 +28,7 @@ export const FlightStore = signalStore(
 
     reducer: (actions, on) => {
       on(actions.flightsLoaded, (state, { flights }) => {
-        patchState(state, 'flights loaded', { flights });
+        updateState(state, 'flights loaded', { flights });
       });
     },
 

@@ -5,7 +5,7 @@ import {
   updateEntity,
   withEntities,
 } from '@ngrx/signals/entities';
-import { patchState, withDevtools } from 'ngrx-toolkit';
+import { updateState, withDevtools } from 'ngrx-toolkit';
 
 export interface Todo {
   id: number;
@@ -25,16 +25,16 @@ export const TodoStore = signalStore(
     let currentId = 0;
     return {
       add(todo: AddTodo) {
-        patchState(store, 'add todo', setEntity({ id: ++currentId, ...todo }));
+        updateState(store, 'add todo', setEntity({ id: ++currentId, ...todo }));
       },
 
       remove(id: number) {
-        patchState(store, 'remove todo', removeEntity(id));
+        updateState(store, 'remove todo', removeEntity(id));
       },
 
       toggleFinished(id: number): void {
         const todo = store.entityMap()[id];
-        patchState(
+        updateState(
           store,
           'toggle todo',
           updateEntity({ id, changes: { finished: !todo.finished } })

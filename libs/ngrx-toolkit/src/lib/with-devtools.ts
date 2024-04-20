@@ -122,7 +122,21 @@ type PatchFn = typeof originalPatchState extends (
   ? (state: First, action: string, ...rest: Rest) => Returner
   : never;
 
+/**
+ * @deprecated Has been renamed to `updateState`
+ */
 export const patchState: PatchFn = (state, action, ...rest) => {
+  updateState(state, action, ...rest);
+};
+
+/**
+ * Wrapper of `patchState` for DevTools integration. Next to updating the state,
+ * it also sends the action to the DevTools.
+ * @param state state of Signal Store
+ * @param action name of action how it will show in DevTools
+ * @param updaters updater functions or objects
+ */
+export const updateState: PatchFn = (state, action, ...updaters) => {
   currentActionNames.add(action);
-  return originalPatchState(state, ...rest);
+  return originalPatchState(state, ...updaters);
 };
