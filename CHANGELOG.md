@@ -1,3 +1,20 @@
+## 0.2.0 (2024-04-20)
+
+
+### 🚀 Features
+
+- add MIT licence ([1c5ef89](https://github.com/angular-architects/ngrx-toolkit/commit/1c5ef89))
+
+### 🩹 Fixes
+
+- nx release with correct publish directory ([9c0f94f](https://github.com/angular-architects/ngrx-toolkit/commit/9c0f94f))
+- **redux:** multiple effects can subscribe to the same action ([12d0077](https://github.com/angular-architects/ngrx-toolkit/commit/12d0077))
+- **redux:** remove parameter from `noPayload` action functions ([0e83882](https://github.com/angular-architects/ngrx-toolkit/commit/0e83882))
+
+### ❤️  Thank You
+
+- Rainer Hahnekamp @rainerhahnekamp
+
 ## 0.1.1 (2024-04-20)
 
 
