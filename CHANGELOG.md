@@ -1,3 +1,14 @@
+## 0.3.0 (2024-04-20)
+
+
+### 🚀 Features
+
+- **devtools:** rename `patchState` to `updateState` ([4343720](https://github.com/angular-architects/ngrx-toolkit/commit/4343720))
+
+### ❤️  Thank You
+
+- Rainer Hahnekamp @rainerhahnekamp
+
 ## 0.2.0 (2024-04-20)
 
 
