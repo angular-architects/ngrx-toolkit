@@ -1,3 +1,15 @@
+## 0.1.1 (2024-04-20)
+
+
+### 🩹 Fixes
+
+- **redux:** multiple effects can subscribe to the same action ([12d0077](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/12d0077))
+- **redux:** remove parameter from `noPayload` action functions ([0e83882](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/0e83882))
+
+### ❤️  Thank You
+
+- Rainer Hahnekamp @rainerhahnekamp
+
 ## 0.1.0 (2024-03-02)
 
 
