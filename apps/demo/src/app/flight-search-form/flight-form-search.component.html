@@ -1,0 +1,56 @@
+<div [formGroup]="flightSearchForm">
+
+  <mat-form-field>
+    <mat-label>From</mat-label>
+    <input matInput formControlName="from">
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>To</mat-label>
+    <input matInput formControlName="to">
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Dates</mat-label>
+    <mat-date-range-input [rangePicker]="picker">
+      <input matStartDate formControlName="start" placeholder="Start date">
+      <input matEndDate formControlName="end" placeholder="End date">
+    </mat-date-range-input>
+    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-date-range-picker #picker></mat-date-range-picker>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Period</mat-label>
+    <mat-select formControlName="period">
+      <mat-option>None</mat-option>
+      <mat-option value="7_days">Next 7 days</mat-option>
+      <mat-option value="14_days">Next 14 days</mat-option>
+      <mat-option value="custom">Custom</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<mat-table [dataSource]="flightStore.flights()">
+  <!-- From Column -->
+  <ng-container matColumnDef="from">
+    <mat-header-cell *matHeaderCellDef>From</mat-header-cell>
+    <mat-cell *matCellDef="let element">{{ element.from }}</mat-cell>
+  </ng-container>
+
+  <!-- To Column -->
+  <ng-container matColumnDef="to">
+    <mat-header-cell *matHeaderCellDef>To</mat-header-cell>
+    <mat-cell *matCellDef="let element">{{ element.to }}</mat-cell>
+  </ng-container>
+
+  <!-- Date Column -->
+  <ng-container matColumnDef="date">
+    <mat-header-cell mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
+    <mat-cell mat-cell *matCellDef="let element">{{
+      element.date | date
+    }}</mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+</mat-table>

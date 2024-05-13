@@ -346,7 +346,7 @@ export const appRoutes: Route[] = [
     FlightCardComponent
   ],
   selector: 'demo-flight-search-redux-connector',
-  templateUrl: './flight-search.component.html',
+  templateUrl: './flight-form-search.component.html',
 })
 export class FlightSearchReducConnectorComponent {
   private store = injectFlightStore();

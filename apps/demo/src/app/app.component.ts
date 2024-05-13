@@ -9,7 +9,7 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 import { SidebarComponent } from "./core/sidebar/sidebar.component";
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatListItem, MatListModule } from '@angular/material/list';
+import { MatListModule } from '@angular/material/list';
 
 @Component({
     selector: 'demo-root',
@@ -25,7 +25,7 @@ import { MatListItem, MatListModule } from '@angular/material/list';
         RouterOutlet,
         SidebarComponent,
         CommonModule,
-        MatToolbarModule,
+        MatToolbarModule
     ]
 })
 export class AppComponent {

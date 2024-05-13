@@ -10,10 +10,9 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideClientHydration(),
     provideRouter(appRoutes,
-      withComponentInputBinding()),
+    withComponentInputBinding()),
     provideAnimations(),
     provideHttpClient(),
-    importProvidersFrom(LayoutModule),
-
+    importProvidersFrom(LayoutModule)
   ],
 };
