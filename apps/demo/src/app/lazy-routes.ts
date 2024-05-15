@@ -8,9 +8,11 @@ import { FlightEditDynamicComponent } from './flight-search-data-service-dynamic
 import { TodoStorageSyncComponent } from './todo-storage-sync/todo-storage-sync.component';
 import { provideFlightStore } from './flight-search-redux-connector/+state/redux';
 import { FlightSearchReducConnectorComponent } from './flight-search-redux-connector/flight-search.component';
+import { TodoWithComputedComponent } from './todo-with-computed/todo-with-computed.component';
 
 export const lazyRoutes: Route[] = [
   { path: 'todo', component: TodoComponent },
+  { path: 'todo-with-computed', component: TodoWithComputedComponent},
   { path: 'flight-search', component: FlightSearchComponent },
   {
     path: 'flight-search-data-service-simple',
