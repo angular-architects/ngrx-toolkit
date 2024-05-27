@@ -1,3 +1,14 @@
+## 0.3.1 (2024-05-27)
+
+
+### 🩹 Fixes
+
+- lazy load routes to get under the build budget ([729c84d](https://github.com/angular-architects/ngrx-toolkit/commit/729c84d))
+
+### ❤️  Thank You
+
+- Rainer Hahnekamp @rainerhahnekamp
+
 ## 0.3.0 (2024-04-20)
 
 
