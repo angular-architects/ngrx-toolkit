@@ -1,3 +1,14 @@
+## 0.4.0 (2024-06-07)
+
+
+### 🚀 Features
+
+- Add local pagination feature ([#56](https://github.com/angular-architects/ngrx-toolkit/pull/56))
+
+### ❤️  Thank You
+
+- Murat Sari
+
 ## 0.3.1 (2024-05-27)
 
 
