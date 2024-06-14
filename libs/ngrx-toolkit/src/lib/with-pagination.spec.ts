@@ -1,5 +1,10 @@
 import { patchState, signalStore, type } from '@ngrx/signals';
-import { createPageArray, gotoPage, setPageSize, withPagination } from './with-pagination';
+import {
+  createPageArray,
+  gotoPage,
+  setPageSize,
+  withPagination,
+} from './with-pagination';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 
 type Book = { id: number; title: string; author: string };
@@ -21,13 +26,13 @@ describe('withPagination', () => {
     const store = new Store();
 
     patchState(store, setAllEntities(generateBooks(55)));
-    expect(store.currentPage()).toBe(1);
+    expect(store.currentPage()).toBe(0);
     expect(store.pageCount()).toBe(6);
   }),
     it('should use and update a pagination with collection', () => {
       const Store = signalStore(
         withEntities({ entity: type<Book>(), collection: 'books' }),
-        withPagination({ collection: 'books' })
+        withPagination({ entity: type<Book>(), collection: 'books' })
       );
 
       const store = new Store();
@@ -37,41 +42,30 @@ describe('withPagination', () => {
         setAllEntities(generateBooks(55), { collection: 'books' })
       );
 
-      patchState(store, gotoPage(6, { collection: 'books' }));
-      expect(store.booksCurrentPage()).toBe(6);
+      patchState(store, gotoPage(5, { collection: 'books' }));
+      expect(store.booksCurrentPage()).toBe(5);
       expect(store.selectedPageBooksEntities().length).toBe(5);
       expect(store.booksPageCount()).toBe(6);
     }),
     it('should react on enitiy changes', () => {
       const Store = signalStore(
-        withEntities({ entity: type<Book>()}),
+        withEntities({ entity: type<Book>() }),
         withPagination()
       );
 
       const store = new Store();
 
-      patchState(
-        store,
-        setAllEntities(generateBooks(100))
-      );
+      patchState(store, setAllEntities(generateBooks(100)));
 
       expect(store.pageCount()).toBe(10);
 
-      patchState(
-        store,
-        setAllEntities(generateBooks(20))
-      );
+      patchState(store, setAllEntities(generateBooks(20)));
 
       expect(store.pageCount()).toBe(2);
 
-
-      patchState(
-        store,
-        setPageSize(5)
-      );
+      patchState(store, setPageSize(5));
 
       expect(store.pageCount()).toBe(4);
-
     }),
     describe('internal pageNavigationArray', () => {
       it('should return an array of page numbers', () => {

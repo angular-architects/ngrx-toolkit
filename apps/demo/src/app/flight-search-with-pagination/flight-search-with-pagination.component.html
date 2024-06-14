@@ -1,0 +1,56 @@
+<h2 class="title">Flight Search (Pagination)</h2>
+
+
+<form (ngSubmit)="search()">
+  <div>
+    <mat-form-field>
+      <mat-label>Name</mat-label>
+      <input [(ngModel)]="searchParams.from" name="from" matInput />
+    </mat-form-field>
+  </div>
+
+  <div>
+    <mat-form-field>
+      <mat-label>Name</mat-label>
+      <input [(ngModel)]="searchParams.to" name="to" matInput />
+    </mat-form-field>
+  </div>
+
+  <button mat-raised-button>Search</button>
+</form>
+
+<mat-table [dataSource]="dataSource">
+  <!-- From Column -->
+  <ng-container matColumnDef="from">
+    <mat-header-cell *matHeaderCellDef>From</mat-header-cell>
+    <mat-cell *matCellDef="let element">{{ element.from }}</mat-cell>
+  </ng-container>
+
+  <!-- To Column -->
+  <ng-container matColumnDef="to">
+    <mat-header-cell *matHeaderCellDef>To</mat-header-cell>
+    <mat-cell *matCellDef="let element">{{ element.to }}</mat-cell>
+  </ng-container>
+
+  <!-- Date Column -->
+  <ng-container matColumnDef="date">
+    <mat-header-cell mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
+    <mat-cell mat-cell *matCellDef="let element">{{
+      element.date | date
+    }}</mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row
+    *matRowDef="let row; columns: displayedColumns"
+    (click)="selection.toggle(row)"
+  ></mat-row>
+</mat-table>
+<mat-paginator [length]="flightStore.flightTotalCount()"
+              [pageSize]="flightStore.flightPageSize()"
+              [pageIndex]="flightStore.flightCurrentPage()"
+              [showFirstLastButtons]="true"
+              [pageSizeOptions]="[5, 10, 25]"
+              (page)="handlePageEvent($event)"
+              aria-label="Select page">
+</mat-paginator>
