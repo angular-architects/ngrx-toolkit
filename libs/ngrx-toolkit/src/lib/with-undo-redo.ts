@@ -161,6 +161,16 @@ SignalStoreFeature<any, any> {
                         return;
                     }
 
+                    // 
+                    // Deep Comparison to prevent duplicated entries
+                    // on the stack. This can e.g. happen after an undo 
+                    // if the component sends back the undone filter 
+                    // to the store.
+                    //
+                    if(JSON.stringify(cand) === JSON.stringify(previous)) {
+                        return;
+                    }
+    
                     // Clear redoStack after recorded action
                     redoStack.splice(0);
 
