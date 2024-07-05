@@ -270,6 +270,9 @@ public class SyncedStoreComponent {
 
   clearStorage(): void {
     this.syncStore.clearStorage(); // clears the stored item in storage
+  }
+}
+```
 
 ## Redux Connector for the NgRx Signal Store `createReduxState()`
 
