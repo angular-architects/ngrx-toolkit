@@ -16,12 +16,12 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
+import { capitalize } from './with-data-service';
 import {
   EntityComputed,
   EntityState,
   NamedEntityComputed,
 } from './shared/signal-store-models';
-import { capitalize } from './with-data-service';
 
 // This is a virtual page which is can be used to create a pagination control
 export type Page = { label: string | number; value: number };

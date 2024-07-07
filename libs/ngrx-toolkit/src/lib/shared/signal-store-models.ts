@@ -21,6 +21,12 @@ export type SignalStoreFeatureResult = {
   methods: Record<string, Function>;
 };
 
+export type EmptyFeatureResult = {
+  state: {};
+  computed: {};
+  methods: {};
+};
+
 // withEntites models
 export type EntityState<Entity> = {
   entityMap: Record<EntityId, Entity>;

@@ -4,7 +4,6 @@ import {
   SignalStoreFeature,
   StateSignal,
 } from '@ngrx/signals';
-import { SignalStoreFeatureResult } from '@ngrx/signals/src/signal-store-models';
 import { effect, inject, PLATFORM_ID, signal, Signal } from '@angular/core';
 import { isPlatformServer } from '@angular/common';
 import { Prettify } from './shared/prettify';
@@ -83,7 +82,7 @@ export function reset() {
 /**
  * @param name store's name as it should appear in the DevTools
  */
-export function withDevtools<Input extends SignalStoreFeatureResult>(
+export function withDevtools<Input extends EmptyFeatureResult>(
   name: string
 ): SignalStoreFeature<Input, EmptyFeatureResult> {
   return (store) => {
