@@ -5,27 +5,27 @@ import {
   withComputed,
   withState,
 } from '@ngrx/signals';
-import { Emtpy } from './shared/empty';
+import { Empty } from './shared/empty';
 
 export type CallState = 'init' | 'loading' | 'loaded' | { error: string };
 
 export type CallStateSlice = {
-  callState: CallState
-}
+  callState: CallState;
+};
 
 export type NamedCallStateSlice<Collection extends string> = {
   [K in keyof CallStateSlice as `${Collection}${Capitalize<K>}`]: CallStateSlice[K];
-}
+};
 
 export type CallStateSignals = {
   loading: Signal<boolean>;
   loaded: Signal<boolean>;
-  error: Signal<string | null>
-}
+  error: Signal<string | null>;
+};
 
 export type NamedCallStateSignals<Prop extends string> = {
   [K in keyof CallStateSignals as `${Prop}${Capitalize<K>}`]: CallStateSignals[K];
-}
+};
 
 export type SetCallState<Prop extends string | undefined> = Prop extends string
   ? NamedCallStateSlice<Prop>
@@ -34,7 +34,7 @@ export type SetCallState<Prop extends string | undefined> = Prop extends string
 export function getCallStateKeys(config?: { collection?: string }) {
   const prop = config?.collection;
   return {
-    callStateKey: prop ?  `${config.collection}CallState` : 'callState',
+    callStateKey: prop ? `${config.collection}CallState` : 'callState',
     loadingKey: prop ? `${config.collection}Loading` : 'loading',
     loadedKey: prop ? `${config.collection}Loaded` : 'loaded',
     errorKey: prop ? `${config.collection}Error` : 'error',
@@ -44,19 +44,19 @@ export function getCallStateKeys(config?: { collection?: string }) {
 export function withCallState<Collection extends string>(config: {
   collection: Collection;
 }): SignalStoreFeature<
-  { state: Emtpy, signals: Emtpy, methods: Emtpy },
+  { state: Empty; methods: Empty; computed: Empty },
   {
-    state: NamedCallStateSlice<Collection>,
-    signals: NamedCallStateSignals<Collection>,
-    methods: Emtpy
+    state: NamedCallStateSlice<Collection>;
+    computed: NamedCallStateSignals<Collection>;
+    methods: Empty;
   }
 >;
 export function withCallState(): SignalStoreFeature<
-  { state: Emtpy, signals: Emtpy, methods: Emtpy },
+  { state: Empty; methods: Empty; computed: Empty },
   {
-    state: CallStateSlice,
-    signals: CallStateSignals,
-    methods: Emtpy
+    state: CallStateSlice;
+    computed: CallStateSignals;
+    methods: Empty;
   }
 >;
 export function withCallState<Collection extends string>(config?: {
@@ -68,7 +68,6 @@ export function withCallState<Collection extends string>(config?: {
   return signalStoreFeature(
     withState({ [callStateKey]: 'init' }),
     withComputed((state: Record<string, Signal<unknown>>) => {
-
       const callState = state[callStateKey] as Signal<CallState>;
 
       return {
@@ -77,8 +76,8 @@ export function withCallState<Collection extends string>(config?: {
         [errorKey]: computed(() => {
           const v = callState();
           return typeof v === 'object' ? v.error : null;
-        })
-      }
+        }),
+      };
     })
   );
 }
@@ -96,37 +95,32 @@ export function setLoading<Prop extends string | undefined = undefined>(
 export function setLoaded<Prop extends string | undefined = undefined>(
   prop?: Prop
 ): SetCallState<Prop> {
-
   if (prop) {
     return { [`${prop}CallState`]: 'loaded' } as SetCallState<Prop>;
-  }
-  else {
+  } else {
     return { callState: 'loaded' } as SetCallState<Prop>;
   }
 }
 
 export function setError<Prop extends string | undefined = undefined>(
   error: unknown,
-  prop?: Prop,
-  ): SetCallState<Prop> {
+  prop?: Prop
+): SetCallState<Prop> {
+  let errorMessage = '';
 
-    let errorMessage = '';
+  if (!error) {
+    errorMessage = '';
+  } else if (typeof error === 'object' && 'message' in error) {
+    errorMessage = String(error.message);
+  } else {
+    errorMessage = String(error);
+  }
 
-    if (!error) {
-      errorMessage = '';
-    }
-    else if (typeof error === 'object' && 'message' in error) {
-      errorMessage = String(error.message);
-    }
-    else {
-      errorMessage = String(error);
-    }
-    
-
-    if (prop) {
-      return { [`${prop}CallState`]: { error: errorMessage } } as SetCallState<Prop>;
-    }
-    else {
-      return { callState: { error: errorMessage } } as SetCallState<Prop>;
-    }
+  if (prop) {
+    return {
+      [`${prop}CallState`]: { error: errorMessage },
+    } as SetCallState<Prop>;
+  } else {
+    return { callState: { error: errorMessage } } as SetCallState<Prop>;
+  }
 }

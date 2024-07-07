@@ -1,5 +1,11 @@
 name: Test
-on: [push]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -9,6 +15,6 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-      - run: npm ci
-      - run: npm run verify
+      - run: npm i
+      - run: npm run build:all
 
