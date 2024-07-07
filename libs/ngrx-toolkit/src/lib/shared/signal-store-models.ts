@@ -14,7 +14,6 @@
  */
 import { Signal } from '@angular/core';
 import { EntityId } from '@ngrx/signals/entities';
-import { Entity } from '../with-data-service';
 
 export type SignalStoreFeatureResult = {
   state: object;
@@ -34,11 +33,4 @@ export type EntityComputed<Entity> = {
 
 export type NamedEntityComputed<Entity, Collection extends string> = {
   [K in keyof EntityComputed<Entity> as `${Collection}${Capitalize<K>}`]: EntityComputed<Entity>[K];
-};
-
-export type EntitySignals<Entity> = {
-  entities: Signal<Entity[]>;
-};
-export type NamedEntitySignals<Entity, Collection extends string> = {
-  [K in keyof EntitySignals<Entity> as `${Collection}${Capitalize<K>}`]: EntitySignals<Entity>[K];
 };
