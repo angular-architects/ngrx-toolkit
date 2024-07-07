@@ -16,13 +16,12 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import { Emtpy } from './shared/empty';
+import { capitalize } from './with-data-service';
 import {
-  EntitySignals,
+  EntityComputed,
   EntityState,
-  NamedEntitySignals,
-} from '@ngrx/signals/entities/src/models';
-import { Entity, capitalize } from './with-data-service';
+  NamedEntityComputed,
+} from './shared/signal-store-models';
 
 // This is a virtual page which is can be used to create a pagination control
 export type Page = { label: string | number; value: number };
@@ -120,13 +119,13 @@ export function withPagination<E, Collection extends string>(options: {
   collection: Collection;
 }): SignalStoreFeature<
   {
-    state: Emtpy;
-    signals: NamedEntitySignals<E, Collection>;
-    methods: Emtpy;
+    state: {};
+    computed: NamedEntityComputed<E, Collection>;
+    methods: {};
   },
   {
     state: NamedPaginationServiceState<E, Collection>;
-    signals: NamedPaginationServiceSignals<E, Collection>;
+    computed: NamedPaginationServiceSignals<E, Collection>;
     methods: NamedPaginationServiceMethods<Collection>;
   }
 >;
@@ -134,12 +133,12 @@ export function withPagination<E, Collection extends string>(options: {
 export function withPagination<E>(): SignalStoreFeature<
   {
     state: EntityState<E>;
-    signals: EntitySignals<E>;
-    methods: Emtpy;
+    computed: EntityComputed<E>;
+    methods: {};
   },
   {
     state: PaginationServiceState<E>;
-    signals: PaginationServiceSignals<E>;
+    computed: PaginationServiceSignals<E>;
     methods: PaginationServiceMethods;
   }
 >;

@@ -8,20 +8,14 @@ import {
   withHooks,
   withMethods,
 } from '@ngrx/signals';
-import { Emtpy } from './shared/empty';
-
-type SignalStoreFeatureInput<State> = Pick<
-  Parameters<SignalStoreFeature>[0],
-  'signals' | 'methods'
-> & {
-  state: State;
-};
+import { Empty } from './shared/empty';
+import { SignalStoreFeatureResult } from './shared/signal-store-models';
 
 const NOOP = () => {};
 
 type WithStorageSyncFeatureResult = {
-  state: Emtpy;
-  signals: Emtpy;
+  state: Empty;
+  computed: Empty;
   methods: {
     clearStorage(): void;
     readFromStorage(): void;
@@ -82,17 +76,17 @@ export type SyncConfig<State> = {
  */
 export function withStorageSync<
   State extends object,
-  Input extends SignalStoreFeatureInput<State>
+  Input extends SignalStoreFeatureResult
 >(key: string): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
 export function withStorageSync<
   State extends object,
-  Input extends SignalStoreFeatureInput<State>
+  Input extends SignalStoreFeatureResult
 >(
   config: SyncConfig<Input['state']>
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
 export function withStorageSync<
   State extends object,
-  Input extends SignalStoreFeatureInput<State>
+  Input extends SignalStoreFeatureResult
 >(
   configOrKey: SyncConfig<Input['state']> | string
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult> {

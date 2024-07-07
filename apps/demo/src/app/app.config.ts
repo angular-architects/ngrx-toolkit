@@ -8,12 +8,9 @@ import { LayoutModule } from '@angular/cdk/layout';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideClientHydration(),
-    provideRouter(appRoutes,
-      withComponentInputBinding()),
+    provideRouter(appRoutes, withComponentInputBinding()),
     provideAnimations(),
     provideHttpClient(),
     importProvidersFrom(LayoutModule),
-
   ],
 };

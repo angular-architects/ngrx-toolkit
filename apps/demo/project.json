@@ -29,12 +29,7 @@
           "@angular/material/prebuilt-themes/deeppurple-amber.css",
           "apps/demo/src/styles.css"
         ],
-        "scripts": [],
-        "server": "apps/demo/src/main.server.ts",
-        "prerender": true,
-        "ssr": {
-          "entry": "apps/demo/server.ts"
-        }
+        "scripts": []
       },
       "configurations": {
         "production": {
@@ -42,7 +37,7 @@
             {
               "type": "initial",
               "maximumWarning": "500kb",
-              "maximumError": "1mb"
+              "maximumError": "2mb"
             },
             {
               "type": "anyComponentStyle",

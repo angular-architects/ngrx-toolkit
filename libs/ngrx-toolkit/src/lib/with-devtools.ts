@@ -1,10 +1,12 @@
 import {
+  PartialStateUpdater,
   patchState as originalPatchState,
   SignalStoreFeature,
+  StateSignal,
 } from '@ngrx/signals';
-import { SignalStoreFeatureResult } from '@ngrx/signals/src/signal-store-models';
 import { effect, inject, PLATFORM_ID, signal, Signal } from '@angular/core';
 import { isPlatformServer } from '@angular/common';
+import { Prettify } from './shared/prettify';
 
 declare global {
   interface Window {
@@ -18,7 +20,7 @@ declare global {
   }
 }
 
-type EmptyFeatureResult = { state: {}; signals: {}; methods: {} };
+type EmptyFeatureResult = { state: {}; computed: {}; methods: {} };
 export type Action = { type: string };
 
 const storeRegistry = signal<Record<string, Signal<unknown>>>({});
@@ -80,7 +82,7 @@ export function reset() {
 /**
  * @param name store's name as it should appear in the DevTools
  */
-export function withDevtools<Input extends SignalStoreFeatureResult>(
+export function withDevtools<Input extends EmptyFeatureResult>(
   name: string
 ): SignalStoreFeature<Input, EmptyFeatureResult> {
   return (store) => {
@@ -136,7 +138,13 @@ export const patchState: PatchFn = (state, action, ...rest) => {
  * @param action name of action how it will show in DevTools
  * @param updaters updater functions or objects
  */
-export const updateState: PatchFn = (state, action, ...updaters) => {
+export function updateState<State extends object>(
+  state: StateSignal<State>,
+  action: string,
+  ...updaters: Array<
+    Partial<Prettify<State>> | PartialStateUpdater<Prettify<State>>
+  >
+): void {
   currentActionNames.add(action);
   return originalPatchState(state, ...updaters);
-};
+}
