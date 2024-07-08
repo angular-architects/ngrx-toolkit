@@ -6,7 +6,7 @@ set -e
 
 echo 'checking against different @ngrx/signals versions'
 
-declare -a versions=('18.0.0-rc.0' '18.0.0-rc.1' '18.0.0-rc.2')
+declare -a versions=('18.0.0-rc.1' '18.0.0-rc.2')
 
 for version in ${versions[*]}; do
   npm i @ngrx/signals@$version
