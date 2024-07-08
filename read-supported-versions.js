@@ -34,10 +34,11 @@ fs.readFile(packageJsonPath, 'utf8', (err, data) => {
     throw new Error('Could not find @ngrx/signals in peerDependencies');
   }
 
-  const versions = peerDependencies['@ngrx/signals']
-    .split('||')
-    .map((version) => version.trim())
-    .join(os.EOL);
+  const versions =
+    peerDependencies['@ngrx/signals']
+      .split('||')
+      .map((version) => version.trim())
+      .join(os.EOL) + os.EOL;
 
   fs.writeFileSync(outputPath, versions);
 });
