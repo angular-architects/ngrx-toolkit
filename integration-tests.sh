@@ -10,5 +10,6 @@ declare -a versions=('18.0.0-rc.1' '18.0.0-rc.2')
 
 for version in ${versions[*]}; do
   npm i @ngrx/signals@$version
+  echo "Building with version $version"
   npx nx build --project demo
 done
