@@ -6,7 +6,14 @@ set -e
 
 echo 'checking against different @ngrx/signals versions'
 
-declare -a versions=('18.0.0-rc.1' '18.0.0-rc.2')
+./read-supported-versions.js
+
+i=0
+while read line
+do
+  versions[$i]="$line"
+  i=$((i+1))
+done < versions.txt
 
 for version in ${versions[*]}; do
   npm i @ngrx/signals@$version
