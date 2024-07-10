@@ -1,3 +1,24 @@
+## 18.0.0-rc.2.0 (2024-07-10)
+
+
+### 🚀 Features
+
+- update to ngrx 18 and refactorings ([80ccc52](https://github.com/angular-architects/ngrx-toolkit/commit/80ccc52))
+- **pagination:** Add pagination sample using mat-paginator ([d583ebe](https://github.com/angular-architects/ngrx-toolkit/commit/d583ebe))
+
+### 🩹 Fixes
+
+- close unterminated code block in `libs/ngrx-toolkit/README.md` ([3e8e17b](https://github.com/angular-architects/ngrx-toolkit/commit/3e8e17b))
+- **undo-redo:** prevent duplicated entries on undo stack ([e360ee6](https://github.com/angular-architects/ngrx-toolkit/commit/e360ee6))
+- **undo-redo:** prevent duplicated entries on undo stack ([b4f68af](https://github.com/angular-architects/ngrx-toolkit/commit/b4f68af))
+
+### ❤️  Thank You
+
+- Manfred Steyer
+- michael-small @michael-small
+- Murat Sari
+- Rainer Hahnekamp @rainerhahnekamp
+
 ## 0.4.0 (2024-06-07)
 
 
