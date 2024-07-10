@@ -6,11 +6,25 @@
 <img src="https://raw.githubusercontent.com/angular-architects/ngrx-toolkit/main/logo.png" width="320" style="text-align: center">
 </p>
 
-NgRx Toolkit is an extension to the NgRx Signals Store. **It is still in beta** but already offers following features:
+NgRx Toolkit is an extension to the NgRx Signals Store. **It is still in beta** but already offers features, like:
 
 - Devtools: Integration into Redux Devtools
 - Redux: Possibility to use the Redux Pattern (Reducer, Actions, Effects)
+- Storage Sync: Synchronize the Store with Web Storage
 - Redux Connector: Map NgRx Store Actions to a present Signal Store
+
+To install it, run
+
+```shell
+npm i @angular-architects/ngrx-toolkit
+```
+
+Starting with 18.0.0-rc.2, we have a [strict version dependency](#why-is-the-version-range-to-the-ngrxsignals-dependency-so-strict) to `@ngrx/signals`:
+
+| @ngrx/signals  | @angular-architects/ngrx-toolkit |
+|----------------|----------------------------------|
+| <= 18.0.0-rc.1 | 0.0.4                            |
+| 18.0.0-rc.2    | 18.0.0-rc.2.x                    |
 
 To install it, run
 
@@ -24,12 +38,17 @@ npm i @angular-architects/ngrx-toolkit
   - [Redux: `withRedux()`](#redux-withredux)
   - [DataService `withDataService()`](#dataservice-withdataservice)
   - [DataService with Dynamic Properties](#dataservice-with-dynamic-properties)
+  - [Storage Sync `withStorageSync`](#storage-sync-withstoragesync)
   - [Redux Connector for the NgRx Signal Store `createReduxState()`](#redux-connector-for-the-ngrx-signal-store-createreduxstate)
     - [Use a present Signal Store](#use-a-present-signal-store)
     - [Use well-known NgRx Store Actions](#use-well-known-ngrx-store-actions)
     - [Map Actions to Methods](#map-actions-to-methods)
     - [Register an Angular Dependency Injection Provider](#register-an-angular-dependency-injection-provider)
     - [Use the Store in your Component](#use-the-store-in-your-component)
+  - [FAQ](#faq)
+    - [Why is the version range to the `@ngrx/signals` dependency so strict?](#why-is-the-version-range-to-the-ngrxsignals-dependency-so-strict)
+    - [I have an idea for a new extension, can I contribute?](#i-have-an-idea-for-a-new-extension-can-i-contribute)
+    - [I require a feature that is not available in a lower version. What should I do?](#i-require-a-feature-that-is-not-available-in-a-lower-version-what-should-i-do)
 
 
 ## Devtools: `withDevtools()`
@@ -405,3 +424,24 @@ export class FlightSearchReducConnectorComponent {
   }
 }
 ```
+## FAQ
+
+### Why is the version range to the `@ngrx/signals` dependency so strict?
+
+The strict version range for @ngrx/signals is necessary because some of our features rely on encapsulated types, which can change even in a patch release.
+
+To ensure stability, we clone these internal types and run integration tests for each release. This rigorous testing means we may need to update our version, even for a patch release, to maintain compatibility and stability.
+
+### I have an idea for a new extension, can I contribute?
+
+Yes, please! We are always looking for new ideas and contributions. 
+
+Since we don't want to bloat the library, we are very selective about new features. You also have to provide the following:
+- Good test coverage so that we can update it properly and don't have to call you 😉.
+- A use case showing the feature in action in the demo app of the repository.
+- An entry to the README.md.
+
+### I require a feature that is not available in a lower version. What should I do?
+
+Please create an issue. Very likely, we are able to cherry-pick the feature into the lower version.
+
