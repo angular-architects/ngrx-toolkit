@@ -6,11 +6,25 @@
 <img src="https://raw.githubusercontent.com/angular-architects/ngrx-toolkit/main/logo.png" width="320" style="text-align: center">
 </p>
 
-NgRx Toolkit is an extension to the NgRx Signals Store. **It is still in beta** but already offers following features:
+NgRx Toolkit is an extension to the NgRx Signals Store. **It is still in beta** but already offers features, like:
 
 - Devtools: Integration into Redux Devtools
 - Redux: Possibility to use the Redux Pattern (Reducer, Actions, Effects)
+- Storage Sync: Synchronize the Store with Web Storage
 - Redux Connector: Map NgRx Store Actions to a present Signal Store
+
+To install it, run
+
+```shell
+npm i @angular-architects/ngrx-toolkit
+```
+
+Starting with 18.0.0-rc.2, we have a [strict version dependency](#why-is-the-version-range-to-the-ngrxsignals-dependency-so-strict) to `@ngrx/signals`:
+
+| @ngrx/signals  | @angular-architects/ngrx-toolkit |
+|----------------|----------------------------------|
+| <= 18.0.0-rc.1 | 0.0.4                            |
+| 18.0.0-rc.2    | 18.0.0-rc.2.x                    |
 
 To install it, run
 
@@ -24,12 +38,17 @@ npm i @angular-architects/ngrx-toolkit
   - [Redux: `withRedux()`](#redux-withredux)
   - [DataService `withDataService()`](#dataservice-withdataservice)
   - [DataService with Dynamic Properties](#dataservice-with-dynamic-properties)
+  - [Storage Sync `withStorageSync`](#storage-sync-withstoragesync)
   - [Redux Connector for the NgRx Signal Store `createReduxState()`](#redux-connector-for-the-ngrx-signal-store-createreduxstate)
     - [Use a present Signal Store](#use-a-present-signal-store)
     - [Use well-known NgRx Store Actions](#use-well-known-ngrx-store-actions)
     - [Map Actions to Methods](#map-actions-to-methods)
     - [Register an Angular Dependency Injection Provider](#register-an-angular-dependency-injection-provider)
     - [Use the Store in your Component](#use-the-store-in-your-component)
+  - [FAQ](#faq)
+    - [Why is the version range to the `@ngrx/signals` dependency so strict?](#why-is-the-version-range-to-the-ngrxsignals-dependency-so-strict)
+    - [I have an idea for a new extension, can I contribute?](#i-have-an-idea-for-a-new-extension-can-i-contribute)
+    - [I require a feature that is not available in a lower version. What should I do?](#i-require-a-feature-that-is-not-available-in-a-lower-version-what-should-i-do)
 
 
 ## Devtools: `withDevtools()`
@@ -40,7 +59,7 @@ This extension is very easy to use. Just add it to a `signalStore`. Example:
 export const FlightStore = signalStore(
   { providedIn: 'root' },
   withDevtools('flights'), // <-- add this
-  withState({ flights: [] as Flight[] }),
+  withState({ flights: [] as Flight[] })
   // ...
 );
 ```
@@ -76,18 +95,15 @@ export const FlightStore = signalStore(
       return {
         load$: create(actions.load).pipe(
           switchMap(({ from, to }) =>
-            httpClient.get<Flight[]>(
-              'https://demo.angulararchitects.io/api/flight',
-              {
-                params: new HttpParams().set('from', from).set('to', to),
-              },
-            ),
+            httpClient.get<Flight[]>('https://demo.angulararchitects.io/api/flight', {
+              params: new HttpParams().set('from', from).set('to', to),
+            })
           ),
-          tap((flights) => actions.loaded({ flights })),
+          tap((flights) => actions.loaded({ flights }))
         ),
       };
     },
-  }),
+  })
 );
 ```
 
@@ -103,18 +119,18 @@ export const SimpleFlightBookingStore = signalStore(
   withCallState(),
   withEntities<Flight>(),
   withDataService({
-    dataServiceType: FlightService, 
+    dataServiceType: FlightService,
     filter: { from: 'Paris', to: 'New York' },
   }),
-  withUndoRedo(),
+  withUndoRedo()
 );
 ```
 
-The features ``withCallState`` and ``withUndoRedo`` are optional, but when present, they enrich each other.
+The features `withCallState` and `withUndoRedo` are optional, but when present, they enrich each other.
 
-The Data Service needs to implement the ``DataService`` interface:
+The Data Service needs to implement the `DataService` interface:
 
-```typescript 
+```typescript
 @Injectable({
   providedIn: 'root'
 })
@@ -172,30 +188,30 @@ export class FlightSearchSimpleComponent {
 
 ## DataService with Dynamic Properties
 
-To avoid naming conflicts, the properties set up by ``withDataService`` and the connected features can be configured in a typesafe way:
+To avoid naming conflicts, the properties set up by `withDataService` and the connected features can be configured in a typesafe way:
 
 ```typescript
 export const FlightBookingStore = signalStore(
   { providedIn: 'root' },
   withCallState({
-    collection: 'flight'
+    collection: 'flight',
   }),
-  withEntities({ 
-    entity: type<Flight>(), 
-    collection: 'flight'
+  withEntities({
+    entity: type<Flight>(),
+    collection: 'flight',
   }),
   withDataService({
-    dataServiceType: FlightService, 
+    dataServiceType: FlightService,
     filter: { from: 'Graz', to: 'Hamburg' },
-    collection: 'flight'
+    collection: 'flight',
   }),
   withUndoRedo({
     collections: ['flight'],
-  }),
+  })
 );
 ```
 
-This setup makes them use ``flight`` as part of the used property names. As these implementations respect the Type Script type system, the compiler will make sure these properties are used in a typesafe way:
+This setup makes them use `flight` as part of the used property names. As these implementations respect the Type Script type system, the compiler will make sure these properties are used in a typesafe way:
 
 ```typescript
 @Component(...)
@@ -233,6 +249,47 @@ export class FlightSearchDynamicComponent {
     this.store.updateSelectedFlightEntities(id, selected);
   }
 
+}
+```
+
+## Storage Sync `withStorageSync()`
+
+`withStorageSync` adds automatic or manual synchronization with Web Storage (`localstorage`/`sessionstorage`).
+
+> [!WARNING]  
+> As Web Storage only works in browser environments it will fallback to a stub implementation on server environments.
+
+Example:
+
+```ts
+const SyncStore = signalStore(
+  withStorageSync<User>({
+    key: 'synced', // key used when writing to/reading from storage
+    autoSync: false, // read from storage on init and write on state changes - `true` by default
+    select: (state: User) => Partial<User>, // projection to keep specific slices in sync
+    parse: (stateString: string) => State, // custom parsing from storage - `JSON.parse` by default
+    stringify: (state: User) => string, // custom stringification - `JSON.stringify` by default
+    storage: () => sessionstorage, // factory to select storage to sync with
+  })
+);
+```
+
+```ts
+@Component(...)
+public class SyncedStoreComponent {
+  private syncStore = inject(SyncStore);
+
+  updateFromStorage(): void {
+    this.syncStore.readFromStorage(); // reads the stored item from storage and patches the state
+  }
+
+  updateStorage(): void {
+    this.syncStore.writeToStorage(); // writes the current state to storage
+  }
+
+  clearStorage(): void {
+    this.syncStore.clearStorage(); // clears the stored item in storage
+  }
 }
 ```
 
@@ -367,3 +424,24 @@ export class FlightSearchReducConnectorComponent {
   }
 }
 ```
+## FAQ
+
+### Why is the version range to the `@ngrx/signals` dependency so strict?
+
+The strict version range for @ngrx/signals is necessary because some of our features rely on encapsulated types, which can change even in a patch release.
+
+To ensure stability, we clone these internal types and run integration tests for each release. This rigorous testing means we may need to update our version, even for a patch release, to maintain compatibility and stability.
+
+### I have an idea for a new extension, can I contribute?
+
+Yes, please! We are always looking for new ideas and contributions.
+
+Since we don't want to bloat the library, we are very selective about new features. You also have to provide the following:
+- Good test coverage so that we can update it properly and don't have to call you 😉.
+- A use case showing the feature in action in the demo app of the repository.
+- An entry to the README.md.
+
+### I require a feature that is not available in a lower version. What should I do?
+
+Please create an issue. Very likely, we are able to cherry-pick the feature into the lower version.
+
