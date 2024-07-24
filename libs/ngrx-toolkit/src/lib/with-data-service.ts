@@ -21,11 +21,13 @@ import {
   addEntity,
   updateEntity,
   removeEntity,
+  SelectEntityId,
 } from '@ngrx/signals/entities';
 import { EntityState, NamedEntityComputed } from './shared/signal-store-models';
 
 export type Filter = Record<string, unknown>;
-export type Entity = { id: EntityId };
+
+export type Entity = { [key in string]: EntityId }
 
 export interface DataService<E extends Entity, F extends Filter> {
   load(filter: F): Promise<E[]>;
@@ -107,7 +109,6 @@ export function getDataServiceKeys(options: { collection?: string }) {
     entitiesKey,
     entityMapKey,
     idsKey,
-
     currentKey,
     loadByIdKey,
     setCurrentKey,
@@ -116,6 +117,14 @@ export function getDataServiceKeys(options: { collection?: string }) {
     updateAllKey,
     deleteKey,
   };
+}
+
+const defaultSelectId: SelectEntityId<{ id: EntityId }> = (entity) => entity.id;
+
+function getEntityIdSelector(config?: {
+  selectId?: SelectEntityId<unknown>;
+}) {
+  return config?.selectId ?? defaultSelectId;
 }
 
 export type NamedDataServiceState<
@@ -182,7 +191,6 @@ export type DataServiceMethods<E extends Entity, F extends Filter> = {
   updateFilter: (filter: F) => void;
   updateSelected: (id: EntityId, selected: boolean) => void;
   load: () => Promise<void>;
-
   setCurrent(entity: E): void;
   loadById(id: EntityId): Promise<void>;
   create(entity: E): Promise<void>;
@@ -196,11 +204,13 @@ export type Empty = Record<string, never>;
 export function withDataService<
   E extends Entity,
   F extends Filter,
-  Collection extends string
+  Collection extends string,
+  selectId extends SelectEntityId<E>
 >(options: {
   dataServiceType: ProviderToken<DataService<E, F>>;
   filter: F;
   collection: Collection;
+  selectId?: selectId
 }): SignalStoreFeature<
   {
     state: {};
@@ -217,9 +227,10 @@ export function withDataService<
     methods: NamedDataServiceMethods<E, F, Collection>;
   }
 >;
-export function withDataService<E extends Entity, F extends Filter>(options: {
+export function withDataService<E extends Entity, F extends Filter, selectId extends SelectEntityId<E>>(options: {
   dataServiceType: ProviderToken<DataService<E, F>>;
   filter: F;
+  selectId?: selectId
 }): SignalStoreFeature<
   {
     state: { callState: CallState } & EntityState<E>;
@@ -232,16 +243,17 @@ export function withDataService<E extends Entity, F extends Filter>(options: {
     methods: DataServiceMethods<E, F>;
   }
 >;
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function withDataService<
   E extends Entity,
   F extends Filter,
-  Collection extends string
+  Collection extends string,
+  SelectId extends SelectEntityId<E>
 >(options: {
   dataServiceType: ProviderToken<DataService<E, F>>;
   filter: F;
   collection?: Collection;
+  selectId?: SelectId
 }): SignalStoreFeature<any, any> {
   const { dataServiceType, filter, collection: prefix } = options;
   const {
@@ -252,7 +264,6 @@ export function withDataService<
     selectedIdsKey,
     updateFilterKey,
     updateSelectedKey,
-
     currentKey,
     createKey,
     updateKey,
@@ -261,6 +272,8 @@ export function withDataService<
     loadByIdKey,
     setCurrentKey,
   } = getDataServiceKeys(options);
+
+  const selectId = getEntityIdSelector(options)
 
   const { callStateKey } = getCallStateKeys({ collection: prefix });
 
@@ -276,14 +289,17 @@ export function withDataService<
         Record<EntityId, boolean>
       >;
 
+      const id = selectId(entities()[0])
+
       return {
         [selectedEntitiesKey]: computed(() =>
-          entities().filter((e) => selectedIds()[e.id])
+          entities().filter((e) => selectedIds()[e[id]])
         ),
       };
     }),
     withMethods((store: Record<string, unknown> & StateSignal<object>) => {
       const dataService = inject(dataServiceType);
+
       return {
         [updateFilterKey]: (filter: F): void => {
           patchState(store, { [filterKey]: filter });
@@ -305,8 +321,8 @@ export function withDataService<
             patchState(
               store,
               prefix
-                ? setAllEntities(result, { collection: prefix })
-                : setAllEntities(result)
+                ? setAllEntities(result, { collection: prefix, selectId })
+                : setAllEntities(result, { selectId })
             );
             store[callStateKey] && patchState(store, setLoaded(prefix));
           } catch (e) {
@@ -339,8 +355,8 @@ export function withDataService<
             patchState(
               store,
               prefix
-                ? addEntity(created, { collection: prefix })
-                : addEntity(created)
+                ? addEntity(created, { collection: prefix, selectId })
+                : addEntity(created, { selectId })
             );
             store[callStateKey] && patchState(store, setLoaded(prefix));
           } catch (e) {
@@ -356,17 +372,19 @@ export function withDataService<
             const updated = await dataService.update(entity);
             patchState(store, { [currentKey]: updated });
 
+            const id = selectId(entity)
+
             const updateArg = {
-              id: updated.id,
+              id: updated[id],
               changes: updated,
             };
 
             const updater = (collection: string) =>
-              updateEntity(updateArg, { collection });
+              updateEntity(updateArg, { collection, selectId });
 
             patchState(
               store,
-              prefix ? updater(prefix) : updateEntity(updateArg)
+              prefix ? updater(prefix) : updateEntity(updateArg, { selectId })
             );
             store[callStateKey] && patchState(store, setLoaded(prefix));
           } catch (e) {
@@ -382,8 +400,8 @@ export function withDataService<
             patchState(
               store,
               prefix
-                ? setAllEntities(result, { collection: prefix })
-                : setAllEntities(result)
+                ? setAllEntities(result, { collection: prefix, selectId })
+                : setAllEntities(result, { selectId })
             );
             store[callStateKey] && patchState(store, setLoaded(prefix));
           } catch (e) {
@@ -395,14 +413,16 @@ export function withDataService<
           patchState(store, { [currentKey]: entity });
           store[callStateKey] && patchState(store, setLoading(prefix));
 
+          const id = selectId(entity)
+
           try {
             await dataService.delete(entity);
             patchState(store, { [currentKey]: undefined });
             patchState(
               store,
               prefix
-                ? removeEntity(entity.id, { collection: prefix })
-                : removeEntity(entity.id)
+                ? removeEntity(entity[id], { collection: prefix })
+                : removeEntity(entity[id])
             );
             store[callStateKey] && patchState(store, setLoaded(prefix));
           } catch (e) {
