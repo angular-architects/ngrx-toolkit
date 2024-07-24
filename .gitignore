@@ -41,3 +41,5 @@ Thumbs.db
 .nx
 .angular
 /versions.txt
+/.yalc/
+/yalc.lock

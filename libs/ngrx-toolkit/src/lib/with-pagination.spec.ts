@@ -19,6 +19,7 @@ const generateBooks = (count = 10) => {
 describe('withPagination', () => {
   it('should use and update a pagination', () => {
     const Store = signalStore(
+      { protectedState: false },
       withEntities({ entity: type<Book>() }),
       withPagination()
     );
@@ -31,6 +32,7 @@ describe('withPagination', () => {
   }),
     it('should use and update a pagination with collection', () => {
       const Store = signalStore(
+        { protectedState: false },
         withEntities({ entity: type<Book>(), collection: 'books' }),
         withPagination({ entity: type<Book>(), collection: 'books' })
       );
@@ -49,6 +51,7 @@ describe('withPagination', () => {
     }),
     it('should react on enitiy changes', () => {
       const Store = signalStore(
+        { protectedState: false },
         withEntities({ entity: type<Book>() }),
         withPagination()
       );

@@ -1,4 +1,5 @@
 import {
+  EmptyFeatureResult,
   PartialStateUpdater,
   patchState as originalPatchState,
   SignalStoreFeature,
@@ -20,7 +21,6 @@ declare global {
   }
 }
 
-type EmptyFeatureResult = { state: {}; computed: {}; methods: {} };
 export type Action = { type: string };
 
 const storeRegistry = signal<Record<string, Signal<unknown>>>({});

@@ -7,15 +7,13 @@ import {
   signalStoreFeature,
   withHooks,
   withMethods,
+  SignalStoreFeatureResult,
+  EmptyFeatureResult,
 } from '@ngrx/signals';
-import { Empty } from './shared/empty';
-import { SignalStoreFeatureResult } from './shared/signal-store-models';
 
 const NOOP = () => {};
 
-type WithStorageSyncFeatureResult = {
-  state: Empty;
-  computed: Empty;
+type WithStorageSyncFeatureResult = EmptyFeatureResult & {
   methods: {
     clearStorage(): void;
     readFromStorage(): void;

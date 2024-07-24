@@ -1,6 +1,6 @@
 import { signalStore } from '@ngrx/signals';
 import { withEntities } from '@ngrx/signals/entities';
-import { Action, withDevtools } from 'ngrx-toolkit';
+import { Action, withDevtools } from './with-devtools';
 import { TestBed } from '@angular/core/testing';
 import { PLATFORM_ID } from '@angular/core';
 import SpyInstance = jest.SpyInstance;

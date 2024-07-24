@@ -1,9 +1,9 @@
 import { patchState, signalStore } from '@ngrx/signals';
-import { setLoaded, setLoading, withCallState } from 'ngrx-toolkit';
+import { setLoaded, setLoading, withCallState } from './with-call-state';
 
 describe('withCallState', () => {
   it('should use and update a callState', () => {
-    const DataStore = signalStore(withCallState());
+    const DataStore = signalStore({ protectedState: false }, withCallState());
     const dataStore = new DataStore();
 
     patchState(dataStore, setLoading());
@@ -13,7 +13,10 @@ describe('withCallState', () => {
   });
 
   it('should use the callState for a collection', () => {
-    const DataStore = signalStore(withCallState({ collection: 'entities' }));
+    const DataStore = signalStore(
+      { protectedState: false },
+      withCallState({ collection: 'entities' })
+    );
     const dataStore = new DataStore();
 
     patchState(dataStore, setLoaded('entities'));

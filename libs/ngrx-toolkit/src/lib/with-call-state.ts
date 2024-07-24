@@ -45,18 +45,16 @@ export function withCallState<Collection extends string>(config: {
   collection: Collection;
 }): SignalStoreFeature<
   EmptyFeatureResult,
-  {
+  EmptyFeatureResult & {
     state: NamedCallStateSlice<Collection>;
     computed: NamedCallStateSignals<Collection>;
-    methods: {};
   }
 >;
 export function withCallState(): SignalStoreFeature<
   EmptyFeatureResult,
-  {
+  EmptyFeatureResult & {
     state: CallStateSlice;
     computed: CallStateSignals;
-    methods: {};
   }
 >;
 export function withCallState<Collection extends string>(config?: {
@@ -106,7 +104,7 @@ export function setError<Prop extends string | undefined = undefined>(
   error: unknown,
   prop?: Prop
 ): SetCallState<Prop> {
-  let errorMessage = '';
+  let errorMessage: string;
 
   if (!error) {
     errorMessage = '';
