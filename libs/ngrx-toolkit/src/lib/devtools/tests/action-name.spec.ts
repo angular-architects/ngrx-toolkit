@@ -1,7 +1,7 @@
 import { setupExtensions } from './helpers';
 import { TestBed } from '@angular/core/testing';
 import { signalStore, withState } from '@ngrx/signals';
-import { tkPatchState, withDevtools } from 'ngrx-toolkit';
+import { updateState, withDevtools } from 'ngrx-toolkit';
 
 describe('tkPatchState', () => {
   it('should show the name of the action', () => {
@@ -10,13 +10,13 @@ describe('tkPatchState', () => {
       signalStore(
         { providedIn: 'root' },
         withDevtools('shop'),
-        withState({ name: 'Car' }),
-      ),
+        withState({ name: 'Car' })
+      )
     );
     TestBed.flushEffects();
     expect(sendSpy).toHaveBeenCalledWith(
       { type: 'Store Update' },
-      { shop: { name: 'Car' } },
+      { shop: { name: 'Car' } }
     );
   });
 
@@ -26,17 +26,17 @@ describe('tkPatchState', () => {
       signalStore(
         { providedIn: 'root' },
         withDevtools('shop'),
-        withState({ name: 'Car' }),
-      ),
+        withState({ name: 'Car' })
+      )
     );
     TestBed.flushEffects();
 
-    tkPatchState(store, 'Set Name', { name: 'i4' });
+    updateState(store, 'Set Name', { name: 'i4' });
     TestBed.flushEffects();
 
     expect(sendSpy).lastCalledWith(
       { type: 'Set Name' },
-      { shop: { name: 'i4' } },
+      { shop: { name: 'i4' } }
     );
   });
 });
