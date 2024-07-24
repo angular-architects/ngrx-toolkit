@@ -3620,10 +3620,10 @@
     "@emnapi/runtime" "^1.1.0"
     "@tybys/wasm-util" "^0.9.0"
 
-"@ngrx/signals@^18.0.0-rc.2":
-  version "18.0.0-rc.3"
-  resolved "https://registry.yarnpkg.com/@ngrx/signals/-/signals-18.0.0-rc.3.tgz#1fe6da09e1c3fa5a9e16da2318deba18530daa7a"
-  integrity sha512-OTMHO0ey9oeglImw5+6BbAUHNSebJk98mS9RnFRs6sj3AWA7TzgpWqWE8fyN2v/wEPnraR2jcSfuLxN02gp2vw==
+"@ngrx/signals@18.0.0-rc.2":
+  version "18.0.0-rc.2"
+  resolved "https://registry.yarnpkg.com/@ngrx/signals/-/signals-18.0.0-rc.2.tgz#4dafc5a3aa1e84637f06644f6bf3afbd2e35ee4e"
+  integrity sha512-KFj0I5seMVVqqXaoBqeQiR/+dKho4n+Ry/RmaAfa3f0rgYhfaxNTo7U39B7udIYjJf8Z+eYPmBFJEU3HGQU0mA==
   dependencies:
     tslib "^2.3.0"
 
