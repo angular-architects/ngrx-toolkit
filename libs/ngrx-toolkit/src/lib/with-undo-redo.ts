@@ -5,6 +5,7 @@ import {
   withComputed,
   withHooks,
   withMethods,
+  EmptyFeatureResult,
 } from '@ngrx/signals';
 import { EntityId, EntityMap, EntityState } from '@ngrx/signals/entities';
 import { Signal, effect, signal, untracked, isSignal } from '@angular/core';
@@ -25,16 +26,6 @@ const defaultOptions: NormalizedUndoRedoOptions = {
   maxStackSize: 100,
 };
 
-export type NamedUndoRedoState<Collection extends string> = {
-  [K in Collection as `${K}EntityMap`]: EntityMap<Entity>;
-} & {
-  [K in Collection as `${K}Ids`]: EntityId[];
-};
-
-export type NamedUndoRedoSignals<Collection extends string> = {
-  [K in Collection as `${K}Entities`]: Signal<Entity[]>;
-};
-
 export function getUndoRedoKeys(collections?: string[]): string[] {
   if (collections) {
     return collections.flatMap((c) => [
@@ -51,15 +42,10 @@ export function withUndoRedo<Collection extends string>(options?: {
   maxStackSize?: number;
   collections: Collection[];
 }): SignalStoreFeature<
-  {
-    state: {};
-    // This alternative breaks type inference:
-    // state: NamedEntityState<Entity, Collection>
+  EmptyFeatureResult & {
     computed: NamedEntityComputed<Entity, Collection>;
-    methods: {};
   },
-  {
-    state: {};
+  EmptyFeatureResult & {
     computed: {
       canUndo: Signal<boolean>;
       canRedo: Signal<boolean>;
@@ -74,13 +60,11 @@ export function withUndoRedo<Collection extends string>(options?: {
 export function withUndoRedo(options?: {
   maxStackSize?: number;
 }): SignalStoreFeature<
-  {
+  EmptyFeatureResult & {
     state: EntityState<Entity>;
     computed: EntityComputed<Entity>;
-    methods: {};
   },
-  {
-    state: {};
+  EmptyFeatureResult & {
     computed: {
       canUndo: Signal<boolean>;
       canRedo: Signal<boolean>;

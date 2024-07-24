@@ -3,9 +3,10 @@ import {
   EmptyFeatureResult,
   SignalStoreFeature,
   SignalStoreFeatureResult,
-  StateSignals,
+  WritableStateSource,
 } from '@ngrx/signals';
 import { assertActionFnSpecs } from './assertions/assertions';
+
 /** Actions **/
 
 type Payload = Record<string, unknown>;
@@ -258,7 +259,7 @@ export function withRedux<
   PublicStoreActionFns extends PublicActionFns<Spec> = PublicActionFns<Spec>
 >(redux: {
   actions: Spec;
-  reducer: ReducerFactory<StateActionFns, StateSignals<Input['state']>>;
+  reducer: ReducerFactory<StateActionFns, WritableStateSource<Input['state']>>;
   effects: EffectsFactory<StateActionFns>;
 }): SignalStoreFeature<
   Input,

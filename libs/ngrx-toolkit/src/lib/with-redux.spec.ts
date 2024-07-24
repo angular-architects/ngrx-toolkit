@@ -73,14 +73,14 @@ describe('with redux', () => {
                     'https://www.angulararchitects.io',
                     {
                       params: new HttpParams().set('from', from).set('to', to),
-                    },
+                    }
                   );
                 }),
-                map((flights) => actions.flightsLoaded({ flights })),
+                map((flights) => actions.flightsLoaded({ flights }))
               ),
             };
           },
-        }),
+        })
       );
 
       const flightsStore = new FlightsStore();
@@ -88,7 +88,7 @@ describe('with redux', () => {
       const flight = createFlight();
       controller
         .expectOne((req) =>
-          req.url.startsWith('https://www.angulararchitects.io'),
+          req.url.startsWith('https://www.angulararchitects.io')
         )
         .flush([flight]);
 
@@ -109,7 +109,7 @@ describe('with redux', () => {
         effects() {
           return {};
         },
-      }),
+      })
     );
 
     const flightStore = TestBed.configureTestingModule({
@@ -140,14 +140,14 @@ describe('with redux', () => {
         effects(actions, create) {
           return {
             init1$: create(actions.init).pipe(
-              map(() => actions.updateEffect1({ value: true })),
+              map(() => actions.updateEffect1({ value: true }))
             ),
             init2$: create(actions.init).pipe(
-              map(() => actions.updateEffect2({ value: true })),
+              map(() => actions.updateEffect2({ value: true }))
             ),
           };
         },
-      }),
+      })
     );
 
     const flightStore = TestBed.configureTestingModule({
