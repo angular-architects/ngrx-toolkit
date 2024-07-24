@@ -1,11 +1,11 @@
 import { Signal, computed } from '@angular/core';
 import {
+  EmptyFeatureResult,
   SignalStoreFeature,
   signalStoreFeature,
   withComputed,
   withState,
 } from '@ngrx/signals';
-import { Empty } from './shared/empty';
 
 export type CallState = 'init' | 'loading' | 'loaded' | { error: string };
 
@@ -44,19 +44,19 @@ export function getCallStateKeys(config?: { collection?: string }) {
 export function withCallState<Collection extends string>(config: {
   collection: Collection;
 }): SignalStoreFeature<
-  { state: Empty; methods: Empty; computed: Empty },
+  EmptyFeatureResult,
   {
     state: NamedCallStateSlice<Collection>;
     computed: NamedCallStateSignals<Collection>;
-    methods: Empty;
+    methods: {};
   }
 >;
 export function withCallState(): SignalStoreFeature<
-  { state: Empty; methods: Empty; computed: Empty },
+  EmptyFeatureResult,
   {
     state: CallStateSlice;
     computed: CallStateSignals;
-    methods: Empty;
+    methods: {};
   }
 >;
 export function withCallState<Collection extends string>(config?: {
