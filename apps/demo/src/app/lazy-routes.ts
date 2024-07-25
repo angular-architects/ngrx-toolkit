@@ -6,8 +6,6 @@ import { FlightEditSimpleComponent } from './flight-search-data-service-simple/f
 import { FlightSearchDynamicComponent } from './flight-search-data-service-dynamic/flight-search.component';
 import { FlightEditDynamicComponent } from './flight-search-data-service-dynamic/flight-edit.component';
 import { TodoStorageSyncComponent } from './todo-storage-sync/todo-storage-sync.component';
-import { provideFlightStore } from './flight-search-redux-connector/+state/redux';
-import { FlightSearchReducConnectorComponent } from './flight-search-redux-connector/flight-search.component';
 import { FlightSearchWithPaginationComponent } from './flight-search-with-pagination/flight-search-with-pagination.component';
 
 export const lazyRoutes: Route[] = [
@@ -24,13 +22,14 @@ export const lazyRoutes: Route[] = [
   },
   {
     path: 'flight-search-with-pagination',
-    component: FlightSearchWithPaginationComponent
+    component: FlightSearchWithPaginationComponent,
   },
   { path: 'flight-edit-dynamic/:id', component: FlightEditDynamicComponent },
   { path: 'todo-storage-sync', component: TodoStorageSyncComponent },
-  {
-    path: 'flight-search-redux-connector',
-    providers: [provideFlightStore()],
-    component: FlightSearchReducConnectorComponent,
-  },
+  // temporarily disabled
+  // {
+  //   path: 'flight-search-redux-connector',
+  //   providers: [provideFlightStore()],
+  //   component: FlightSearchReducConnectorComponent,
+  // },
 ];
