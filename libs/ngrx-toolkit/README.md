@@ -256,7 +256,7 @@ export class FlightSearchDynamicComponent {
 
 `withStorageSync` adds automatic or manual synchronization with Web Storage (`localstorage`/`sessionstorage`).
 
-> [!WARNING]  
+> [!WARNING]
 > As Web Storage only works in browser environments it will fallback to a stub implementation on server environments.
 
 Example:
@@ -434,12 +434,14 @@ To ensure stability, we clone these internal types and run integration tests for
 
 ### I have an idea for a new extension, can I contribute?
 
-Yes, please! We are always looking for new ideas and contributions. 
+Yes, please! We are always looking for new ideas and contributions.
 
 Since we don't want to bloat the library, we are very selective about new features. You also have to provide the following:
 - Good test coverage so that we can update it properly and don't have to call you 😉.
 - A use case showing the feature in action in the demo app of the repository.
 - An entry to the README.md.
+
+This project uses [pnpm](https://pnpm.io/) to manage dependencies and run tasks (for local development and CI).
 
 ### I require a feature that is not available in a lower version. What should I do?
 
