@@ -3516,10 +3516,10 @@
   resolved "https://registry.yarnpkg.com/@msgpackr-extract/msgpackr-extract-win32-x64/-/msgpackr-extract-win32-x64-3.0.3.tgz#0aa5502d547b57abfc4ac492de68e2006e417242"
   integrity sha512-x0fWaQtYp4E6sktbsdAqnehxDgEc/VwM7uLsRCYWaiGu0ykYdZPiS8zCWdnjHwyiumousxfBm4SO31eXqwEZhQ==
 
-"@ngrx/signals@^18.0.0-rc.2":
-  version "18.0.0-rc.3"
-  resolved "https://registry.yarnpkg.com/@ngrx/signals/-/signals-18.0.0-rc.3.tgz#1fe6da09e1c3fa5a9e16da2318deba18530daa7a"
-  integrity sha512-OTMHO0ey9oeglImw5+6BbAUHNSebJk98mS9RnFRs6sj3AWA7TzgpWqWE8fyN2v/wEPnraR2jcSfuLxN02gp2vw==
+"@ngrx/signals@^18.0.0":
+  version "18.0.0"
+  resolved "https://registry.yarnpkg.com/@ngrx/signals/-/signals-18.0.0.tgz#2fe1bb0fdff493b79db73d9e4a71a8f611449074"
+  integrity sha512-zAWlsRqBbP/JsLmXHupfRb/BD5Xe2I03hLIB+q+vmXwAf29KCwRMVPLpWWu0DEgJvM0dVklP9WIgcG/D1pKScg==
   dependencies:
     tslib "^2.3.0"
 
