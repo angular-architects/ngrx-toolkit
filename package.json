@@ -20,7 +20,7 @@
     "@angular/platform-browser": "18.1.1",
     "@angular/platform-browser-dynamic": "18.1.1",
     "@angular/router": "18.1.1",
-    "@ngrx/signals": "18.0.0-rc.2",
+    "@ngrx/signals": "^18.0.0",
     "@ngrx/store": "^18.0.1",
     "@nx/angular": "19.5.2",
     "rxjs": "~7.8.0",
