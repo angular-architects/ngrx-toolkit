@@ -25,6 +25,8 @@ Starting with 18.0.0-rc.2, we have a [strict version dependency](#why-is-the-ver
 |----------------|----------------------------------|
 | <= 18.0.0-rc.1 | 0.0.4                            |
 | 18.0.0-rc.2    | 18.0.0-rc.2.x                    |
+| 18.0.0-rc.3    | (not supported)                  |
+| 18.0.0         | 18.0.0                           |
 
 To install it, run
 

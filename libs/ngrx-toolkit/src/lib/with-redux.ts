@@ -1,10 +1,11 @@
 import { Observable, Subject } from 'rxjs';
-import { SignalStoreFeature, StateSignal } from '@ngrx/signals';
-import { assertActionFnSpecs } from './assertions/assertions';
 import {
   EmptyFeatureResult,
+  SignalStoreFeature,
   SignalStoreFeatureResult,
-} from './shared/signal-store-models';
+  WritableStateSource,
+} from '@ngrx/signals';
+import { assertActionFnSpecs } from './assertions/assertions';
 
 /** Actions **/
 
@@ -258,7 +259,7 @@ export function withRedux<
   PublicStoreActionFns extends PublicActionFns<Spec> = PublicActionFns<Spec>
 >(redux: {
   actions: Spec;
-  reducer: ReducerFactory<StateActionFns, StateSignal<Input['state']>>;
+  reducer: ReducerFactory<StateActionFns, WritableStateSource<Input['state']>>;
   effects: EffectsFactory<StateActionFns>;
 }): SignalStoreFeature<
   Input,

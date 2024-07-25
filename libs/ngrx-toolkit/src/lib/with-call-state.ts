@@ -1,11 +1,11 @@
 import { Signal, computed } from '@angular/core';
 import {
+  EmptyFeatureResult,
   SignalStoreFeature,
   signalStoreFeature,
   withComputed,
   withState,
 } from '@ngrx/signals';
-import { Empty } from './shared/empty';
 
 export type CallState = 'init' | 'loading' | 'loaded' | { error: string };
 
@@ -44,19 +44,17 @@ export function getCallStateKeys(config?: { collection?: string }) {
 export function withCallState<Collection extends string>(config: {
   collection: Collection;
 }): SignalStoreFeature<
-  { state: Empty; methods: Empty; computed: Empty },
-  {
+  EmptyFeatureResult,
+  EmptyFeatureResult & {
     state: NamedCallStateSlice<Collection>;
     computed: NamedCallStateSignals<Collection>;
-    methods: Empty;
   }
 >;
 export function withCallState(): SignalStoreFeature<
-  { state: Empty; methods: Empty; computed: Empty },
-  {
+  EmptyFeatureResult,
+  EmptyFeatureResult & {
     state: CallStateSlice;
     computed: CallStateSignals;
-    methods: Empty;
   }
 >;
 export function withCallState<Collection extends string>(config?: {
@@ -106,7 +104,7 @@ export function setError<Prop extends string | undefined = undefined>(
   error: unknown,
   prop?: Prop
 ): SetCallState<Prop> {
-  let errorMessage = '';
+  let errorMessage: string;
 
   if (!error) {
     errorMessage = '';

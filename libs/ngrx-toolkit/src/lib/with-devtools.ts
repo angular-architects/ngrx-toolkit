@@ -1,8 +1,9 @@
 import {
+  EmptyFeatureResult,
   PartialStateUpdater,
   patchState as originalPatchState,
   SignalStoreFeature,
-  StateSignal,
+  WritableStateSource,
 } from '@ngrx/signals';
 import { effect, inject, PLATFORM_ID, signal, Signal } from '@angular/core';
 import { isPlatformServer } from '@angular/common';
@@ -20,7 +21,6 @@ declare global {
   }
 }
 
-type EmptyFeatureResult = { state: {}; computed: {}; methods: {} };
 export type Action = { type: string };
 
 const storeRegistry = signal<Record<string, Signal<unknown>>>({});
@@ -134,17 +134,17 @@ export const patchState: PatchFn = (state, action, ...rest) => {
 /**
  * Wrapper of `patchState` for DevTools integration. Next to updating the state,
  * it also sends the action to the DevTools.
- * @param state state of Signal Store
+ * @param stateSource state of Signal Store
  * @param action name of action how it will show in DevTools
  * @param updaters updater functions or objects
  */
 export function updateState<State extends object>(
-  state: StateSignal<State>,
+  stateSource: WritableStateSource<State>,
   action: string,
   ...updaters: Array<
     Partial<Prettify<State>> | PartialStateUpdater<Prettify<State>>
   >
 ): void {
   currentActionNames.add(action);
-  return originalPatchState(state, ...updaters);
+  return originalPatchState(stateSource, ...updaters);
 }
