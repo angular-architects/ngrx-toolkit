@@ -3,11 +3,15 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "npx nx serve demo",
-    "build:all": "npx nx run-many --targets=build",
-    "verify:all": "npx nx run-many --targets=lint,test,build"
+    "start": "nx serve demo",
+    "build:all": "nx run-many --targets=build",
+    "verify:all": "nx run-many --targets=lint,test,build"
   },
   "private": true,
+  "engines": {
+    "node": ">=18",
+    "pnpm": "9"
+  },
   "dependencies": {
     "@angular-architects/paper-design": "^1.0.3",
     "@angular/animations": "18.1.1",

@@ -16,7 +16,7 @@ do
 done < versions.txt
 
 for version in ${versions[*]}; do
-  npm i @ngrx/signals@$version
+  pnpm i @ngrx/signals@$version
   echo "Building with version $version"
-  npx nx build --project demo
+  pnpm nx build --project demo
 done

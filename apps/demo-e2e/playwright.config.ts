@@ -20,7 +20,7 @@ export default defineConfig({ ...nxE2EPreset(__filename, { testDir: './src' }),
     },
     /* Run your local dev server before starting the tests */
     webServer: {
-        command: 'npx nx serve demo',
+        command: 'pnpm nx serve demo',
         url: 'http://localhost:4200',
         reuseExistingServer: !process.env.CI,
         cwd: workspaceRoot,
