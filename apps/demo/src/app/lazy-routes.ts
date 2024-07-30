@@ -7,6 +7,8 @@ import { FlightSearchDynamicComponent } from './flight-search-data-service-dynam
 import { FlightEditDynamicComponent } from './flight-search-data-service-dynamic/flight-edit.component';
 import { TodoStorageSyncComponent } from './todo-storage-sync/todo-storage-sync.component';
 import { FlightSearchWithPaginationComponent } from './flight-search-with-pagination/flight-search-with-pagination.component';
+import { FlightSearchReducConnectorComponent } from './flight-search-redux-connector/flight-search.component';
+import { provideFlightStore } from './flight-search-redux-connector/+state/redux';
 
 export const lazyRoutes: Route[] = [
   { path: 'todo', component: TodoComponent },
@@ -26,10 +28,9 @@ export const lazyRoutes: Route[] = [
   },
   { path: 'flight-edit-dynamic/:id', component: FlightEditDynamicComponent },
   { path: 'todo-storage-sync', component: TodoStorageSyncComponent },
-  // temporarily disabled
-  // {
-  //   path: 'flight-search-redux-connector',
-  //   providers: [provideFlightStore()],
-  //   component: FlightSearchReducConnectorComponent,
-  // },
+  {
+    path: 'flight-search-redux-connector',
+    providers: [provideFlightStore()],
+    component: FlightSearchReducConnectorComponent,
+  },
 ];
