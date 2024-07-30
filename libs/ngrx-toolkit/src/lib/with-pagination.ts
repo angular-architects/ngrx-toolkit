@@ -9,12 +9,13 @@
 import { Signal, computed } from '@angular/core';
 import {
   SignalStoreFeature,
-  StateSignal,
   patchState,
   signalStoreFeature,
   withComputed,
   withMethods,
   withState,
+  WritableStateSource,
+  EmptyFeatureResult,
 } from '@ngrx/signals';
 import { capitalize } from './with-data-service';
 import {
@@ -118,11 +119,7 @@ export function withPagination<E, Collection extends string>(options: {
   entity: E;
   collection: Collection;
 }): SignalStoreFeature<
-  {
-    state: {};
-    computed: NamedEntityComputed<E, Collection>;
-    methods: {};
-  },
+  EmptyFeatureResult & { computed: NamedEntityComputed<E, Collection> },
   {
     state: NamedPaginationServiceState<E, Collection>;
     computed: NamedPaginationServiceSignals<E, Collection>;
@@ -131,10 +128,9 @@ export function withPagination<E, Collection extends string>(options: {
 >;
 
 export function withPagination<E>(): SignalStoreFeature<
-  {
+  EmptyFeatureResult & {
     state: EntityState<E>;
     computed: EntityComputed<E>;
-    methods: {};
   },
   {
     state: PaginationServiceState<E>;
@@ -220,34 +216,36 @@ export function withPagination<E, Collection extends string>(options?: {
         }),
       };
     }),
-    withMethods((store: Record<string, unknown> & StateSignal<object>) => {
-      return {
-        [setPageSizeKey]: (size: number) => {
-          patchState(store, setPageSize(size, options));
-        },
-        [nextPageKey]: () => {
-          patchState(store, nextPage(options));
-        },
+    withMethods(
+      (store: Record<string, unknown> & WritableStateSource<object>) => {
+        return {
+          [setPageSizeKey]: (size: number) => {
+            patchState(store, setPageSize(size, options));
+          },
+          [nextPageKey]: () => {
+            patchState(store, nextPage(options));
+          },
 
-        [previousPageKey]: () => {
-          patchState(store, previousPage(options));
-        },
+          [previousPageKey]: () => {
+            patchState(store, previousPage(options));
+          },
 
-        [lastPageKey]: () => {
-          const lastPage = (store[pageCountKey] as Signal<number>)();
-          if (lastPage === 0) return;
-          patchState(store, gotoPage(lastPage - 1, options));
-        },
+          [lastPageKey]: () => {
+            const lastPage = (store[pageCountKey] as Signal<number>)();
+            if (lastPage === 0) return;
+            patchState(store, gotoPage(lastPage - 1, options));
+          },
 
-        [firstPageKey]: () => {
-          patchState(store, firstPage());
-        },
+          [firstPageKey]: () => {
+            patchState(store, firstPage());
+          },
 
-        [gotoPageKey]: (page: number) => {
-          patchState(store, gotoPage(page, options));
-        },
-      };
-    })
+          [gotoPageKey]: (page: number) => {
+            patchState(store, gotoPage(page, options));
+          },
+        };
+      }
+    )
   );
 }
 

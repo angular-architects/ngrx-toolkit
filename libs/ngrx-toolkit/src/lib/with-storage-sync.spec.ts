@@ -6,6 +6,7 @@ interface StateObject {
   foo: string;
   age: number;
 }
+
 const initialState: StateObject = {
   foo: 'bar',
   age: 18,
@@ -42,7 +43,10 @@ describe('withStorageSync', () => {
         } as StateObject)
       );
 
-      const Store = signalStore(withStorageSync({ key, autoSync: false }));
+      const Store = signalStore(
+        { protectedState: false },
+        withStorageSync({ key, autoSync: false })
+      );
       const store = new Store();
       expect(getState(store)).toEqual({});
 
@@ -85,7 +89,10 @@ describe('withStorageSync', () => {
           } as StateObject)
         );
 
-        const Store = signalStore(withStorageSync(key));
+        const Store = signalStore(
+          { protectedState: false },
+          withStorageSync(key)
+        );
         const store = new Store();
         expect(getState(store)).toEqual({
           foo: 'baz',
@@ -116,7 +123,10 @@ describe('withStorageSync', () => {
           } as StateObject)
         );
 
-        const Store = signalStore(withStorageSync({ key, autoSync: false }));
+        const Store = signalStore(
+          { protectedState: false },
+          withStorageSync({ key, autoSync: false })
+        );
         const store = new Store();
         expect(getState(store)).toEqual({});
 
@@ -133,7 +143,10 @@ describe('withStorageSync', () => {
   describe('select', () => {
     it('syncs the whole state by default', () => {
       TestBed.runInInjectionContext(() => {
-        const Store = signalStore(withStorageSync(key));
+        const Store = signalStore(
+          { protectedState: false },
+          withStorageSync(key)
+        );
         const store = new Store();
 
         patchState(store, { ...initialState });
@@ -149,6 +162,7 @@ describe('withStorageSync', () => {
     it('syncs selected slices when specified', () => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
+          { protectedState: false },
           withState(initialState),
           withStorageSync({ key, select: ({ foo }) => ({ foo }) })
         );
@@ -177,6 +191,7 @@ describe('withStorageSync', () => {
 
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
+          { protectedState: false },
           withState(initialState),
           withStorageSync({
             key,
@@ -211,6 +226,7 @@ describe('withStorageSync', () => {
         );
 
         const Store = signalStore(
+          { protectedState: false },
           withStorageSync({ key, storage: () => sessionStorage })
         );
         const store = new Store();

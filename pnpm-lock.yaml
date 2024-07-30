@@ -42,8 +42,8 @@ importers:
         specifier: 18.1.1
         version: 18.1.1(@angular/common@18.1.1(@angular/core@18.1.1(rxjs@7.8.1)(zone.js@0.14.8))(rxjs@7.8.1))(@angular/core@18.1.1(rxjs@7.8.1)(zone.js@0.14.8))(@angular/platform-browser@18.1.1(@angular/animations@18.1.1(@angular/core@18.1.1(rxjs@7.8.1)(zone.js@0.14.8)))(@angular/common@18.1.1(@angular/core@18.1.1(rxjs@7.8.1)(zone.js@0.14.8))(rxjs@7.8.1))(@angular/core@18.1.1(rxjs@7.8.1)(zone.js@0.14.8)))(rxjs@7.8.1)
       '@ngrx/signals':
-        specifier: 18.0.0-rc.2
-        version: 18.0.0-rc.2(@angular/core@18.1.1(rxjs@7.8.1)(zone.js@0.14.8))(rxjs@7.8.1)
+        specifier: ^18.0.0
+        version: 18.0.0(@angular/core@18.1.1(rxjs@7.8.1)(zone.js@0.14.8))(rxjs@7.8.1)
       '@ngrx/store':
         specifier: ^18.0.1
         version: 18.0.1(@angular/core@18.1.1(rxjs@7.8.1)(zone.js@0.14.8))(rxjs@7.8.1)
@@ -2202,8 +2202,8 @@ packages:
   '@napi-rs/wasm-runtime@0.2.4':
     resolution: {integrity: sha512-9zESzOO5aDByvhIAsOy9TbpZ0Ur2AJbUI7UT73kcUTS2mxAMHOBaa1st/jAymNoCtvrit99kkzT1FZuXVcgfIQ==}
 
-  '@ngrx/signals@18.0.0-rc.2':
-    resolution: {integrity: sha512-KFj0I5seMVVqqXaoBqeQiR/+dKho4n+Ry/RmaAfa3f0rgYhfaxNTo7U39B7udIYjJf8Z+eYPmBFJEU3HGQU0mA==}
+  '@ngrx/signals@18.0.0':
+    resolution: {integrity: sha512-zAWlsRqBbP/JsLmXHupfRb/BD5Xe2I03hLIB+q+vmXwAf29KCwRMVPLpWWu0DEgJvM0dVklP9WIgcG/D1pKScg==}
     peerDependencies:
       '@angular/core': ^18.0.0
       rxjs: ^6.5.3 || ^7.4.0
@@ -11024,7 +11024,7 @@ snapshots:
       '@emnapi/runtime': 1.2.0
       '@tybys/wasm-util': 0.9.0
 
-  '@ngrx/signals@18.0.0-rc.2(@angular/core@18.1.1(rxjs@7.8.1)(zone.js@0.14.8))(rxjs@7.8.1)':
+  '@ngrx/signals@18.0.0(@angular/core@18.1.1(rxjs@7.8.1)(zone.js@0.14.8))(rxjs@7.8.1)':
     dependencies:
       '@angular/core': 18.1.1(rxjs@7.8.1)(zone.js@0.14.8)
       tslib: 2.6.3

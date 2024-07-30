@@ -15,18 +15,6 @@
 import { Signal } from '@angular/core';
 import { EntityId } from '@ngrx/signals/entities';
 
-export type SignalStoreFeatureResult = {
-  state: object;
-  computed: Record<string, Signal<unknown>>;
-  methods: Record<string, Function>;
-};
-
-export type EmptyFeatureResult = {
-  state: {};
-  computed: {};
-  methods: {};
-};
-
 // withEntites models
 export type EntityState<Entity> = {
   entityMap: Record<EntityId, Entity>;
