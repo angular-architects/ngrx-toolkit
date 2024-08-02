@@ -1,3 +1,18 @@
+## 18.0.0-rc.2.1 (2024-08-02)
+
+
+### 🚀 Features
+
+- update to NgRx Signals 18 Release ([3d61dd2](https://github.com/angular-architects/ngrx-toolkit/commit/3d61dd2))
+
+### 🩹 Fixes
+
+- switch to yarn because of failing ci ([bd8cb25](https://github.com/angular-architects/ngrx-toolkit/commit/bd8cb25))
+
+### ❤️  Thank You
+
+- Rainer Hahnekamp @rainerhahnekamp
+
 # 18.0.0 (2024-07-30)
 
 
