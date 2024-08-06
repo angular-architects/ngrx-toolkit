@@ -67,6 +67,15 @@ export const FlightStore = signalStore(
 );
 ```
 
+The Signal Store does not use the Redux pattern, so there are no action names involved by default. Instead, every action is referred to as a “Store Update.” However, if you want to customize the action name for better clarity, you can use the `updateState` method instead of `patchState`:
+
+```typescript
+patchState(this.store, {loading: false});
+
+// updateState is a wrapper around patchState and has an action name as second parameter
+updateState(this.store 'update loading', {loading: false});
+```
+
 ## Redux: `withRedux()`
 
 `withRedux()` bring back the Redux pattern into the Signal Store.
