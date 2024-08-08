@@ -42,6 +42,7 @@ npm i @angular-architects/ngrx-toolkit
   - [DataService `withDataService()`](#dataservice-withdataservice)
   - [DataService with Dynamic Properties](#dataservice-with-dynamic-properties)
   - [Storage Sync `withStorageSync`](#storage-sync-withstoragesync)
+  - [Undo-Redo `withUndoRedo`](#undo-redo-withUndoRedo)
   - [Redux Connector for the NgRx Signal Store `createReduxState()`](#redux-connector-for-the-ngrx-signal-store-createreduxstate)
     - [Use a present Signal Store](#use-a-present-signal-store)
     - [Use well-known NgRx Store Actions](#use-well-known-ngrx-store-actions)
@@ -139,6 +140,7 @@ export const SimpleFlightBookingStore = signalStore(
 ```
 
 The features `withCallState` and `withUndoRedo` are optional, but when present, they enrich each other.
+Refer to the [Undo-Redo](#undo-redo-withundoredo) section for more information.
 
 The Data Service needs to implement the `DataService` interface:
 
@@ -301,6 +303,43 @@ public class SyncedStoreComponent {
 
   clearStorage(): void {
     this.syncStore.clearStorage(); // clears the stored item in storage
+  }
+}
+```
+
+## Undo-Redo `withUndoRedo()`
+
+`withUndoRedo` adds undo and redo functionality to the store.
+
+Example:
+
+```ts
+const SyncStore = signalStore(
+  withUndoRedo({
+    maxStackSize: 100, // limit of undo/redo steps - `100` by default
+    collections: ['flight'], // entity collections to keep track of - unnamed collection is tracked by default
+    keys: ['test'], // non-entity based keys to track - `[]` by default
+    skip: 0, // number of initial state changes to skip - `0` by default
+  })
+);
+```
+
+```ts
+@Component(...)
+public class UndoRedoComponent {
+  private syncStore = inject(SyncStore);
+
+  canUndo = this.store.canUndo; // use in template or in ts
+  canRedo = this.store.canRedo; // use in template or in ts
+
+  undo(): void {
+    if (!this.canUndo()) return;
+    this.store.undo();
+  }
+
+  redo(): void {
+    if (!this.canRedo()) return;
+    this.store.redo();
   }
 }
 ```

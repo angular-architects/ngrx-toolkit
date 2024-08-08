@@ -5,25 +5,24 @@ import {
   withComputed,
   withHooks,
   withMethods,
-  EmptyFeatureResult,
+  EmptyFeatureResult, SignalStoreFeatureResult
 } from '@ngrx/signals';
-import { EntityId, EntityMap, EntityState } from '@ngrx/signals/entities';
 import { Signal, effect, signal, untracked, isSignal } from '@angular/core';
-import { Entity, capitalize } from './with-data-service';
-import {
-  EntityComputed,
-  NamedEntityComputed,
-} from './shared/signal-store-models';
+import { capitalize } from './with-data-service';
 
 export type StackItem = Record<string, unknown>;
 
 export type NormalizedUndoRedoOptions = {
   maxStackSize: number;
   collections?: string[];
+  keys: string[];
+  skip: number,
 };
 
 const defaultOptions: NormalizedUndoRedoOptions = {
   maxStackSize: 100,
+  keys: [],
+  skip: 0,
 };
 
 export function getUndoRedoKeys(collections?: string[]): string[] {
@@ -38,51 +37,33 @@ export function getUndoRedoKeys(collections?: string[]): string[] {
   return ['entityMap', 'ids', 'selectedIds', 'filter'];
 }
 
-export function withUndoRedo<Collection extends string>(options?: {
-  maxStackSize?: number;
-  collections: Collection[];
-}): SignalStoreFeature<
-  EmptyFeatureResult & {
-    computed: NamedEntityComputed<Entity, Collection>;
-  },
-  EmptyFeatureResult & {
-    computed: {
-      canUndo: Signal<boolean>;
-      canRedo: Signal<boolean>;
-    };
-    methods: {
-      undo: () => void;
-      redo: () => void;
-    };
-  }
->;
+type NonNever<T> = T extends never ? never : T;
 
-export function withUndoRedo(options?: {
-  maxStackSize?: number;
-}): SignalStoreFeature<
-  EmptyFeatureResult & {
-    state: EntityState<Entity>;
-    computed: EntityComputed<Entity>;
-  },
-  EmptyFeatureResult & {
-    computed: {
-      canUndo: Signal<boolean>;
-      canRedo: Signal<boolean>;
-    };
-    methods: {
-      undo: () => void;
-      redo: () => void;
-    };
-  }
->;
+type ExtractEntityCollection<T> = T extends `${infer U}Entities` ? U : never;
 
-export function withUndoRedo<Collection extends string>(
-  options: {
-    maxStackSize?: number;
-    collections?: Collection[];
-  } = {}
-): // eslint-disable-next-line @typescript-eslint/no-explicit-any
-SignalStoreFeature<any, any> {
+type ExtractEntityCollections<Store extends SignalStoreFeatureResult> = NonNever<{
+  [K in keyof Store['computed']]: ExtractEntityCollection<K>;
+}[keyof Store['computed']]>;
+
+type OptionsForState<Store extends SignalStoreFeatureResult> = Partial<Omit<NormalizedUndoRedoOptions, 'collections' | 'keys'>> & {
+  collections?: ExtractEntityCollections<Store>[];
+  keys?: (keyof Store['state'])[];
+};
+
+export function withUndoRedo<
+  Input extends EmptyFeatureResult>(options?: OptionsForState<Input>): SignalStoreFeature<
+  Input,
+  EmptyFeatureResult & {
+  computed: {
+    canUndo: Signal<boolean>;
+    canRedo: Signal<boolean>;
+  };
+  methods: {
+    undo: () => void;
+    redo: () => void;
+  };
+}
+> {
   let previous: StackItem | null = null;
   let skipOnce = false;
 
@@ -107,7 +88,7 @@ SignalStoreFeature<any, any> {
     canRedo.set(redoStack.length !== 0);
   };
 
-  const keys = getUndoRedoKeys(normalized?.collections);
+  const keys = [...getUndoRedoKeys(normalized.collections), ...normalized.keys];
 
   return signalStoreFeature(
     withComputed(() => ({
@@ -147,10 +128,10 @@ SignalStoreFeature<any, any> {
       },
     })),
     withHooks({
-      onInit(store: Record<string, unknown>) {
+      onInit(store) {
         effect(() => {
           const cand = keys.reduce((acc, key) => {
-            const s = store[key];
+            const s = (store as Record<string | keyof Input['state'], unknown>)[key];
             if (s && isSignal(s)) {
               return {
                 ...acc,
@@ -159,6 +140,11 @@ SignalStoreFeature<any, any> {
             }
             return acc;
           }, {});
+
+          if (normalized.skip > 0) {
+            normalized.skip--;
+            return;
+          }
 
           if (skipOnce) {
             skipOnce = false;
