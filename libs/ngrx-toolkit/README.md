@@ -140,6 +140,7 @@ export class FlightService implements DataService<Flight, FlightFilter> {
 
   create(entity: Flight): Promise<Flight> { ... }
   update(entity: Flight): Promise<Flight> { ... }
+  updateAll(entity: Flight[]): Promise<Flight[]> { ... }
   delete(entity: Flight): Promise<void> { ... }
   [...]
 }
