@@ -7,8 +7,15 @@
     "url": "https://github.com/angular-architects/ngrx-toolkit"
   },
   "peerDependencies": {
-    "@ngrx/signals": "18.0.2"
+    "@ngrx/signals": "18.0.2",
+    "@ngrx/store": ">=18.0.0"
   },
+  "peerDependenciesMeta": {
+    "@ngrx/store": {
+      "optional": true
+    }
+  },
+
   "dependencies": {
     "tslib": "^2.3.0"
   },

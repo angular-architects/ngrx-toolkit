@@ -2,16 +2,16 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
 import { EntityId } from '@ngrx/signals/entities';
-import { DataService } from 'ngrx-toolkit';
+import { DataService } from '@angular-architects/ngrx-toolkit';
 import { Flight } from './flight';
 
 export type FlightFilter = {
   from: string;
   to: string;
-}
+};
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class FlightService implements DataService<Flight, FlightFilter> {
   baseUrl = `https://demo.angulararchitects.io/api`;
@@ -44,11 +44,7 @@ export class FlightService implements DataService<Flight, FlightFilter> {
     return firstValueFrom(this.find(filter.from, filter.to));
   }
 
-  private find(
-    from: string,
-    to: string,
-    urgent = false
-  ): Observable<Flight[]> {
+  private find(from: string, to: string, urgent = false): Observable<Flight[]> {
     let url = [this.baseUrl, 'flight'].join('/');
 
     if (urgent) {
@@ -75,5 +71,4 @@ export class FlightService implements DataService<Flight, FlightFilter> {
     const url = [this.baseUrl, 'flight', flight.id].join('/');
     return this.http.delete<void>(url);
   }
-
 }

@@ -5,7 +5,7 @@ import {
   updateEntity,
   withEntities,
 } from '@ngrx/signals/entities';
-import { updateState, withDevtools } from 'ngrx-toolkit';
+import { updateState, withDevtools } from '@angular-architects/ngrx-toolkit';
 
 export interface Todo {
   id: number;
