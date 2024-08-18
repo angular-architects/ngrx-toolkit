@@ -35,7 +35,6 @@ To install it, run
 npm i @angular-architects/ngrx-toolkit
 ```
 
-
 - [NgRx Toolkit](#ngrx-toolkit)
   - [Devtools: `withDevtools()`](#devtools-withdevtools)
   - [Redux: `withRedux()`](#redux-withredux)
@@ -54,7 +53,6 @@ npm i @angular-architects/ngrx-toolkit
     - [I have an idea for a new extension, can I contribute?](#i-have-an-idea-for-a-new-extension-can-i-contribute)
     - [I require a feature that is not available in a lower version. What should I do?](#i-require-a-feature-that-is-not-available-in-a-lower-version-what-should-i-do)
 
-
 ## Devtools: `withDevtools()`
 
 This extension is very easy to use. Just add it to a `signalStore`. Example:
@@ -68,13 +66,16 @@ export const FlightStore = signalStore(
 );
 ```
 
-The Signal Store does not use the Redux pattern, so there are no action names involved by default. Instead, every action is referred to as a “Store Update.” However, if you want to customize the action name for better clarity, you can use the `updateState` method instead of `patchState`:
+The Signal Store does not use the Redux pattern, so there are no action names involved by default. Instead, every action is referred to as a "Store Update". However, if you want to customize the action name for better clarity, you can use the `updateState` method instead of `patchState`:
 
 ```typescript
-patchState(this.store, {loading: false});
+patchState(this.store, { loading: false });
 
 // updateState is a wrapper around patchState and has an action name as second parameter
-updateState(this.store 'update loading', {loading: false});
+updateState(this.store
+'update loading', { loading: false }
+)
+;
 ```
 
 ## Redux: `withRedux()`
@@ -347,7 +348,7 @@ public class UndoRedoComponent {
 
 ## Redux Connector for the NgRx Signal Store `createReduxState()`
 
-The Redux Connector turns any `signalStore()` into a Global State Management Slice following the Redux pattern.
+The Redux Connector turns any `signalStore()` into a Global State Management Slice following the Redux pattern. It is available as secondary entry point, i.e. `import { createReduxState } from '@angular-architects/ngrx-toolkit/redux-connector'` and has a dependency to `@ngrx/store`.
 
 It supports:
 
@@ -356,7 +357,6 @@ It supports:
 ✅ Angular Lazy Loading \
 ✅ Auto-generated `provideNamedStore()` & `injectNamedStore()` Functions \
 ✅ Global Action to Store Method Mappers \
-
 
 ### Use a present Signal Store
 
@@ -412,23 +412,23 @@ export const ticketActions = createActionGroup({
 ```typescript
 export const { provideFlightStore, injectFlightStore } =
   createReduxState('flight', FlightStore, store => withActionMappers(
-    mapAction(
-      // Filtered Action
-      ticketActions.flightsLoad,
-      // Side-Effect
-      store.loadFlights,
-      // Result Action
-      ticketActions.flightsLoaded),
-    mapAction(
-      // Filtered Actions
-      ticketActions.flightsLoaded, ticketActions.flightsLoadedByPassenger,
-      // State Updater Method (like Reducers)
-      store.setFlights
-    ),
-    mapAction(ticketActions.flightUpdate, store.updateFlight),
-    mapAction(ticketActions.flightsClear, store.clearFlights),
-  )
-);
+      mapAction(
+        // Filtered Action
+        ticketActions.flightsLoad,
+        // Side-Effect
+        store.loadFlights,
+        // Result Action
+        ticketActions.flightsLoaded),
+      mapAction(
+        // Filtered Actions
+        ticketActions.flightsLoaded, ticketActions.flightsLoadedByPassenger,
+        // State Updater Method (like Reducers)
+        store.setFlights
+      ),
+      mapAction(ticketActions.flightUpdate, store.updateFlight),
+      mapAction(ticketActions.flightsClear, store.clearFlights),
+    )
+  );
 ```
 
 ### Register an Angular Dependency Injection Provider
@@ -476,6 +476,7 @@ export class FlightSearchReducConnectorComponent {
   }
 }
 ```
+
 ## FAQ
 
 ### Why is the version range to the `@ngrx/signals` dependency so strict?
@@ -489,6 +490,7 @@ To ensure stability, we clone these internal types and run integration tests for
 Yes, please! We are always looking for new ideas and contributions.
 
 Since we don't want to bloat the library, we are very selective about new features. You also have to provide the following:
+
 - Good test coverage so that we can update it properly and don't have to call you 😉.
 - A use case showing the feature in action in the demo app of the repository.
 - An entry to the README.md.
