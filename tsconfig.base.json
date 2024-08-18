@@ -16,7 +16,9 @@
     "baseUrl": ".",
     "paths": {
       "@angular-architects/ngrx-toolkit": ["libs/ngrx-toolkit/src/index.ts"],
-      "@angular-architects/ngrx-toolkit/redux-connector": ["libs/ngrx-toolkit/redux-connector"]
+      "@angular-architects/ngrx-toolkit/redux-connector": [
+        "libs/ngrx-toolkit/redux-connector"
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]
