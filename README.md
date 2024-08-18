@@ -23,7 +23,7 @@ Starting with 18.0.0-rc.2, we have a [strict version dependency](#why-is-the-ver
 
 | @ngrx/signals  | @angular-architects/ngrx-toolkit |
 |----------------|----------------------------------|
-| 18.0.2         | 18.0.2                           |
+| 18.0.2         | latest                           |
 | 18.0.0         | 18.0.0                           |
 | 18.0.0-rc.3    | (not supported)                  |
 | 18.0.0-rc.2    | 18.0.0-rc.2.x                    |
@@ -347,7 +347,7 @@ public class UndoRedoComponent {
 
 ## Redux Connector for the NgRx Signal Store `createReduxState()`
 
-The Redux Connector turns any `signalStore()` into a Gobal State Management Slice following the Redux pattern.
+The Redux Connector turns any `signalStore()` into a Global State Management Slice following the Redux pattern.
 
 It supports:
 

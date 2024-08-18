@@ -6,7 +6,7 @@ import {
   updateEntity,
 } from '@ngrx/signals/entities';
 import { AddTodo, Todo } from '../todo-store';
-import { withStorageSync } from 'ngrx-toolkit';
+import { withStorageSync } from '@angular-architects/ngrx-toolkit';
 
 export const SyncedTodoStore = signalStore(
   { providedIn: 'root' },
