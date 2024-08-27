@@ -77,7 +77,7 @@ export class FlightService implements DataService<Flight, FlightFilter> {
   providedIn: 'root'
 })
 export class FlightServiceRXJS implements DataService<Flight, FlightFilter> {
-  private baseUrl = 'http://localhost:3000/books';
+  private baseUrl = `https://demo.angulararchitects.io/api`;
   private http = inject(HttpClient);
 
   loadById(id: EntityId): Observable<Flight> {

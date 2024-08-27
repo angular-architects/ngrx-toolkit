@@ -1,4 +1,4 @@
-import { FlightService } from '../shared/flight.service';
+import { FlightService, FlightServiceRXJS } from '../shared/flight.service';
 
 import { signalStore } from '@ngrx/signals';
 
@@ -26,7 +26,7 @@ export const SimpleFlightBookingStoreWithObservables = signalStore(
   withCallState(),
   withEntities<Flight>(),
   withDataService({
-    dataServiceType: FlightService,
+    dataServiceType: FlightServiceRXJS,
     filter: { from: 'Paris', to: 'New York' },
   }),
   withUndoRedo(),
