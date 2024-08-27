@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable, firstValueFrom, catchError, of } from 'rxjs';
+import { Observable, firstValueFrom, catchError, of, pipe } from 'rxjs';
 import { EntityId } from '@ngrx/signals/entities';
 import { DataService } from 'ngrx-toolkit';
 import { Flight } from './flight';
@@ -82,25 +82,22 @@ export class FlightService implements DataService<Flight, FlightFilter> {
   providedIn: 'root'
 })
 export class FlightServiceRXJS implements DataService<Flight, FlightFilter> {
-  private url = 'http://localhost:3000/books';
+  private baseUrl = 'http://localhost:3000/books';
   private http = inject(HttpClient);
 
   loadById(id: EntityId): Observable<Flight> {
-    const reqObj = { params: new HttpParams().set('id', id) };
-    return this.http
-      .get<Flight>(this.url, reqObj)
+    return this.findById('' + id)
       .pipe(catchError((_) => of<Flight>()));
   }
 
   create(entity: Flight): Observable<Flight> {
-    return this.http
-      .post<Flight>(this.url, entity)
+    entity.id = 0;
+    return this.save(entity)
       .pipe(catchError((_) => of<Flight>()));
   }
 
   update(entity: Flight): Observable<Flight> {
-    return this.http
-      .post<Flight>(this.url, entity)
+    return this.save(entity)
       .pipe(catchError((_) => of<Flight>()));
   }
 
@@ -110,16 +107,44 @@ export class FlightServiceRXJS implements DataService<Flight, FlightFilter> {
   }
 
   delete(entity: Flight): Observable<void> {
-    return this.http
-      .delete<void>(`${this.url}/${entity.id}`)
+    return this.remove(entity)
       .pipe(catchError((_) => of<void>()));
   }
 
   load(filter: FlightFilter): Observable<Flight[]> {
-    console.log('loading');
-    // TODO - actually add in filter
-    return this.http
-      .get<Flight[]>(this.url)
+    return this.find(filter.from, filter.to)
       .pipe(catchError((_) => of<Flight[]>([])));
+  }
+
+  private find(
+    from: string,
+    to: string,
+    urgent = false
+  ): Observable<Flight[]> {
+    let url = [this.baseUrl, 'flight'].join('/');
+
+    if (urgent) {
+      url = [this.baseUrl, 'error?code=403'].join('/');
+    }
+
+    const params = new HttpParams().set('from', from).set('to', to);
+    const headers = new HttpHeaders().set('Accept', 'application/json');
+    return this.http.get<Flight[]>(url, { params, headers });
+  }
+
+  private findById(id: string): Observable<Flight> {
+    const reqObj = { params: new HttpParams().set('id', id) };
+    const url = [this.baseUrl, 'flight'].join('/');
+    return this.http.get<Flight>(url, reqObj);
+  }
+
+  private save(flight: Flight): Observable<Flight> {
+    const url = [this.baseUrl, 'flight'].join('/');
+    return this.http.post<Flight>(url, flight);
+  }
+
+  private remove(flight: Flight): Observable<void> {
+    const url = [this.baseUrl, 'flight', flight.id].join('/');
+    return this.http.delete<void>(url);
   }
 }
