@@ -13,7 +13,18 @@ export const SimpleFlightBookingStore = signalStore(
   withCallState(),
   withEntities<Flight>(),
   withDataService({
-    dataServiceType: FlightService, 
+    dataServiceType: FlightService,
+    filter: { from: 'Paris', to: 'New York' },
+  }),
+  withUndoRedo(),
+);
+
+export const SimpleFlightBookingStoreWithObservables = signalStore(
+  { providedIn: 'root' },
+  withCallState(),
+  withEntities<Flight>(),
+  withDataService({
+    dataServiceType: FlightService,
     filter: { from: 'Paris', to: 'New York' },
   }),
   withUndoRedo(),

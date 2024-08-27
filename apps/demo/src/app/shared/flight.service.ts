@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable, firstValueFrom } from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { Observable, firstValueFrom, catchError, of } from 'rxjs';
 import { EntityId } from '@ngrx/signals/entities';
 import { DataService } from 'ngrx-toolkit';
 import { Flight } from './flight';
@@ -76,4 +76,50 @@ export class FlightService implements DataService<Flight, FlightFilter> {
     return this.http.delete<void>(url);
   }
 
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class FlightServiceRXJS implements DataService<Flight, FlightFilter> {
+  private url = 'http://localhost:3000/books';
+  private http = inject(HttpClient);
+
+  loadById(id: EntityId): Observable<Flight> {
+    const reqObj = { params: new HttpParams().set('id', id) };
+    return this.http
+      .get<Flight>(this.url, reqObj)
+      .pipe(catchError((_) => of<Flight>()));
+  }
+
+  create(entity: Flight): Observable<Flight> {
+    return this.http
+      .post<Flight>(this.url, entity)
+      .pipe(catchError((_) => of<Flight>()));
+  }
+
+  update(entity: Flight): Observable<Flight> {
+    return this.http
+      .post<Flight>(this.url, entity)
+      .pipe(catchError((_) => of<Flight>()));
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  updateAll(entity: Flight[]): Observable<Flight[]> {
+    throw new Error('updateAll method not implemented.');
+  }
+
+  delete(entity: Flight): Observable<void> {
+    return this.http
+      .delete<void>(`${this.url}/${entity.id}`)
+      .pipe(catchError((_) => of<void>()));
+  }
+
+  load(filter: FlightFilter): Observable<Flight[]> {
+    console.log('loading');
+    // TODO - actually add in filter
+    return this.http
+      .get<Flight[]>(this.url)
+      .pipe(catchError((_) => of<Flight[]>([])));
+  }
 }
