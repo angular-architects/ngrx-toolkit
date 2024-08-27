@@ -304,22 +304,33 @@ export function withDataService<
               },
             }));
           },
-          [loadKey]: async (): Promise<void> => {
+          [loadKey]: (): PromiseOrSubscription<void> => {
             const filter = store[filterKey] as Signal<F>;
             store[callStateKey] && patchState(store, setLoading(prefix));
+            const serviceCall = dataService.load(filter());
 
-            try {
-              const result = await dataService.load(filter());
-              patchState(
-                store,
-                prefix
-                  ? setAllEntities(result, { collection: prefix })
-                  : setAllEntities(result)
-              );
-              store[callStateKey] && patchState(store, setLoaded(prefix));
-            } catch (e) {
-              store[callStateKey] && patchState(store, setError(e, prefix));
-              throw e;
+            if (isObservable(serviceCall)) {
+              return serviceCall.pipe(
+                tapResponse((result) => {
+                  patchState(
+                    store,
+                    prefix
+                      ? setAllEntities(result, { collection: prefix })
+                      : setAllEntities(result));
+                  store[callStateKey] && patchState(store, setLoaded(prefix));
+              }, (errorResponse: HttpErrorResponse) => store[callStateKey] && patchState(store, setError(errorResponse, prefix)))).subscribe();
+            } else {
+              const loadPromise = async () => {
+                try {
+                  const result = await serviceCall;
+                  patchState(store, prefix ? setAllEntities(result, { collection: prefix }) : setAllEntities(result));
+                  store[callStateKey] && patchState(store, setLoaded(prefix));
+                } catch (e) {
+                  store[callStateKey] && patchState(store, setError(e, prefix));
+                  throw e;
+                }
+              };
+              return loadPromise();
             }
           },
           [loadByIdKey]: async (id: EntityId): Promise<void> => {
