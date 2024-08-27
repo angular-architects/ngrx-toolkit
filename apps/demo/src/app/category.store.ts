@@ -1,6 +1,6 @@
 import { patchState, signalStore, withHooks } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
-import { withDevtools } from 'ngrx-toolkit';
+import { withDevtools } from '@angular-architects/ngrx-toolkit';
 
 export interface Category {
   id: number;

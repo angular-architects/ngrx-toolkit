@@ -1,3 +1,21 @@
+## 18.0.3 (2024-08-18)
+
+
+### 🚀 Features
+
+- update to NgRx Signals 18 Release ([3d61dd2](https://github.com/angular-architects/ngrx-toolkit/commit/3d61dd2))
+- add undo-redo skip and keys options, docs and unit tests ([e9d9634](https://github.com/angular-architects/ngrx-toolkit/commit/e9d9634))
+- add secondary entry point for redux connector ([48f9d95](https://github.com/angular-architects/ngrx-toolkit/commit/48f9d95))
+
+### 🩹 Fixes
+
+- switch to yarn because of failing ci ([bd8cb25](https://github.com/angular-architects/ngrx-toolkit/commit/bd8cb25))
+
+### ❤️  Thank You
+
+- marcindz88
+- Rainer Hahnekamp @rainerhahnekamp
+
 # 18.0.0 (2024-07-30)
 
 

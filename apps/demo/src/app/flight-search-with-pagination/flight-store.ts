@@ -3,7 +3,11 @@ import { FlightService } from '../shared/flight.service';
 import { signalStore, type } from '@ngrx/signals';
 
 import { withEntities } from '@ngrx/signals/entities';
-import { withCallState, withDataService, withPagination } from 'ngrx-toolkit';
+import {
+  withCallState,
+  withDataService,
+  withPagination,
+} from '@angular-architects/ngrx-toolkit';
 import { Flight } from '../shared/flight';
 
 export const FlightBookingStore = signalStore(

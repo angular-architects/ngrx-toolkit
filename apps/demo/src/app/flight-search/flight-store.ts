@@ -5,7 +5,7 @@ import {
   withDevtools,
   withRedux,
   updateState,
-} from 'ngrx-toolkit';
+} from '@angular-architects/ngrx-toolkit';
 import { inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, switchMap } from 'rxjs';
