@@ -24,22 +24,39 @@ import {
   removeEntity,
 } from '@ngrx/signals/entities';
 import { EntityState, NamedEntityComputed } from './shared/signal-store-models';
+import { Observable, isObservable, Subscription } from 'rxjs';
+import {HttpErrorResponse} from "@angular/common/http";
+import {tapResponse} from "@ngrx/operators";
 
 export type Filter = Record<string, unknown>;
 export type Entity = { id: EntityId };
 
-export interface DataService<E extends Entity, F extends Filter> {
-  load(filter: F): Promise<E[]>;
+// Observable checking handled by rxjs/isObservable
+function isPromise<T>(value: PromiseOrObservable<T>): value is Promise<T> {
+  return value && typeof (value as Promise<T>).then === 'function';
+}
 
-  loadById(id: EntityId): Promise<E>;
+// For interface
+type PromiseOrObservable<Entity> = Promise<Entity> | Observable<Entity>;
+// For methods
+// TODO - will likely be an unsubscription after working these things out - the unsub strategy is outstanding for now
+type PromiseOrSubscription<Entity> = Promise<Entity> | Subscription;
 
-  create(entity: E): Promise<E>;
+export interface DataService<
+  E extends Entity,
+  F extends Filter>
+{
+  load(filter: F): PromiseOrObservable<Entity[]>;
 
-  update(entity: E): Promise<E>;
+  loadById(id: EntityId): PromiseOrObservable<Entity>;
 
-  updateAll(entity: E[]): Promise<E[]>;
+  create(entity: E): PromiseOrObservable<Entity>;
 
-  delete(entity: E): Promise<void>;
+  update(entity: E): PromiseOrObservable<Entity>;
+
+  updateAll(entity: E[]): PromiseOrObservable<Entity[]>;
+
+  delete(entity: E): PromiseOrObservable<void> ;
 }
 
 export function capitalize(str: string): string {
@@ -160,36 +177,36 @@ export type NamedDataServiceMethods<
     selected: boolean
   ) => void;
 } & {
-  [K in Collection as `load${Capitalize<K>}Entities`]: () => Promise<void>;
+  [K in Collection as `load${Capitalize<K>}Entities`]: () => PromiseOrSubscription<void>;
 } & {
   [K in Collection as `setCurrent${Capitalize<K>}`]: (entity: E) => void;
 } & {
   [K in Collection as `load${Capitalize<K>}ById`]: (
     id: EntityId
-  ) => Promise<void>;
+  ) => PromiseOrSubscription<void>;
 } & {
-  [K in Collection as `create${Capitalize<K>}`]: (entity: E) => Promise<void>;
+  [K in Collection as `create${Capitalize<K>}`]: (entity: E) => PromiseOrSubscription<void>;
 } & {
-  [K in Collection as `update${Capitalize<K>}`]: (entity: E) => Promise<void>;
+  [K in Collection as `update${Capitalize<K>}`]: (entity: E) => PromiseOrSubscription<void>;
 } & {
   [K in Collection as `updateAll${Capitalize<K>}`]: (
     entity: E[]
-  ) => Promise<void>;
+  ) => PromiseOrSubscription<void>;
 } & {
-  [K in Collection as `delete${Capitalize<K>}`]: (entity: E) => Promise<void>;
+  [K in Collection as `delete${Capitalize<K>}`]: (entity: E) => PromiseOrSubscription<void>;
 };
 
 export type DataServiceMethods<E extends Entity, F extends Filter> = {
   updateFilter: (filter: F) => void;
   updateSelected: (id: EntityId, selected: boolean) => void;
-  load: () => Promise<void>;
+  load: () => PromiseOrSubscription<void>;
 
   setCurrent(entity: E): void;
-  loadById(id: EntityId): Promise<void>;
-  create(entity: E): Promise<void>;
-  update(entity: E): Promise<void>;
-  updateAll(entities: E[]): Promise<void>;
-  delete(entity: E): Promise<void>;
+  loadById(id: EntityId): PromiseOrSubscription<void>;
+  create(entity: E): PromiseOrSubscription<void>;
+  update(entity: E): PromiseOrSubscription<void>;
+  updateAll(entities: E[]): PromiseOrSubscription<void>;
+  delete(entity: E): PromiseOrSubscription<void>;
 };
 
 export function withDataService<
