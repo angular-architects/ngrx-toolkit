@@ -1,4 +1,5 @@
 import { ProviderToken, Signal, computed, inject } from '@angular/core';
+import {HttpErrorResponse} from "@angular/common/http";
 import {
   SignalStoreFeature,
   patchState,
@@ -23,18 +24,12 @@ import {
   updateEntity,
   removeEntity,
 } from '@ngrx/signals/entities';
-import { EntityState, NamedEntityComputed } from './shared/signal-store-models';
-import { Observable, isObservable, Subscription } from 'rxjs';
-import {HttpErrorResponse} from "@angular/common/http";
 import {tapResponse} from "@ngrx/operators";
+import { Observable, isObservable, Subscription } from 'rxjs';
+import { EntityState, NamedEntityComputed } from './shared/signal-store-models';
 
 export type Filter = Record<string, unknown>;
 export type Entity = { id: EntityId };
-
-// Observable checking handled by rxjs/isObservable
-function isPromise<T>(value: PromiseOrObservable<T>): value is Promise<T> {
-  return value && typeof (value as Promise<T>).then === 'function';
-}
 
 // For interface
 type PromiseOrObservable<Entity> = Promise<Entity> | Observable<Entity>;
@@ -307,6 +302,7 @@ export function withDataService<
           [loadKey]: (): PromiseOrSubscription<void> => {
             const filter = store[filterKey] as Signal<F>;
             store[callStateKey] && patchState(store, setLoading(prefix));
+
             const serviceCall = dataService.load(filter());
 
             if (isObservable(serviceCall)) {
@@ -318,12 +314,16 @@ export function withDataService<
                       ? setAllEntities(result, { collection: prefix })
                       : setAllEntities(result));
                   store[callStateKey] && patchState(store, setLoaded(prefix));
-              }, (errorResponse: HttpErrorResponse) => store[callStateKey] && patchState(store, setError(errorResponse, prefix)))).subscribe();
+                }, (errorResponse: HttpErrorResponse) => store[callStateKey] && patchState(store, setError(errorResponse, prefix)))).subscribe();
             } else {
               const loadPromise = async () => {
                 try {
                   const result = await serviceCall;
-                  patchState(store, prefix ? setAllEntities(result, { collection: prefix }) : setAllEntities(result));
+                  patchState(
+                    store,
+                    prefix
+                      ? setAllEntities(result, { collection: prefix })
+                      : setAllEntities(result));
                   store[callStateKey] && patchState(store, setLoaded(prefix));
                 } catch (e) {
                   store[callStateKey] && patchState(store, setError(e, prefix));
@@ -461,6 +461,7 @@ export function withDataService<
             store[callStateKey] && patchState(store, setLoading(prefix));
 
             const serviceCall = dataService.updateAll(entities);
+
             if (isObservable(serviceCall)) {
               return serviceCall.pipe(
                 tapResponse((result) => {
