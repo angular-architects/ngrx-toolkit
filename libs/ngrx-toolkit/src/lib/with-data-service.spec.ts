@@ -1,36 +1,35 @@
-import {
-  DataService,
-  withCallState,
-  withDataService,
-} from '@angular-architects/ngrx-toolkit';
-import { signalStore, type } from '@ngrx/signals';
+import { signalStore } from '@ngrx/signals';
 import { withEntities } from '@ngrx/signals/entities';
-import { Flight } from '../../../../apps/demo/src/app/shared/flight';
 import { Injectable } from '@angular/core';
 import { Observable, firstValueFrom, of } from 'rxjs';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { EntityId } from '@ngrx/signals/entities';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { withCallState } from './with-call-state';
+import { DataService, withDataService } from './with-data-service';
 
 describe('withDataService', () => {
-  it('should load from a service and set entities in the store', () => {
-    const Store = signalStore(
-      { providedIn: 'root' },
-      withCallState(),
-      withEntities<Flight>(),
-      withDataService({
-        dataServiceType: MockFlightService,
-        filter: { from: 'Paris', to: 'New York' },
-      }),
-    );
+  it('should load from a service and set entities in the store', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        { providedIn: 'root' },
+        withCallState(),
+        withEntities<Flight>(),
+        withDataService({
+          dataServiceType: MockFlightService,
+          filter: { from: 'Paris', to: 'New York' },
+        })
+      );
+      const store = new Store();
 
-    const store = new Store();
+      tick(1);
+      expect(store.entities().length).toBe(0);
 
-    expect(store.entities.length).toBe(0);
+      store.load();
+      tick(1);
 
-    store.load()
-
-    expect(store.entities.length).toBe(1);
-  });
+      expect(store.entities().length).toBe(1);
+    });
+  }));
 });
 
 export type FlightFilter = {
@@ -69,18 +68,47 @@ export class MockFlightService implements DataService<Flight, FlightFilter> {
   }
 
   private find(from: string, to: string, urgent = false): Observable<Flight[]> {
-    return of([{id: 1, from: 'Paris', to: 'New York', date: new Date().toDateString(), delayed: false}])
+    console.log('hey', from, to);
+    return of([
+      {
+        id: 1,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      },
+    ]);
   }
 
   private findById(id: string): Observable<Flight> {
-    return of({id: 2, from: 'Paris', to: 'New York', date: new Date().toDateString(), delayed: false})
+    return of({
+      id: 2,
+      from: 'Paris',
+      to: 'New York',
+      date: new Date().toDateString(),
+      delayed: false,
+    });
   }
 
   private save(flight: Flight): Observable<Flight> {
-    return of({id: 3, from: 'Paris', to: 'New York', date: new Date().toDateString(), delayed: false})
+    return of({
+      id: 3,
+      from: 'Paris',
+      to: 'New York',
+      date: new Date().toDateString(),
+      delayed: false,
+    });
   }
 
   private remove(flight: Flight): Observable<void> {
-    return of()
+    return of();
   }
 }
+
+export type Flight = {
+  id: number;
+  from: string;
+  to: string;
+  date: string;
+  delayed: boolean;
+};
