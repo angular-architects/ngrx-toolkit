@@ -62,6 +62,192 @@ describe('withDataService', () => {
       });
     });
   }));
+  it('should create from a service and set an entity in the store', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        { providedIn: 'root' },
+        withCallState(),
+        withEntities<Flight>(),
+        withDataService({
+          dataServiceType: MockFlightService,
+          filter: { from: 'Paris', to: 'New York' },
+        })
+      );
+      const store = new Store();
+
+      tick(1);
+
+      expect(store.entities().length).toBe(0)
+
+      store.create({
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      } as Flight)
+
+      tick(1);
+
+      expect(store.entities().length).toBe(1)
+      expect(store.current()).toEqual({
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+    });
+  }));
+  it('should update from a service and update an entity in the store', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        { providedIn: 'root' },
+        withCallState(),
+        withEntities<Flight>(),
+        withDataService({
+          dataServiceType: MockFlightService,
+          filter: { from: 'Paris', to: 'New York' },
+        })
+      );
+      const store = new Store();
+
+      tick(1);
+
+      expect(store.entities().length).toBe(0)
+
+      store.create({
+        id: 3,
+        from: 'Wadena MN',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+      tick(1);
+      store.update({
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+      tick(1);
+
+      expect(store.current()).toEqual({
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+    });
+  }));
+  it('should update all from a service and update all entities in the store', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        { providedIn: 'root' },
+        withCallState(),
+        withEntities<Flight>(),
+        withDataService({
+          dataServiceType: MockFlightService,
+          filter: { from: 'Paris', to: 'New York' },
+        })
+      );
+      const store = new Store();
+
+      tick(1);
+
+      expect(store.entities().length).toBe(0)
+
+      store.create({
+        id: 3,
+        from: 'Wadena MN',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+      store.create({
+        id: 4,
+        from: 'Wadena MN',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+      tick(1);
+      store.updateAll([{
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      }, {
+        id: 4,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      }])
+      tick(1);
+      expect(store.entities().length).toBe(2)
+      expect(store.entities().at(0)).toEqual({
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+      expect(store.entities().at(1)).toEqual({
+        id: 4,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+    });
+  }));
+  it('should delete from a service and update that entity in the store', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        { providedIn: 'root' },
+        withCallState(),
+        withEntities<Flight>(),
+        withDataService({
+          dataServiceType: MockFlightService,
+          filter: { from: 'Paris', to: 'New York' },
+        })
+      );
+      const store = new Store();
+
+      tick(1);
+
+      expect(store.entities().length).toBe(0)
+
+      store.create({
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+      tick(1);
+      expect(store.entities().length).toBe(1)
+      expect(store.entities().at(0)).toEqual({
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+      store.delete({
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+      tick(1);
+      expect(store.entities().length).toBe(0)
+    });
+  }));
 });
 
 type FlightFilter = {
@@ -88,7 +274,19 @@ class MockFlightService implements DataService<Flight, FlightFilter> {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateAll(entity: Flight[]): Promise<Flight[]> {
-    throw new Error('updateAll method not implemented.');
+    return firstValueFrom(of([{
+      id: 3,
+      from: 'Paris',
+      to: 'New York',
+      date: new Date().toDateString(),
+      delayed: false,
+    }, {
+      id: 4,
+      from: 'Paris',
+      to: 'New York',
+      date: new Date().toDateString(),
+      delayed: false,
+    }]));
   }
 
   delete(entity: Flight): Promise<void> {
@@ -132,7 +330,7 @@ class MockFlightService implements DataService<Flight, FlightFilter> {
   }
 
   private remove(flight: Flight): Observable<void> {
-    return of();
+    return of(undefined);
   }
 }
 
