@@ -1,28 +1,20 @@
 import { Injectable } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { Observable, firstValueFrom, of } from 'rxjs';
-import { signalStore } from '@ngrx/signals';
+import { signalStore, type, withHooks } from '@ngrx/signals';
 import { withEntities } from '@ngrx/signals/entities';
 import { EntityId } from '@ngrx/signals/entities';
 import { withCallState } from './with-call-state';
 import { DataService, withDataService } from './with-data-service';
 
 // Since the resulting shape of entities in the store is a matter of the implementing services of `dataServiceType`,
-//     these tests are more so about verifying that each resulting method exists, with or without prefixes.
+//     these tests are more so about verifying that each resulting method exists, with or without named collections.
 // The expectations on the resulting shape of the data in the store following these tests merely asserts
 //     that the store was patched in the right generic shape and with respective call states.
+
 describe('withDataService', () => {
   it('should load from a service and set entities in the store', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
-      const Store = signalStore(
-        { providedIn: 'root' },
-        withCallState(),
-        withEntities<Flight>(),
-        withDataService({
-          dataServiceType: MockFlightService,
-          filter: { from: 'Paris', to: 'New York' },
-        })
-      );
       const store = new Store();
 
       tick(1);
@@ -34,17 +26,21 @@ describe('withDataService', () => {
       expect(store.entities().length).toBe(1);
     });
   }));
+  it('should load from a service and set entities in the store (with named collection)', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new StoreWithNamedCollection();
+
+      tick(1);
+      expect(store.flightEntities().length).toBe(0);
+
+      store.loadFlightEntities();
+      tick(1);
+
+      expect(store.flightEntities().length).toBe(1);
+    });
+  }));
   it('should load by ID from a service and set entities in the store', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
-      const Store = signalStore(
-        { providedIn: 'root' },
-        withCallState(),
-        withEntities<Flight>(),
-        withDataService({
-          dataServiceType: MockFlightService,
-          filter: { from: 'Paris', to: 'New York' },
-        })
-      );
       const store = new Store();
 
       tick(1);
@@ -62,17 +58,27 @@ describe('withDataService', () => {
       });
     });
   }));
+  it('should load by ID from a service and set entities in the store (with named collection)', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new StoreWithNamedCollection();
+
+      tick(1);
+
+      store.loadFlightById(2);
+
+      tick(1);
+
+      expect(store.currentFlight()).toEqual({
+        id: 2,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      });
+    });
+  }));
   it('should create from a service and set an entity in the store', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
-      const Store = signalStore(
-        { providedIn: 'root' },
-        withCallState(),
-        withEntities<Flight>(),
-        withDataService({
-          dataServiceType: MockFlightService,
-          filter: { from: 'Paris', to: 'New York' },
-        })
-      );
       const store = new Store();
 
       tick(1);
@@ -98,17 +104,35 @@ describe('withDataService', () => {
       })
     });
   }));
+  it('should create from a service and set an entity in the store (with named collection)', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new StoreWithNamedCollection();
+
+      tick(1);
+
+      expect(store.flightEntities().length).toBe(0)
+
+      store.createFlight({
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      } as Flight)
+
+      tick(1);
+
+      expect(store.flightEntities().length).toBe(1)
+      expect(store.currentFlight()).toEqual({
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+    });
+  }));
   it('should update from a service and update an entity in the store', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
-      const Store = signalStore(
-        { providedIn: 'root' },
-        withCallState(),
-        withEntities<Flight>(),
-        withDataService({
-          dataServiceType: MockFlightService,
-          filter: { from: 'Paris', to: 'New York' },
-        })
-      );
       const store = new Store();
 
       tick(1);
@@ -141,17 +165,42 @@ describe('withDataService', () => {
       })
     });
   }));
+  it('should update from a service and update an entity in the store (with named collection)', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new StoreWithNamedCollection();
+
+      tick(1);
+
+      expect(store.flightEntities().length).toBe(0)
+
+      store.createFlight({
+        id: 3,
+        from: 'Wadena MN',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+      tick(1);
+      store.updateFlight({
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+      tick(1);
+
+      expect(store.currentFlight()).toEqual({
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+    });
+  }));
   it('should update all from a service and update all entities in the store', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
-      const Store = signalStore(
-        { providedIn: 'root' },
-        withCallState(),
-        withEntities<Flight>(),
-        withDataService({
-          dataServiceType: MockFlightService,
-          filter: { from: 'Paris', to: 'New York' },
-        })
-      );
       const store = new Store();
 
       tick(1);
@@ -204,17 +253,62 @@ describe('withDataService', () => {
       })
     });
   }));
+  it('should update all from a service and update all entities in the store (with named collection)', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new StoreWithNamedCollection();
+
+      tick(1);
+
+      expect(store.flightEntities().length).toBe(0)
+
+      store.createFlight({
+        id: 3,
+        from: 'Wadena MN',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+      store.createFlight({
+        id: 4,
+        from: 'Wadena MN',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+      tick(1);
+      store.updateAllFlight([{
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      }, {
+        id: 4,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      }])
+      tick(1);
+      expect(store.flightEntities().length).toBe(2)
+      expect(store.flightEntities().at(0)).toEqual({
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+      expect(store.flightEntities().at(1)).toEqual({
+        id: 4,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+    });
+  }));
   it('should delete from a service and update that entity in the store', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
-      const Store = signalStore(
-        { providedIn: 'root' },
-        withCallState(),
-        withEntities<Flight>(),
-        withDataService({
-          dataServiceType: MockFlightService,
-          filter: { from: 'Paris', to: 'New York' },
-        })
-      );
       const store = new Store();
 
       tick(1);
@@ -246,6 +340,41 @@ describe('withDataService', () => {
       })
       tick(1);
       expect(store.entities().length).toBe(0)
+    });
+  }));
+  it('should delete from a service and update that entity in the store (with named collection)', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new StoreWithNamedCollection();
+
+      tick(1);
+
+      expect(store.flightEntities().length).toBe(0)
+
+      store.createFlight({
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+      tick(1);
+      expect(store.flightEntities().length).toBe(1)
+      expect(store.flightEntities().at(0)).toEqual({
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+      store.deleteFlight({
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+      tick(1);
+      expect(store.flightEntities().length).toBe(0)
     });
   }));
 });
@@ -341,3 +470,26 @@ type Flight = {
   date: string;
   delayed: boolean;
 };
+
+const Store = signalStore(
+  withCallState(),
+  withEntities<Flight>(),
+  withDataService({
+    dataServiceType: MockFlightService,
+    filter: { from: 'Paris', to: 'New York' },
+  }),
+);
+const StoreWithNamedCollection = signalStore(
+  withCallState({
+    collection: 'flight'
+  }),
+  withEntities({
+    entity: type<Flight>(),
+    collection: 'flight'
+  }),
+  withDataService({
+    dataServiceType: MockFlightService,
+    filter: { from: 'Paris', to: 'New York' },
+    collection: 'flight',
+  }),
+);
