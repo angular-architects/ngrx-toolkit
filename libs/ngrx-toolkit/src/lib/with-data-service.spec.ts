@@ -377,6 +377,94 @@ describe('withDataService', () => {
       expect(store.flightEntities().length).toBe(0)
     });
   }));
+  it('should update the selected flight of the store', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+
+      tick(1);
+
+      store.create({
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+      expect(store.selectedEntities().length).toBe(0)
+
+      store.updateSelected(3, true)
+
+      tick(1);
+
+      expect(store.selectedEntities().length).toBe(1)
+      expect(store.selectedEntities()).toContainEqual({
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+    });
+  }));
+  it('should update selected flight of the store (with named collection)', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new StoreWithNamedCollection();
+
+      tick(1);
+
+      store.createFlight({
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+      expect(store.selectedFlightEntities().length).toBe(0)
+
+      store.updateSelectedFlightEntities(3, true)
+
+      tick(1);
+
+      expect(store.selectedFlightEntities().length).toBe(1)
+      expect(store.selectedFlightEntities()).toContainEqual({
+        id: 3,
+        from: 'Paris',
+        to: 'New York',
+        date: new Date().toDateString(),
+        delayed: false,
+      })
+    });
+  }));
+  it('should update the filter of the service', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+
+      tick(1);
+
+      expect(store.filter()).toEqual({ from: 'Paris', to: 'New York' })
+
+      store.updateFilter({ from: 'Wadena MN', to: 'New York' })
+
+      tick(1);
+
+      expect(store.filter()).toEqual({ from: 'Wadena MN', to: 'New York' })
+    });
+  }));
+  it('should update the filter of the service (with named collection)', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new StoreWithNamedCollection();
+
+      tick(1);
+
+      expect(store.flightFilter()).toEqual({ from: 'Paris', to: 'New York' })
+
+      store.updateFlightFilter({ from: 'Wadena MN', to: 'New York' })
+
+      tick(1);
+
+      expect(store.flightFilter()).toEqual({ from: 'Wadena MN', to: 'New York' })
+    });
+  }));
 });
 
 type FlightFilter = {
