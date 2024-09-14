@@ -55,7 +55,9 @@ npm i @angular-architects/ngrx-toolkit
 
 ## Devtools: `withDevtools()`
 
-This extension is very easy to use. Just add it to a `signalStore`. Example:
+Redux Devtools is a powerful browser extension tool, that allows you to inspect every change in your stores. Originally, it was designed for Redux, but it can also be used with the SignalStore. You can download it for Chrome [here](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd).
+
+To use the Devtools, you need to add the `withDevtools()` extension to your SignalStore:
 
 ```typescript
 export const FlightStore = signalStore(
@@ -65,6 +67,16 @@ export const FlightStore = signalStore(
   // ...
 );
 ```
+
+After that, open your app and navigate to the component that uses the store. Open the Devtools and you will see the `flights` store in the Devtools under the name "NgRx Signal Store"
+
+You can find a working example in the [demo app](https://github.com/angular-architects/ngrx-toolkit/blob/main/apps/demo/src/app/todo-store.ts).
+
+**Important**: The extensions don't activate them during app initialization (as it is with `@ngrx/store`). You need to open the Devtools and select the "NgRx Signal Store" tab to activate it.
+
+<img src="https://raw.githubusercontent.com/angular-architects/ngrx-toolkit/main/devtools.png" width="1000">
+
+---
 
 The Signal Store does not use the Redux pattern, so there are no action names involved by default. Instead, every action is referred to as a "Store Update". However, if you want to customize the action name for better clarity, you can use the `updateState` method instead of `patchState`:
 
