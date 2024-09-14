@@ -1,4 +1,5 @@
 export {
+  withDevToolsStub,
   withDevtools,
   patchState,
   updateState,

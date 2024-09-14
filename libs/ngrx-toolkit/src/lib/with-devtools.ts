@@ -80,6 +80,11 @@ export function reset() {
 }
 
 /**
+ * Stub for DevTools integration. Can be used to disable DevTools in production.
+ */
+export const withDevToolsStub: typeof withDevtools = () => store => store;
+
+/**
  * @param name store's name as it should appear in the DevTools
  */
 export function withDevtools<Input extends EmptyFeatureResult>(
