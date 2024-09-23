@@ -84,10 +84,7 @@ The Signal Store does not use the Redux pattern, so there are no action names in
 patchState(this.store, { loading: false });
 
 // updateState is a wrapper around patchState and has an action name as second parameter
-updateState(this.store
-'update loading', { loading: false }
-)
-;
+updateState(this.store, 'update loading', { loading: false });
 ```
 
 ## Redux: `withRedux()`
