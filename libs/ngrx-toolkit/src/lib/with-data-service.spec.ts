@@ -691,6 +691,22 @@ describe('withDataService', () => {
   // TODO 3B: setting error state (with named collection)
 });
 
+// Test helpers
+let currentFlightId = 0;
+const createFlight = (flight: Partial<Flight> = {}) => ({
+  ...{
+    id: ++currentFlightId, from: 'Paris', to: 'New York', date: new Date().toDateString(), delayed: false,
+  },
+  ...flight
+});
+type Flight = {
+  id: number;
+  from: string;
+  to: string;
+  date: string;
+  delayed: boolean;
+};
+
 type FlightFilter = {
   from: string;
   to: string;
@@ -716,22 +732,7 @@ class MockFlightService implements DataService<Flight, FlightFilter> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateAll(entity: Flight[]): Promise<Flight[]> {
     return firstValueFrom(
-      of([
-        {
-          id: 3,
-          from: 'Paris',
-          to: 'New York',
-          date: new Date().toDateString(),
-          delayed: false,
-        },
-        {
-          id: 4,
-          from: 'Paris',
-          to: 'New York',
-          date: new Date().toDateString(),
-          delayed: false,
-        },
-      ])
+      of([createFlight({id: 3}), createFlight({id: 4})])
     );
   }
 
@@ -744,35 +745,15 @@ class MockFlightService implements DataService<Flight, FlightFilter> {
   }
 
   private find(from: string, to: string, urgent = false): Observable<Flight[]> {
-    return of([
-      {
-        id: 1,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      },
-    ]);
+    return of([createFlight()]);
   }
 
   private findById(id: string): Observable<Flight> {
-    return of({
-      id: 2,
-      from: 'Paris',
-      to: 'New York',
-      date: new Date().toDateString(),
-      delayed: false,
-    });
+    return of(createFlight({id: 2}));
   }
 
   private save(flight: Flight): Observable<Flight> {
-    return of({
-      id: 3,
-      from: 'Paris',
-      to: 'New York',
-      date: new Date().toDateString(),
-      delayed: false,
-    });
+    return of(createFlight({id: 3}));
   }
 
   private remove(flight: Flight): Observable<void> {
@@ -800,22 +781,7 @@ class MockFlightServiceForLoading implements DataService<Flight, FlightFilter> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateAll(entity: Flight[]): Promise<Flight[]> {
     return firstValueFrom(
-      of([
-        {
-          id: 3,
-          from: 'Paris',
-          to: 'New York',
-          date: new Date().toDateString(),
-          delayed: false,
-        },
-        {
-          id: 4,
-          from: 'Paris',
-          to: 'New York',
-          date: new Date().toDateString(),
-          delayed: false,
-        },
-      ]).pipe(delay(3))
+      of([createFlight({id: 3}), createFlight({id: 4})]).pipe(delay(3))
     );
   }
 
@@ -828,49 +794,21 @@ class MockFlightServiceForLoading implements DataService<Flight, FlightFilter> {
   }
 
   private find(from: string, to: string, urgent = false): Observable<Flight[]> {
-    return of([
-      {
-        id: 1,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      },
-    ]).pipe(delay(3));
+    return of([createFlight({id: 1})]).pipe(delay(3));
   }
 
   private findById(id: string): Observable<Flight> {
-    return of({
-      id: 2,
-      from: 'Paris',
-      to: 'New York',
-      date: new Date().toDateString(),
-      delayed: false,
-    }).pipe(delay(3));
+    return of(createFlight({id: 2})).pipe(delay(3));
   }
 
   private save(flight: Flight): Observable<Flight> {
-    return of({
-      id: 3,
-      from: 'Paris',
-      to: 'New York',
-      date: new Date().toDateString(),
-      delayed: false,
-    }).pipe(delay(3));
+    return of(createFlight({id: 3})).pipe(delay(3));
   }
 
   private remove(flight: Flight): Observable<void> {
     return of(undefined).pipe(delay(3));
   }
 }
-
-type Flight = {
-  id: number;
-  from: string;
-  to: string;
-  date: string;
-  delayed: boolean;
-};
 
 const Store = signalStore(
   withCallState(),
