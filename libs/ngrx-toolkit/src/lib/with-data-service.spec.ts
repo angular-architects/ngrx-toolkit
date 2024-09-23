@@ -17,11 +17,11 @@ describe('withDataService', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
 
-      tick(1);
+      tick();
       expect(store.entities().length).toBe(0);
 
       store.load();
-      tick(1);
+      tick();
 
       expect(store.entities().length).toBe(1);
     });
@@ -30,11 +30,11 @@ describe('withDataService', () => {
     TestBed.runInInjectionContext(() => {
       const store = new StoreWithNamedCollection();
 
-      tick(1);
+      tick();
       expect(store.flightEntities().length).toBe(0);
 
       store.loadFlightEntities();
-      tick(1);
+      tick();
 
       expect(store.flightEntities().length).toBe(1);
     });
@@ -43,11 +43,11 @@ describe('withDataService', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
 
-      tick(1);
+      tick();
 
       store.loadById(2);
 
-      tick(1);
+      tick();
 
       expect(store.current()).toEqual({
         id: 2,
@@ -62,11 +62,11 @@ describe('withDataService', () => {
     TestBed.runInInjectionContext(() => {
       const store = new StoreWithNamedCollection();
 
-      tick(1);
+      tick();
 
       store.loadFlightById(2);
 
-      tick(1);
+      tick();
 
       expect(store.currentFlight()).toEqual({
         id: 2,
@@ -81,7 +81,7 @@ describe('withDataService', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
 
-      tick(1);
+      tick();
 
       expect(store.entities().length).toBe(0);
 
@@ -92,7 +92,7 @@ describe('withDataService', () => {
         delayed: false,
       } as Flight);
 
-      tick(1);
+      tick();
 
       expect(store.entities().length).toBe(1);
       expect(store.current()).toEqual({
@@ -108,7 +108,7 @@ describe('withDataService', () => {
     TestBed.runInInjectionContext(() => {
       const store = new StoreWithNamedCollection();
 
-      tick(1);
+      tick();
 
       expect(store.flightEntities().length).toBe(0);
 
@@ -119,7 +119,7 @@ describe('withDataService', () => {
         delayed: false,
       } as Flight);
 
-      tick(1);
+      tick();
 
       expect(store.flightEntities().length).toBe(1);
       expect(store.currentFlight()).toEqual({
@@ -135,7 +135,7 @@ describe('withDataService', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
 
-      tick(1);
+      tick();
 
       expect(store.entities().length).toBe(0);
 
@@ -146,7 +146,7 @@ describe('withDataService', () => {
         date: new Date().toDateString(),
         delayed: false,
       });
-      tick(1);
+      tick();
       store.update({
         id: 3,
         from: 'Paris',
@@ -154,7 +154,7 @@ describe('withDataService', () => {
         date: new Date().toDateString(),
         delayed: false,
       });
-      tick(1);
+      tick();
 
       expect(store.current()).toEqual({
         id: 3,
@@ -169,7 +169,7 @@ describe('withDataService', () => {
     TestBed.runInInjectionContext(() => {
       const store = new StoreWithNamedCollection();
 
-      tick(1);
+      tick();
 
       expect(store.flightEntities().length).toBe(0);
 
@@ -180,7 +180,7 @@ describe('withDataService', () => {
         date: new Date().toDateString(),
         delayed: false,
       });
-      tick(1);
+      tick();
       store.updateFlight({
         id: 3,
         from: 'Paris',
@@ -188,7 +188,7 @@ describe('withDataService', () => {
         date: new Date().toDateString(),
         delayed: false,
       });
-      tick(1);
+      tick();
 
       expect(store.currentFlight()).toEqual({
         id: 3,
@@ -203,7 +203,7 @@ describe('withDataService', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
 
-      tick(1);
+      tick();
 
       expect(store.entities().length).toBe(0);
 
@@ -221,7 +221,7 @@ describe('withDataService', () => {
         date: new Date().toDateString(),
         delayed: false,
       });
-      tick(1);
+      tick();
       store.updateAll([
         {
           id: 3,
@@ -238,7 +238,7 @@ describe('withDataService', () => {
           delayed: false,
         },
       ]);
-      tick(1);
+      tick();
       expect(store.entities().length).toBe(2);
       expect(store.entities().at(0)).toEqual({
         id: 3,
@@ -260,7 +260,7 @@ describe('withDataService', () => {
     TestBed.runInInjectionContext(() => {
       const store = new StoreWithNamedCollection();
 
-      tick(1);
+      tick();
 
       expect(store.flightEntities().length).toBe(0);
 
@@ -278,7 +278,7 @@ describe('withDataService', () => {
         date: new Date().toDateString(),
         delayed: false,
       });
-      tick(1);
+      tick();
       store.updateAllFlight([
         {
           id: 3,
@@ -295,7 +295,7 @@ describe('withDataService', () => {
           delayed: false,
         },
       ]);
-      tick(1);
+      tick();
       expect(store.flightEntities().length).toBe(2);
       expect(store.flightEntities().at(0)).toEqual({
         id: 3,
@@ -317,7 +317,7 @@ describe('withDataService', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
 
-      tick(1);
+      tick();
 
       expect(store.entities().length).toBe(0);
 
@@ -328,7 +328,7 @@ describe('withDataService', () => {
         date: new Date().toDateString(),
         delayed: false,
       });
-      tick(1);
+      tick();
       expect(store.entities().length).toBe(1);
       expect(store.entities().at(0)).toEqual({
         id: 3,
@@ -344,7 +344,7 @@ describe('withDataService', () => {
         date: new Date().toDateString(),
         delayed: false,
       });
-      tick(1);
+      tick();
       expect(store.entities().length).toBe(0);
     });
   }));
@@ -352,7 +352,7 @@ describe('withDataService', () => {
     TestBed.runInInjectionContext(() => {
       const store = new StoreWithNamedCollection();
 
-      tick(1);
+      tick();
 
       expect(store.flightEntities().length).toBe(0);
 
@@ -363,7 +363,7 @@ describe('withDataService', () => {
         date: new Date().toDateString(),
         delayed: false,
       });
-      tick(1);
+      tick();
       expect(store.flightEntities().length).toBe(1);
       expect(store.flightEntities().at(0)).toEqual({
         id: 3,
@@ -379,7 +379,7 @@ describe('withDataService', () => {
         date: new Date().toDateString(),
         delayed: false,
       });
-      tick(1);
+      tick();
       expect(store.flightEntities().length).toBe(0);
     });
   }));
@@ -387,7 +387,7 @@ describe('withDataService', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
 
-      tick(1);
+      tick();
 
       store.create({
         id: 3,
@@ -400,7 +400,7 @@ describe('withDataService', () => {
 
       store.updateSelected(3, true);
 
-      tick(1);
+      tick();
 
       expect(store.selectedEntities().length).toBe(1);
       expect(store.selectedEntities()).toContainEqual({
@@ -416,7 +416,7 @@ describe('withDataService', () => {
     TestBed.runInInjectionContext(() => {
       const store = new StoreWithNamedCollection();
 
-      tick(1);
+      tick();
 
       store.createFlight({
         id: 3,
@@ -429,7 +429,7 @@ describe('withDataService', () => {
 
       store.updateSelectedFlightEntities(3, true);
 
-      tick(1);
+      tick();
 
       expect(store.selectedFlightEntities().length).toBe(1);
       expect(store.selectedFlightEntities()).toContainEqual({
@@ -445,13 +445,13 @@ describe('withDataService', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
 
-      tick(1);
+      tick();
 
       expect(store.filter()).toEqual({ from: 'Paris', to: 'New York' });
 
       store.updateFilter({ from: 'Wadena MN', to: 'New York' });
 
-      tick(1);
+      tick();
 
       expect(store.filter()).toEqual({ from: 'Wadena MN', to: 'New York' });
     });
@@ -460,13 +460,13 @@ describe('withDataService', () => {
     TestBed.runInInjectionContext(() => {
       const store = new StoreWithNamedCollection();
 
-      tick(1);
+      tick();
 
       expect(store.flightFilter()).toEqual({ from: 'Paris', to: 'New York' });
 
       store.updateFlightFilter({ from: 'Wadena MN', to: 'New York' });
 
-      tick(1);
+      tick();
 
       expect(store.flightFilter()).toEqual({
         from: 'Wadena MN',
@@ -477,7 +477,7 @@ describe('withDataService', () => {
   it('should the current entity', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
-      tick(1);
+      tick();
 
       store.create({
         from: 'Paris',
@@ -506,7 +506,7 @@ describe('withDataService', () => {
   it('set the current entity (with named collection)', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new StoreWithNamedCollection();
-      tick(1);
+      tick();
 
       store.createFlight({
         from: 'Paris',
@@ -536,7 +536,7 @@ describe('withDataService', () => {
   it('handles loading state', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new StoreForLoading();
-      tick(1);
+      tick();
 
       expect(store.loading()).toBe(false);
 
@@ -546,21 +546,21 @@ describe('withDataService', () => {
         date: new Date().toDateString(),
         delayed: false,
       } as Flight);
-      tick(1);
+      tick();
       expect(store.loading()).toBe(true);
-      tick(2);
+      tick(3);
       expect(store.loading()).toBe(false);
 
       store.load();
-      tick(1);
+      tick();
       expect(store.loading()).toBe(true);
-      tick(2);
+      tick(3);
       expect(store.loading()).toBe(false);
 
       store.loadById(3);
-      tick(1);
+      tick();
       expect(store.loading()).toBe(true);
-      tick(2);
+      tick(3);
       expect(store.loading()).toBe(false);
 
       store.update({
@@ -570,9 +570,9 @@ describe('withDataService', () => {
         date: new Date().toDateString(),
         delayed: false,
       });
-      tick(1);
+      tick();
       expect(store.loading()).toBe(true);
-      tick(2);
+      tick(3);
       expect(store.loading()).toBe(false);
 
       store.updateAll([
@@ -591,9 +591,9 @@ describe('withDataService', () => {
           delayed: false,
         },
       ]);
-      tick(1);
+      tick();
       expect(store.loading()).toBe(true);
-      tick(2);
+      tick(3);
       expect(store.loading()).toBe(false);
 
       store.delete({
@@ -603,9 +603,9 @@ describe('withDataService', () => {
         date: new Date().toDateString(),
         delayed: false,
       });
-      tick(1);
+      tick();
       expect(store.loading()).toBe(true);
-      tick(2);
+      tick(3);
       expect(store.loading()).toBe(false);
     });
   }));
@@ -613,7 +613,7 @@ describe('withDataService', () => {
   it('handles loading state (with named collection)', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new StoreWithNamedCollectionForLoading();
-      tick(1);
+      tick();
 
       expect(store.flightLoading()).toBe(false);
 
@@ -623,21 +623,21 @@ describe('withDataService', () => {
         date: new Date().toDateString(),
         delayed: false,
       } as Flight);
-      tick(1);
+      tick();
       expect(store.flightLoading()).toBe(true);
-      tick(2);
+      tick(3);
       expect(store.flightLoading()).toBe(false);
 
       store.loadFlightEntities();
-      tick(1);
+      tick();
       expect(store.flightLoading()).toBe(true);
-      tick(2);
+      tick(3);
       expect(store.flightLoading()).toBe(false);
 
       store.loadFlightById(3);
-      tick(1);
+      tick();
       expect(store.flightLoading()).toBe(true);
-      tick(2);
+      tick(3);
       expect(store.flightLoading()).toBe(false);
 
       store.updateFlight({
@@ -647,9 +647,9 @@ describe('withDataService', () => {
         date: new Date().toDateString(),
         delayed: false,
       });
-      tick(1);
+      tick();
       expect(store.flightLoading()).toBe(true);
-      tick(2);
+      tick(3);
       expect(store.flightLoading()).toBe(false);
 
       store.updateAllFlight([
@@ -668,9 +668,9 @@ describe('withDataService', () => {
           delayed: false,
         },
       ]);
-      tick(1);
+      tick();
       expect(store.flightLoading()).toBe(true);
-      tick(2);
+      tick(3);
       expect(store.flightLoading()).toBe(false);
 
       store.deleteFlight({
@@ -680,9 +680,9 @@ describe('withDataService', () => {
         date: new Date().toDateString(),
         delayed: false,
       });
-      tick(1);
+      tick();
       expect(store.flightLoading()).toBe(true);
-      tick(2);
+      tick(3);
       expect(store.flightLoading()).toBe(false);
     });
   }));
