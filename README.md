@@ -87,6 +87,64 @@ patchState(this.store, { loading: false });
 updateState(this.store, 'update loading', { loading: false });
 ```
 
+### Configuration
+
+You may configure this feature by setting up a provider in your application:
+
+```typescript
+providers: [
+  provideStoreDevtoolsConfig({
+    logOnly: !isDevMode(), // Restrict extension to log-only mode, default is false
+  })
+]
+```
+
+When running in production you may opt to tree-shake it from the application bundle you need to abstract it in your environment file.
+
+<details>
+
+  <summary>Devtools tree-shaking details</summary>
+
+If the environment files don't exist in your project you can use the `ng generate environments` command to create them.
+
+environment.ts:
+```typescript
+import { withDevtools } from '@angular-architects/ngrx-toolkit';
+
+export const environment = {
+storeDevToolsFeature: withDevtools
+}
+```
+
+environment.prod.ts
+```typescript
+export const environment = {
+   storeDevToolsFeature: (_: string): SignalStoreFeature => store => store
+}
+```
+
+Then all you need to do is replace `withDevTools` everywhere in your app with `environment.storeDevToolsFeature`
+e.g.:
+```typescript
+export const SomeStore = signalStore(
+  withState({strings: [] as string[] }),
+  environment.storeDevToolsFeature('some')
+);
+```
+
+Also make sure you have defined file replacements in angular.json prod configuration:
+```json
+"fileReplacements": [
+  {
+    "replace": "src/environments/environment.ts",
+    "with": "src/environments/environment.prod.ts"
+  }
+]
+```
+
+</details>
+
+
 ## Redux: `withRedux()`
 
 `withRedux()` bring back the Redux pattern into the Signal Store.

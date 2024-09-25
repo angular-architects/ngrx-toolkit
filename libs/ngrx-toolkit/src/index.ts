@@ -1,9 +1,4 @@
-export {
-  withDevtools,
-  patchState,
-  updateState,
-  Action,
-} from './lib/with-devtools';
+export * from './lib/with-devtools';
 export * from './lib/with-redux';
 
 export * from './lib/with-call-state';

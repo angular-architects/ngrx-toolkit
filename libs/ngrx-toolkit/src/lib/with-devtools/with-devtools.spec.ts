@@ -1,11 +1,11 @@
 import { signalStore } from '@ngrx/signals';
 import { withEntities } from '@ngrx/signals/entities';
-import { Action, withDevtools } from './with-devtools';
 import { TestBed } from '@angular/core/testing';
 import { PLATFORM_ID } from '@angular/core';
 import SpyInstance = jest.SpyInstance;
 import Mock = jest.Mock;
-import { reset } from './with-devtools';
+import { Action, withDevtools, reset } from './with-devtools';
+import { DevtoolsConfig, provideStoreDevtoolsConfig } from './with-devtools.config';
 
 type Flight = {
   id: number;
@@ -31,6 +31,7 @@ const createFlight = (flight: Partial<Flight> = {}) => ({
 interface SetupOptions {
   extensionsAvailable: boolean;
   inSsr: boolean;
+  config: DevtoolsConfig | null;
 }
 
 interface TestData {
@@ -48,6 +49,7 @@ function run(
     const defaultOptions: SetupOptions = {
       inSsr: false,
       extensionsAvailable: true,
+      config: null,
     };
     const realOptions = { ...defaultOptions, ...options };
 
@@ -64,6 +66,7 @@ function run(
           provide: PLATFORM_ID,
           useValue: realOptions.inSsr ? 'server' : 'browser',
         },
+        ...(realOptions.config ? [provideStoreDevtoolsConfig(realOptions.config)] : []),
       ],
     });
 
@@ -117,6 +120,26 @@ describe('Devtools', () => {
   );
 
   it(
+    'should not connect if it runs in logOnly mode',
+    run(
+      ({ connectSpy }) => {
+        expect(connectSpy).toHaveBeenCalledTimes(0);
+      },
+      { config: { logOnly: true } }
+    )
+  );
+
+  it(
+    'should connect if it runs with config and logOnly=false',
+    run(
+      ({ connectSpy }) => {
+        expect(connectSpy).toHaveBeenCalledTimes(1);
+      },
+      { config: { logOnly: false } }
+    )
+  );
+
+  it(
     'should dispatch todo state',
     run(({ sendSpy, runEffects }) => {
       runEffects();
@@ -153,5 +176,4 @@ describe('Devtools', () => {
   it.todo('should patchState with action name');
   it.todo('should use patchState with default action name');
   it.todo('should group multiple patchStates (glitch-free) in one action');
-  it.todo('should not run if in prod mode');
 });
