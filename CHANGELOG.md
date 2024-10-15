@@ -1,3 +1,14 @@
+## 18.1.0 (2024-10-15)
+
+
+### 🚀 Features
+
+- upgrade to NgRx 18.1 ([30073b9](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/30073b9))
+
+### ❤️  Thank You
+
+- Rainer Hahnekamp
+
 ## 18.0.3 (2024-08-18)
 
 
