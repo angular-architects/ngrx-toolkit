@@ -94,7 +94,9 @@ updateState(this.store, 'update loading', { loading: false });
 
   <summary>Devtools tree-shaking details</summary>
 
-  environment.ts:
+It is required to add the `withDevtools` function to the environment files.
+
+environments/environment.ts:
 ```typescript
 import { withDevtools } from '@angular-architects/ngrx-toolkit';
 
@@ -103,7 +105,7 @@ export const environment = {
 }
 ```
 
-environment.prod.ts
+environments/environment.prod.ts
 ```typescript
 import { withDevtoolsStub } from '@angular-architects/ngrx-toolkit';
 
@@ -112,12 +114,21 @@ export const environment = {
 }
 ```
 
-Then all you need to do is replace `withDevTools` everywhere in your app with `environment.storeWithDevTools`
+Then you can create utility function which can be used across the application
 e.g.:
+
+shared/store.features.ts (or any other file)
+```typescript
+import { environment } from 'src/environments/environment';
+
+export const withTreeShakableDevTools = environment.storeWithDevTools;
+```
+
+And use it in your store definitions:
 ```typescript
 export const SomeStore = signalStore(
   withState({strings: [] as string[] }),
-  environment.storeWithDevTools('featureName')
+  withTreeShakableDevTools('featureName')
 );
 ```
 
