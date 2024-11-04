@@ -23,6 +23,7 @@ Starting with 18.0.0-rc.2, we have a [strict version dependency](#why-is-the-ver
 
 | @ngrx/signals  | @angular-architects/ngrx-toolkit |
 |----------------|----------------------------------|
+| 18.1.1         | 18.1.0 & 18.1.1                  |
 | 18.1.0         | 18.1.0                           |
 | 18.0.2         | 18.0.3                           |
 | 18.0.0         | 18.0.0                           |
