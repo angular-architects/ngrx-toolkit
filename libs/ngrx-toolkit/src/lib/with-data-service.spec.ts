@@ -105,13 +105,7 @@ describe('withDataService', () => {
 
       expect(store.entities().length).toBe(0);
 
-      store.create({
-        id: 3,
-        from: 'Wadena MN',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      store.create(createFlight({id: 3, from: 'Wadena MN'}));
       tick();
       store.update(createFlight({id: 3}));
       tick();
@@ -127,13 +121,7 @@ describe('withDataService', () => {
 
       expect(store.flightEntities().length).toBe(0);
 
-      store.createFlight({
-        id: 3,
-        from: 'Wadena MN',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      store.createFlight(createFlight({id: 3, from: 'Wadena MN'}));
       tick();
       store.updateFlight(createFlight({id: 3}));
       tick();
@@ -284,7 +272,7 @@ describe('withDataService', () => {
       });
     });
   }));
-  it('should the current entity', fakeAsync(() => {
+  it('should set the current entity', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
       tick();
@@ -296,7 +284,7 @@ describe('withDataService', () => {
       expect(store.current()).toEqual(createFlight({id: 4}));
     });
   }));
-  it('set the current entity (with named collection)', fakeAsync(() => {
+  it('should set the current entity (with named collection)', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new StoreWithNamedCollection();
       tick();
@@ -439,7 +427,6 @@ class MockFlightService implements DataService<Flight, FlightFilter> {
   }
 
   create(entity: Flight): Promise<Flight> {
-    entity.id = 0;
     return firstValueFrom(this.save(entity));
   }
 
@@ -450,7 +437,7 @@ class MockFlightService implements DataService<Flight, FlightFilter> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateAll(entity: Flight[]): Promise<Flight[]> {
     return firstValueFrom(
-      of([createFlight({id: 3}), createFlight({id: 4})])
+      of(entity)
     );
   }
 
@@ -467,11 +454,11 @@ class MockFlightService implements DataService<Flight, FlightFilter> {
   }
 
   private findById(id: string): Observable<Flight> {
-    return of(createFlight({id: 2}));
+    return of(createFlight({id: Number(id)}));
   }
 
   private save(flight: Flight): Observable<Flight> {
-    return of(createFlight({id: 3}));
+    return of(flight);
   }
 
   private remove(flight: Flight): Observable<void> {
@@ -488,7 +475,6 @@ class MockFlightServiceForLoading implements DataService<Flight, FlightFilter> {
   }
 
   create(entity: Flight): Promise<Flight> {
-    entity.id = 0;
     return firstValueFrom(this.save(entity));
   }
 
@@ -499,7 +485,7 @@ class MockFlightServiceForLoading implements DataService<Flight, FlightFilter> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateAll(entity: Flight[]): Promise<Flight[]> {
     return firstValueFrom(
-      of([createFlight({id: 3}), createFlight({id: 4})]).pipe(delay(3))
+      of(entity).pipe(delay(3))
     );
   }
 
@@ -516,11 +502,11 @@ class MockFlightServiceForLoading implements DataService<Flight, FlightFilter> {
   }
 
   private findById(id: string): Observable<Flight> {
-    return of(createFlight({id: 2})).pipe(delay(3));
+    return of(createFlight({id: Number(id)})).pipe(delay(3));
   }
 
   private save(flight: Flight): Observable<Flight> {
-    return of(createFlight({id: 3})).pipe(delay(3));
+    return of(createFlight(flight)).pipe(delay(3));
   }
 
   private remove(flight: Flight): Observable<void> {
