@@ -49,13 +49,7 @@ describe('withDataService', () => {
 
       tick();
 
-      expect(store.current()).toEqual({
-        id: 2,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      expect(store.current()).toEqual(createFlight({id: 2}));
     });
   }));
   it('should load by ID from a service and set entities in the store (with named collection)', fakeAsync(() => {
@@ -68,13 +62,7 @@ describe('withDataService', () => {
 
       tick();
 
-      expect(store.currentFlight()).toEqual({
-        id: 2,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      expect(store.currentFlight()).toEqual(createFlight({id: 2}));
     });
   }));
   it('should create from a service and set an entity in the store', fakeAsync(() => {
@@ -85,23 +73,12 @@ describe('withDataService', () => {
 
       expect(store.entities().length).toBe(0);
 
-      store.create({
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      } as Flight);
+      store.create(createFlight({id: 3}));
 
       tick();
 
       expect(store.entities().length).toBe(1);
-      expect(store.current()).toEqual({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      expect(store.current()).toEqual(createFlight({id: 3}));
     });
   }));
   it('should create from a service and set an entity in the store (with named collection)', fakeAsync(() => {
@@ -112,23 +89,12 @@ describe('withDataService', () => {
 
       expect(store.flightEntities().length).toBe(0);
 
-      store.createFlight({
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      } as Flight);
+      store.createFlight(createFlight({id: 3}));
 
       tick();
 
       expect(store.flightEntities().length).toBe(1);
-      expect(store.currentFlight()).toEqual({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      expect(store.currentFlight()).toEqual(createFlight({id: 3}));
     });
   }));
   it('should update from a service and update an entity in the store', fakeAsync(() => {
@@ -147,22 +113,10 @@ describe('withDataService', () => {
         delayed: false,
       });
       tick();
-      store.update({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      store.update(createFlight({id: 3}));
       tick();
 
-      expect(store.current()).toEqual({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      expect(store.current()).toEqual(createFlight({id: 3}));
     });
   }));
   it('should update from a service and update an entity in the store (with named collection)', fakeAsync(() => {
@@ -181,22 +135,10 @@ describe('withDataService', () => {
         delayed: false,
       });
       tick();
-      store.updateFlight({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      store.updateFlight(createFlight({id: 3}));
       tick();
 
-      expect(store.currentFlight()).toEqual({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      expect(store.currentFlight()).toEqual(createFlight({id: 3}));
     });
   }));
   it('should update all from a service and update all entities in the store', fakeAsync(() => {
@@ -207,53 +149,17 @@ describe('withDataService', () => {
 
       expect(store.entities().length).toBe(0);
 
-      store.create({
-        id: 3,
-        from: 'Wadena MN',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
-      store.create({
-        id: 4,
-        from: 'Wadena MN',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      store.create(createFlight({id: 3, from: 'Wadena MN'}));
+      store.create(createFlight({id: 4, from: 'Wadena MN'}));
       tick();
       store.updateAll([
-        {
-          id: 3,
-          from: 'Paris',
-          to: 'New York',
-          date: new Date().toDateString(),
-          delayed: false,
-        },
-        {
-          id: 4,
-          from: 'Paris',
-          to: 'New York',
-          date: new Date().toDateString(),
-          delayed: false,
-        },
+        createFlight({id: 3}),
+        createFlight({id: 4}),
       ]);
       tick();
       expect(store.entities().length).toBe(2);
-      expect(store.entities().at(0)).toEqual({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
-      expect(store.entities().at(1)).toEqual({
-        id: 4,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      expect(store.entities().at(0)).toEqual(createFlight({id: 3}));
+      expect(store.entities().at(1)).toEqual(createFlight({id: 4}));
     });
   }));
   it('should update all from a service and update all entities in the store (with named collection)', fakeAsync(() => {
@@ -264,53 +170,17 @@ describe('withDataService', () => {
 
       expect(store.flightEntities().length).toBe(0);
 
-      store.createFlight({
-        id: 3,
-        from: 'Wadena MN',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
-      store.createFlight({
-        id: 4,
-        from: 'Wadena MN',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      store.createFlight(createFlight({id: 3, from: 'Wadena MN'}));
+      store.createFlight(createFlight({id: 4, from: 'Wadena MN'}));
       tick();
       store.updateAllFlight([
-        {
-          id: 3,
-          from: 'Paris',
-          to: 'New York',
-          date: new Date().toDateString(),
-          delayed: false,
-        },
-        {
-          id: 4,
-          from: 'Paris',
-          to: 'New York',
-          date: new Date().toDateString(),
-          delayed: false,
-        },
+        createFlight({id: 3}),
+        createFlight({id: 4}),
       ]);
       tick();
       expect(store.flightEntities().length).toBe(2);
-      expect(store.flightEntities().at(0)).toEqual({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
-      expect(store.flightEntities().at(1)).toEqual({
-        id: 4,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      expect(store.flightEntities().at(0)).toEqual(createFlight({id: 3}));
+      expect(store.flightEntities().at(1)).toEqual(createFlight({id: 4}));
     });
   }));
   it('should delete from a service and update that entity in the store', fakeAsync(() => {
@@ -321,29 +191,11 @@ describe('withDataService', () => {
 
       expect(store.entities().length).toBe(0);
 
-      store.create({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      store.create(createFlight({id: 3}));
       tick();
       expect(store.entities().length).toBe(1);
-      expect(store.entities().at(0)).toEqual({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
-      store.delete({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      expect(store.entities().at(0)).toEqual(createFlight({id: 3}));
+      store.delete(createFlight({id: 3}));
       tick();
       expect(store.entities().length).toBe(0);
     });
@@ -356,29 +208,11 @@ describe('withDataService', () => {
 
       expect(store.flightEntities().length).toBe(0);
 
-      store.createFlight({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      store.createFlight(createFlight({id: 3}));
       tick();
       expect(store.flightEntities().length).toBe(1);
-      expect(store.flightEntities().at(0)).toEqual({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
-      store.deleteFlight({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      expect(store.flightEntities().at(0)).toEqual(createFlight({id: 3}));
+      store.deleteFlight(createFlight({id: 3}));
       tick();
       expect(store.flightEntities().length).toBe(0);
     });
@@ -389,13 +223,7 @@ describe('withDataService', () => {
 
       tick();
 
-      store.create({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      store.create(createFlight({id: 3}));
       expect(store.selectedEntities().length).toBe(0);
 
       store.updateSelected(3, true);
@@ -403,13 +231,7 @@ describe('withDataService', () => {
       tick();
 
       expect(store.selectedEntities().length).toBe(1);
-      expect(store.selectedEntities()).toContainEqual({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      expect(store.selectedEntities()).toContainEqual(createFlight({id: 3}));
     });
   }));
   it('should update selected flight of the store (with named collection)', fakeAsync(() => {
@@ -418,13 +240,7 @@ describe('withDataService', () => {
 
       tick();
 
-      store.createFlight({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      store.createFlight(createFlight({id: 3}));
       expect(store.selectedFlightEntities().length).toBe(0);
 
       store.updateSelectedFlightEntities(3, true);
@@ -432,13 +248,7 @@ describe('withDataService', () => {
       tick();
 
       expect(store.selectedFlightEntities().length).toBe(1);
-      expect(store.selectedFlightEntities()).toContainEqual({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      expect(store.selectedFlightEntities()).toContainEqual(createFlight({id: 3}));
     });
   }));
   it('should update the filter of the service', fakeAsync(() => {
@@ -479,28 +289,11 @@ describe('withDataService', () => {
       const store = new Store();
       tick();
 
-      store.create({
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      } as Flight);
+      store.create(createFlight({id: 3}));
 
-      store.setCurrent({
-        id: 4,
-        from: 'Wadena MN',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      store.setCurrent(createFlight({id: 4}));
 
-      expect(store.current()).toEqual({
-        id: 4,
-        from: 'Wadena MN',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      expect(store.current()).toEqual(createFlight({id: 4}));
     });
   }));
   it('set the current entity (with named collection)', fakeAsync(() => {
@@ -508,28 +301,11 @@ describe('withDataService', () => {
       const store = new StoreWithNamedCollection();
       tick();
 
-      store.createFlight({
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      } as Flight);
+      store.createFlight(createFlight({id: 3}));
 
-      store.setCurrentFlight({
-        id: 4,
-        from: 'Wadena MN',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      store.setCurrentFlight(createFlight({id: 4}));
 
-      expect(store.currentFlight()).toEqual({
-        id: 4,
-        from: 'Wadena MN',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      expect(store.currentFlight()).toEqual(createFlight({id: 4}));
     });
   }));
 
@@ -540,12 +316,7 @@ describe('withDataService', () => {
 
       expect(store.loading()).toBe(false);
 
-      store.create({
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      } as Flight);
+      store.create(createFlight({id: 3}));
       tick();
       expect(store.loading()).toBe(true);
       tick(3);
@@ -563,46 +334,22 @@ describe('withDataService', () => {
       tick(3);
       expect(store.loading()).toBe(false);
 
-      store.update({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      store.update(createFlight({id: 3}));
       tick();
       expect(store.loading()).toBe(true);
       tick(3);
       expect(store.loading()).toBe(false);
 
       store.updateAll([
-        {
-          id: 3,
-          from: 'Paris',
-          to: 'New York',
-          date: new Date().toDateString(),
-          delayed: false,
-        },
-        {
-          id: 4,
-          from: 'Paris',
-          to: 'New York',
-          date: new Date().toDateString(),
-          delayed: false,
-        },
+        createFlight({id: 3}),
+        createFlight({id: 4}),
       ]);
       tick();
       expect(store.loading()).toBe(true);
       tick(3);
       expect(store.loading()).toBe(false);
 
-      store.delete({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      store.delete(createFlight({id: 3}));
       tick();
       expect(store.loading()).toBe(true);
       tick(3);
@@ -617,12 +364,7 @@ describe('withDataService', () => {
 
       expect(store.flightLoading()).toBe(false);
 
-      store.createFlight({
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      } as Flight);
+      store.createFlight(createFlight({id: 3}));
       tick();
       expect(store.flightLoading()).toBe(true);
       tick(3);
@@ -640,46 +382,22 @@ describe('withDataService', () => {
       tick(3);
       expect(store.flightLoading()).toBe(false);
 
-      store.updateFlight({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      store.updateFlight(createFlight({id: 3}));
       tick();
       expect(store.flightLoading()).toBe(true);
       tick(3);
       expect(store.flightLoading()).toBe(false);
 
       store.updateAllFlight([
-        {
-          id: 3,
-          from: 'Paris',
-          to: 'New York',
-          date: new Date().toDateString(),
-          delayed: false,
-        },
-        {
-          id: 4,
-          from: 'Paris',
-          to: 'New York',
-          date: new Date().toDateString(),
-          delayed: false,
-        },
+        createFlight({id: 3}),
+        createFlight({id: 4}),
       ]);
       tick();
       expect(store.flightLoading()).toBe(true);
       tick(3);
       expect(store.flightLoading()).toBe(false);
 
-      store.deleteFlight({
-        id: 3,
-        from: 'Paris',
-        to: 'New York',
-        date: new Date().toDateString(),
-        delayed: false,
-      });
+      store.deleteFlight(createFlight({id: 3}));
       tick();
       expect(store.flightLoading()).toBe(true);
       tick(3);
