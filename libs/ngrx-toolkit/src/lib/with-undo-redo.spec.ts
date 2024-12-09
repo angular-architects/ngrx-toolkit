@@ -192,32 +192,23 @@ describe('withUndoRedo', () => {
       });
     }));
 
-    it('clears undo redo stack', fakeAsync(() => {
-      TestBed.runInInjectionContext(() => {
-        const Store = signalStore(
-          withState(testState),
-          withMethods(store => ({ update: (value: string) => patchState(store, { test: value }) })),
-          withUndoRedo({ keys: testKeys })
-        );
+    it('clears undo redo stack', () => {
+      const Store = signalStore(
+        { providedIn: 'root' },
+        withState(testState),
+        withMethods(store => ({ update: (value: string) => patchState(store, { test: value }) })),
+        withUndoRedo({ keys: testKeys })
+      );
 
-        const store = new Store();
-        tick(1);
+      const store = TestBed.inject(Store);
 
-        store.update('Foo');
-        tick(1);
+      store.update('Foo');
+      store.update('Bar');
+      store.undo();
+      store.clearStack();
 
-        store.update('Bar');
-        tick(1);
-
-        store.undo();
-        tick(1);
-
-        store.clearStack();
-        tick(1);
-
-        expect(store.canUndo()).toBe(false);
-        expect(store.canRedo()).toBe(false);
-      });
-    }))
+      expect(store.canUndo()).toBe(false);
+      expect(store.canRedo()).toBe(false);
+    })
   });
 });
