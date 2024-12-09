@@ -21,7 +21,8 @@ describe('withUndoRedo', () => {
         'canUndo',
         'canRedo',
         'undo',
-        'redo'
+        'redo',
+        'clearStack'
       ]);
     });
   });
@@ -190,5 +191,33 @@ describe('withUndoRedo', () => {
         expect(store.canRedo()).toBe(true);
       });
     }));
+
+    it('clears undo redo stack', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withState(testState),
+          withMethods(store => ({ update: (value: string) => patchState(store, { test: value }) })),
+          withUndoRedo({ keys: testKeys })
+        );
+
+        const store = new Store();
+        tick(1);
+
+        store.update('Foo');
+        tick(1);
+
+        store.update('Bar');
+        tick(1);
+
+        store.undo();
+        tick(1);
+
+        store.clearStack();
+        tick(1);
+
+        expect(store.canUndo()).toBe(false);
+        expect(store.canRedo()).toBe(false);
+      });
+    }))
   });
 });

@@ -61,6 +61,7 @@ export function withUndoRedo<
   methods: {
     undo: () => void;
     redo: () => void;
+    clearStack: () => void;
   };
 }
 > {
@@ -124,6 +125,11 @@ export function withUndoRedo<
           previous = item;
         }
 
+        updateInternal();
+      },
+      clearStack(): void {
+        undoStack.splice(0);
+        redoStack.splice(0);
         updateInternal();
       },
     })),

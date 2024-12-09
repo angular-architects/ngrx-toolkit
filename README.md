@@ -382,6 +382,7 @@ public class UndoRedoComponent {
 
   canUndo = this.store.canUndo; // use in template or in ts
   canRedo = this.store.canRedo; // use in template or in ts
+  clearStack = this.store.clearStack; // use in template or in ts
 
   undo(): void {
     if (!this.canUndo()) return;
@@ -391,6 +392,10 @@ public class UndoRedoComponent {
   redo(): void {
     if (!this.canRedo()) return;
     this.store.redo();
+  }
+
+  clearStack(): void {
+    this.store.clearStack();
   }
 }
 ```
