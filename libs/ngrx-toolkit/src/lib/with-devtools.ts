@@ -2,6 +2,7 @@ import {
   EmptyFeatureResult,
   PartialStateUpdater,
   patchState as originalPatchState,
+  signalStore,
   SignalStoreFeature,
   WritableStateSource,
 } from '@ngrx/signals';
@@ -82,7 +83,7 @@ export function reset() {
 /**
  * Stub for DevTools integration. Can be used to disable DevTools in production.
  */
-export const withDevToolsStub: typeof withDevtools = () => store => store;
+export const withDevToolsStub: typeof withDevtools = () => (store) => store;
 
 /**
  * @param name store's name as it should appear in the DevTools

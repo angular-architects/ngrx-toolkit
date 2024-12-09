@@ -1,4 +1,4 @@
-import { patchState, signalStore, withState } from '@ngrx/signals';
+import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { withDevtools } from '../with-devtools';
 import { TestBed, waitForAsync } from '@angular/core/testing';
 import { setupExtensions } from './helpers';
@@ -11,7 +11,7 @@ describe('withDevtools / renaming', () => {
     const { sendSpy } = setupExtensions();
     const Store = signalStore(
       withDevtools('flights'),
-      withState({ airline: 'Lufthansa' }),
+      withState({ airline: 'Lufthansa' })
     );
 
     @Component({
@@ -36,7 +36,7 @@ describe('withDevtools / renaming', () => {
       {
         flights: { airline: 'Lufthansa' },
         'flights-1': { airline: 'Lufthansa' },
-      },
+      }
     );
   }));
 
@@ -44,7 +44,7 @@ describe('withDevtools / renaming', () => {
     const { sendSpy } = setupExtensions();
     const Store = signalStore(
       withDevtools('flights'),
-      withState({ airline: 'Lufthansa' }),
+      withState({ airline: 'Lufthansa' })
     );
 
     @Component({
@@ -110,7 +110,7 @@ describe('withDevtools / renaming', () => {
   it('should throw if automatic indexing is disabled', waitForAsync(() => {
     const Store = signalStore(
       withDevtools('flights', { indexNames: false }),
-      withState({ airline: 'Lufthansa' }),
+      withState({ airline: 'Lufthansa' })
     );
 
     @Component({
@@ -137,24 +137,34 @@ describe('withDevtools / renaming', () => {
     const Store = signalStore(
       { providedIn: 'root' },
       withState({ airline: 'Lufthansa' }),
-      withDevtools('flights'),
+      withDevtools('flights')
     );
     const StoreIx1 = signalStore(
       { providedIn: 'root' },
       withState({ airline: 'Austrian' }),
       withDevtools('flights'),
+      withMethods((store) => ({
+        setAirline(airline: string) {
+          patchState(store, { airline });
+        },
+      }))
     );
     const StoreIx2 = signalStore(
       { providedIn: 'root' },
       withState({ airline: 'British Airways' }),
       withDevtools('flights'),
+      withMethods((store) => ({
+        setAirline(airline: string) {
+          patchState(store, { airline });
+        },
+      }))
     );
     const store = TestBed.inject(Store);
     const storeIx1 = TestBed.inject(StoreIx1);
     const storeIx2 = TestBed.inject(StoreIx2);
 
-    patchState(storeIx1, { airline: 'Austrian Airlines' });
-    patchState(storeIx2, { airline: 'BA' });
+    storeIx1.setAirline('Austrian Airlines');
+    storeIx2.setAirline('BA');
 
     TestBed.flushEffects();
 
@@ -164,7 +174,7 @@ describe('withDevtools / renaming', () => {
         flights: { airline: 'Lufthansa' },
         'flights-1': { airline: 'Austrian Airlines' },
         'flights-2': { airline: 'BA' },
-      },
+      }
     );
   });
 
@@ -173,20 +183,20 @@ describe('withDevtools / renaming', () => {
     const Store = signalStore(
       { providedIn: 'root' },
       withState({ airline: 'Lufthansa' }),
-      withDevtools('flights', { indexNames: false }),
+      withDevtools('flights', { indexNames: false })
     );
     const StoreIx1 = signalStore(
       { providedIn: 'root' },
       withState({ airline: 'Austrian' }),
-      withDevtools('flights'),
+      withDevtools('flights')
     );
   });
 
   it.todo(
-    'should throw on multiple instance of a signal store if indexing is disabled',
+    'should throw on multiple instance of a signal store if indexing is disabled'
   );
   it.todo(
-    'should throw immediately if a signal store is defined with an existing name',
+    'should throw immediately if a signal store is defined with an existing name'
   );
 
   it('should allow to rename the store before first sync', waitForAsync(async () => {
@@ -195,7 +205,7 @@ describe('withDevtools / renaming', () => {
     const Store = signalStore(
       { providedIn: 'root' },
       withState({ name: 'Product', price: 10.5 }),
-      withDevtools('flight'),
+      withDevtools('flight')
     );
 
     const store = TestBed.inject(Store);
@@ -204,7 +214,7 @@ describe('withDevtools / renaming', () => {
 
     expect(sendSpy).toHaveBeenCalledWith(
       { type: 'Store Update' },
-      { flights: { name: 'Product', price: 10.5 } },
+      { flights: { name: 'Product', price: 10.5 } }
     );
   }));
 
@@ -213,14 +223,14 @@ describe('withDevtools / renaming', () => {
     const Store = signalStore(
       { providedIn: 'root' },
       withState({ name: 'Product', price: 10.5 }),
-      withDevtools('flight'),
+      withDevtools('flight')
     );
     const store = TestBed.inject(Store);
 
     TestBed.flushEffects();
 
     expect(() => store.renameDevtoolsName('flights')).toThrow(
-      'NgRx Toolkit/DevTools: cannot rename from flight to flights. flight has already been send to DevTools.',
+      'NgRx Toolkit/DevTools: cannot rename from flight to flights. flight has already been send to DevTools.'
     );
   }));
 
@@ -229,19 +239,19 @@ describe('withDevtools / renaming', () => {
     signalStore(
       { providedIn: 'root' },
       withState({ name: 'Product', price: 10.5 }),
-      withDevtools('shop'),
+      withDevtools('shop')
     );
 
     const Store2 = signalStore(
       { providedIn: 'root' },
       withState({ name: 'Product', price: 10.5 }),
-      withDevtools('mall'),
+      withDevtools('mall')
     );
     const store = TestBed.inject(Store2);
     TestBed.flushEffects();
 
     expect(() => store.renameDevtoolsName('shop')).toThrow(
-      'NgRx Toolkit/DevTools: cannot rename from mall to shop. mall has already been send to DevTools.',
+      'NgRx Toolkit/DevTools: cannot rename from mall to shop. mall has already been send to DevTools.'
     );
   }));
 });

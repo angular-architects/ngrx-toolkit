@@ -1,7 +1,6 @@
-import { Action } from '../with-devtools';
+import { Action, existingNames } from '../with-devtools';
 import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { jest } from '@jest/globals';
 
 interface SetupOptions {
   extensionsAvailable: boolean;
@@ -31,7 +30,7 @@ function assertNotNull<T>(obj: T): asserts obj is NonNullable<T> {
 
 export function setupExtensions(
   isPlatformBrowser = true,
-  isExtensionAvailable = true,
+  isExtensionAvailable = true
 ) {
   const sendSpy = jest.fn();
   const connection = {
@@ -53,6 +52,8 @@ export function setupExtensions(
       ],
     });
   }
+
+  existingNames.clear();
 
   return { sendSpy, connectSpy };
 }

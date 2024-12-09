@@ -21,7 +21,7 @@ export type DevtoolsOptions = {
   indexNames: boolean;
 };
 
-const existingNames: Record<string, unknown> = {};
+export const existingNames = new Map<string, unknown>();
 
 /**
  * Adds this store as a feature state to the Redux DevTools.
@@ -37,17 +37,18 @@ const existingNames: Record<string, unknown> = {};
  * synchronization. In most cases. that's in the constructor.
  *
  * @param name name of the store as it should appear in the DevTools
+ * @param options options for the DevTools
  */
 export function withDevtools(
   name: string,
-  options: Partial<DevtoolsOptions> = {},
+  options: Partial<DevtoolsOptions> = {}
 ) {
-  if (name in existingNames) {
+  if (existingNames.has(name)) {
     throw new Error(
-      `A store with name ${name} has already been registered for the Devtools`,
+      `A store with name ${name} has already been registered for the Devtools`
     );
   }
-  existingNames[name] = true;
+  existingNames.set(name, true);
   const finalOptions: DevtoolsOptions = { ...{ indexNames: true }, ...options };
   return signalStoreFeature(
     withMethods((store) => {
@@ -63,6 +64,6 @@ export function withDevtools(
     withHooks(() => {
       const syncer = inject(DevtoolsSyncer);
       return { onDestroy: () => syncer.removeStore(name) };
-    }),
+    })
   );
 }

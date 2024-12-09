@@ -1,9 +1,10 @@
 import { setupExtensions } from './helpers';
 import { TestBed } from '@angular/core/testing';
-import { signalStore, withState } from '@ngrx/signals';
-import { updateState, withDevtools } from 'ngrx-toolkit';
+import { signalStore, withMethods, withState } from '@ngrx/signals';
+import { withDevtools } from '../with-devtools';
+import { updateState } from '../update-state';
 
-describe('tkPatchState', () => {
+describe('updateState', () => {
   it('should show the name of the action', () => {
     const { sendSpy } = setupExtensions();
     TestBed.inject(
@@ -22,16 +23,21 @@ describe('tkPatchState', () => {
 
   it('should set the action name', () => {
     const { sendSpy } = setupExtensions();
-    const store = TestBed.inject(
-      signalStore(
-        { providedIn: 'root' },
-        withDevtools('shop'),
-        withState({ name: 'Car' })
-      )
+
+    const Store = signalStore(
+      { providedIn: 'root' },
+      withDevtools('shop'),
+      withState({ name: 'Car' }),
+      withMethods((store) => ({
+        setName(name: string) {
+          updateState(store, 'Set Name', { name });
+        },
+      }))
     );
+    const store = TestBed.inject(Store);
     TestBed.flushEffects();
 
-    updateState(store, 'Set Name', { name: 'i4' });
+    store.setName('i4');
     TestBed.flushEffects();
 
     expect(sendSpy).lastCalledWith(
