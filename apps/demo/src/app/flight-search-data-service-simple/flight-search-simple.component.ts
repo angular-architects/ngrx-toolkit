@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FlightCardComponent } from '../shared/flight-card.component';
-import { SimpleFlightBookingStore } from './flight-booking-simple.store';
+import { SimpleFlightBookingStore, SimpleFlightBookingStoreWithObservables } from './flight-booking-simple.store';
 import { MatTableModule } from '@angular/material/table';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -31,7 +31,8 @@ import { MatButtonModule } from '@angular/material/button';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FlightSearchSimpleComponent {
-  private store = inject(SimpleFlightBookingStore);
+  // private store = inject(SimpleFlightBookingStore);
+  private store = inject(SimpleFlightBookingStoreWithObservables); // TODO - differentiate these in more nuanced way than comment in/out
 
   from = this.store.filter.from;
   to = this.store.filter.to;
