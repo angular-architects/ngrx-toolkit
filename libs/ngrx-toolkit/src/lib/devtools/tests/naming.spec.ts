@@ -1,6 +1,6 @@
-import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
+import { signalStore, withState } from '@ngrx/signals';
 import { withDevtools } from '../with-devtools';
-import { TestBed, waitForAsync } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { setupExtensions } from './helpers';
 import {
   createEnvironmentInjector,
@@ -9,6 +9,7 @@ import {
   runInInjectionContext,
 } from '@angular/core';
 import { renameDevtoolsName } from '../rename-devtools-name';
+import { withDisabledNameIndices } from '../with-disabled-name-indicies';
 
 describe('withDevtools / renaming', () => {
   it('should automatically index multiple instances', () => {
@@ -84,7 +85,7 @@ describe('withDevtools / renaming', () => {
     setupExtensions();
     const Store = signalStore(
       { providedIn: 'root' },
-      withDevtools('flights', { indexNames: false }),
+      withDevtools('flights', withDisabledNameIndices()),
       withState({ airline: 'Lufthansa' })
     );
 
@@ -103,7 +104,7 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
   });
 
   it('should throw if name already exists', () => {
-    const { sendSpy } = setupExtensions();
+    setupExtensions();
     signalStore(withDevtools('flights'));
     expect(() => signalStore(withDevtools('flights'))).toThrow(
       'The store "flights" has already been registered in the DevTools. Duplicate registration is not allowed.'
@@ -151,7 +152,7 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
 
     it('should throw on rename if name already exists', () => {
       setupExtensions();
-      signalStore(
+      const Store1 = signalStore(
         { providedIn: 'root' },
         withState({ name: 'Product', price: 10.5 }),
         withDevtools('shop')
@@ -162,11 +163,12 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
         withState({ name: 'Product', price: 10.5 }),
         withDevtools('mall')
       );
+      TestBed.inject(Store1);
       const store = TestBed.inject(Store2);
       TestBed.flushEffects();
 
       expect(() => renameDevtoolsName(store, 'shop')).toThrow(
-        'NgRx Toolkit/DevTools: cannot rename from mall to shop. mall has already been send to DevTools.'
+        'NgRx Toolkit/DevTools: cannot rename from mall to shop. shop is already assigned to another SignalStore instance.'
       );
     });
 

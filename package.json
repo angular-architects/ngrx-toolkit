@@ -5,6 +5,7 @@
   "scripts": {
     "start": "nx serve demo",
     "build:all": "nx run-many --targets=build",
+    "test:all": "nx run-many --targets=test",
     "verify:all": "nx run-many --targets=lint,test,build"
   },
   "private": true,

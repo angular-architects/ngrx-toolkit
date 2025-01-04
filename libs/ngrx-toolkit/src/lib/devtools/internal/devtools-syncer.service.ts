@@ -117,7 +117,7 @@ Enable automatic indexing via withDevTools('${storeName}', { indexNames: true })
     this.#stores.update((stores) => {
       if (newName in stores) {
         throw new Error(
-          `NgRx Toolkit/DevTools: cannot rename from ${oldName} to ${newName}. ${oldName} does not exist.`
+          `NgRx Toolkit/DevTools: cannot rename from ${oldName} to ${newName}. ${newName} is already assigned to another SignalStore instance.`
         );
       }
 
