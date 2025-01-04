@@ -1,6 +1,6 @@
 import { setupExtensions } from './helpers';
 import { TestBed, waitForAsync } from '@angular/core/testing';
-import { patchState, signalStore, withState } from '@ngrx/signals';
+import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { withDevtools } from '../with-devtools';
 import { Component, inject } from '@angular/core';
 import { provideRouter } from '@angular/router';
@@ -13,17 +13,17 @@ describe('Devtools Basics', () => {
       signalStore(
         { providedIn: 'root' },
         withDevtools('shop'),
-        withState({ name: 'Car' }),
-      ),
+        withState({ name: 'Car' })
+      )
     );
     TestBed.flushEffects();
     expect(sendSpy).toHaveBeenCalledWith(
       { type: 'Store Update' },
-      { shop: { name: 'Car' } },
+      { shop: { name: 'Car' } }
     );
   });
 
-  it('should add multiple store as feature stores', () => {
+  it('should add multiple stores as feature stores', () => {
     const { sendSpy } = setupExtensions();
     for (const name of ['category', 'booking']) {
       TestBed.inject(signalStore({ providedIn: 'root' }, withDevtools(name)));
@@ -34,7 +34,7 @@ describe('Devtools Basics', () => {
       {
         category: {},
         booking: {},
-      },
+      }
     );
   });
 
@@ -68,10 +68,37 @@ describe('Devtools Basics', () => {
     const harness = await RouterTestingHarness.create('flight');
     expect(sendSpy).toHaveBeenCalledWith(
       { type: 'Store Update' },
-      { flight: {} },
+      { flight: {} }
     );
     await harness.navigateByUrl('/');
     TestBed.flushEffects();
     expect(sendSpy).toHaveBeenCalledWith({ type: 'Store Update' }, {});
   }));
+
+  it('should group multiple patchState running before the first synchronization', () => {
+    const { sendSpy } = setupExtensions();
+    const store = TestBed.inject(
+      signalStore(
+        { providedIn: 'root' },
+        withDevtools('shop'),
+        withState({ name: 'Car', amount: 0 }),
+        withMethods((store) => ({
+          increment() {
+            patchState(store, (value) => ({
+              ...value,
+              amount: value.amount + 1,
+            }));
+          },
+        }))
+      )
+    );
+
+    store.increment();
+    store.increment();
+    TestBed.flushEffects();
+
+    expect(sendSpy.mock.calls).toEqual([
+      [{ type: 'Store Update' }, { shop: { name: 'Car', amount: 2 } }],
+    ]);
+  });
 });

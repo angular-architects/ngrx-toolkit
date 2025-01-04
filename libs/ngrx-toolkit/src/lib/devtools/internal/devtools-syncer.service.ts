@@ -43,7 +43,7 @@ export abstract class DevtoolsSyncer implements OnDestroy {
   abstract addStore(
     name: string,
     store: Signal<unknown>,
-    options: DevtoolsOptions,
+    options: DevtoolsOptions
   ): void;
 
   abstract removeStore(name: string): void;
@@ -72,7 +72,7 @@ type StoreRegistry = Record<
 class DefaultDevtoolsSyncer implements OnDestroy, DevtoolsSyncer {
   readonly #stores = signal<StoreRegistry>({});
   readonly #connection = throwIfNull(
-    window.__REDUX_DEVTOOLS_EXTENSION__,
+    window.__REDUX_DEVTOOLS_EXTENSION__
   ).connect({
     name: 'NgRx Signal Store',
   });
@@ -112,11 +112,8 @@ class DefaultDevtoolsSyncer implements OnDestroy, DevtoolsSyncer {
     if (names.includes(storeName)) {
       const { options } = this.#stores()[storeName];
       if (!options.indexNames) {
-        throw new Error(
-          `An instance of the store ${storeName} already exists. Use a name,
-          rename it upon instantiation or enable automatic indexing:
-          (withDevTools('${storeName}', {indexNames: true}))`,
-        );
+        throw new Error(`An instance of the store ${storeName} already exists. \
+Enable automatic indexing via withDevTools('${storeName}', { indexNames: true }), or rename it upon instantiation.`);
       }
     }
 
@@ -146,7 +143,7 @@ class DefaultDevtoolsSyncer implements OnDestroy, DevtoolsSyncer {
   renameStore(oldName: string, newName: string) {
     if (this.#syncedStoreNames.has(oldName)) {
       throw new Error(
-        `NgRx Toolkit/DevTools: cannot rename from ${oldName} to ${newName}. ${oldName} has already been send to DevTools.`,
+        `NgRx Toolkit/DevTools: cannot rename from ${oldName} to ${newName}. ${oldName} has already been send to DevTools.`
       );
     }
 
@@ -155,7 +152,7 @@ class DefaultDevtoolsSyncer implements OnDestroy, DevtoolsSyncer {
       for (const storeName in stores) {
         if (storeName === newName) {
           throw new Error(
-            `NgRx Toolkit/DevTools: cannot rename from ${oldName} to ${newName}. ${newName} already exists.`,
+            `NgRx Toolkit/DevTools: cannot rename from ${oldName} to ${newName}. ${newName} already exists.`
           );
         }
         if (storeName === oldName) {

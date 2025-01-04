@@ -1,4 +1,10 @@
-import { signalStoreFeature, withHooks, withMethods } from '@ngrx/signals';
+import {
+  EmptyFeatureResult,
+  signalStoreFeature,
+  StateSource,
+  withHooks,
+  withMethods,
+} from '@ngrx/signals';
 import { inject } from '@angular/core';
 import { DevtoolsSyncer } from './internal/devtools-syncer.service';
 import { getStoreSignal } from '../shared/get-store-signal';
@@ -18,10 +24,42 @@ declare global {
 }
 
 export type DevtoolsOptions = {
+  /**
+   * If multiple instances of the same SignalStore class
+   * exist, their devtool names are indexed.
+   *
+   * If this feature is disabled, this feature throws
+   * a runtime error.
+   *
+   * By default, the value is `true`.
+   *
+   * For example:
+   * <pre>
+   * const Store = signalStore(
+   *   withDevtools('flights', { indexNames: true })
+   * )
+   *
+   * const store1 = new Store(); // will show up as 'flights'
+   * const store2 = new Store(); // will show up as 'flights-1'
+   * </pre>
+   *
+   * With value set to `false`:
+   * <pre>
+   * const Store = signalStore(
+   *   withDevtools('flights', { indexNames: false })
+   * )
+   *
+   * const store1 = new Store(); // will show up as 'flights'
+   * const store2 = new Store(); //💥 throws an error
+   * </pre>
+   *
+   */
   indexNames: boolean;
 };
 
 export const existingNames = new Map<string, unknown>();
+
+export const renameDevtoolsMethodName = '___renameDevtoolsName';
 
 /**
  * Adds this store as a feature state to the Redux DevTools.
@@ -30,11 +68,8 @@ export const existingNames = new Map<string, unknown>();
  * change that via the `patch` method, which has as second
  * parameter the action name.
  *
- * It adds the method `renameDevtoolsName` which allows
- * you to rename the features store after instantiation.
- *
- * This method has to be executed before the first
- * synchronization. In most cases. that's in the constructor.
+ * The standalone function {@link renameDevtoolsName} can rename
+ * the store name before the first synchronization.
  *
  * @param name name of the store as it should appear in the DevTools
  * @param options options for the DevTools
@@ -45,7 +80,7 @@ export function withDevtools(
 ) {
   if (existingNames.has(name)) {
     throw new Error(
-      `A store with name ${name} has already been registered for the Devtools`
+      `The store "${name}" has already been registered in the DevTools. Duplicate registration is not allowed.`
     );
   }
   existingNames.set(name, true);
@@ -56,10 +91,10 @@ export function withDevtools(
       syncer.addStore(name, getStoreSignal(store), finalOptions);
 
       return {
-        renameDevtoolsName(newName: string): void {
+        [renameDevtoolsMethodName]: (newName: string) => {
           syncer.renameStore(name, newName);
         },
-      };
+      } as {};
     }),
     withHooks(() => {
       const syncer = inject(DevtoolsSyncer);

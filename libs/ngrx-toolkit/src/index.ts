@@ -1,10 +1,7 @@
-export {
-  withDevToolsStub,
-  withDevtools,
-  patchState,
-  updateState,
-  Action,
-} from './lib/with-devtools';
+export { withDevToolsStub } from './lib/devtools/with-dev-tools-stub';
+export { withDevtools } from './lib/devtools/with-devtools';
+export { patchState, updateState } from './lib/devtools/update-state';
+
 export * from './lib/with-redux';
 
 export * from './lib/with-call-state';
