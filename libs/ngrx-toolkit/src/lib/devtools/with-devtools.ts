@@ -88,7 +88,7 @@ export function withDevtools(
         [renameDevtoolsMethodName]: (newName: string) => {
           syncer.renameStore(name, newName);
         },
-      } as {};
+      } as Record<string, (newName: string) => void>;
     }),
     withHooks(() => {
       const syncer = inject(DevtoolsSyncer);

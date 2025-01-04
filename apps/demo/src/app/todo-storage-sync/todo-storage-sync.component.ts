@@ -5,7 +5,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { SyncedTodoStore } from './synced-todo-store';
 import { SelectionModel } from '@angular/cdk/collections';
 import { CategoryStore } from '../category.store';
-import { Todo } from '../todo-store';
+import { Todo } from '../devtools/todo-store';
 
 @Component({
   selector: 'demo-todo-storage-sync',

@@ -1,6 +1,7 @@
 export { withDevToolsStub } from './lib/devtools/with-dev-tools-stub';
 export { withDevtools } from './lib/devtools/with-devtools';
 export { patchState, updateState } from './lib/devtools/update-state';
+export { renameDevtoolsName } from './lib/devtools/rename-devtools-name';
 
 export * from './lib/with-redux';
 

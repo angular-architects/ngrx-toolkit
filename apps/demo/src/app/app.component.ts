@@ -2,7 +2,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { Component, effect, inject } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { Todo, TodoStore } from './todo-store';
+import { Todo, TodoStore } from './devtools/todo-store';
 import { MatIconModule } from '@angular/material/icon';
 import { CategoryStore } from './category.store';
 import { RouterLink, RouterOutlet } from '@angular/router';
