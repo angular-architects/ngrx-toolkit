@@ -6,7 +6,6 @@ import { FlightBookingStore } from './flight-booking.store';
 import { Flight } from '../shared/flight';
 
 @Component({
-  standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
   selector: 'demo-flight-edit',
   templateUrl: './flight-edit.component.html',

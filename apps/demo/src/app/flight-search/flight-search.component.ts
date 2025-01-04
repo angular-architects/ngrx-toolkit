@@ -11,7 +11,6 @@ import { MatButtonModule } from '@angular/material/button';
 @Component({
   selector: 'demo-flight-search',
   templateUrl: 'flight-search.component.html',
-  standalone: true,
   imports: [
     MatTableModule,
     DatePipe,

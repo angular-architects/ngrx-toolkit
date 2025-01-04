@@ -14,7 +14,6 @@ import { MatListItem, MatListModule } from '@angular/material/list';
 @Component({
     selector: 'demo-root',
     templateUrl: './app.component.html',
-    standalone: true,
     styleUrl: './app.component.css',
     imports: [
         MatTableModule,

@@ -42,8 +42,8 @@ type NonNever<T> = T extends never ? never : T;
 type ExtractEntityCollection<T> = T extends `${infer U}Entities` ? U : never;
 
 type ExtractEntityCollections<Store extends SignalStoreFeatureResult> = NonNever<{
-  [K in keyof Store['computed']]: ExtractEntityCollection<K>;
-}[keyof Store['computed']]>;
+  [K in keyof Store['props']]: ExtractEntityCollection<K>;
+}[keyof Store['props']]>;
 
 type OptionsForState<Store extends SignalStoreFeatureResult> = Partial<Omit<NormalizedUndoRedoOptions, 'collections' | 'keys'>> & {
   collections?: ExtractEntityCollections<Store>[];
@@ -54,7 +54,7 @@ export function withUndoRedo<
   Input extends EmptyFeatureResult>(options?: OptionsForState<Input>): SignalStoreFeature<
   Input,
   EmptyFeatureResult & {
-  computed: {
+  props: {
     canUndo: Signal<boolean>;
     canRedo: Signal<boolean>;
   };

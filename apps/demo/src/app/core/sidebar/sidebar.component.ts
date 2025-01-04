@@ -10,7 +10,6 @@ import { RouterModule } from '@angular/router';
 import { map, shareReplay } from 'rxjs';
 
 @Component({
-    standalone: true,
     selector: 'demo-sidebar-cmp',
     imports: [
         RouterModule,
