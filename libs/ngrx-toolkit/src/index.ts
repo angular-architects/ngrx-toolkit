@@ -1,10 +1,9 @@
-export {
-  withDevToolsStub,
-  withDevtools,
-  patchState,
-  updateState,
-  Action,
-} from './lib/with-devtools';
+export { withDevToolsStub } from './lib/devtools/with-dev-tools-stub';
+export { withDevtools } from './lib/devtools/with-devtools';
+export { withDisabledNameIndices } from './lib/devtools/with-disabled-name-indicies';
+export { patchState, updateState } from './lib/devtools/update-state';
+export { renameDevtoolsName } from './lib/devtools/rename-devtools-name';
+
 export * from './lib/with-redux';
 
 export * from './lib/with-call-state';

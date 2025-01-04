@@ -5,7 +5,7 @@ import {
   removeEntity,
   updateEntity,
 } from '@ngrx/signals/entities';
-import { AddTodo, Todo } from '../todo-store';
+import { AddTodo, Todo } from '../devtools/todo-store';
 import { withStorageSync } from '@angular-architects/ngrx-toolkit';
 
 export const SyncedTodoStore = signalStore(
