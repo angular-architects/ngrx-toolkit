@@ -64,7 +64,6 @@ import { TodoDetailComponent } from './todo-detail.component';
     display: flex;
   }
   `,
-  standalone: true,
   imports: [
     MatCheckboxModule,
     MatIconModule,

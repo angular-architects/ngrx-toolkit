@@ -29,7 +29,6 @@ const TodoDetailStore = signalStore(
       <textarea>{{ todo().description }}</textarea>
     </mat-card-content>
   </mat-card>`,
-  standalone: true,
   imports: [MatCardModule],
   providers: [TodoDetailStore],
   styles: `
