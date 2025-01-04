@@ -4,12 +4,12 @@ import {
   Injectable,
   OnDestroy,
   PLATFORM_ID,
-  Signal,
   signal,
 } from '@angular/core';
 import { currentActionNames } from './currrent-action-names';
-import { isPlatformBrowser, isPlatformServer } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { Connection, DevtoolsOptions } from '../with-devtools';
+import { getState, StateSource } from '@ngrx/signals';
 
 const dummyConnection: Connection = {
   send: () => void true,
@@ -64,7 +64,7 @@ export class DevtoolsSyncer implements OnDestroy {
       for (const name in stores) {
         this.#syncedStoreNames.add(name);
         const { store } = stores[name];
-        rootState[name] = store();
+        rootState[name] = getState(store);
       }
 
       const names = Array.from(currentActionNames);
@@ -79,7 +79,7 @@ export class DevtoolsSyncer implements OnDestroy {
     currentActionNames.clear();
   }
 
-  addStore(name: string, store: Signal<unknown>, options: DevtoolsOptions) {
+  addStore(name: string, store: StateSource<object>, options: DevtoolsOptions) {
     let storeName = name;
     const names = Object.keys(this.#stores());
 
@@ -143,5 +143,5 @@ Enable automatic indexing via withDevTools('${storeName}', { indexNames: true })
 
 type StoreRegistry = Record<
   string,
-  { store: Signal<unknown>; options: DevtoolsOptions }
+  { store: StateSource<object>; options: DevtoolsOptions }
 >;

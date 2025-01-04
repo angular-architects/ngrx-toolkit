@@ -11,7 +11,7 @@ import {
 import { renameDevtoolsName } from '../rename-devtools-name';
 
 describe('withDevtools / renaming', () => {
-  it('should automatically index multiple instances', waitForAsync(() => {
+  it('should automatically index multiple instances', () => {
     const { sendSpy } = setupExtensions();
     const Store = signalStore(
       { providedIn: 'root' },
@@ -36,9 +36,9 @@ describe('withDevtools / renaming', () => {
         'flights-1': { airline: 'Lufthansa' },
       }
     );
-  }));
+  });
 
-  it('not index, if multiple instances do not exist simultaneously', waitForAsync(async () => {
+  it('not index, if multiple instances do not exist simultaneously', () => {
     const { sendSpy } = setupExtensions();
     const Store = signalStore(
       withDevtools('flights'),
@@ -78,9 +78,9 @@ describe('withDevtools / renaming', () => {
         },
       ],
     ]);
-  }));
+  });
 
-  it('should throw if automatic indexing is disabled', waitForAsync(() => {
+  it('should throw if automatic indexing is disabled', () => {
     setupExtensions();
     const Store = signalStore(
       { providedIn: 'root' },
@@ -100,7 +100,7 @@ describe('withDevtools / renaming', () => {
       `An instance of the store flights already exists. \
 Enable automatic indexing via withDevTools('flights', { indexNames: true }), or rename it upon instantiation.`
     );
-  }));
+  });
 
   it('should throw if name already exists', () => {
     const { sendSpy } = setupExtensions();
@@ -111,7 +111,7 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
   });
 
   describe('renaming', () => {
-    it('should allow to rename the store before first sync', waitForAsync(async () => {
+    it('should allow to rename the store before first sync', () => {
       const { sendSpy } = setupExtensions();
 
       const Store = signalStore(
@@ -128,9 +128,9 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
         { type: 'Store Update' },
         { flights: { name: 'Product', price: 10.5 } }
       );
-    }));
+    });
 
-    it('should throw on rename after sync', waitForAsync(async () => {
+    it('should throw on rename after sync', () => {
       setupExtensions();
       const Store = signalStore(
         { providedIn: 'root' },
@@ -144,9 +144,9 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
       expect(() => renameDevtoolsName(store, 'flights')).toThrow(
         'NgRx Toolkit/DevTools: cannot rename from flight to flights. flight has already been send to DevTools.'
       );
-    }));
+    });
 
-    it('should throw on rename if name already exists', waitForAsync(async () => {
+    it('should throw on rename if name already exists', () => {
       setupExtensions();
       signalStore(
         { providedIn: 'root' },
@@ -165,7 +165,7 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
       expect(() => renameDevtoolsName(store, 'shop')).toThrow(
         'NgRx Toolkit/DevTools: cannot rename from mall to shop. mall has already been send to DevTools.'
       );
-    }));
+    });
 
     it('should throw if applied to a SignalStore without DevTools', () => {
       setupExtensions();

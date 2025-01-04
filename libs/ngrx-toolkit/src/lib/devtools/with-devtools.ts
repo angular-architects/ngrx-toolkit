@@ -1,7 +1,6 @@
 import { signalStoreFeature, withHooks, withMethods } from '@ngrx/signals';
 import { inject } from '@angular/core';
 import { DevtoolsSyncer } from './internal/devtools-syncer.service';
-import { getStoreSignal } from './internal/get-store-signal';
 
 export type Action = { type: string };
 export type Connection = {
@@ -82,7 +81,7 @@ export function withDevtools(
   return signalStoreFeature(
     withMethods((store) => {
       const syncer = inject(DevtoolsSyncer);
-      syncer.addStore(name, getStoreSignal(store), finalOptions);
+      syncer.addStore(name, store, finalOptions);
 
       return {
         [renameDevtoolsMethodName]: (newName: string) => {
