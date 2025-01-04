@@ -47,14 +47,14 @@ export function withCallState<Collection extends string>(config: {
   EmptyFeatureResult,
   EmptyFeatureResult & {
     state: NamedCallStateSlice<Collection>;
-    computed: NamedCallStateSignals<Collection>;
+    props: NamedCallStateSignals<Collection>;
   }
 >;
 export function withCallState(): SignalStoreFeature<
   EmptyFeatureResult,
   EmptyFeatureResult & {
     state: CallStateSlice;
-    computed: CallStateSignals;
+    props: CallStateSignals;
   }
 >;
 export function withCallState<Collection extends string>(config?: {

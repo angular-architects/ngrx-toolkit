@@ -9,7 +9,6 @@ import { Todo } from '../todo-store';
 
 @Component({
   selector: 'demo-todo-storage-sync',
-  standalone: true,
   imports: [MatCheckboxModule, MatIconModule, MatTableModule],
   templateUrl: './todo-storage-sync.component.html',
   styleUrl: './todo-storage-sync.component.scss',

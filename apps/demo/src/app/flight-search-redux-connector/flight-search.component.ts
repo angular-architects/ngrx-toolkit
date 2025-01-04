@@ -10,7 +10,6 @@ import { FlightFilter } from '../shared/flight.service';
 import { Flight } from '../shared/flight';
 
 @Component({
-  standalone: true,
   imports: [
     JsonPipe,
     RouterLink,

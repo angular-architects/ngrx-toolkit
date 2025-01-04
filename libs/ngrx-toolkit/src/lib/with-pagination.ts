@@ -119,10 +119,10 @@ export function withPagination<E, Collection extends string>(options: {
   entity: E;
   collection: Collection;
 }): SignalStoreFeature<
-  EmptyFeatureResult & { computed: NamedEntityComputed<E, Collection> },
+  EmptyFeatureResult & { props: NamedEntityComputed<E, Collection> },
   {
     state: NamedPaginationServiceState<E, Collection>;
-    computed: NamedPaginationServiceSignals<E, Collection>;
+    props: NamedPaginationServiceSignals<E, Collection>;
     methods: NamedPaginationServiceMethods<Collection>;
   }
 >;
@@ -130,11 +130,11 @@ export function withPagination<E, Collection extends string>(options: {
 export function withPagination<E>(): SignalStoreFeature<
   EmptyFeatureResult & {
     state: EntityState<E>;
-    computed: EntityComputed<E>;
+    props: EntityComputed<E>;
   },
   {
     state: PaginationServiceState<E>;
-    computed: PaginationServiceSignals<E>;
+    props: PaginationServiceSignals<E>;
     methods: PaginationServiceMethods;
   }
 >;

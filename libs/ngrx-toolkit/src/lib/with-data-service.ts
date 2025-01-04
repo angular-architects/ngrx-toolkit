@@ -204,10 +204,10 @@ export function withDataService<
   // These alternatives break type inference:
   // state: { callState: CallState } & NamedEntityState<E, Collection>,
   // state: NamedEntityState<E, Collection>,
-  EmptyFeatureResult & { computed: NamedEntityComputed<E, Collection> },
+  EmptyFeatureResult & { props: NamedEntityComputed<E, Collection> },
   {
     state: NamedDataServiceState<E, F, Collection>;
-    computed: NamedDataServiceComputed<E, Collection>;
+    props: NamedDataServiceComputed<E, Collection>;
     methods: NamedDataServiceMethods<E, F, Collection>;
   }
 >;
@@ -218,7 +218,7 @@ export function withDataService<E extends Entity, F extends Filter>(options: {
   EmptyFeatureResult & { state: { callState: CallState } & EntityState<E> },
   {
     state: DataServiceState<E, F>;
-    computed: DataServiceComputed<E>;
+    props: DataServiceComputed<E>;
     methods: DataServiceMethods<E, F>;
   }
 >;

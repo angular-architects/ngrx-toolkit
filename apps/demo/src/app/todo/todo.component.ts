@@ -10,7 +10,6 @@ import { SelectionModel } from '@angular/cdk/collections';
   selector: 'demo-todo',
   templateUrl: 'todo.component.html',
   styleUrl: 'todo.component.scss',
-  standalone: true,
   imports: [MatCheckboxModule, MatIconModule, MatTableModule],
 })
 export class TodoComponent {

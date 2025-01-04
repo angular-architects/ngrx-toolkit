@@ -5,10 +5,14 @@ import { Observable, Unsubscribable, map, pipe } from "rxjs";
 
 type RxMethodInput<Input> = Input | Observable<Input> | Signal<Input>;
 
+type RxMethodRef = {
+  destroy: () => void;
+}
+
 type RxMethod<Input, MethodInput = Input, MethodResult = unknown> = ((
   input: RxMethodInput<Input>,
   resultMethod: (input: MethodInput) => MethodResult
-) => Unsubscribable) & Unsubscribable;
+) => RxMethodRef) & RxMethodRef;
 
 export function reduxMethod<Input, MethodInput = Input>(
   generator: (source$: Observable<Input>) => Observable<MethodInput>,
@@ -47,12 +51,12 @@ export function reduxMethod<Input, MethodInput = Input, MethodResult = unknown>(
         injector: config?.injector || injector
       });
       const rxWithInput = rxMethodWithResult(input);
-      unsubscribable = { unsubscribe: rxWithInput.unsubscribe.bind(rxWithInput) };
+      unsubscribable = { unsubscribe: rxWithInput.destroy.bind(rxWithInput) };
 
       return rxWithInput;
     }) as RxMethod<Input, MethodInput, MethodResult>;
 
-    inputResultFn.unsubscribe = () => unsubscribable?.unsubscribe();
+    inputResultFn.destroy = () => unsubscribable?.unsubscribe();
 
     return inputResultFn;
   }

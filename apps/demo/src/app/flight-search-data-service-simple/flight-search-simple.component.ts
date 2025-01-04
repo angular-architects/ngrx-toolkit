@@ -10,7 +10,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 
 @Component({
-  standalone: true,
   imports: [
     NgIf,
     NgForOf,

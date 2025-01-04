@@ -6,7 +6,6 @@ import { RouterLink } from '@angular/router';
 import { FlightBookingStore } from './flight-booking.store';
 
 @Component({
-  standalone: true,
   imports: [
     NgIf,
     NgForOf,

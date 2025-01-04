@@ -12,7 +12,6 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 @Component({
   selector: 'demo-flight-search-with-pagination',
   templateUrl: 'flight-search-with-pagination.component.html',
-  standalone: true,
   imports: [
     MatTableModule,
     MatPaginatorModule,

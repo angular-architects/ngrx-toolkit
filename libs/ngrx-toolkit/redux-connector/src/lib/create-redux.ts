@@ -1,4 +1,4 @@
-import { ENVIRONMENT_INITIALIZER, inject, makeEnvironmentProviders } from "@angular/core";
+import { inject, makeEnvironmentProviders, provideEnvironmentInitializer } from "@angular/core";
 import { ActionCreator, ActionType } from "@ngrx/store/src/models";
 import { CreateReduxState, ExtractActionTypes, MapperTypes, Store } from "./model";
 import { SignalReduxStore, injectReduxDispatch } from "./signal-redux-store";
@@ -70,10 +70,8 @@ export function createReduxState<
   return {
     [`provide${capitalize(storeName)}Store`]: (connectReduxDevtools = false) => makeEnvironmentProviders([
       isRootProvider? [] : signalStore,
-      {
-        provide: ENVIRONMENT_INITIALIZER,
-        multi: true,
-        useFactory: (
+      provideEnvironmentInitializer(() => {
+        const initializerFn = ((
           signalReduxStore = inject(SignalReduxStore),
           store = inject(signalStore)
         ) => () => {
@@ -83,8 +81,9 @@ export function createReduxState<
           signalReduxStore.connectFeatureStore(
             withActionMappers(store)
           );
-        }
-      }
+        })();
+        return initializerFn();
+      })
     ]),
     [`inject${capitalize(storeName)}Store`]: () => Object.assign(
       inject(signalStore),

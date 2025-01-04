@@ -4,7 +4,6 @@ import { RouterModule } from "@angular/router";
 import { initFlight } from "./flight";
 
 @Component({
-  standalone: true,
   selector: 'demo-flight-card',
   imports: [CommonModule, RouterModule],
   templateUrl: './flight-card.component.html',
