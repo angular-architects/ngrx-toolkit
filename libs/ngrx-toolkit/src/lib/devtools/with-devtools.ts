@@ -1,4 +1,4 @@
-import { signalStoreFeatures, withMethods } from '@ngrx/signals';
+import { signalStoreFeature, withHooks, withMethods } from '@ngrx/signals';
 import { inject } from '@angular/core';
 import { DevtoolsSyncer } from './internal/devtools-syncer.service';
 import { getStoreSignal } from './internal/get-store-signal';
