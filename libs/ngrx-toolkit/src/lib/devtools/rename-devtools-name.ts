@@ -3,9 +3,6 @@ import { renameDevtoolsMethodName } from './with-devtools';
 
 /**
  * Renames the name of a store how it appears in the Devtools.
- *
- * This method has to be executed before the first
- * synchronization. In most cases. that's in the constructor.
  * @param store instance of the SignalStore
  * @param newName new name for the Devtools
  */

@@ -2,9 +2,16 @@ import { setupExtensions } from './helpers';
 import { TestBed, waitForAsync } from '@angular/core/testing';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { withDevtools } from '../with-devtools';
-import { Component, inject } from '@angular/core';
+import {
+  Component,
+  createEnvironmentInjector,
+  EnvironmentInjector,
+  inject,
+  Injector,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { renameDevtoolsName } from '../rename-devtools-name';
 
 describe('Devtools Basics', () => {
   it('should dispatch update', () => {
@@ -38,44 +45,52 @@ describe('Devtools Basics', () => {
     );
   });
 
-  it('should remove the state once destroyed', waitForAsync(async () => {
+  it('should remove the state once destroyed', () => {
     const { sendSpy } = setupExtensions();
 
     const Store = signalStore(withDevtools('flight'));
+    const childInjector = createEnvironmentInjector(
+      [Store],
+      TestBed.inject(EnvironmentInjector)
+    );
 
-    @Component({
-      selector: 'app-flight-search',
-      template: ``,
-      standalone: true,
-      providers: [Store],
-    })
-    class FlightSearchComponent {
-      store = inject(Store);
-    }
+    childInjector.get(Store);
+    TestBed.flushEffects();
 
-    @Component({ selector: 'app-home', template: ``, standalone: true })
-    class HomeComponent {}
-
-    TestBed.configureTestingModule({
-      providers: [
-        provideRouter([
-          { path: '', component: HomeComponent },
-          { path: 'flight', component: FlightSearchComponent },
-        ]),
-      ],
-    });
-
-    const harness = await RouterTestingHarness.create('flight');
     expect(sendSpy).toHaveBeenCalledWith(
       { type: 'Store Update' },
       { flight: {} }
     );
-    await harness.navigateByUrl('/');
+
+    childInjector.destroy();
     TestBed.flushEffects();
     expect(sendSpy).toHaveBeenCalledWith({ type: 'Store Update' }, {});
-  }));
+  });
 
-  it('should group multiple patchState running before the first synchronization', () => {
+  it('should remove a renamed state once destroyed', () => {
+    const { sendSpy } = setupExtensions();
+
+    const Store = signalStore(withDevtools('flight'));
+    const childInjector = createEnvironmentInjector(
+      [Store],
+      TestBed.inject(EnvironmentInjector)
+    );
+
+    const store = childInjector.get(Store);
+    TestBed.flushEffects();
+
+    expect(sendSpy).toHaveBeenCalledWith(
+      { type: 'Store Update' },
+      { flight: {} }
+    );
+
+    renameDevtoolsName(store, 'flights');
+    childInjector.destroy();
+    TestBed.flushEffects();
+    expect(sendSpy).toHaveBeenCalledWith({ type: 'Store Update' }, {});
+  });
+
+  it('should group multiple patchState running before the synchronization', () => {
     const { sendSpy } = setupExtensions();
     const store = TestBed.inject(
       signalStore(

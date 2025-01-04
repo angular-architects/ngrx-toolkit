@@ -50,9 +50,18 @@ export const TodoStore = signalStore(
           updateEntity({ id, changes: { finished: !todo.finished } })
         );
       },
-      selectTodo(id: number) {
-        updateState(store, `select todo ${id}`, {
-          selectedIds: [...store.selectedIds(), id],
+      toggleSelectTodo(id: number) {
+        updateState(store, `select todo ${id}`, ({ selectedIds }) => {
+          if (selectedIds.includes(id)) {
+            return {
+              selectedIds: selectedIds.filter(
+                (selectedId) => selectedId !== id
+              ),
+            };
+          }
+          return {
+            selectedIds: [...store.selectedIds(), id],
+          };
         });
       },
     };

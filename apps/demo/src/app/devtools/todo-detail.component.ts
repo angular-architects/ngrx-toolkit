@@ -2,7 +2,10 @@ import { Component, effect, inject, input } from '@angular/core';
 import { MatCard, MatCardModule } from '@angular/material/card';
 import { Todo } from './todo-store';
 import { signalStore, withState } from '@ngrx/signals';
-import { withDevtools } from '@angular-architects/ngrx-toolkit';
+import {
+  renameDevtoolsName,
+  withDevtools,
+} from '@angular-architects/ngrx-toolkit';
 
 /**
  * This Store can be instantiated multiple times, if the user
@@ -38,4 +41,13 @@ const TodoDetailStore = signalStore(
 export class TodoDetailComponent {
   readonly #todoDetailStore = inject(TodoDetailStore);
   todo = input.required<Todo>();
+
+  constructor() {
+    effect(
+      () => {
+        renameDevtoolsName(this.#todoDetailStore, `todo-${this.todo().id}`);
+      },
+      { allowSignalWrites: true }
+    );
+  }
 }

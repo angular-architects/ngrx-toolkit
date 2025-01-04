@@ -86,7 +86,7 @@ export class TodoComponent {
   }
 
   checkboxLabel(todo: Todo) {
-    this.todoStore.selectTodo(todo.id);
+    this.todoStore.toggleSelectTodo(todo.id);
   }
 
   removeTodo(todo: Todo) {

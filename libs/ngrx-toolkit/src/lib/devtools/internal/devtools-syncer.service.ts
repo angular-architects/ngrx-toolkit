@@ -30,6 +30,7 @@ const dummyConnection: Connection = {
 export class DevtoolsSyncer implements OnDestroy {
   readonly #stores = signal<StoreRegistry>({});
   readonly #isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  #currentId = 1;
 
   readonly #connection: Connection = this.#isBrowser
     ? window.__REDUX_DEVTOOLS_EXTENSION__
@@ -38,9 +39,6 @@ export class DevtoolsSyncer implements OnDestroy {
         })
       : dummyConnection
     : dummyConnection;
-
-  // keeps track of names which have already been synced. Synced names cannot be renamed
-  readonly #syncedStoreNames = new Set();
 
   constructor() {
     if (!this.#isBrowser) {
@@ -62,7 +60,6 @@ export class DevtoolsSyncer implements OnDestroy {
       const stores = this.#stores();
       const rootState: Record<string, unknown> = {};
       for (const name in stores) {
-        this.#syncedStoreNames.add(name);
         const { store } = stores[name];
         rootState[name] = getState(store);
       }
@@ -94,41 +91,38 @@ Enable automatic indexing via withDevTools('${storeName}', { indexNames: true })
     for (let i = 1; names.includes(storeName); i++) {
       storeName = `${name}-${i}`;
     }
+    const id = this.#currentId++;
 
     this.#stores.update((stores) => ({
       ...stores,
-      [storeName]: { store, options },
+      [storeName]: { store, options, id },
     }));
+
+    return id;
   }
 
-  removeStore(name: string) {
-    this.#stores.update((value) => {
-      const newStore: StoreRegistry = {};
-      for (const storeName in value) {
-        if (storeName !== name) {
-          newStore[storeName] = value[storeName];
+  removeStore(id: number) {
+    this.#stores.update((stores) => {
+      return Object.entries(stores).reduce((newStore, [name, value]) => {
+        if (value.id === id) {
+          return newStore;
+        } else {
+          return { ...newStore, [name]: value };
         }
-      }
-
-      return newStore;
+      }, {});
     });
   }
 
   renameStore(oldName: string, newName: string) {
-    if (this.#syncedStoreNames.has(oldName)) {
-      throw new Error(
-        `NgRx Toolkit/DevTools: cannot rename from ${oldName} to ${newName}. ${oldName} has already been send to DevTools.`
-      );
-    }
-
     this.#stores.update((stores) => {
+      if (newName in stores) {
+        throw new Error(
+          `NgRx Toolkit/DevTools: cannot rename from ${oldName} to ${newName}. ${oldName} does not exist.`
+        );
+      }
+
       const newStore: StoreRegistry = {};
       for (const storeName in stores) {
-        if (storeName === newName) {
-          throw new Error(
-            `NgRx Toolkit/DevTools: cannot rename from ${oldName} to ${newName}. ${newName} already exists.`
-          );
-        }
         if (storeName === oldName) {
           newStore[newName] = stores[oldName];
         } else {
@@ -143,5 +137,5 @@ Enable automatic indexing via withDevTools('${storeName}', { indexNames: true })
 
 type StoreRegistry = Record<
   string,
-  { store: StateSource<object>; options: DevtoolsOptions }
+  { store: StateSource<object>; options: DevtoolsOptions; id: number }
 >;

@@ -1,4 +1,10 @@
-import { signalStoreFeature, withHooks, withMethods } from '@ngrx/signals';
+import {
+  SignalStoreFeature,
+  signalStoreFeature,
+  SignalStoreFeatureResult,
+  withHooks,
+  withMethods,
+} from '@ngrx/signals';
 import { inject } from '@angular/core';
 import { DevtoolsSyncer } from './internal/devtools-syncer.service';
 
@@ -53,6 +59,7 @@ export type DevtoolsOptions = {
 export const existingNames = new Map<string, unknown>();
 
 export const renameDevtoolsMethodName = '___renameDevtoolsName';
+export const uniqueDevtoolsId = '___uniqueDevtoolsId';
 
 /**
  * Adds this store as a feature state to the Redux DevTools.
@@ -62,7 +69,7 @@ export const renameDevtoolsMethodName = '___renameDevtoolsName';
  * parameter the action name.
  *
  * The standalone function {@link renameDevtoolsName} can rename
- * the store name before the first synchronization.
+ * the store name.
  *
  * @param name name of the store as it should appear in the DevTools
  * @param options options for the DevTools
@@ -81,17 +88,20 @@ export function withDevtools(
   return signalStoreFeature(
     withMethods((store) => {
       const syncer = inject(DevtoolsSyncer);
-      syncer.addStore(name, store, finalOptions);
+      const id = syncer.addStore(name, store, finalOptions);
 
+      // TODO: use withProps and symbols
       return {
         [renameDevtoolsMethodName]: (newName: string) => {
           syncer.renameStore(name, newName);
         },
-      } as Record<string, (newName: string) => void>;
+        [uniqueDevtoolsId]: () => id,
+      } as Record<string, (newName?: unknown) => unknown>;
     }),
-    withHooks(() => {
+    withHooks((store) => {
       const syncer = inject(DevtoolsSyncer);
-      return { onDestroy: () => syncer.removeStore(name) };
+      const id = Number(store[uniqueDevtoolsId]());
+      return { onDestroy: () => syncer.removeStore(id) };
     })
   );
 }

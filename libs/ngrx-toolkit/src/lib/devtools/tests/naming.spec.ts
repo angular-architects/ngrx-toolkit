@@ -130,8 +130,8 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
       );
     });
 
-    it('should throw on rename after sync', () => {
-      setupExtensions();
+    it('should also rename after sync', () => {
+      const { sendSpy } = setupExtensions();
       const Store = signalStore(
         { providedIn: 'root' },
         withState({ name: 'Product', price: 10.5 }),
@@ -140,9 +140,12 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
       const store = TestBed.inject(Store);
 
       TestBed.flushEffects();
+      renameDevtoolsName(store, 'flights');
+      TestBed.flushEffects();
 
-      expect(() => renameDevtoolsName(store, 'flights')).toThrow(
-        'NgRx Toolkit/DevTools: cannot rename from flight to flights. flight has already been send to DevTools.'
+      expect(sendSpy).toHaveBeenCalledWith(
+        { type: 'Store Update' },
+        { flights: { name: 'Product', price: 10.5 } }
       );
     });
 
