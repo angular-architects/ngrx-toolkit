@@ -4,16 +4,16 @@ import { DevtoolsSyncer } from './internal/devtools-syncer.service';
 import { getStoreSignal } from './internal/get-store-signal';
 
 export type Action = { type: string };
+export type Connection = {
+  send: (action: Action, state: Record<string, unknown>) => void;
+};
+export type ReduxDevtoolsExtension = {
+  connect: (options: { name: string }) => Connection;
+};
 
 declare global {
   interface Window {
-    __REDUX_DEVTOOLS_EXTENSION__:
-      | {
-          connect: (options: { name: string }) => {
-            send: (action: Action, state: Record<string, unknown>) => void;
-          };
-        }
-      | undefined;
+    __REDUX_DEVTOOLS_EXTENSION__: ReduxDevtoolsExtension | undefined;
   }
 }
 

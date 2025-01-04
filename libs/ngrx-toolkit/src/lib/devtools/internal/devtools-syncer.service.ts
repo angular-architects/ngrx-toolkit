@@ -7,10 +7,13 @@ import {
   Signal,
   signal,
 } from '@angular/core';
-import { throwIfNull } from '../../shared/throw-if-null';
 import { currentActionNames } from './currrent-action-names';
-import { isPlatformServer } from '@angular/common';
-import { DevtoolsOptions } from '../with-devtools';
+import { isPlatformBrowser, isPlatformServer } from '@angular/common';
+import { Connection, DevtoolsOptions } from '../with-devtools';
+
+const dummyConnection: Connection = {
+  send: () => void true,
+};
 
 /**
  * A service provided by the root injector is
@@ -23,63 +26,34 @@ import { DevtoolsOptions } from '../with-devtools';
  * process would shut down once the component gets
  * destroyed.
  */
-@Injectable({
-  providedIn: 'root',
-  useFactory: () => {
-    const isServer = isPlatformServer(inject(PLATFORM_ID));
-    if (isServer) {
-      return new DummyDevtoolsSyncer();
-    }
-
-    const isToolkitMissing = !window.__REDUX_DEVTOOLS_EXTENSION__;
-    if (isToolkitMissing) {
-      return new DummyDevtoolsSyncer();
-    }
-
-    return new DefaultDevtoolsSyncer();
-  },
-})
-export abstract class DevtoolsSyncer implements OnDestroy {
-  abstract addStore(
-    name: string,
-    store: Signal<unknown>,
-    options: DevtoolsOptions
-  ): void;
-
-  abstract removeStore(name: string): void;
-
-  abstract renameStore(currentName: string, newName: string): void;
-
-  abstract ngOnDestroy(): void;
-}
-
-class DummyDevtoolsSyncer implements DevtoolsSyncer {
-  addStore(): void {}
-
-  removeStore(): void {}
-
-  renameStore(): void {}
-
-  ngOnDestroy(): void {}
-}
-
-type StoreRegistry = Record<
-  string,
-  { store: Signal<unknown>; options: DevtoolsOptions }
->;
-
-@Injectable()
-class DefaultDevtoolsSyncer implements OnDestroy, DevtoolsSyncer {
+@Injectable({ providedIn: 'root' })
+export class DevtoolsSyncer implements OnDestroy {
   readonly #stores = signal<StoreRegistry>({});
-  readonly #connection = throwIfNull(
-    window.__REDUX_DEVTOOLS_EXTENSION__
-  ).connect({
-    name: 'NgRx Signal Store',
-  });
+  readonly #isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+
+  readonly #connection: Connection = this.#isBrowser
+    ? window.__REDUX_DEVTOOLS_EXTENSION__
+      ? window.__REDUX_DEVTOOLS_EXTENSION__.connect({
+          name: 'NgRx SignalStore',
+        })
+      : dummyConnection
+    : dummyConnection;
+
   // keeps track of names which have already been synced. Synced names cannot be renamed
   readonly #syncedStoreNames = new Set();
 
   constructor() {
+    if (!this.#isBrowser) {
+      return;
+    }
+
+    const isToolkitAvailable = Boolean(window.__REDUX_DEVTOOLS_EXTENSION__);
+    if (!isToolkitAvailable) {
+      throw new Error(
+        'NgRx Toolkit/DevTools: Redux DevTools Extension is not available.'
+      );
+    }
+
     effect(() => {
       if (!this.#connection) {
         return;
@@ -166,3 +140,8 @@ Enable automatic indexing via withDevTools('${storeName}', { indexNames: true })
     });
   }
 }
+
+type StoreRegistry = Record<
+  string,
+  { store: Signal<unknown>; options: DevtoolsOptions }
+>;
