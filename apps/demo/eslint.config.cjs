@@ -1,7 +1,10 @@
+const playwright = require('eslint-plugin-playwright');
 const nx = require('@nx/eslint-plugin');
 const baseConfig = require('../../eslint.config.cjs');
 
 module.exports = [
+  playwright.configs['flat/recommended'],
+
   ...baseConfig,
   ...nx.configs['flat/angular'],
   ...nx.configs['flat/angular-template'],
@@ -25,5 +28,10 @@ module.exports = [
         },
       ],
     },
-  }
+  },
+  {
+    files: ['**/*.ts', '**/*.js'],
+    // Override or add rules here
+    rules: {},
+  },
 ];
