@@ -39,3 +39,8 @@ export function setupExtensions(
 
   return { sendSpy, connectSpy };
 }
+
+it('should initialize', () => {
+  const { connectSpy } = setupExtensions();
+  expect(connectSpy).not.toHaveBeenCalled();
+});
