@@ -8,21 +8,14 @@
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:application",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/demo",
         "index": "apps/demo/src/index.html",
         "browser": "apps/demo/src/main.ts",
-        "polyfills": [
-          "zone.js"
-        ],
+        "polyfills": ["zone.js"],
         "tsConfig": "apps/demo/tsconfig.app.json",
-        "assets": [
-          "apps/demo/src/favicon.ico",
-          "apps/demo/src/assets"
-        ],
+        "assets": ["apps/demo/src/favicon.ico", "apps/demo/src/assets"],
         "styles": [
           "@angular/material/prebuilt-themes/deeppurple-amber.css",
           "apps/demo/src/styles.css"
@@ -73,17 +66,20 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
-      ]
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
         "jestConfig": "apps/demo/jest.config.ts"
+      }
+    },
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "outputs": ["{workspaceRoot}/dist/.playwright/apps/demo"],
+      "options": {
+        "config": "apps/demo/playwright.config.ts"
       }
     }
   }

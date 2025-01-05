@@ -23,12 +23,14 @@ const TodoDetailStore = signalStore(
 
 @Component({
   selector: 'demo-todo-detail',
-  template: ` <mat-card>
-    <mat-card-title>{{ todo().name }}</mat-card-title>
-    <mat-card-content>
-      <textarea>{{ todo().description }}</textarea>
-    </mat-card-content>
-  </mat-card>`,
+  template: ` <section [attr.aria-label]="todo().name">
+    <mat-card>
+      <mat-card-title>{{ todo().name }}</mat-card-title>
+      <mat-card-content>
+        <textarea>{{ todo().description }}</textarea>
+      </mat-card-content>
+    </mat-card>
+  </section>`,
   imports: [MatCardModule],
   providers: [TodoDetailStore],
   styles: `
@@ -42,11 +44,8 @@ export class TodoDetailComponent {
   todo = input.required<Todo>();
 
   constructor() {
-    effect(
-      () => {
-        renameDevtoolsName(this.#todoDetailStore, `todo-${this.todo().id}`);
-      },
-      { allowSignalWrites: true }
-    );
+    effect(() => {
+      renameDevtoolsName(this.#todoDetailStore, `todo-${this.todo().id}`);
+    });
   }
 }
