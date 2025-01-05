@@ -34,6 +34,16 @@ const config: Config = {
     locales: ['en'],
   },
 
+  plugins: [
+    [
+      'docusaurus-plugin-typedoc',
+      {
+        entryPoints: ['../libs/ngrx-toolkit/src/index.ts'],
+        tsconfig: '../libs/ngrx-toolkit/tsconfig.lib.json',
+      },
+    ],
+  ],
+
   presets: [
     [
       'classic',
@@ -72,6 +82,11 @@ const config: Config = {
         {
           to: '/docs/create-redux-state',
           label: 'Redux Connector',
+          position: 'left',
+        },
+        {
+          to: '/docs/api',
+          label: 'API',
           position: 'left',
         },
       ],

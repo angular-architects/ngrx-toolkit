@@ -1,11 +1,8 @@
-import { setupExtensions } from './helpers';
+import { setupExtensions } from './helpers.spec';
 import { TestBed } from '@angular/core/testing';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { withDevtools } from '../with-devtools';
-import {
-  createEnvironmentInjector,
-  EnvironmentInjector,
-} from '@angular/core';
+import { createEnvironmentInjector, EnvironmentInjector } from '@angular/core';
 import { renameDevtoolsName } from '../rename-devtools-name';
 
 describe('Devtools Basics', () => {

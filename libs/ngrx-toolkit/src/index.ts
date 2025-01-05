@@ -4,7 +4,7 @@ export { withDisabledNameIndices } from './lib/devtools/with-disabled-name-indic
 export { patchState, updateState } from './lib/devtools/update-state';
 export { renameDevtoolsName } from './lib/devtools/rename-devtools-name';
 
-export * from './lib/with-redux';
+export { withRedux } from './lib/with-redux';
 
 export * from './lib/with-call-state';
 export * from './lib/with-undo-redo';

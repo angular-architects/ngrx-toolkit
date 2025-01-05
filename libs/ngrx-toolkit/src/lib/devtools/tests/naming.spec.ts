@@ -1,7 +1,7 @@
 import { signalStore, withState } from '@ngrx/signals';
 import { withDevtools } from '../with-devtools';
 import { TestBed } from '@angular/core/testing';
-import { setupExtensions } from './helpers';
+import { setupExtensions } from './helpers.spec';
 import {
   createEnvironmentInjector,
   EnvironmentInjector,
