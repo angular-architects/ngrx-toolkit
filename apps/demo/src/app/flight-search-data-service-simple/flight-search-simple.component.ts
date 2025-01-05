@@ -1,4 +1,4 @@
-import { AsyncPipe, JsonPipe, NgForOf, NgIf } from '@angular/common';
+import { JsonPipe, NgForOf, NgIf } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ChangeDetectionStrategy } from '@angular/core';
@@ -13,17 +13,13 @@ import { MatButtonModule } from '@angular/material/button';
   imports: [
     NgIf,
     NgForOf,
-    AsyncPipe,
     JsonPipe,
-
     FormsModule,
     FlightCardComponent,
-
     MatTableModule,
     MatInputModule,
     MatButtonModule,
-
-    RouterLink
+    RouterLink,
   ],
   selector: 'demo-flight-search',
   templateUrl: './flight-search-simple.component.html',
@@ -62,5 +58,4 @@ export class FlightSearchSimpleComponent {
   updateBasket(id: number, selected: boolean): void {
     this.store.updateSelected(id, selected);
   }
-
 }

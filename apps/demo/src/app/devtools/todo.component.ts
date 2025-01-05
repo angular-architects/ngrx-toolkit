@@ -1,10 +1,9 @@
-import { Component, effect, inject, input } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Todo, TodoStore } from './todo-store';
-import { CategoryStore } from '../category.store';
 import { TodoDetailComponent } from './todo-detail.component';
 
 @Component({

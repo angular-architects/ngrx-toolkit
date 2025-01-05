@@ -105,7 +105,9 @@ describe('with redux', () => {
         actions: {
           init: noPayload,
         },
-        reducer() {},
+        reducer() {
+          return {};
+        },
         effects() {
           return {};
         },

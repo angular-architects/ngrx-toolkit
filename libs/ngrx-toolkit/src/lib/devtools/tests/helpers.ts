@@ -1,19 +1,6 @@
-import { Action, existingNames } from '../with-devtools';
+import { existingNames } from '../with-devtools';
 import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-
-interface SetupOptions {
-  extensionsAvailable: boolean;
-  inSsr: boolean;
-  createStore: boolean;
-}
-
-interface TestData {
-  store: unknown;
-  connectSpy: jest.Mock;
-  sendSpy: jest.Mock<(action: Action, state: Record<string, unknown>) => void>;
-  runEffects: () => void;
-}
 
 export type Flight = {
   id: number;
@@ -22,11 +9,6 @@ export type Flight = {
   date: Date;
   delayed: boolean;
 };
-function assertNotNull<T>(obj: T): asserts obj is NonNullable<T> {
-  if (obj === null || obj === undefined) {
-    throw new Error('value cannot be null or undefined');
-  }
-}
 
 export function setupExtensions(
   isPlatformBrowser = true,

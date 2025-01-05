@@ -223,7 +223,6 @@ export function withDataService<E extends Entity, F extends Filter>(options: {
   }
 >;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function withDataService<
   E extends Entity,
   F extends Filter,
@@ -232,7 +231,8 @@ export function withDataService<
   dataServiceType: ProviderToken<DataService<E, F>>;
   filter: F;
   collection?: Collection;
-}): SignalStoreFeature<any, any> {
+}): /* eslint-disable @typescript-eslint/no-explicit-any */
+SignalStoreFeature<any, any> {
   const { dataServiceType, filter, collection: prefix } = options;
   const {
     entitiesKey,
@@ -289,7 +289,8 @@ export function withDataService<
           },
           [loadKey]: async (): Promise<void> => {
             const filter = store[filterKey] as Signal<F>;
-            store[callStateKey] && patchState(store, setLoading(prefix));
+            (() =>
+              store[callStateKey] && patchState(store, setLoading(prefix)))();
 
             try {
               const result = await dataService.load(filter());
@@ -299,21 +300,28 @@ export function withDataService<
                   ? setAllEntities(result, { collection: prefix })
                   : setAllEntities(result)
               );
-              store[callStateKey] && patchState(store, setLoaded(prefix));
+              (() =>
+                store[callStateKey] && patchState(store, setLoaded(prefix)))();
             } catch (e) {
-              store[callStateKey] && patchState(store, setError(e, prefix));
+              (() =>
+                store[callStateKey] &&
+                patchState(store, setError(e, prefix)))();
               throw e;
             }
           },
           [loadByIdKey]: async (id: EntityId): Promise<void> => {
-            store[callStateKey] && patchState(store, setLoading(prefix));
+            (() =>
+              store[callStateKey] && patchState(store, setLoading(prefix)))();
 
             try {
               const current = await dataService.loadById(id);
-              store[callStateKey] && patchState(store, setLoaded(prefix));
+              (() =>
+                store[callStateKey] && patchState(store, setLoaded(prefix)))();
               patchState(store, { [currentKey]: current });
             } catch (e) {
-              store[callStateKey] && patchState(store, setError(e, prefix));
+              (() =>
+                store[callStateKey] &&
+                patchState(store, setError(e, prefix)))();
               throw e;
             }
           },
@@ -322,7 +330,8 @@ export function withDataService<
           },
           [createKey]: async (entity: E): Promise<void> => {
             patchState(store, { [currentKey]: entity });
-            store[callStateKey] && patchState(store, setLoading(prefix));
+            (() =>
+              store[callStateKey] && patchState(store, setLoading(prefix)))();
 
             try {
               const created = await dataService.create(entity);
@@ -333,15 +342,19 @@ export function withDataService<
                   ? addEntity(created, { collection: prefix })
                   : addEntity(created)
               );
-              store[callStateKey] && patchState(store, setLoaded(prefix));
+              (() =>
+                store[callStateKey] && patchState(store, setLoaded(prefix)))();
             } catch (e) {
-              store[callStateKey] && patchState(store, setError(e, prefix));
+              (() =>
+                store[callStateKey] &&
+                patchState(store, setError(e, prefix)))();
               throw e;
             }
           },
           [updateKey]: async (entity: E): Promise<void> => {
             patchState(store, { [currentKey]: entity });
-            store[callStateKey] && patchState(store, setLoading(prefix));
+            (() =>
+              store[callStateKey] && patchState(store, setLoading(prefix)))();
 
             try {
               const updated = await dataService.update(entity);
@@ -359,14 +372,18 @@ export function withDataService<
                 store,
                 prefix ? updater(prefix) : updateEntity(updateArg)
               );
-              store[callStateKey] && patchState(store, setLoaded(prefix));
+              (() =>
+                store[callStateKey] && patchState(store, setLoaded(prefix)))();
             } catch (e) {
-              store[callStateKey] && patchState(store, setError(e, prefix));
+              (() =>
+                store[callStateKey] &&
+                patchState(store, setError(e, prefix)))();
               throw e;
             }
           },
           [updateAllKey]: async (entities: E[]): Promise<void> => {
-            store[callStateKey] && patchState(store, setLoading(prefix));
+            (() =>
+              store[callStateKey] && patchState(store, setLoading(prefix)))();
 
             try {
               const result = await dataService.updateAll(entities);
@@ -376,15 +393,19 @@ export function withDataService<
                   ? setAllEntities(result, { collection: prefix })
                   : setAllEntities(result)
               );
-              store[callStateKey] && patchState(store, setLoaded(prefix));
+              (() =>
+                store[callStateKey] && patchState(store, setLoaded(prefix)))();
             } catch (e) {
-              store[callStateKey] && patchState(store, setError(e, prefix));
+              (() =>
+                store[callStateKey] &&
+                patchState(store, setError(e, prefix)))();
               throw e;
             }
           },
           [deleteKey]: async (entity: E): Promise<void> => {
             patchState(store, { [currentKey]: entity });
-            store[callStateKey] && patchState(store, setLoading(prefix));
+            (() =>
+              store[callStateKey] && patchState(store, setLoading(prefix)))();
 
             try {
               await dataService.delete(entity);
@@ -395,9 +416,12 @@ export function withDataService<
                   ? removeEntity(entity.id, { collection: prefix })
                   : removeEntity(entity.id)
               );
-              store[callStateKey] && patchState(store, setLoaded(prefix));
+              (() =>
+                store[callStateKey] && patchState(store, setLoaded(prefix)))();
             } catch (e) {
-              store[callStateKey] && patchState(store, setError(e, prefix));
+              (() =>
+                store[callStateKey] &&
+                patchState(store, setError(e, prefix)))();
               throw e;
             }
           },

@@ -1,16 +1,11 @@
 import { setupExtensions } from './helpers';
-import { TestBed, waitForAsync } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { withDevtools } from '../with-devtools';
 import {
-  Component,
   createEnvironmentInjector,
   EnvironmentInjector,
-  inject,
-  Injector,
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
-import { RouterTestingHarness } from '@angular/router/testing';
 import { renameDevtoolsName } from '../rename-devtools-name';
 
 describe('Devtools Basics', () => {

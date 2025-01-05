@@ -8,15 +8,16 @@
   },
   "peerDependencies": {
     "@ngrx/signals": "^19.0.0",
-    "@ngrx/store": "^19.0.0"
+    "@ngrx/store": "^19.0.0",
+    "@angular/core": "19.0.5",
+    "rxjs": "~7.8.0",
+    "@angular/common": "19.0.5"
   },
   "peerDependenciesMeta": {
     "@ngrx/store": {
       "optional": true
     }
   },
-  "dependencies": {
-    "tslib": "^2.3.0"
-  },
+  "dependencies": {},
   "sideEffects": false
 }
