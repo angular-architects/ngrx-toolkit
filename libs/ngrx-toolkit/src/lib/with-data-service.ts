@@ -1,4 +1,5 @@
 import { ProviderToken, Signal, computed, inject } from '@angular/core';
+import {HttpErrorResponse} from "@angular/common/http";
 import {
   SignalStoreFeature,
   patchState,
@@ -23,23 +24,34 @@ import {
   updateEntity,
   removeEntity,
 } from '@ngrx/signals/entities';
+import {tapResponse} from "@ngrx/operators";
+import { Observable, isObservable, Subscription } from 'rxjs';
 import { EntityState, NamedEntityComputed } from './shared/signal-store-models';
 
 export type Filter = Record<string, unknown>;
 export type Entity = { id: EntityId };
 
-export interface DataService<E extends Entity, F extends Filter> {
-  load(filter: F): Promise<E[]>;
+// For interface
+type PromiseOrObservable<Entity> = Promise<Entity> | Observable<Entity>;
+// For methods
+// TODO - will likely be an unsubscription after working these things out - the unsub strategy is outstanding for now
+type PromiseOrSubscription<Entity> = Promise<Entity> | Subscription;
 
-  loadById(id: EntityId): Promise<E>;
+export interface DataService<
+  E extends Entity,
+  F extends Filter>
+{
+  load(filter: F): PromiseOrObservable<Entity[]>;
 
-  create(entity: E): Promise<E>;
+  loadById(id: EntityId): PromiseOrObservable<Entity>;
 
-  update(entity: E): Promise<E>;
+  create(entity: E): PromiseOrObservable<Entity>;
 
-  updateAll(entity: E[]): Promise<E[]>;
+  update(entity: E): PromiseOrObservable<Entity>;
 
-  delete(entity: E): Promise<void>;
+  updateAll(entity: E[]): PromiseOrObservable<Entity[]>;
+
+  delete(entity: E): PromiseOrObservable<void> ;
 }
 
 export function capitalize(str: string): string {
@@ -160,36 +172,36 @@ export type NamedDataServiceMethods<
     selected: boolean
   ) => void;
 } & {
-  [K in Collection as `load${Capitalize<K>}Entities`]: () => Promise<void>;
+  [K in Collection as `load${Capitalize<K>}Entities`]: () => PromiseOrSubscription<void>;
 } & {
   [K in Collection as `setCurrent${Capitalize<K>}`]: (entity: E) => void;
 } & {
   [K in Collection as `load${Capitalize<K>}ById`]: (
     id: EntityId
-  ) => Promise<void>;
+  ) => PromiseOrSubscription<void>;
 } & {
-  [K in Collection as `create${Capitalize<K>}`]: (entity: E) => Promise<void>;
+  [K in Collection as `create${Capitalize<K>}`]: (entity: E) => PromiseOrSubscription<void>;
 } & {
-  [K in Collection as `update${Capitalize<K>}`]: (entity: E) => Promise<void>;
+  [K in Collection as `update${Capitalize<K>}`]: (entity: E) => PromiseOrSubscription<void>;
 } & {
   [K in Collection as `updateAll${Capitalize<K>}`]: (
     entity: E[]
-  ) => Promise<void>;
+  ) => PromiseOrSubscription<void>;
 } & {
-  [K in Collection as `delete${Capitalize<K>}`]: (entity: E) => Promise<void>;
+  [K in Collection as `delete${Capitalize<K>}`]: (entity: E) => PromiseOrSubscription<void>;
 };
 
 export type DataServiceMethods<E extends Entity, F extends Filter> = {
   updateFilter: (filter: F) => void;
   updateSelected: (id: EntityId, selected: boolean) => void;
-  load: () => Promise<void>;
+  load: () => PromiseOrSubscription<void>;
 
   setCurrent(entity: E): void;
-  loadById(id: EntityId): Promise<void>;
-  create(entity: E): Promise<void>;
-  update(entity: E): Promise<void>;
-  updateAll(entities: E[]): Promise<void>;
-  delete(entity: E): Promise<void>;
+  loadById(id: EntityId): PromiseOrSubscription<void>;
+  create(entity: E): PromiseOrSubscription<void>;
+  update(entity: E): PromiseOrSubscription<void>;
+  updateAll(entities: E[]): PromiseOrSubscription<void>;
+  delete(entity: E): PromiseOrSubscription<void>;
 };
 
 export function withDataService<
@@ -287,118 +299,240 @@ export function withDataService<
               },
             }));
           },
-          [loadKey]: async (): Promise<void> => {
+          [loadKey]: (): PromiseOrSubscription<void> => {
             const filter = store[filterKey] as Signal<F>;
             store[callStateKey] && patchState(store, setLoading(prefix));
 
-            try {
-              const result = await dataService.load(filter());
-              patchState(
-                store,
-                prefix
-                  ? setAllEntities(result, { collection: prefix })
-                  : setAllEntities(result)
-              );
-              store[callStateKey] && patchState(store, setLoaded(prefix));
-            } catch (e) {
-              store[callStateKey] && patchState(store, setError(e, prefix));
-              throw e;
+            const serviceCall = dataService.load(filter());
+
+            if (isObservable(serviceCall)) {
+              return serviceCall.pipe(
+                tapResponse((result) => {
+                  patchState(
+                    store,
+                    prefix
+                      ? setAllEntities(result, { collection: prefix })
+                      : setAllEntities(result));
+                  store[callStateKey] && patchState(store, setLoaded(prefix));
+                }, (errorResponse: HttpErrorResponse) => store[callStateKey] && patchState(store, setError(errorResponse, prefix)))).subscribe();
+            } else {
+              const loadPromise = async () => {
+                try {
+                  const result = await serviceCall;
+                  patchState(
+                    store,
+                    prefix
+                      ? setAllEntities(result, { collection: prefix })
+                      : setAllEntities(result));
+                  store[callStateKey] && patchState(store, setLoaded(prefix));
+                } catch (e) {
+                  store[callStateKey] && patchState(store, setError(e, prefix));
+                  throw e;
+                }
+              };
+              return loadPromise();
             }
           },
-          [loadByIdKey]: async (id: EntityId): Promise<void> => {
+          [loadByIdKey]: (id: EntityId): PromiseOrSubscription<void> => {
             store[callStateKey] && patchState(store, setLoading(prefix));
 
-            try {
-              const current = await dataService.loadById(id);
-              store[callStateKey] && patchState(store, setLoaded(prefix));
-              patchState(store, { [currentKey]: current });
-            } catch (e) {
-              store[callStateKey] && patchState(store, setError(e, prefix));
-              throw e;
+            const serviceCall = dataService.loadById(id);
+
+            if (isObservable(serviceCall)) {
+              return serviceCall.pipe(
+                tapResponse(
+                  (current) => {
+                    store[callStateKey] && patchState(store, setLoaded(prefix));
+                    patchState(store, { [currentKey]: current });
+                  }, (errorResponse: HttpErrorResponse) => store[callStateKey] && patchState(store, setError(errorResponse, prefix))
+                )
+              ).subscribe()
+            } else {
+              const loadByIdPromise = async () => {
+                try {
+                  const current = await dataService.loadById(id);
+                  store[callStateKey] && patchState(store, setLoaded(prefix));
+                  patchState(store, { [currentKey]: current });
+                } catch (e) {
+                  store[callStateKey] && patchState(store, setError(e, prefix));
+                  throw e;
+                }
+              }
+              return loadByIdPromise()
             }
+
           },
           [setCurrentKey]: (current: E): void => {
             patchState(store, { [currentKey]: current });
           },
-          [createKey]: async (entity: E): Promise<void> => {
+          [createKey]: (entity: E): PromiseOrSubscription<void> => {
             patchState(store, { [currentKey]: entity });
             store[callStateKey] && patchState(store, setLoading(prefix));
 
-            try {
-              const created = await dataService.create(entity);
-              patchState(store, { [currentKey]: created });
-              patchState(
-                store,
-                prefix
-                  ? addEntity(created, { collection: prefix })
-                  : addEntity(created)
-              );
-              store[callStateKey] && patchState(store, setLoaded(prefix));
-            } catch (e) {
-              store[callStateKey] && patchState(store, setError(e, prefix));
-              throw e;
+            const serviceCall = dataService.create(entity)
+
+            if (isObservable(serviceCall)) {
+              return serviceCall.pipe(
+                tapResponse((created) => {
+                  patchState(store, { [currentKey]: created });
+                  patchState(
+                    store,
+                    prefix
+                      ? addEntity(created, { collection: prefix })
+                      : addEntity(created)
+                  );
+                  store[callStateKey] && patchState(store, setLoaded(prefix));
+                }, (errorResponse: HttpErrorResponse) => store[callStateKey] && patchState(store, setError(errorResponse, prefix)))
+              ).subscribe()
+            } else {
+              const createPromise = async () => {
+                try {
+                  const created = await serviceCall;
+                  patchState(store, { [currentKey]: created });
+                  patchState(
+                    store,
+                    prefix
+                      ? addEntity(created, { collection: prefix })
+                      : addEntity(created)
+                  );
+                  store[callStateKey] && patchState(store, setLoaded(prefix));
+                } catch (e) {
+                  store[callStateKey] && patchState(store, setError(e, prefix));
+                  throw e;
+                }
+              }
+              return createPromise()
             }
           },
-          [updateKey]: async (entity: E): Promise<void> => {
+          [updateKey]: (entity: E): PromiseOrSubscription<void> => {
             patchState(store, { [currentKey]: entity });
             store[callStateKey] && patchState(store, setLoading(prefix));
 
-            try {
-              const updated = await dataService.update(entity);
-              patchState(store, { [currentKey]: updated });
+            const serviceCall = dataService.update(entity);
 
-              const updateArg = {
-                id: updated.id,
-                changes: updated,
-              };
+            if (isObservable(serviceCall)) {
+              return serviceCall.pipe(
+                tapResponse((updated) => {
+                  patchState(store, { [currentKey]: updated });
 
-              const updater = (collection: string) =>
-                updateEntity(updateArg, { collection });
+                  const updateArg = {
+                    id: updated.id,
+                    changes: updated,
+                  };
 
-              patchState(
-                store,
-                prefix ? updater(prefix) : updateEntity(updateArg)
-              );
-              store[callStateKey] && patchState(store, setLoaded(prefix));
-            } catch (e) {
-              store[callStateKey] && patchState(store, setError(e, prefix));
-              throw e;
+                  const updater = (collection: string) =>
+                    updateEntity(updateArg, { collection });
+
+                  patchState(
+                    store,
+                    prefix ? updater(prefix) : updateEntity(updateArg)
+                  );
+                  store[callStateKey] && patchState(store, setLoaded(prefix));
+                }, (error: HttpErrorResponse) => store[callStateKey] && patchState(store, setError(error, prefix)))
+              ).subscribe()
+            } else {
+              const updatePromise = async() => {
+                try {
+                  const updated = await serviceCall;
+                  patchState(store, { [currentKey]: updated });
+
+                  const updateArg = {
+                    id: updated.id,
+                    changes: updated,
+                  };
+
+                  const updater = (collection: string) =>
+                    updateEntity(updateArg, { collection });
+
+                  patchState(
+                    store,
+                    prefix ? updater(prefix) : updateEntity(updateArg)
+                  );
+                  store[callStateKey] && patchState(store, setLoaded(prefix));
+                } catch (e) {
+                  store[callStateKey] && patchState(store, setError(e, prefix));
+                  throw e;
+                }
+              }
+              return updatePromise()
             }
           },
-          [updateAllKey]: async (entities: E[]): Promise<void> => {
+          [updateAllKey]: (entities: E[]): PromiseOrSubscription<void> => {
             store[callStateKey] && patchState(store, setLoading(prefix));
 
-            try {
-              const result = await dataService.updateAll(entities);
-              patchState(
-                store,
-                prefix
-                  ? setAllEntities(result, { collection: prefix })
-                  : setAllEntities(result)
-              );
-              store[callStateKey] && patchState(store, setLoaded(prefix));
-            } catch (e) {
-              store[callStateKey] && patchState(store, setError(e, prefix));
-              throw e;
+            const serviceCall = dataService.updateAll(entities);
+
+            if (isObservable(serviceCall)) {
+              return serviceCall.pipe(
+                tapResponse((result) => {
+                  patchState(
+                    store,
+                    prefix
+                      ? setAllEntities(result, { collection: prefix })
+                      : setAllEntities(result)
+                  );
+                  store[callStateKey] && patchState(store, setLoaded(prefix));
+                }, (error: HttpErrorResponse) => store[callStateKey] && patchState(store, setError(error, prefix)))
+              ).subscribe()
+            } else {
+              const updateAllPromise = async() => {
+                try {
+                  const result = await serviceCall;
+                  patchState(
+                    store,
+                    prefix
+                      ? setAllEntities(result, { collection: prefix })
+                      : setAllEntities(result)
+                  );
+                  store[callStateKey] && patchState(store, setLoaded(prefix));
+                } catch (e) {
+                  store[callStateKey] && patchState(store, setError(e, prefix));
+                  throw e;
+                }
+              }
+              return updateAllPromise()
             }
           },
-          [deleteKey]: async (entity: E): Promise<void> => {
+          [deleteKey]: (entity: E): PromiseOrSubscription<void> => {
             patchState(store, { [currentKey]: entity });
             store[callStateKey] && patchState(store, setLoading(prefix));
 
-            try {
-              await dataService.delete(entity);
-              patchState(store, { [currentKey]: undefined });
-              patchState(
-                store,
-                prefix
-                  ? removeEntity(entity.id, { collection: prefix })
-                  : removeEntity(entity.id)
-              );
-              store[callStateKey] && patchState(store, setLoaded(prefix));
-            } catch (e) {
-              store[callStateKey] && patchState(store, setError(e, prefix));
-              throw e;
+            const serviceCall = dataService.delete(entity)
+
+            if (isObservable(serviceCall)) {
+              return serviceCall.pipe(
+                tapResponse(
+                  (() => {
+                    patchState(store, { [currentKey]: undefined });
+                    patchState(
+                      store,
+                      prefix
+                        ? removeEntity(entity.id, { collection: prefix })
+                        : removeEntity(entity.id)
+                    );
+                    store[callStateKey] && patchState(store, setLoaded(prefix));
+                  }),
+                  (error: HttpErrorResponse) => store[callStateKey] && patchState(store, setError(error, prefix)),
+                )
+              ).subscribe()
+            } else {
+              const deletePromise = async() => {
+                try {
+                  await serviceCall;
+                  patchState(store, { [currentKey]: undefined });
+                  patchState(
+                    store,
+                    prefix
+                      ? removeEntity(entity.id, { collection: prefix })
+                      : removeEntity(entity.id)
+                  );
+                  store[callStateKey] && patchState(store, setLoaded(prefix));
+                } catch (e) {
+                  store[callStateKey] && patchState(store, setError(e, prefix));
+                  throw e;
+                }
+              }
+              return deletePromise()
             }
           },
         };
