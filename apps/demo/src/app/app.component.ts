@@ -1,20 +1,20 @@
-import { SelectionModel } from '@angular/cdk/collections';
-import { Component, effect, inject } from '@angular/core';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { Component } from '@angular/core';
+import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { Todo, TodoStore } from './devtools/todo-store';
 import { MatIconModule } from '@angular/material/icon';
-import { CategoryStore } from './category.store';
 import { RouterLink, RouterOutlet } from '@angular/router';
-import { SidebarComponent } from './core/sidebar/sidebar.component';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatListItem, MatListModule } from '@angular/material/list';
+import { MatListModule } from '@angular/material/list';
+import {
+  MatDrawer,
+  MatDrawerContainer,
+  MatDrawerContent,
+} from '@angular/material/sidenav';
 
 @Component({
   selector: 'demo-root',
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css',
   imports: [
     MatTableModule,
     MatCheckboxModule,
@@ -22,9 +22,18 @@ import { MatListItem, MatListModule } from '@angular/material/list';
     MatListModule,
     RouterLink,
     RouterOutlet,
-    SidebarComponent,
     CommonModule,
     MatToolbarModule,
+    MatDrawer,
+    MatDrawerContainer,
+    MatDrawerContent,
   ],
+  styles: `
+    .container {
+      display: inline;
+    }
+    .content {
+    margin: 4em;
+  }`,
 })
 export class AppComponent {}

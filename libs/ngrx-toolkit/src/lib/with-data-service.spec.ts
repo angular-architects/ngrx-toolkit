@@ -49,7 +49,7 @@ describe('withDataService', () => {
 
       tick();
 
-      expect(store.current()).toEqual(createFlight({id: 2}));
+      expect(store.current()).toEqual(createFlight({ id: 2 }));
     });
   }));
   it('should load by ID from a service and set entities in the store (with named collection)', fakeAsync(() => {
@@ -62,7 +62,7 @@ describe('withDataService', () => {
 
       tick();
 
-      expect(store.currentFlight()).toEqual(createFlight({id: 2}));
+      expect(store.currentFlight()).toEqual(createFlight({ id: 2 }));
     });
   }));
   it('should create from a service and set an entity in the store', fakeAsync(() => {
@@ -73,12 +73,12 @@ describe('withDataService', () => {
 
       expect(store.entities().length).toBe(0);
 
-      store.create(createFlight({id: 3}));
+      store.create(createFlight({ id: 3 }));
 
       tick();
 
       expect(store.entities().length).toBe(1);
-      expect(store.current()).toEqual(createFlight({id: 3}));
+      expect(store.current()).toEqual(createFlight({ id: 3 }));
     });
   }));
   it('should create from a service and set an entity in the store (with named collection)', fakeAsync(() => {
@@ -89,12 +89,12 @@ describe('withDataService', () => {
 
       expect(store.flightEntities().length).toBe(0);
 
-      store.createFlight(createFlight({id: 3}));
+      store.createFlight(createFlight({ id: 3 }));
 
       tick();
 
       expect(store.flightEntities().length).toBe(1);
-      expect(store.currentFlight()).toEqual(createFlight({id: 3}));
+      expect(store.currentFlight()).toEqual(createFlight({ id: 3 }));
     });
   }));
   it('should update from a service and update an entity in the store', fakeAsync(() => {
@@ -105,12 +105,12 @@ describe('withDataService', () => {
 
       expect(store.entities().length).toBe(0);
 
-      store.create(createFlight({id: 3, from: 'Wadena MN'}));
+      store.create(createFlight({ id: 3, from: 'Wadena MN' }));
       tick();
-      store.update(createFlight({id: 3}));
+      store.update(createFlight({ id: 3 }));
       tick();
 
-      expect(store.current()).toEqual(createFlight({id: 3}));
+      expect(store.current()).toEqual(createFlight({ id: 3 }));
     });
   }));
   it('should update from a service and update an entity in the store (with named collection)', fakeAsync(() => {
@@ -121,12 +121,12 @@ describe('withDataService', () => {
 
       expect(store.flightEntities().length).toBe(0);
 
-      store.createFlight(createFlight({id: 3, from: 'Wadena MN'}));
+      store.createFlight(createFlight({ id: 3, from: 'Wadena MN' }));
       tick();
-      store.updateFlight(createFlight({id: 3}));
+      store.updateFlight(createFlight({ id: 3 }));
       tick();
 
-      expect(store.currentFlight()).toEqual(createFlight({id: 3}));
+      expect(store.currentFlight()).toEqual(createFlight({ id: 3 }));
     });
   }));
   it('should update all from a service and update all entities in the store', fakeAsync(() => {
@@ -137,17 +137,14 @@ describe('withDataService', () => {
 
       expect(store.entities().length).toBe(0);
 
-      store.create(createFlight({id: 3, from: 'Wadena MN'}));
-      store.create(createFlight({id: 4, from: 'Wadena MN'}));
+      store.create(createFlight({ id: 3, from: 'Wadena MN' }));
+      store.create(createFlight({ id: 4, from: 'Wadena MN' }));
       tick();
-      store.updateAll([
-        createFlight({id: 3}),
-        createFlight({id: 4}),
-      ]);
+      store.updateAll([createFlight({ id: 3 }), createFlight({ id: 4 })]);
       tick();
       expect(store.entities().length).toBe(2);
-      expect(store.entities().at(0)).toEqual(createFlight({id: 3}));
-      expect(store.entities().at(1)).toEqual(createFlight({id: 4}));
+      expect(store.entities().at(0)).toEqual(createFlight({ id: 3 }));
+      expect(store.entities().at(1)).toEqual(createFlight({ id: 4 }));
     });
   }));
   it('should update all from a service and update all entities in the store (with named collection)', fakeAsync(() => {
@@ -158,17 +155,14 @@ describe('withDataService', () => {
 
       expect(store.flightEntities().length).toBe(0);
 
-      store.createFlight(createFlight({id: 3, from: 'Wadena MN'}));
-      store.createFlight(createFlight({id: 4, from: 'Wadena MN'}));
+      store.createFlight(createFlight({ id: 3, from: 'Wadena MN' }));
+      store.createFlight(createFlight({ id: 4, from: 'Wadena MN' }));
       tick();
-      store.updateAllFlight([
-        createFlight({id: 3}),
-        createFlight({id: 4}),
-      ]);
+      store.updateAllFlight([createFlight({ id: 3 }), createFlight({ id: 4 })]);
       tick();
       expect(store.flightEntities().length).toBe(2);
-      expect(store.flightEntities().at(0)).toEqual(createFlight({id: 3}));
-      expect(store.flightEntities().at(1)).toEqual(createFlight({id: 4}));
+      expect(store.flightEntities().at(0)).toEqual(createFlight({ id: 3 }));
+      expect(store.flightEntities().at(1)).toEqual(createFlight({ id: 4 }));
     });
   }));
   it('should delete from a service and update that entity in the store', fakeAsync(() => {
@@ -179,11 +173,11 @@ describe('withDataService', () => {
 
       expect(store.entities().length).toBe(0);
 
-      store.create(createFlight({id: 3}));
+      store.create(createFlight({ id: 3 }));
       tick();
       expect(store.entities().length).toBe(1);
-      expect(store.entities().at(0)).toEqual(createFlight({id: 3}));
-      store.delete(createFlight({id: 3}));
+      expect(store.entities().at(0)).toEqual(createFlight({ id: 3 }));
+      store.delete(createFlight({ id: 3 }));
       tick();
       expect(store.entities().length).toBe(0);
     });
@@ -196,11 +190,11 @@ describe('withDataService', () => {
 
       expect(store.flightEntities().length).toBe(0);
 
-      store.createFlight(createFlight({id: 3}));
+      store.createFlight(createFlight({ id: 3 }));
       tick();
       expect(store.flightEntities().length).toBe(1);
-      expect(store.flightEntities().at(0)).toEqual(createFlight({id: 3}));
-      store.deleteFlight(createFlight({id: 3}));
+      expect(store.flightEntities().at(0)).toEqual(createFlight({ id: 3 }));
+      store.deleteFlight(createFlight({ id: 3 }));
       tick();
       expect(store.flightEntities().length).toBe(0);
     });
@@ -211,7 +205,7 @@ describe('withDataService', () => {
 
       tick();
 
-      store.create(createFlight({id: 3}));
+      store.create(createFlight({ id: 3 }));
       expect(store.selectedEntities().length).toBe(0);
 
       store.updateSelected(3, true);
@@ -219,7 +213,7 @@ describe('withDataService', () => {
       tick();
 
       expect(store.selectedEntities().length).toBe(1);
-      expect(store.selectedEntities()).toContainEqual(createFlight({id: 3}));
+      expect(store.selectedEntities()).toContainEqual(createFlight({ id: 3 }));
     });
   }));
   it('should update selected flight of the store (with named collection)', fakeAsync(() => {
@@ -228,7 +222,7 @@ describe('withDataService', () => {
 
       tick();
 
-      store.createFlight(createFlight({id: 3}));
+      store.createFlight(createFlight({ id: 3 }));
       expect(store.selectedFlightEntities().length).toBe(0);
 
       store.updateSelectedFlightEntities(3, true);
@@ -236,7 +230,9 @@ describe('withDataService', () => {
       tick();
 
       expect(store.selectedFlightEntities().length).toBe(1);
-      expect(store.selectedFlightEntities()).toContainEqual(createFlight({id: 3}));
+      expect(store.selectedFlightEntities()).toContainEqual(
+        createFlight({ id: 3 })
+      );
     });
   }));
   it('should update the filter of the service', fakeAsync(() => {
@@ -277,11 +273,11 @@ describe('withDataService', () => {
       const store = new Store();
       tick();
 
-      store.create(createFlight({id: 3}));
+      store.create(createFlight({ id: 3 }));
 
-      store.setCurrent(createFlight({id: 4}));
+      store.setCurrent(createFlight({ id: 4 }));
 
-      expect(store.current()).toEqual(createFlight({id: 4}));
+      expect(store.current()).toEqual(createFlight({ id: 4 }));
     });
   }));
   it('should set the current entity (with named collection)', fakeAsync(() => {
@@ -289,11 +285,11 @@ describe('withDataService', () => {
       const store = new StoreWithNamedCollection();
       tick();
 
-      store.createFlight(createFlight({id: 3}));
+      store.createFlight(createFlight({ id: 3 }));
 
-      store.setCurrentFlight(createFlight({id: 4}));
+      store.setCurrentFlight(createFlight({ id: 4 }));
 
-      expect(store.currentFlight()).toEqual(createFlight({id: 4}));
+      expect(store.currentFlight()).toEqual(createFlight({ id: 4 }));
     });
   }));
 
@@ -304,7 +300,7 @@ describe('withDataService', () => {
 
       expect(store.loading()).toBe(false);
 
-      store.create(createFlight({id: 3}));
+      store.create(createFlight({ id: 3 }));
       tick();
       expect(store.loading()).toBe(true);
       tick(3);
@@ -322,22 +318,19 @@ describe('withDataService', () => {
       tick(3);
       expect(store.loading()).toBe(false);
 
-      store.update(createFlight({id: 3}));
+      store.update(createFlight({ id: 3 }));
       tick();
       expect(store.loading()).toBe(true);
       tick(3);
       expect(store.loading()).toBe(false);
 
-      store.updateAll([
-        createFlight({id: 3}),
-        createFlight({id: 4}),
-      ]);
+      store.updateAll([createFlight({ id: 3 }), createFlight({ id: 4 })]);
       tick();
       expect(store.loading()).toBe(true);
       tick(3);
       expect(store.loading()).toBe(false);
 
-      store.delete(createFlight({id: 3}));
+      store.delete(createFlight({ id: 3 }));
       tick();
       expect(store.loading()).toBe(true);
       tick(3);
@@ -352,7 +345,7 @@ describe('withDataService', () => {
 
       expect(store.flightLoading()).toBe(false);
 
-      store.createFlight(createFlight({id: 3}));
+      store.createFlight(createFlight({ id: 3 }));
       tick();
       expect(store.flightLoading()).toBe(true);
       tick(3);
@@ -370,22 +363,19 @@ describe('withDataService', () => {
       tick(3);
       expect(store.flightLoading()).toBe(false);
 
-      store.updateFlight(createFlight({id: 3}));
+      store.updateFlight(createFlight({ id: 3 }));
       tick();
       expect(store.flightLoading()).toBe(true);
       tick(3);
       expect(store.flightLoading()).toBe(false);
 
-      store.updateAllFlight([
-        createFlight({id: 3}),
-        createFlight({id: 4}),
-      ]);
+      store.updateAllFlight([createFlight({ id: 3 }), createFlight({ id: 4 })]);
       tick();
       expect(store.flightLoading()).toBe(true);
       tick(3);
       expect(store.flightLoading()).toBe(false);
 
-      store.deleteFlight(createFlight({id: 3}));
+      store.deleteFlight(createFlight({ id: 3 }));
       tick();
       expect(store.flightLoading()).toBe(true);
       tick(3);
@@ -401,9 +391,13 @@ describe('withDataService', () => {
 let currentFlightId = 0;
 const createFlight = (flight: Partial<Flight> = {}) => ({
   ...{
-    id: ++currentFlightId, from: 'Paris', to: 'New York', date: new Date().toDateString(), delayed: false,
+    id: ++currentFlightId,
+    from: 'Paris',
+    to: 'New York',
+    date: new Date().toDateString(),
+    delayed: false,
   },
-  ...flight
+  ...flight,
 });
 type Flight = {
   id: number;
@@ -434,11 +428,8 @@ class MockFlightService implements DataService<Flight, FlightFilter> {
     return firstValueFrom(this.save(entity));
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateAll(entity: Flight[]): Promise<Flight[]> {
-    return firstValueFrom(
-      of(entity)
-    );
+    return firstValueFrom(of(entity));
   }
 
   delete(entity: Flight): Promise<void> {
@@ -449,19 +440,19 @@ class MockFlightService implements DataService<Flight, FlightFilter> {
     return firstValueFrom(this.find(filter.from, filter.to));
   }
 
-  private find(from: string, to: string, urgent = false): Observable<Flight[]> {
+  private find(_from: string, _to: string): Observable<Flight[]> {
     return of([createFlight()]);
   }
 
   private findById(id: string): Observable<Flight> {
-    return of(createFlight({id: Number(id)}));
+    return of(createFlight({ id: Number(id) }));
   }
 
   private save(flight: Flight): Observable<Flight> {
     return of(flight);
   }
 
-  private remove(flight: Flight): Observable<void> {
+  private remove(_flight: Flight): Observable<void> {
     return of(undefined);
   }
 }
@@ -482,11 +473,8 @@ class MockFlightServiceForLoading implements DataService<Flight, FlightFilter> {
     return firstValueFrom(this.save(entity));
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   updateAll(entity: Flight[]): Promise<Flight[]> {
-    return firstValueFrom(
-      of(entity).pipe(delay(3))
-    );
+    return firstValueFrom(of(entity).pipe(delay(3)));
   }
 
   delete(entity: Flight): Promise<void> {
@@ -497,19 +485,19 @@ class MockFlightServiceForLoading implements DataService<Flight, FlightFilter> {
     return firstValueFrom(this.find(filter.from, filter.to));
   }
 
-  private find(from: string, to: string, urgent = false): Observable<Flight[]> {
-    return of([createFlight({id: 1})]).pipe(delay(3));
+  private find(_from: string, _to: string): Observable<Flight[]> {
+    return of([createFlight({ id: 1 })]).pipe(delay(3));
   }
 
   private findById(id: string): Observable<Flight> {
-    return of(createFlight({id: Number(id)})).pipe(delay(3));
+    return of(createFlight({ id: Number(id) })).pipe(delay(3));
   }
 
   private save(flight: Flight): Observable<Flight> {
     return of(createFlight(flight)).pipe(delay(3));
   }
 
-  private remove(flight: Flight): Observable<void> {
+  private remove(_flight: Flight): Observable<void> {
     return of(undefined).pipe(delay(3));
   }
 }

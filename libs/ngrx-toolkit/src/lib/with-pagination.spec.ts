@@ -29,59 +29,62 @@ describe('withPagination', () => {
     patchState(store, setAllEntities(generateBooks(55)));
     expect(store.currentPage()).toBe(0);
     expect(store.pageCount()).toBe(6);
-  }),
-    it('should use and update a pagination with collection', () => {
-      const Store = signalStore(
-        { protectedState: false },
-        withEntities({ entity: type<Book>(), collection: 'books' }),
-        withPagination({ entity: type<Book>(), collection: 'books' })
-      );
+  });
 
-      const store = new Store();
+  it('should use and update a pagination with collection', () => {
+    const Store = signalStore(
+      { protectedState: false },
+      withEntities({ entity: type<Book>(), collection: 'books' }),
+      withPagination({ entity: type<Book>(), collection: 'books' })
+    );
 
-      patchState(
-        store,
-        setAllEntities(generateBooks(55), { collection: 'books' })
-      );
+    const store = new Store();
 
-      patchState(store, gotoPage(5, { collection: 'books' }));
-      expect(store.booksCurrentPage()).toBe(5);
-      expect(store.selectedPageBooksEntities().length).toBe(5);
-      expect(store.booksPageCount()).toBe(6);
-    }),
-    it('should react on enitiy changes', () => {
-      const Store = signalStore(
-        { protectedState: false },
-        withEntities({ entity: type<Book>() }),
-        withPagination()
-      );
+    patchState(
+      store,
+      setAllEntities(generateBooks(55), { collection: 'books' })
+    );
 
-      const store = new Store();
+    patchState(store, gotoPage(5, { collection: 'books' }));
+    expect(store.booksCurrentPage()).toBe(5);
+    expect(store.selectedPageBooksEntities().length).toBe(5);
+    expect(store.booksPageCount()).toBe(6);
+  });
 
-      patchState(store, setAllEntities(generateBooks(100)));
+  it('should react on enitiy changes', () => {
+    const Store = signalStore(
+      { protectedState: false },
+      withEntities({ entity: type<Book>() }),
+      withPagination()
+    );
 
-      expect(store.pageCount()).toBe(10);
+    const store = new Store();
 
-      patchState(store, setAllEntities(generateBooks(20)));
+    patchState(store, setAllEntities(generateBooks(100)));
 
-      expect(store.pageCount()).toBe(2);
+    expect(store.pageCount()).toBe(10);
 
-      patchState(store, setPageSize(5));
+    patchState(store, setAllEntities(generateBooks(20)));
 
-      expect(store.pageCount()).toBe(4);
-    }),
-    describe('internal pageNavigationArray', () => {
-      it('should return an array of page numbers', () => {
-        const pages = createPageArray(8, 10, 500, 7);
-        expect(pages).toEqual([
-          { label: 5, value: 5 },
-          { label: '...', value: 6 },
-          { label: 7, value: 7 },
-          { label: 8, value: 8 },
-          { label: 9, value: 9 },
-          { label: '...', value: 10 },
-          { label: 50, value: 50 },
-        ]);
-      });
+    expect(store.pageCount()).toBe(2);
+
+    patchState(store, setPageSize(5));
+
+    expect(store.pageCount()).toBe(4);
+  });
+
+  describe('internal pageNavigationArray', () => {
+    it('should return an array of page numbers', () => {
+      const pages = createPageArray(8, 10, 500, 7);
+      expect(pages).toEqual([
+        { label: 5, value: 5 },
+        { label: '...', value: 6 },
+        { label: 7, value: 7 },
+        { label: 8, value: 8 },
+        { label: 9, value: 9 },
+        { label: '...', value: 10 },
+        { label: 50, value: 50 },
+      ]);
     });
+  });
 });

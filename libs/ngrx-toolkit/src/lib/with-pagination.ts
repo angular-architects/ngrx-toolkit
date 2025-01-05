@@ -142,7 +142,8 @@ export function withPagination<E>(): SignalStoreFeature<
 export function withPagination<E, Collection extends string>(options?: {
   entity: E;
   collection: Collection;
-}): SignalStoreFeature<any, any> {
+}): /* eslint-disable @typescript-eslint/no-explicit-any */
+SignalStoreFeature<any, any> {
   const {
     pageKey,
     pageSizeKey,

@@ -1,31 +1,54 @@
 <h2 class="title">Flight Search (Simple)</h2>
 
 <form #form="ngForm">
-
   <div class="form-group">
-    <label>From:</label>
-    <input #fromField [ngModel]="from()" (ngModelChange)="updateCriteria($event, toField.value)" name="from" class="form-control">
+    <label
+      >From:
+      <input
+        #fromField
+        [ngModel]="from()"
+        (ngModelChange)="updateCriteria($event, toField.value)"
+        name="from"
+        class="form-control"
+      />
+    </label>
   </div>
 
-  <div class="alert alert-warning" *ngIf="form?.controls?.['from']?.hasError('appCity')">
+  <div
+    class="alert alert-warning"
+    *ngIf="form?.controls?.['from']?.hasError('appCity')"
+  >
     Invalid city!
   </div>
 
   <div class="form-group">
-    <label>To:</label>
-    <input #toField [ngModel]="to()" (ngModelChange)="updateCriteria(fromField.value, $event)" name="to" class="form-control">
+    <label
+      >To:
+      <input
+        #toField
+        [ngModel]="to()"
+        (ngModelChange)="updateCriteria(fromField.value, $event)"
+        name="to"
+        class="form-control"
+    /></label>
   </div>
 
   <div class="form-group">
-    <button (click)="search()" [disabled]="!from() || !to()" class="btn btn-default">
+    <button
+      (click)="search()"
+      [disabled]="!from() || !to()"
+      class="btn btn-default"
+    >
       Search
     </button>
 
-    <button [disabled]="!canUndo()" (click)="undo()" class="btn btn-default">Undo</button>
-    <button [disabled]="!canRedo()" (click)="redo()" class="btn btn-default">Redo</button>
-
+    <button [disabled]="!canUndo()" (click)="undo()" class="btn btn-default">
+      Undo
+    </button>
+    <button [disabled]="!canRedo()" (click)="redo()" class="btn btn-default">
+      Redo
+    </button>
   </div>
-
 </form>
 
 <div>
@@ -33,11 +56,20 @@
 </div>
 
 <div class="row">
-  <div *ngFor="let f of flights()" class="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-3">
-    <demo-flight-card [item]="f" [selected]="selectedIds()[f.id]" (selectedChange)="updateBasket(f.id, $event)">
-          <a class="btn btn-default" [routerLink]="['../flight-edit-simple', f.id]">Edit</a>
+  <div
+    *ngFor="let f of flights()"
+    class="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-3"
+  >
+    <demo-flight-card
+      [item]="f"
+      [selected]="selectedIds()[f.id]"
+      (selectedChange)="updateBasket(f.id, $event)"
+    >
+      <a class="btn btn-default" [routerLink]="['../flight-edit-simple', f.id]"
+        >Edit</a
+      >
     </demo-flight-card>
   </div>
 </div>
 
-<pre>{{ selected() | json}}</pre>
+<pre>{{ selected() | json }}</pre>

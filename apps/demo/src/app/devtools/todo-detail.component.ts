@@ -1,5 +1,5 @@
 import { Component, effect, inject, input } from '@angular/core';
-import { MatCard, MatCardModule } from '@angular/material/card';
+import { MatCardModule } from '@angular/material/card';
 import { Todo } from './todo-store';
 import { signalStore, withState } from '@ngrx/signals';
 import {

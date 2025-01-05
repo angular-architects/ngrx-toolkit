@@ -81,3 +81,9 @@ export interface MapperTypes<Creators extends readonly ActionCreator[]> {
   storeMethod: StoreMethod<Creators>;
   resultMethod?: (...args: unknown[]) => unknown;
 }
+
+export type ServiceWithDecorator = {
+  ɵprov?: {
+    providedIn?: string;
+  };
+};

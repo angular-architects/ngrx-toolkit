@@ -1,7 +1,6 @@
 import { JsonPipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { FlightCardComponent } from '../shared/flight-card.component';
 import { ticketActions } from './+state/actions';
 import { injectFlightStore } from './+state/redux';
@@ -10,13 +9,7 @@ import { FlightFilter } from '../shared/flight.service';
 import { Flight } from '../shared/flight';
 
 @Component({
-  imports: [
-    JsonPipe,
-    RouterLink,
-
-    FormsModule,
-    FlightCardComponent
-  ],
+  imports: [JsonPipe, FormsModule, FlightCardComponent],
   selector: 'demo-flight-search-redux-connector',
   templateUrl: './flight-search.component.html',
 })
@@ -26,7 +19,7 @@ export class FlightSearchReducConnectorComponent {
   protected localState = signalState({
     filter: {
       from: 'Frankfurt',
-      to: 'Paris'
+      to: 'Paris',
     },
     basket: {
       888: true,
@@ -40,25 +33,26 @@ export class FlightSearchReducConnectorComponent {
     this.store.dispatch(
       ticketActions.flightsLoad({
         from: this.localState.filter.from(),
-        to: this.localState.filter.to()
+        to: this.localState.filter.to(),
       })
     );
   }
 
   protected patchFilter(filter: Partial<FlightFilter>) {
-    patchState(this.localState, state => ({
+    patchState(this.localState, (state) => ({
       filter: {
         ...state.filter,
-        ...filter
-    }}));
+        ...filter,
+      },
+    }));
   }
 
   protected select(id: number, selected: boolean): void {
-    patchState(this.localState, state => ({
+    patchState(this.localState, (state) => ({
       basket: {
         ...state.basket,
-        [id]: selected
-      }
+        [id]: selected,
+      },
     }));
   }
 
@@ -70,7 +64,7 @@ export class FlightSearchReducConnectorComponent {
     const newFlight = {
       ...oldFlight,
       date: newDate.toISOString(),
-      delayed: true
+      delayed: true,
     };
 
     this.store.dispatch(ticketActions.flightUpdate({ flight: newFlight }));

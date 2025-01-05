@@ -30,13 +30,12 @@
         "default",
         "{workspaceRoot}/.eslintrc.json",
         "{workspaceRoot}/.eslintignore",
-        "{workspaceRoot}/eslint.config.js"
+        "{workspaceRoot}/eslint.config.js",
+        "{workspaceRoot}/eslint.config.cjs"
       ]
     },
     "nx-release-publish": {
-      "dependsOn": [
-        "build"
-      ],
+      "dependsOn": ["build"],
       "options": {
         "packageRoot": "dist/libs/ngrx-toolkit"
       }
@@ -52,19 +51,21 @@
       "!{projectRoot}/src/test-setup.[jt]s",
       "!{projectRoot}/test-setup.[jt]s",
       "!{projectRoot}/.eslintrc.json",
-      "!{projectRoot}/eslint.config.js"
+      "!{projectRoot}/eslint.config.js",
+      "!{projectRoot}/eslint.config.cjs"
     ],
     "sharedGlobals": []
   },
   "release": {
     "projects": ["ngrx-toolkit"],
-    "version": {"conventionalCommits": true},
+    "version": {
+      "conventionalCommits": true
+    },
     "changelog": {
       "workspaceChangelog": {
         "createRelease": "github"
       }
     }
-
   },
   "generators": {
     "@nx/angular:application": {

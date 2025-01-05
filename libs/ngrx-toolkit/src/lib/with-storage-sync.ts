@@ -11,7 +11,7 @@ import {
   EmptyFeatureResult,
 } from '@ngrx/signals';
 
-const NOOP = () => {};
+const NOOP = () => void true;
 
 type WithStorageSyncFeatureResult = EmptyFeatureResult & {
   methods: {
@@ -72,14 +72,10 @@ export type SyncConfig<State> = {
  *
  * Only works on browser platform.
  */
-export function withStorageSync<
-  State extends object,
-  Input extends SignalStoreFeatureResult
->(key: string): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
-export function withStorageSync<
-  State extends object,
-  Input extends SignalStoreFeatureResult
->(
+export function withStorageSync<Input extends SignalStoreFeatureResult>(
+  key: string
+): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
+export function withStorageSync<Input extends SignalStoreFeatureResult>(
   config: SyncConfig<Input['state']>
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
 export function withStorageSync<
