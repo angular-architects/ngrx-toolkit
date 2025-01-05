@@ -1,4 +1,3 @@
- 
 export default {
   displayName: 'demo',
   preset: '../../jest.preset.js',
@@ -13,6 +12,7 @@ export default {
       },
     ],
   },
+  testPathIgnorePatterns: ['e2e'],
   transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
   snapshotSerializers: [
     'jest-preset-angular/build/serializers/no-ng-attributes',

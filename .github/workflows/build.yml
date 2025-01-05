@@ -21,6 +21,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint:all
       - run: pnpm run test:all
+      - run: pnpm run test:e2e
       - run: pnpm run build:all
       - run: ./integration-tests.sh
 

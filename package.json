@@ -6,6 +6,7 @@
     "start": "nx serve demo",
     "lint:all": "nx run-many --targets=lint",
     "test:all": "nx run-many --targets=test",
+    "test:e2e": "nx e2e demo",
     "build:all": "nx run-many --targets=build",
     "verify:all": "nx run-many --targets=lint,test,build"
   },
