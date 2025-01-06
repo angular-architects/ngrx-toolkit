@@ -9,7 +9,7 @@ NgRx Toolkit is a set of extensions to the NgRx Signals Store, like
 - Devtools: Integration into Redux Devtools
 - Redux: Possibility to use the Redux Pattern (Reducer, Actions, Effects)
 - Storage Sync: Synchronize the Store with Web Storage
-- Redux Connector: Map NgRx Store Actions to a present Signal Store
+- [Redux Connector: Map NgRx Store Actions to a present Signal Store](libs/ngrx-toolkit/redux-connector/docs/README.md)
 
 To install it, run
 
