@@ -2,9 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/%40angular-architects%2Fngrx-toolkit.svg)](https://www.npmjs.com/package/%40angular-architects%2Fngrx-toolkit)
 
-<p align="center">
-<img src="https://raw.githubusercontent.com/angular-architects/ngrx-toolkit/main/logo.png" width="320" style="text-align: center">
-</p>
+<img src="https://raw.githubusercontent.com/angular-architects/ngrx-toolkit/main/logo.png" width="320" style="text-align: center" />
 
 NgRx Toolkit is an extension to the NgRx Signals Store. **It is still in beta** but already offers features, like:
 

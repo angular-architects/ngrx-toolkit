@@ -1,0 +1,7 @@
+{
+  "entryPoints": ["../libs/ngrx-toolkit/src/index.ts"],
+  "out": "docs/api",
+  "exclude": ["**/*.test.ts", "**/__tests__/**/*"], // Exclude test files
+  "includeVersion": true,         // Optionally include version info
+  "excludeExternals": true        // Exclude external libraries
+}
