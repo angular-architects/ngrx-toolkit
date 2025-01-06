@@ -85,9 +85,14 @@ const config: Config = {
           position: 'left',
         },
         {
-          to: '/docs/api',
+          to: '/docs/api/globals',
           label: 'API',
           position: 'left',
+        },
+        {
+          href: 'https://github.com/angular-architects/ngrx-toolkit',
+          label: 'GitHub',
+          position: 'right',
         },
       ],
     },
