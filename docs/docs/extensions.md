@@ -9,8 +9,9 @@ It offers extensions like:
 - [⭐️ Devtools](./with-devtools): Integration into Redux Devtools
 - [Redux](./with-redux): Possibility to use the Redux Pattern (Reducer, Actions, Effects)
 - [DataService](./with-data-service): Builds on top of `withEntities` and adds the backend synchronization to it
-- [Storage Sync](./with-storage-sync): Synchronize the Store with Web Storage
-- [Undo Redo](./with-undo-redo): Add Undo/Redo functionality to your store
+- [Storage Sync](./with-storage-sync): Synchronizes the Store with Web Storage
+- [Undo Redo](./with-undo-redo): Adds Undo/Redo functionality to your store
+- [Reset](./with-reset): Adds a `resetState` method to your store
 
 To install it, run
 
