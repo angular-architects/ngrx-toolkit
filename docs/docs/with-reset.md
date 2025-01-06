@@ -31,3 +31,19 @@ console.log(store.user()); // { id: 2, name: 'John' }
 store.resetState();
 console.log(store.user()); // { id: 1, name: 'Konrad' }
 ```
+
+## `setResetState()`
+
+If you want to set a custom reset state, you can use the `setResetState()` method.
+
+Example:
+
+```typescript
+// continue from the previous example
+
+setResetState(store, { user: { id: 3, name: 'Jane' }, address: { city: 'Berlin', zip: '10115' } });
+store.changeUser(4, 'Alice');
+
+store.resetState();
+console.log(store.user()); // { id: 3, name: 'Jane' }
+```

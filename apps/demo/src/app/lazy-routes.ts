@@ -33,4 +33,9 @@ export const lazyRoutes: Route[] = [
     providers: [provideFlightStore()],
     component: FlightSearchReducConnectorComponent,
   },
+  {
+    path: 'reset',
+    loadComponent: () =>
+      import('./reset/todo.component').then((m) => m.TodoComponent),
+  },
 ];

@@ -5,7 +5,7 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import { withReset } from './with-reset';
+import { setResetState, withReset } from './with-reset';
 import { TestBed } from '@angular/core/testing';
 import { effect } from '@angular/core';
 
@@ -25,6 +25,9 @@ describe('withReset', () => {
         },
         changeUserName(name: string) {
           patchState(store, (value) => ({ user: { ...value.user, name } }));
+        },
+        changeAddress(city: string, zip: string) {
+          patchState(store, { address: { city, zip } });
         },
       }))
     );
@@ -79,5 +82,31 @@ describe('withReset', () => {
     store.changeUser(2, 'Ludwig');
     TestBed.flushEffects();
     expect(effectCounter).toBe(1);
+  });
+
+  it('should be possible to change the reset state', () => {
+    const { store } = setup();
+
+    setResetState(store, {
+      user: { id: 2, name: 'Max' },
+      address: { city: 'London', zip: 'SW1' },
+    });
+
+    store.changeUser(3, 'Ludwig');
+    store.changeAddress('Paris', '75001');
+
+    store.resetState();
+    expect(getState(store)).toEqual({
+      user: { id: 2, name: 'Max' },
+      address: { city: 'London', zip: 'SW1' },
+    });
+  });
+
+  it('should throw on setResetState if store is not configured with withReset()', () => {
+    const Store = signalStore({ providedIn: 'root' }, withState({}));
+    const store = TestBed.inject(Store);
+    expect(() => setResetState(store, {})).toThrowError(
+      'Cannot set reset state, since store is not configured with withReset()'
+    );
   });
 });

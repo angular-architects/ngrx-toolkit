@@ -11,4 +11,4 @@ export * from './lib/with-undo-redo';
 export * from './lib/with-data-service';
 export { withStorageSync, SyncConfig } from './lib/with-storage-sync';
 export * from './lib/with-pagination';
-export { withReset } from './lib/with-reset';
+export { withReset, setResetState } from './lib/with-reset';
