@@ -1,3 +1,6 @@
+---
+title: withStorageSync()
+---
 
 `withStorageSync` adds automatic or manual synchronization with Web Storage (`localstorage`/`sessionstorage`).
 

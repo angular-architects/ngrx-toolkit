@@ -1,3 +1,7 @@
+---
+title: withDevtools()
+---
+
 Redux Devtools is a powerful browser extension tool, that allows you to inspect every change in your stores. Originally, it was designed for Redux, but it can also be used with the SignalStore. You can download it for Chrome [here](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd).
 
 To use the Devtools, you need to add the `withDevtools()` extension to your SignalStore:
@@ -41,14 +45,11 @@ At any time, you can use `renameDevtoolsName` to change the name of the store in
 The following example shows a component, which has a locally provided store and renames it according to the `id` of the `todo` Signal.
 
 ```typescript
-const TodoDetailStore = signalStore(
-  withDevtools('todo-detail'),
-  withState({ id: 1 })
-);
+const TodoDetailStore = signalStore(withDevtools('todo-detail'), withState({ id: 1 }));
 
 @Component({
   // ...
-  providers: [TodoDetailStore]
+  providers: [TodoDetailStore],
 })
 export class TodoDetailComponent {
   readonly #todoDetailStore = inject(TodoDetailStore);
@@ -71,11 +72,7 @@ If multiple instances exist at the same time, `withDisabledNameIndices` will thr
 You activate per store:
 
 ```typescript
-    const Store = signalStore(
-  { providedIn: 'root' },
-  withDevtools('flights', withDisabledNameIndices()),
-  withState({ airline: 'Lufthansa' })
-);
+const Store = signalStore({ providedIn: 'root' }, withDevtools('flights', withDisabledNameIndices()), withState({ airline: 'Lufthansa' }));
 ```
 
 ## Disabling Devtools in production
@@ -90,8 +87,8 @@ environments/environment.ts:
 import { withDevtools } from '@angular-architects/ngrx-toolkit';
 
 export const environment = {
-  storeWithDevTools: withDevtools
-}
+  storeWithDevTools: withDevtools,
+};
 ```
 
 environments/environment.prod.ts
@@ -100,8 +97,8 @@ environments/environment.prod.ts
 import { withDevtoolsStub } from '@angular-architects/ngrx-toolkit';
 
 export const environment = {
-  storeWithDevTools: withDevToolsStub
-}
+  storeWithDevTools: withDevToolsStub,
+};
 ```
 
 Then you can create utility function which can be used across the application
@@ -118,10 +115,7 @@ export const withTreeShakableDevTools = environment.storeWithDevTools;
 And use it in your store definitions:
 
 ```typescript
-export const SomeStore = signalStore(
-  withState({ strings: [] as string[] }),
-  withTreeShakableDevTools('featureName')
-);
+export const SomeStore = signalStore(withState({ strings: [] as string[] }), withTreeShakableDevTools('featureName'));
 ```
 
 Also make sure you have defined file replacements in angular.json prod configuration:

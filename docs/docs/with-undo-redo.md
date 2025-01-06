@@ -1,3 +1,6 @@
+---
+title: withUndoRedo()
+---
 
 `withUndoRedo` adds undo and redo functionality to the store.
 

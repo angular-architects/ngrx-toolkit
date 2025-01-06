@@ -1,4 +1,8 @@
-`withRedux()` bring back the Redux pattern into the Signal Store.
+---
+title: withRedux()
+---
+
+`withRedux()` brings back the Redux pattern into the Signal Store.
 
 It can be combined with any other extension of the Signal Store.
 
@@ -45,3 +49,4 @@ export const FlightStore = signalStore(
     },
   })
 );
+```
