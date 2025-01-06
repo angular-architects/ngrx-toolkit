@@ -1,401 +1,4 @@
-# NgRx Toolkit
-
-[![npm](https://img.shields.io/npm/v/%40angular-architects%2Fngrx-toolkit.svg)](https://www.npmjs.com/package/%40angular-architects%2Fngrx-toolkit)
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/angular-architects/ngrx-toolkit/main/logo.png" width="320" style="text-align: center">
-</p>
-
-NgRx Toolkit is an extension to the NgRx Signals Store. **It is still in beta** but already offers features, like:
-
-- Devtools: Integration into Redux Devtools
-- Redux: Possibility to use the Redux Pattern (Reducer, Actions, Effects)
-- Storage Sync: Synchronize the Store with Web Storage
-- Redux Connector: Map NgRx Store Actions to a present Signal Store
-
-To install it, run
-
-```shell
-npm i @angular-architects/ngrx-toolkit
-```
-
-- [NgRx Toolkit](#ngrx-toolkit)
-  - [Devtools: `withDevtools()`](#devtools-withdevtools)
-  - [Redux: `withRedux()`](#redux-withredux)
-  - [DataService `withDataService()`](#dataservice-withdataservice)
-  - [DataService with Dynamic Properties](#dataservice-with-dynamic-properties)
-  - [Storage Sync `withStorageSync()`](#storage-sync-withstoragesync)
-  - [Undo-Redo `withUndoRedo()`](#undo-redo-withundoredo)
-  - [Redux Connector for the NgRx Signal Store `createReduxState()`](#redux-connector-for-the-ngrx-signal-store-createreduxstate)
-    - [Use a present Signal Store](#use-a-present-signal-store)
-    - [Use well-known NgRx Store Actions](#use-well-known-ngrx-store-actions)
-    - [Map Actions to Methods](#map-actions-to-methods)
-    - [Register an Angular Dependency Injection Provider](#register-an-angular-dependency-injection-provider)
-    - [Use the Store in your Component](#use-the-store-in-your-component)
-  - [FAQ](#faq)
-    - [I have an idea for a new extension, can I contribute?](#i-have-an-idea-for-a-new-extension-can-i-contribute)
-    - [I require a feature that is not available in a lower version. What should I do?](#i-require-a-feature-that-is-not-available-in-a-lower-version-what-should-i-do)
-
-## Devtools: `withDevtools()`
-
-Redux Devtools is a powerful browser extension tool, that allows you to inspect every change in your stores. Originally, it was designed for Redux, but it can also be used with the SignalStore. You can download it for Chrome [here](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd).
-
-To use the Devtools, you need to add the `withDevtools()` extension to your SignalStore:
-
-```typescript
-export const FlightStore = signalStore(
-  { providedIn: 'root' },
-  withDevtools('flights'), // <-- add this
-  withState({ flights: [] as Flight[] })
-  // ...
-);
-```
-
-After that, open your app and navigate to the component that uses the store. Open the Devtools and you will see the `flights` store in the Devtools under the name "NgRx Signal Store"
-
-You can find a working example in the [demo app](https://github.com/angular-architects/ngrx-toolkit/blob/main/apps/demo/src/app/todo-store.ts).
-
-**Important**: The extensions don't activate them during app initialization (as it is with `@ngrx/store`). You need to open the Devtools and select the "NgRx Signal Store" tab to activate it.
-
-<img src="https://raw.githubusercontent.com/angular-architects/ngrx-toolkit/main/devtools.png" width="1000">
-
----
-
-The Signal Store does not use the Redux pattern, so there are no action names involved by default. Instead, every action is referred to as a "Store Update". However, if you want to customize the action name for better clarity, you can use the `updateState` method instead of `patchState`:
-
-```typescript
-patchState(this.store, { loading: false });
-
-// updateState is a wrapper around patchState and has an action name as second parameter
-updateState(this.store, 'update loading', { loading: false });
-```
-
-`withDevtools()` is by default enabled in production mode, if you want to tree-shake it from the application bundle you need to abstract it in your environment file.
-
-<details>
-
-  <summary>Devtools tree-shaking details</summary>
-
-It is required to add the `withDevtools` function to the environment files.
-
-environments/environment.ts:
-```typescript
-import { withDevtools } from '@angular-architects/ngrx-toolkit';
-
-export const environment = {
-  storeWithDevTools: withDevtools
-}
-```
-
-environments/environment.prod.ts
-```typescript
-import { withDevtoolsStub } from '@angular-architects/ngrx-toolkit';
-
-export const environment = {
-  storeWithDevTools: withDevToolsStub
-}
-```
-
-Then you can create utility function which can be used across the application
-e.g.:
-
-shared/store.features.ts (or any other file)
-```typescript
-import { environment } from 'src/environments/environment';
-
-export const withTreeShakableDevTools = environment.storeWithDevTools;
-```
-
-And use it in your store definitions:
-```typescript
-export const SomeStore = signalStore(
-  withState({strings: [] as string[] }),
-  withTreeShakableDevTools('featureName')
-);
-```
-
-Also make sure you have defined file replacements in angular.json prod configuration:
-```json
-"fileReplacements": [
-  {
-    "replace": "src/environments/environment.ts",
-    "with": "src/environments/environment.prod.ts"
-  }
-]
-```
-
-</details>
-
-
-## Redux: `withRedux()`
-
-`withRedux()` bring back the Redux pattern into the Signal Store.
-
-It can be combined with any other extension of the Signal Store.
-
-Example:
-
-```typescript
-export const FlightStore = signalStore(
-  { providedIn: 'root' },
-  withState({ flights: [] as Flight[] }),
-  withRedux({
-    actions: {
-      public: {
-        load: payload<{ from: string; to: string }>(),
-      },
-      private: {
-        loaded: payload<{ flights: Flight[] }>(),
-      },
-    },
-    reducer(actions, on) {
-      on(actions.loaded, ({ flights }, state) => {
-        patchState(state, 'flights loaded', { flights });
-      });
-    },
-    effects(actions, create) {
-      const httpClient = inject(HttpClient);
-      return {
-        load$: create(actions.load).pipe(
-          switchMap(({ from, to }) =>
-            httpClient.get<Flight[]>('https://demo.angulararchitects.io/api/flight', {
-              params: new HttpParams().set('from', from).set('to', to),
-            })
-          ),
-          tap((flights) => actions.loaded({ flights }))
-        ),
-      };
-    },
-  })
-);
-```
-
-## DataService `withDataService()`
-
-`withDataService()` allows to connect a Data Service to the store:
-
-This gives you a store for a CRUD use case:
-
-```typescript
-export const SimpleFlightBookingStore = signalStore(
-  { providedIn: 'root' },
-  withCallState(),
-  withEntities<Flight>(),
-  withDataService({
-    dataServiceType: FlightService,
-    filter: { from: 'Paris', to: 'New York' },
-  }),
-  withUndoRedo()
-);
-```
-
-The features `withCallState` and `withUndoRedo` are optional, but when present, they enrich each other.
-Refer to the [Undo-Redo](#undo-redo-withundoredo) section for more information.
-
-The Data Service needs to implement the `DataService` interface:
-
-```typescript
-@Injectable({
-  providedIn: 'root'
-})
-export class FlightService implements DataService<Flight, FlightFilter> {
-  loadById(id: EntityId): Promise<Flight> { ... }
-  load(filter: FlightFilter): Promise<Flight[]> { ... }
-
-  create(entity: Flight): Promise<Flight> { ... }
-  update(entity: Flight): Promise<Flight> { ... }
-  updateAll(entity: Flight[]): Promise<Flight[]> { ... }
-  delete(entity: Flight): Promise<void> { ... }
-  [...]
-}
-```
-
-Once the store is defined, it gives its consumers numerous signals and methods they just need to delegate to:
-
-```typescript
-@Component(...)
-export class FlightSearchSimpleComponent {
-  private store = inject(SimpleFlightBookingStore);
-
-  from = this.store.filter.from;
-  to = this.store.filter.to;
-  flights = this.store.entities;
-  selected = this.store.selectedEntities;
-  selectedIds = this.store.selectedIds;
-
-  loading = this.store.loading;
-
-  canUndo = this.store.canUndo;
-  canRedo = this.store.canRedo;
-
-  async search() {
-    this.store.load();
-  }
-
-  undo(): void {
-    this.store.undo();
-  }
-
-  redo(): void {
-    this.store.redo();
-  }
-
-  updateCriteria(from: string, to: string): void {
-    this.store.updateFilter({ from, to });
-  }
-
-  updateBasket(id: number, selected: boolean): void {
-    this.store.updateSelected(id, selected);
-  }
-
-}
-```
-
-## DataService with Dynamic Properties
-
-To avoid naming conflicts, the properties set up by `withDataService` and the connected features can be configured in a typesafe way:
-
-```typescript
-export const FlightBookingStore = signalStore(
-  { providedIn: 'root' },
-  withCallState({
-    collection: 'flight',
-  }),
-  withEntities({
-    entity: type<Flight>(),
-    collection: 'flight',
-  }),
-  withDataService({
-    dataServiceType: FlightService,
-    filter: { from: 'Graz', to: 'Hamburg' },
-    collection: 'flight',
-  }),
-  withUndoRedo({
-    collections: ['flight'],
-  })
-);
-```
-
-This setup makes them use `flight` as part of the used property names. As these implementations respect the Type Script type system, the compiler will make sure these properties are used in a typesafe way:
-
-```typescript
-@Component(...)
-export class FlightSearchDynamicComponent {
-  private store = inject(FlightBookingStore);
-
-  from = this.store.flightFilter.from;
-  to = this.store.flightFilter.to;
-  flights = this.store.flightEntities;
-  selected = this.store.selectedFlightEntities;
-  selectedIds = this.store.selectedFlightIds;
-
-  loading = this.store.flightLoading;
-
-  canUndo = this.store.canUndo;
-  canRedo = this.store.canRedo;
-
-  async search() {
-    this.store.loadFlightEntities();
-  }
-
-  undo(): void {
-    this.store.undo();
-  }
-
-  redo(): void {
-    this.store.redo();
-  }
-
-  updateCriteria(from: string, to: string): void {
-    this.store.updateFlightFilter({ from, to });
-  }
-
-  updateBasket(id: number, selected: boolean): void {
-    this.store.updateSelectedFlightEntities(id, selected);
-  }
-
-}
-```
-
-## Storage Sync `withStorageSync()`
-
-`withStorageSync` adds automatic or manual synchronization with Web Storage (`localstorage`/`sessionstorage`).
-
-> [!WARNING]
-> As Web Storage only works in browser environments it will fallback to a stub implementation on server environments.
-
-Example:
-
-```ts
-const SyncStore = signalStore(
-  withStorageSync<User>({
-    key: 'synced', // key used when writing to/reading from storage
-    autoSync: false, // read from storage on init and write on state changes - `true` by default
-    select: (state: User) => Partial<User>, // projection to keep specific slices in sync
-    parse: (stateString: string) => State, // custom parsing from storage - `JSON.parse` by default
-    stringify: (state: User) => string, // custom stringification - `JSON.stringify` by default
-    storage: () => sessionstorage, // factory to select storage to sync with
-  })
-);
-```
-
-```ts
-@Component(...)
-public class SyncedStoreComponent {
-  private syncStore = inject(SyncStore);
-
-  updateFromStorage(): void {
-    this.syncStore.readFromStorage(); // reads the stored item from storage and patches the state
-  }
-
-  updateStorage(): void {
-    this.syncStore.writeToStorage(); // writes the current state to storage
-  }
-
-  clearStorage(): void {
-    this.syncStore.clearStorage(); // clears the stored item in storage
-  }
-}
-```
-
-## Undo-Redo `withUndoRedo()`
-
-`withUndoRedo` adds undo and redo functionality to the store.
-
-Example:
-
-```ts
-const SyncStore = signalStore(
-  withUndoRedo({
-    maxStackSize: 100, // limit of undo/redo steps - `100` by default
-    collections: ['flight'], // entity collections to keep track of - unnamed collection is tracked by default
-    keys: ['test'], // non-entity based keys to track - `[]` by default
-    skip: 0, // number of initial state changes to skip - `0` by default
-  })
-);
-```
-
-```ts
-@Component(...)
-public class UndoRedoComponent {
-  private syncStore = inject(SyncStore);
-
-  canUndo = this.store.canUndo; // use in template or in ts
-  canRedo = this.store.canRedo; // use in template or in ts
-
-  undo(): void {
-    if (!this.canUndo()) return;
-    this.store.undo();
-  }
-
-  redo(): void {
-    if (!this.canRedo()) return;
-    this.store.redo();
-  }
-}
-```
-
-## Redux Connector for the NgRx Signal Store `createReduxState()`
+# Redux Connector for the NgRx Signal Store `createReduxState()`
 
 The Redux Connector turns any `signalStore()` into a Global State Management Slice following the Redux pattern. It is available as secondary entry point, i.e. `import { createReduxState } from '@angular-architects/ngrx-toolkit/redux-connector'` and has a dependency to `@ngrx/store`.
 
@@ -407,7 +10,15 @@ It supports:
 ✅ Auto-generated `provideNamedStore()` & `injectNamedStore()` Functions \
 ✅ Global Action to Store Method Mappers \
 
-### Use a present Signal Store
+- [Redux Connector for the NgRx Signal Store `createReduxState()`](#redux-connector-for-the-ngrx-signal-store-createreduxstate)
+  - [Use a present Signal Store](#use-a-present-signal-store)
+  - [Use well-known NgRx Store Actions](#use-well-known-ngrx-store-actions)
+  - [Map Actions to Methods](#map-actions-to-methods)
+  - [Register an Angular Dependency Injection Provider](#register-an-angular-dependency-injection-provider)
+  - [Use the Store in your Component](#use-the-store-in-your-component)
+
+
+## Use a present Signal Store
 
 ```typescript
 export const FlightStore = signalStore(
@@ -441,7 +52,7 @@ export const FlightStore = signalStore(
 );
 ```
 
-### Use well-known NgRx Store Actions
+## Use well-known NgRx Store Actions
 
 ```typescript
 export const ticketActions = createActionGroup({
@@ -456,7 +67,7 @@ export const ticketActions = createActionGroup({
 });
 ```
 
-### Map Actions to Methods
+## Map Actions to Methods
 
 ```typescript
 export const { provideFlightStore, injectFlightStore } =
@@ -480,7 +91,7 @@ export const { provideFlightStore, injectFlightStore } =
   );
 ```
 
-### Register an Angular Dependency Injection Provider
+## Register an Angular Dependency Injection Provider
 
 ```typescript
 export const appRoutes: Route[] = [
@@ -492,7 +103,7 @@ export const appRoutes: Route[] = [
 ];
 ```
 
-### Use the Store in your Component
+## Use the Store in your Component
 
 ```typescript
 @Component({
@@ -526,20 +137,3 @@ export class FlightSearchReducConnectorComponent {
 }
 ```
 
-## FAQ
-
-### I have an idea for a new extension, can I contribute?
-
-Yes, please! We are always looking for new ideas and contributions.
-
-Since we don't want to bloat the library, we are very selective about new features. You also have to provide the following:
-
-- Good test coverage so that we can update it properly and don't have to call you 😉.
-- A use case showing the feature in action in the demo app of the repository.
-- An entry to the README.md.
-
-This project uses [pnpm](https://pnpm.io/) to manage dependencies and run tasks (for local development and CI).
-
-### I require a feature that is not available in a lower version. What should I do?
-
-Please create an issue. Very likely, we are able to cherry-pick the feature into the lower version.
