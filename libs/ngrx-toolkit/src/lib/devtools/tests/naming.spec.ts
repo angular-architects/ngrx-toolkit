@@ -9,7 +9,7 @@ import {
   runInInjectionContext,
 } from '@angular/core';
 import { renameDevtoolsName } from '../rename-devtools-name';
-import { withDisabledNameIndices } from '../with-disabled-name-indicies';
+import { withDisabledNameIndices } from '../features/with-disabled-name-indicies';
 
 describe('withDevtools / renaming', () => {
   it('should automatically index multiple instances', () => {

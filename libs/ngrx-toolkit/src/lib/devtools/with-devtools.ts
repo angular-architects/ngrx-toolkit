@@ -1,15 +1,12 @@
 import { signalStoreFeature, withHooks, withMethods } from '@ngrx/signals';
 import { inject } from '@angular/core';
 import { DevtoolsSyncer } from './internal/devtools-syncer.service';
-import { DevtoolsFeature, DevtoolsOptions } from './devtools-feature';
-
-export type Action = { type: string };
-export type Connection = {
-  send: (action: Action, state: Record<string, unknown>) => void;
-};
-export type ReduxDevtoolsExtension = {
-  connect: (options: { name: string }) => Connection;
-};
+import {
+  DevtoolsFeature,
+  DevtoolsInnerOptions,
+} from './internal/devtools-feature';
+import { DefaultTracker } from './internal/default-tracker';
+import { ReduxDevtoolsExtension } from './internal/models';
 
 declare global {
   interface Window {
@@ -42,14 +39,19 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
     );
   }
   existingNames.set(name, true);
-  const finalOptions: DevtoolsOptions = {
-    indexNames: !features.some((f) => f.indexNames === false),
-    map: features.find((f) => f.map)?.map ?? ((state) => state),
-  };
 
   return signalStoreFeature(
     withMethods((store) => {
       const syncer = inject(DevtoolsSyncer);
+
+      const finalOptions: DevtoolsInnerOptions = {
+        indexNames: !features.some((f) => f.indexNames === false),
+        map: features.find((f) => f.map)?.map ?? ((state) => state),
+        tracker: inject(
+          features.find((f) => f.tracker)?.tracker || DefaultTracker
+        ),
+      };
+
       const id = syncer.addStore(name, store, finalOptions);
 
       // TODO: use withProps and symbols
@@ -62,7 +64,7 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
     }),
     withHooks((store) => {
       const syncer = inject(DevtoolsSyncer);
-      const id = Number(store[uniqueDevtoolsId]());
+      const id = String(store[uniqueDevtoolsId]());
       return { onDestroy: () => syncer.removeStore(id) };
     })
   );

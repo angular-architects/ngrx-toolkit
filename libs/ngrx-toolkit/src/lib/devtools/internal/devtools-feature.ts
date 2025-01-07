@@ -1,10 +1,19 @@
+import { Tracker } from './models';
+
 export const DEVTOOLS_FEATURE = Symbol('DEVTOOLS_FEATURE');
 
 export type Mapper = (state: object) => object;
 
 export type DevtoolsOptions = {
-  indexNames: boolean; // defines if names should be indexed.
-  map: Mapper; // defines a mapper for the state.
+  indexNames?: boolean; // defines if names should be indexed.
+  map?: Mapper; // defines a mapper for the state.
+  tracker?: new () => Tracker; // defines a tracker for the state
+};
+
+export type DevtoolsInnerOptions = {
+  indexNames: boolean;
+  map: Mapper;
+  tracker: Tracker;
 };
 
 /**
@@ -19,7 +28,7 @@ export type DevtoolsFeature = {
 } & Partial<DevtoolsOptions>;
 
 export function createDevtoolsFeature(
-  options: Partial<DevtoolsOptions>
+  options: DevtoolsOptions
 ): DevtoolsFeature {
   return {
     [DEVTOOLS_FEATURE]: true,
