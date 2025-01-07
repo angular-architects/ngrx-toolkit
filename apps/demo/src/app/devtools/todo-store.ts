@@ -11,7 +11,7 @@ import {
   updateEntity,
   withEntities,
 } from '@ngrx/signals/entities';
-import { updateState } from '@angular-architects/ngrx-toolkit';
+import { updateState, withDevtools } from '@angular-architects/ngrx-toolkit';
 import { computed } from '@angular/core';
 
 export interface Todo {
@@ -26,6 +26,7 @@ export type AddTodo = Omit<Todo, 'id'>;
 
 export const TodoStore = signalStore(
   { providedIn: 'root' },
+  withDevtools('todo-store'),
   withEntities<Todo>(),
   withState({
     selectedIds: [] as number[],
