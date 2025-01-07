@@ -1,7 +1,7 @@
 import { signalStoreFeature, withHooks, withMethods } from '@ngrx/signals';
 import { inject } from '@angular/core';
 import { DevtoolsSyncer } from './internal/devtools-syncer.service';
-import { DevtoolsFeature } from './devtools-feature';
+import { DevtoolsFeature, DevtoolsOptions } from './devtools-feature';
 
 export type Action = { type: string };
 export type Connection = {
@@ -16,10 +16,6 @@ declare global {
     __REDUX_DEVTOOLS_EXTENSION__: ReduxDevtoolsExtension | undefined;
   }
 }
-
-export type DevtoolsOptions = {
-  indexNames: boolean;
-};
 
 export const existingNames = new Map<string, unknown>();
 
@@ -46,8 +42,9 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
     );
   }
   existingNames.set(name, true);
-  const finalOptions = {
+  const finalOptions: DevtoolsOptions = {
     indexNames: !features.some((f) => f.indexNames === false),
+    map: features.find((f) => f.map)?.map ?? ((state) => state),
   };
 
   return signalStoreFeature(

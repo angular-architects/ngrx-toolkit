@@ -26,5 +26,5 @@ import { createDevtoolsFeature } from './devtools-feature';
  *
  */
 export function withDisabledNameIndices() {
-  return createDevtoolsFeature(false);
+  return createDevtoolsFeature({ indexNames: false });
 }
