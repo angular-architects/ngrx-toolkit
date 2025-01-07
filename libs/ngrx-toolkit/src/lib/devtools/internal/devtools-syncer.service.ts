@@ -8,8 +8,9 @@ import {
 } from '@angular/core';
 import { currentActionNames } from './currrent-action-names';
 import { isPlatformBrowser } from '@angular/common';
-import { Connection, DevtoolsOptions } from '../with-devtools';
+import { Connection } from '../with-devtools';
 import { getState, StateSource } from '@ngrx/signals';
+import { DevtoolsOptions } from '../devtools-feature';
 
 const dummyConnection: Connection = {
   send: () => void true,
@@ -60,8 +61,8 @@ export class DevtoolsSyncer implements OnDestroy {
       const stores = this.#stores();
       const rootState: Record<string, unknown> = {};
       for (const name in stores) {
-        const { store } = stores[name];
-        rootState[name] = getState(store);
+        const { store, options } = stores[name];
+        rootState[name] = options.map(getState(store));
       }
 
       const names = Array.from(currentActionNames);
@@ -137,5 +138,9 @@ Enable automatic indexing via withDevTools('${storeName}', { indexNames: true })
 
 type StoreRegistry = Record<
   string,
-  { store: StateSource<object>; options: DevtoolsOptions; id: number }
+  {
+    store: StateSource<object>;
+    options: DevtoolsOptions;
+    id: number;
+  }
 >;

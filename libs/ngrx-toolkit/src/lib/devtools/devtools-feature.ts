@@ -1,5 +1,12 @@
 export const DEVTOOLS_FEATURE = Symbol('DEVTOOLS_FEATURE');
 
+export type Mapper = (state: object) => object;
+
+export type DevtoolsOptions = {
+  indexNames: boolean; // defines if names should be indexed.
+  map: Mapper; // defines a mapper for the state.
+};
+
 /**
  * A DevtoolsFeature adds or modifies the behavior of the
  * devtools extension.
@@ -7,14 +14,15 @@ export const DEVTOOLS_FEATURE = Symbol('DEVTOOLS_FEATURE');
  * We use them (function calls) instead of a config object,
  * because of tree-shaking.
  */
-export interface DevtoolsFeature {
+export type DevtoolsFeature = {
   [DEVTOOLS_FEATURE]: true;
-  indexNames: boolean | undefined; // defines if names should be indexed.
-}
+} & Partial<DevtoolsOptions>;
 
-export function createDevtoolsFeature(indexNames = true): DevtoolsFeature {
+export function createDevtoolsFeature(
+  options: Partial<DevtoolsOptions>
+): DevtoolsFeature {
   return {
     [DEVTOOLS_FEATURE]: true,
-    indexNames,
+    ...options,
   };
 }

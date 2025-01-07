@@ -26,7 +26,7 @@ export type AddTodo = Omit<Todo, 'id'>;
 
 export const TodoStore = signalStore(
   { providedIn: 'root' },
-  withDevtools('todo'),
+  withDevtools('todo-store'),
   withEntities<Todo>(),
   withState({
     selectedIds: [] as number[],

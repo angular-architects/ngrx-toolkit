@@ -75,6 +75,14 @@ You activate per store:
 const Store = signalStore({ providedIn: 'root' }, withDevtools('flights', withDisabledNameIndices()), withState({ airline: 'Lufthansa' }));
 ```
 
+## `withMapper()`
+
+`withMapper` allows you to define a function that maps the state before it is sent to the Devtools.
+
+Sometimes, it is necessary to map the state before it is sent to the Devtools. For example, you might want to exclude some properties, like passwords or other sensitive data.
+
+````typescript
+
 ## Disabling Devtools in production
 
 `withDevtools()` is by default enabled in production mode, if you want to tree-shake it from the application bundle you need to abstract it in your environment file.
@@ -89,7 +97,7 @@ import { withDevtools } from '@angular-architects/ngrx-toolkit';
 export const environment = {
   storeWithDevTools: withDevtools,
 };
-```
+````
 
 environments/environment.prod.ts
 

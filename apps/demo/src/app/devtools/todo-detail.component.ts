@@ -5,6 +5,7 @@ import { signalStore, withState } from '@ngrx/signals';
 import {
   renameDevtoolsName,
   withDevtools,
+  withMapper,
 } from '@angular-architects/ngrx-toolkit';
 
 /**
@@ -17,8 +18,23 @@ import {
  * run renameDevtoolsStore() in the effect.
  */
 const TodoDetailStore = signalStore(
-  withDevtools('todo-detail'),
-  withState({ id: 1 })
+  withDevtools(
+    'todo-detail',
+    withMapper((state: Record<string, unknown>) => {
+      return Object.keys(state).reduce((acc, key) => {
+        if (key === 'secret') {
+          return acc;
+        }
+        acc[key] = state[key];
+
+        return acc;
+      }, {} as Record<string, unknown>);
+    })
+  ),
+  withState({
+    id: 1,
+    secret: 'do not show in DevTools',
+  })
 );
 
 @Component({

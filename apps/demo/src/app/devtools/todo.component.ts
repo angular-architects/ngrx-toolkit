@@ -5,6 +5,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Todo, TodoStore } from './todo-store';
 import { TodoDetailComponent } from './todo-detail.component';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'demo-todo',
@@ -68,6 +69,7 @@ import { TodoDetailComponent } from './todo-detail.component';
     MatIconModule,
     MatTableModule,
     TodoDetailComponent,
+    FormsModule,
   ],
 })
 export class TodoComponent {
