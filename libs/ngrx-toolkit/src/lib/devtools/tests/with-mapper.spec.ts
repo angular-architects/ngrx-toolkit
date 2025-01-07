@@ -1,7 +1,7 @@
 import { setupExtensions } from './helpers.spec';
 import { TestBed } from '@angular/core/testing';
 import { signalStore, withState } from '@ngrx/signals';
-import { withMapper } from '../with-mapper';
+import { withMapper } from '../features/with-mapper';
 import { withDevtools } from '../with-devtools';
 
 function domRemover(state: Record<string, unknown>) {

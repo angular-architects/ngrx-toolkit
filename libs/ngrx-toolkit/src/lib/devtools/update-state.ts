@@ -1,7 +1,7 @@
 import { patchState as originalPatchState } from '@ngrx/signals';
 import { PartialStateUpdater, WritableStateSource } from '@ngrx/signals';
 import { Prettify } from '../shared/prettify';
-import { currentActionNames } from './internal/currrent-action-names';
+import { currentActionNames } from './internal/current-action-names';
 
 type PatchFn = typeof originalPatchState extends (
   arg1: infer First,

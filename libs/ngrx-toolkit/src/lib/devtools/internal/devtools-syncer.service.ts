@@ -1,16 +1,16 @@
 import {
-  effect,
   inject,
   Injectable,
   OnDestroy,
   PLATFORM_ID,
   signal,
 } from '@angular/core';
-import { currentActionNames } from './currrent-action-names';
+import { currentActionNames } from './current-action-names';
 import { isPlatformBrowser } from '@angular/common';
-import { Connection } from '../with-devtools';
 import { getState, StateSource } from '@ngrx/signals';
-import { DevtoolsOptions } from '../devtools-feature';
+import { DevtoolsInnerOptions } from './devtools-feature';
+import { throwIfNull } from '../../shared/throw-if-null';
+import { Connection, StoreRegistry, Tracker } from './models';
 
 const dummyConnection: Connection = {
   send: () => void true,
@@ -31,6 +31,7 @@ const dummyConnection: Connection = {
 export class DevtoolsSyncer implements OnDestroy {
   readonly #stores = signal<StoreRegistry>({});
   readonly #isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  readonly #trackers = [] as Tracker[];
   #currentId = 1;
 
   readonly #connection: Connection = this.#isBrowser
@@ -52,37 +53,24 @@ export class DevtoolsSyncer implements OnDestroy {
         'NgRx Toolkit/DevTools: Redux DevTools Extension is not available.'
       );
     }
-
-    effect(() => {
-      if (!this.#connection) {
-        return;
-      }
-
-      const stores = this.#stores();
-      const rootState: Record<string, unknown> = {};
-      for (const name in stores) {
-        const { store, options } = stores[name];
-        rootState[name] = options.map(getState(store));
-      }
-
-      const names = Array.from(currentActionNames);
-      const type = names.length ? names.join(', ') : 'Store Update';
-      currentActionNames.clear();
-
-      this.#connection.send({ type }, rootState);
-    });
   }
 
   ngOnDestroy(): void {
     currentActionNames.clear();
   }
 
-  addStore(name: string, store: StateSource<object>, options: DevtoolsOptions) {
+  addStore(
+    name: string,
+    store: StateSource<object>,
+    options: DevtoolsInnerOptions
+  ) {
     let storeName = name;
-    const names = Object.keys(this.#stores());
+    const names = Object.values(this.#stores()).map((store) => store.name);
 
     if (names.includes(storeName)) {
-      const { options } = this.#stores()[storeName];
+      const { options } = throwIfNull(
+        Object.values(this.#stores()).find((store) => store.name === storeName)
+      );
       if (!options.indexNames) {
         throw new Error(`An instance of the store ${storeName} already exists. \
 Enable automatic indexing via withDevTools('${storeName}', { indexNames: true }), or rename it upon instantiation.`);
@@ -92,55 +80,75 @@ Enable automatic indexing via withDevTools('${storeName}', { indexNames: true })
     for (let i = 1; names.includes(storeName); i++) {
       storeName = `${name}-${i}`;
     }
-    const id = this.#currentId++;
-
+    const id = String(this.#currentId++);
     this.#stores.update((stores) => ({
       ...stores,
-      [storeName]: { store, options, id },
+      [id]: { name: storeName, options },
     }));
+
+    const tracker = options.tracker;
+    if (!this.#trackers.includes(tracker)) {
+      this.#trackers.push(tracker);
+    }
+
+    tracker.track(id, store);
+    tracker.onChange(() => this.syncToDevTools());
 
     return id;
   }
 
-  removeStore(id: number) {
-    this.#stores.update((stores) => {
-      return Object.entries(stores).reduce((newStore, [name, value]) => {
-        if (value.id === id) {
-          return newStore;
-        } else {
-          return { ...newStore, [name]: value };
+  syncToDevTools() {
+    const trackerStores = this.#trackers.reduce(
+      (acc, tracker) => ({ ...acc, ...tracker.getStores() }),
+      {} as Record<string, StateSource<object>>
+    );
+    const rootState = Object.entries(trackerStores).reduce(
+      (acc, [id, store]) => {
+        const { options, name } = this.#stores()[id];
+        acc[name] = options.map(getState(store));
+        return acc;
+      },
+      {} as Record<string, unknown>
+    );
+
+    const names = Array.from(currentActionNames);
+    const type = names.length ? names.join(', ') : 'Store Update';
+    currentActionNames.clear();
+
+    this.#connection.send({ type }, rootState);
+  }
+
+  removeStore(id: string) {
+    for (const tracker of this.#trackers) {
+      tracker.removeStore(id);
+    }
+    this.#stores.update((stores) =>
+      Object.entries(stores).reduce((newStore, [storeId, value]) => {
+        if (storeId !== id) {
+          newStore[storeId] = value;
         }
-      }, {});
-    });
+        return newStore;
+      }, {} as StoreRegistry)
+    );
   }
 
   renameStore(oldName: string, newName: string) {
     this.#stores.update((stores) => {
-      if (newName in stores) {
+      const storeNames = Object.values(stores).map((store) => store.name);
+      if (storeNames.includes(newName)) {
         throw new Error(
           `NgRx Toolkit/DevTools: cannot rename from ${oldName} to ${newName}. ${newName} is already assigned to another SignalStore instance.`
         );
       }
 
-      const newStore: StoreRegistry = {};
-      for (const storeName in stores) {
-        if (storeName === oldName) {
-          newStore[newName] = stores[oldName];
+      return Object.entries(stores).reduce((newStore, [id, value]) => {
+        if (value.name === oldName) {
+          newStore[id] = { ...value, name: newName };
         } else {
-          newStore[storeName] = stores[storeName];
+          newStore[id] = value;
         }
-      }
-
-      return newStore;
+        return newStore;
+      }, {} as StoreRegistry);
     });
   }
 }
-
-type StoreRegistry = Record<
-  string,
-  {
-    store: StateSource<object>;
-    options: DevtoolsOptions;
-    id: number;
-  }
->;

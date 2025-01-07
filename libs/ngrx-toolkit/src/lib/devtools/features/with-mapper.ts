@@ -1,4 +1,4 @@
-import { createDevtoolsFeature, Mapper } from './devtools-feature';
+import { createDevtoolsFeature, Mapper } from '../internal/devtools-feature';
 
 /**
  * Allows you to define a function to map the state.

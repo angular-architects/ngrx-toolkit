@@ -1,4 +1,4 @@
-import { createDevtoolsFeature } from './devtools-feature';
+import { createDevtoolsFeature } from '../internal/devtools-feature';
 
 /**
  * If multiple instances of the same SignalStore class
