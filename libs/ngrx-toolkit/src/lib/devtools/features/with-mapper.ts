@@ -8,22 +8,22 @@ import { createDevtoolsFeature, Mapper } from '../internal/devtools-feature';
  *
  * Example:
  *
- * <pre>
- *   const initialState = {
- *     id: 1,
- *     email: 'john.list@host.com',
- *     name: 'John List',
- *     enteredPassword: ''
- *   }
+ * ```typescript
+ * const initialState = {
+ *   id: 1,
+ *   email: 'john.list@host.com',
+ *   name: 'John List',
+ *   enteredPassword: ''
+ * }
  *
- *   const Store = signalStore(
- *     withState(initialState),
- *     withDevtools(
- *       'user',
- *       withMapper(state => ({state, { enteredPassword: '***' }}))
- *     )
+ * const Store = signalStore(
+ *   withState(initialState),
+ *   withDevtools(
+ *     'user',
+ *     withMapper(state => ({...state, enteredPassword: '***' }))
  *   )
- * </pre>
+ * )
+ * ```
  *
  * @param map function which maps the state
  */
