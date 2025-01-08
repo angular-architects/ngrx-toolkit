@@ -1,10 +1,11 @@
 import { Component, effect, inject, input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { Todo } from './todo-store';
-import { signalStore, withState } from '@ngrx/signals';
+import { patchState, signalStore, withHooks, withState } from '@ngrx/signals';
 import {
   renameDevtoolsName,
   withDevtools,
+  withGlitchTracking,
   withMapper,
 } from '@angular-architects/ngrx-toolkit';
 
@@ -29,12 +30,15 @@ const TodoDetailStore = signalStore(
 
         return acc;
       }, {} as Record<string, unknown>);
-    })
+    }),
+    withGlitchTracking()
   ),
   withState({
     id: 1,
     secret: 'do not show in DevTools',
-  })
+    active: false,
+  }),
+  withHooks((store) => ({ onInit: () => patchState(store, { active: true }) }))
 );
 
 @Component({

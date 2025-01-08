@@ -2,6 +2,7 @@ export { withDevToolsStub } from './lib/devtools/with-dev-tools-stub';
 export { withDevtools } from './lib/devtools/with-devtools';
 export { withDisabledNameIndices } from './lib/devtools/features/with-disabled-name-indicies';
 export { withMapper } from './lib/devtools/features/with-mapper';
+export { withGlitchTracking } from './lib/devtools/features/with-glitch-tracking';
 export { patchState, updateState } from './lib/devtools/update-state';
 export { renameDevtoolsName } from './lib/devtools/rename-devtools-name';
 

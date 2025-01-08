@@ -19,9 +19,10 @@ export type StoreRegistry = Record<
 
 export type Tracker = {
   track(id: string, store: StateSource<object>): void;
-  onChange(callback: () => void): void;
+  onChange(callback: (changedState: Record<string, object>) => void): void;
+  notifyRenamedStore(id: string): void;
   removeStore(id: string): void;
-  getStores: () => Record<string, StateSource<object>>;
+  get stores(): TrackerStores;
 };
 
 export type TrackerStores = Record<string, StateSource<object>>;

@@ -49,14 +49,50 @@ test('has title', async ({ page }) => {
   const devtoolsActions = await page.evaluate(() => window['devtoolsSpy']);
 
   expect(devtoolsActions).toEqual([
-    { type: 'add todo' },
-    { type: 'select todo 1' },
-    { type: 'Store Update' },
-    { type: 'select todo 4' },
-    { type: 'Store Update' },
-    { type: 'select todo 1' },
-    { type: 'Store Update' },
-    { type: 'select todo 4' },
-    { type: 'Store Update' },
+    {
+      type: 'add todo',
+    },
+    {
+      type: 'select todo 1',
+    },
+    {
+      type: 'Store Update',
+    },
+    {
+      type: 'Store Update',
+    },
+    {
+      type: 'Store Update',
+    },
+    {
+      type: 'select todo 4',
+    },
+    {
+      type: 'Store Update',
+    },
+    {
+      type: 'Store Update',
+    },
+    {
+      type: 'Store Update',
+    },
+    {
+      type: 'select todo 1',
+    },
+    {
+      type: 'Store Update',
+    },
+    {
+      type: 'Store Update',
+    },
+    {
+      type: 'select todo 4',
+    },
+    {
+      type: 'Store Update',
+    },
+    {
+      type: 'Store Update',
+    },
   ]);
 });

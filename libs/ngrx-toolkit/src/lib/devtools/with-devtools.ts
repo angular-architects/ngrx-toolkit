@@ -41,18 +41,9 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
   existingNames.set(name, true);
 
   return signalStoreFeature(
-    withMethods((store) => {
+    withMethods(() => {
       const syncer = inject(DevtoolsSyncer);
-
-      const finalOptions: DevtoolsInnerOptions = {
-        indexNames: !features.some((f) => f.indexNames === false),
-        map: features.find((f) => f.map)?.map ?? ((state) => state),
-        tracker: inject(
-          features.find((f) => f.tracker)?.tracker || DefaultTracker
-        ),
-      };
-
-      const id = syncer.addStore(name, store, finalOptions);
+      const id = syncer.getNextId();
 
       // TODO: use withProps and symbols
       return {
@@ -65,7 +56,23 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
     withHooks((store) => {
       const syncer = inject(DevtoolsSyncer);
       const id = String(store[uniqueDevtoolsId]());
-      return { onDestroy: () => syncer.removeStore(id) };
+      return {
+        onInit() {
+          const id = String(store[uniqueDevtoolsId]());
+          const finalOptions: DevtoolsInnerOptions = {
+            indexNames: !features.some((f) => f.indexNames === false),
+            map: features.find((f) => f.map)?.map ?? ((state) => state),
+            tracker: inject(
+              features.find((f) => f.tracker)?.tracker || DefaultTracker
+            ),
+          };
+
+          syncer.addStore(id, name, store, finalOptions);
+        },
+        onDestroy() {
+          syncer.removeStore(id);
+        },
+      };
     })
   );
 }

@@ -63,6 +63,37 @@ export class TodoDetailComponent {
 }
 ```
 
+## `withGlitchTracking()`
+
+It tracks all state changes of the State, including intermediary updates
+that are typically suppressed by Angular's glitch-free mechanism.
+
+This feature is especially useful for debugging.
+
+Example:
+
+```typescript
+const Store = signalStore(
+  { providedIn: 'root' },
+  withState({ count: 0 }),
+  withDevtools('counter', withGlitchTracking()),
+  withMethods((store) => ({
+    increase: () => patchState(store, (value) => ({ count: value.count + 1 })),
+  }))
+);
+
+// would show up in the DevTools with value 0
+const store = inject(Store);
+
+store.increase(); // would show up in the DevTools with value 1
+store.increase(); // would show up in the DevTools with value 2
+store.increase(); // would show up in the DevTools with value 3
+```
+
+Without `withGlitchTracking`, the DevTools would only show the final value of 3.
+
+It is also possible to mix. So one store could have `withGlitchTracking` and another one not.
+
 ## `withDisabledNameIndices()`
 
 `withDevtools` foresees the possibility to add features which extend or modify it. At the moment, `withDisabledNameIndices` is the only feature available. It disables the automatic indexing of the store names in the Devtools.

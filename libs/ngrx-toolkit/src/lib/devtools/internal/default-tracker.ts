@@ -1,18 +1,28 @@
 import { effect, Injectable, signal } from '@angular/core';
-import { StateSource } from '@ngrx/signals';
+import { getState, StateSource } from '@ngrx/signals';
 import { Tracker, TrackerStores } from './models';
 
 @Injectable({ providedIn: 'root' })
 export class DefaultTracker implements Tracker {
   readonly #stores = signal<TrackerStores>({});
-  #trackCallback: undefined | (() => void);
+
+  get stores(): TrackerStores {
+    return this.#stores();
+  }
+
+  #trackCallback: undefined | ((changedState: Record<string, object>) => void);
 
   #trackingEffect = effect(() => {
     if (this.#trackCallback === undefined) {
       throw new Error('no callback function defined');
     }
-    this.#stores(); // track stores
-    this.#trackCallback();
+    const stores = this.#stores();
+
+    const fullState = Object.entries(stores).reduce((acc, [id, store]) => {
+      return { ...acc, [id]: getState(store) };
+    }, {} as Record<string, object>);
+
+    this.#trackCallback(fullState);
   });
 
   track(id: string, store: StateSource<object>): void {
@@ -22,7 +32,7 @@ export class DefaultTracker implements Tracker {
     }));
   }
 
-  onChange(callback: () => void): void {
+  onChange(callback: (changedState: Record<string, object>) => void): void {
     this.#trackCallback = callback;
   }
 
@@ -37,10 +47,11 @@ export class DefaultTracker implements Tracker {
     );
   }
 
-  getStores(): Record<string, StateSource<object>> {
-    return Object.entries(this.#stores()).reduce((states, [key, store]) => {
-      states[key] = store;
-      return states;
-    }, {} as Record<string, StateSource<object>>);
+  notifyRenamedStore(id: string): void {
+    if (this.#stores()[id]) {
+      this.#stores.update((stores) => {
+        return { ...stores };
+      });
+    }
   }
 }
