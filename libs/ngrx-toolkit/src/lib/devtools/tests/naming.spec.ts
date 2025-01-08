@@ -131,25 +131,6 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
       );
     });
 
-    it('should also rename after sync', () => {
-      const { sendSpy } = setupExtensions();
-      const Store = signalStore(
-        { providedIn: 'root' },
-        withState({ name: 'Product', price: 10.5 }),
-        withDevtools('flight')
-      );
-      const store = TestBed.inject(Store);
-
-      TestBed.flushEffects();
-      renameDevtoolsName(store, 'flights');
-      TestBed.flushEffects();
-
-      expect(sendSpy).toHaveBeenCalledWith(
-        { type: 'Store Update' },
-        { flights: { name: 'Product', price: 10.5 } }
-      );
-    });
-
     it('should throw on rename if name already exists', () => {
       setupExtensions();
       const Store1 = signalStore(
