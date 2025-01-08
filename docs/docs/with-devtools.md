@@ -25,9 +25,9 @@ The extensions don't activate during app initialization (as it is with `@ngrx/st
 
 <img src="../img/devtools.png" width="1000" />
 
-## `updateState` vs `patchState`
+## `updateState()` vs `patchState()`
 
-The Signal Store does not use the Redux pattern, so there are no action names involved by default. Instead, every action is referred to as a "Store Update". If you want to customize the action name for better clarity, you can use the `updateState` function instead of `patchState`:
+The Signal Store does not use the Redux pattern, so there are no action names involved by default. Instead, every action is referred to as a "Store Update". If you want to customize the action name for better clarity, you can use the `updateState()` function instead of `patchState()`:
 
 ```typescript
 patchState(this.store, { loading: false });
@@ -36,11 +36,11 @@ patchState(this.store, { loading: false });
 updateState(this.store, 'update loading', { loading: false });
 ```
 
-## `renameDevtoolsName`
+## `renameDevtoolsName()`
 
 If multiple instances of a given SignalStore exist, the Devtools will index the names. For example, if you have two `TodoDetail` instances with the name `todo-detail`, the first one will be named `todo-detail` and the second one `todo-detail-1`.
 
-At any time, you can use `renameDevtoolsName` to change the name of the store in the Devtools.
+At any time, you can use `renameDevtoolsName()` to change the name of the store in the Devtools.
 
 The following example shows a component, which has a locally provided store and renames it according to the `id` of the `todo` Signal.
 
@@ -90,15 +90,15 @@ store.increase(); // would show up in the DevTools with value 2
 store.increase(); // would show up in the DevTools with value 3
 ```
 
-Without `withGlitchTracking`, the DevTools would only show the final value of 3.
+Without `withGlitchTracking()`, the DevTools would only show the final value of 3.
 
-It is also possible to mix. So one store could have `withGlitchTracking` and another one not.
+It is also possible to mix. So one store could have `withGlitchTracking()` and another one not.
 
 ## `withDisabledNameIndices()`
 
-`withDevtools` foresees the possibility to add features which extend or modify it. At the moment, `withDisabledNameIndices` is the only feature available. It disables the automatic indexing of the store names in the Devtools.
+`withDevtools()` foresees the possibility to add features which extend or modify it. At the moment, `withDisabledNameIndices()` is the only feature available. It disables the automatic indexing of the store names in the Devtools.
 
-If multiple instances exist at the same time, `withDisabledNameIndices` will throw an error. This is useful if you want to ensure that only one instance of a store is active at a time or that the store name is unique.
+If multiple instances exist at the same time, `withDisabledNameIndices()` will throw an error. This is useful if you want to ensure that only one instance of a store is active at a time or that the store name is unique.
 
 You activate per store:
 
@@ -108,17 +108,32 @@ const Store = signalStore({ providedIn: 'root' }, withDevtools('flights', withDi
 
 ## `withMapper()`
 
-`withMapper` allows you to define a function that maps the state before it is sent to the Devtools.
+`withMapper()` allows you to define a function that maps the state before it is sent to the Devtools.
 
 Sometimes, it is necessary to map the state before it is sent to the Devtools. For example, you might want to exclude some properties, like passwords or other sensitive data.
 
-````typescript
+```typescript
+const initialState = {
+  id: 1,
+  email: 'john.list@host.com',
+  name: 'John List',
+  enteredPassword: '',
+};
+
+const Store = signalStore(
+  withState(initialState),
+  withDevtools(
+    'user',
+    withMapper((state) => ({ ...state, enteredPassword: '***' }))
+  )
+);
+```
 
 ## Disabling Devtools in production
 
 `withDevtools()` is by default enabled in production mode, if you want to tree-shake it from the application bundle you need to abstract it in your environment file.
 
-It is required to add the `withDevtools` function to the environment files.
+It is required to add the `withDevtools()` function to the environment files.
 
 environments/environment.ts:
 
@@ -128,7 +143,7 @@ import { withDevtools } from '@angular-architects/ngrx-toolkit';
 export const environment = {
   storeWithDevTools: withDevtools,
 };
-````
+```
 
 environments/environment.prod.ts
 
@@ -160,10 +175,12 @@ export const SomeStore = signalStore(withState({ strings: [] as string[] }), wit
 Also make sure you have defined file replacements in angular.json prod configuration:
 
 ```json
-"fileReplacements": [
 {
-"replace": "src/environments/environment.ts",
-"with": "src/environments/environment.prod.ts"
+  "fileReplacements": [
+    {
+      "replace": "src/environments/environment.ts",
+      "with": "src/environments/environment.prod.ts"
+    }
+  ]
 }
-]
 ```

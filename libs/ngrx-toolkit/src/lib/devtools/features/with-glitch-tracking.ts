@@ -9,24 +9,24 @@ import { GlitchTrackerService } from '../internal/glitch-tracker.service';
  *
  * Example:
  *
- * <pre>
- *  const Store = signalStore(
- *     { providedIn: 'root' },
- *     withState({ count: 0 }),
- *     withDevtools('counter', withGlitchTracking()),
- *     withMethods((store) => ({
- *       increase: () =>
- *         patchState(store, (value) => ({ count: value.count + 1 })),
- *     }))
- *   );
+ * ```typescript
+ * const Store = signalStore(
+ *   { providedIn: 'root' },
+ *   withState({ count: 0 }),
+ *   withDevtools('counter', withGlitchTracking()),
+ *   withMethods((store) => ({
+ *     increase: () =>
+ *       patchState(store, (value) => ({ count: value.count + 1 })),
+ *   }))
+ * );
  *
- *   // would show up in the DevTools with value 0
- *   const store = inject(Store);
+ * // would show up in the DevTools with value 0
+ * const store = inject(Store);
  *
- *   store.increase(); // would show up in the DevTools with value 1
- *   store.increase(); // would show up in the DevTools with value 2
- *   store.increase(); // would show up in the DevTools with value 3
- * </pre>
+ * store.increase(); // would show up in the DevTools with value 1
+ * store.increase(); // would show up in the DevTools with value 2
+ * store.increase(); // would show up in the DevTools with value 3
+ * ```
  *
  * Without `withGlitchTracking`, the DevTools would only show the final value of 3.
  */
