@@ -1,14 +1,17 @@
 {
   "name": "@angular-architects/ngrx-toolkit",
-  "version": "18.1.1",
+  "version": "19.0.0",
   "license": "MIT",
   "repository": {
     "type": "GitHub",
     "url": "https://github.com/angular-architects/ngrx-toolkit"
   },
   "peerDependencies": {
+    "@angular/core": "^19.0.0",
+    "@angular/common": "^19.0.0",
     "@ngrx/signals": "^19.0.0",
-    "@ngrx/store": "^19.0.0"
+    "@ngrx/store": "^19.0.0",
+    "rxjs": "^7.0.0"
   },
   "peerDependenciesMeta": {
     "@ngrx/store": {

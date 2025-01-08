@@ -1,16 +1,32 @@
-## 18.1.0 (2024-10-15)
+# 19.0.0 (2025-01-08)
 
+### 🚀 Features
+
+- withDevTools disabled in prod, and tree-shaking docs ([4c2baa9](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/4c2baa9))
+- withDevTools disabled in prod, and tree-shaking docs - docs utility function update ([ada5f26](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/ada5f26))
+- Add support for clear undo redo stack. ([#106](https://github.com/rainerhahnekamp/ngrx-toolkit/pull/106))
+- upgrade to NgRx 19 ([f257624](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/f257624))
+- **devtools:** add `withMapper` feature ([97c0031](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/97c0031))
+- **signals:** add `withReset()` feature to SignalStore ([90a64b3](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/90a64b3))
+
+### ❤️ Thank You
+
+- Lukáš Šefčík @LukasSefcik
+- marcindz88
+- Michal Štrajt @mikeshtro
+- Rainer Hahnekamp @rainerhahnekamp
+
+## 18.1.0 (2024-10-15)
 
 ### 🚀 Features
 
 - upgrade to NgRx 18.1 ([30073b9](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/30073b9))
 
-### ❤️  Thank You
+### ❤️ Thank You
 
 - Rainer Hahnekamp
 
 ## 18.0.3 (2024-08-18)
-
 
 ### 🚀 Features
 
@@ -22,13 +38,12 @@
 
 - switch to yarn because of failing ci ([bd8cb25](https://github.com/angular-architects/ngrx-toolkit/commit/bd8cb25))
 
-### ❤️  Thank You
+### ❤️ Thank You
 
 - marcindz88
 - Rainer Hahnekamp @rainerhahnekamp
 
 # 18.0.0 (2024-07-30)
-
 
 ### 🚀 Features
 
@@ -38,12 +53,11 @@
 
 - switch to yarn because of failing ci ([bd8cb25](https://github.com/angular-architects/ngrx-toolkit/commit/bd8cb25))
 
-### ❤️  Thank You
+### ❤️ Thank You
 
 - Rainer Hahnekamp @rainerhahnekamp
 
 ## 18.0.0-rc.2.0 (2024-07-10)
-
 
 ### 🚀 Features
 
@@ -56,7 +70,7 @@
 - **undo-redo:** prevent duplicated entries on undo stack ([e360ee6](https://github.com/angular-architects/ngrx-toolkit/commit/e360ee6))
 - **undo-redo:** prevent duplicated entries on undo stack ([b4f68af](https://github.com/angular-architects/ngrx-toolkit/commit/b4f68af))
 
-### ❤️  Thank You
+### ❤️ Thank You
 
 - Manfred Steyer
 - michael-small @michael-small
@@ -65,39 +79,35 @@
 
 ## 0.4.0 (2024-06-07)
 
-
 ### 🚀 Features
 
 - Add local pagination feature ([#56](https://github.com/angular-architects/ngrx-toolkit/pull/56))
 
-### ❤️  Thank You
+### ❤️ Thank You
 
 - Murat Sari
 
 ## 0.3.1 (2024-05-27)
 
-
 ### 🩹 Fixes
 
 - lazy load routes to get under the build budget ([729c84d](https://github.com/angular-architects/ngrx-toolkit/commit/729c84d))
 
-### ❤️  Thank You
+### ❤️ Thank You
 
 - Rainer Hahnekamp @rainerhahnekamp
 
 ## 0.3.0 (2024-04-20)
 
-
 ### 🚀 Features
 
 - **devtools:** rename `patchState` to `updateState` ([4343720](https://github.com/angular-architects/ngrx-toolkit/commit/4343720))
 
-### ❤️  Thank You
+### ❤️ Thank You
 
 - Rainer Hahnekamp @rainerhahnekamp
 
 ## 0.2.0 (2024-04-20)
-
 
 ### 🚀 Features
 
@@ -109,12 +119,11 @@
 - **redux:** multiple effects can subscribe to the same action ([12d0077](https://github.com/angular-architects/ngrx-toolkit/commit/12d0077))
 - **redux:** remove parameter from `noPayload` action functions ([0e83882](https://github.com/angular-architects/ngrx-toolkit/commit/0e83882))
 
-### ❤️  Thank You
+### ❤️ Thank You
 
 - Rainer Hahnekamp @rainerhahnekamp
 
 ## 0.1.1 (2024-04-20)
-
 
 ### 🩹 Fixes
 
@@ -122,12 +131,11 @@
 - **redux:** multiple effects can subscribe to the same action ([12d0077](https://github.com/angular-architects/ngrx-toolkit/commit/12d0077))
 - **redux:** remove parameter from `noPayload` action functions ([0e83882](https://github.com/angular-architects/ngrx-toolkit/commit/0e83882))
 
-### ❤️  Thank You
+### ❤️ Thank You
 
 - Rainer Hahnekamp @rainerhahnekamp
 
 ## 0.1.0 (2024-03-02)
-
 
 ### 🚀 Features
 
@@ -146,7 +154,7 @@
 - **devtools:** ssr mode ([0fa5e67](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/0fa5e67))
 - **redux:** fix `never` type in reducer ([164585b](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/164585b))
 
-### ❤️  Thank You
+### ❤️ Thank You
 
 - Basti Hoffmann @bohoffi
 - Anders Finserås Graneng @andersfgraneng
