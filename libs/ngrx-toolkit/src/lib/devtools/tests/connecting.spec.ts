@@ -16,9 +16,10 @@ describe('connect & send', () => {
     expect(connectSpy).toHaveBeenCalledTimes(0);
   });
 
-  it('should not connect if it runs on the server', () => {
-    const { connectSpy } = setupExtensions(false);
-    expect(connectSpy).toHaveBeenCalledTimes(0);
+  it('should not throw if it runs on the server', () => {
+    setupExtensions(true, false);
+    const Store = signalStore({ providedIn: 'root' }, withDevtools('flight'));
+    expect(() => TestBed.inject(Store)).not.toThrowError();
   });
 
   it('should only send when store is initialized', () => {
