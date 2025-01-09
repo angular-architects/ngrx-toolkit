@@ -1,3 +1,27 @@
+## 19.0.1 (2025-01-09)
+
+### 🚀 Features
+
+- withDevTools disabled in prod, and tree-shaking docs ([4c2baa9](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/4c2baa9))
+- withDevTools disabled in prod, and tree-shaking docs - docs utility function update ([ada5f26](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/ada5f26))
+- Add support for clear undo redo stack. ([#106](https://github.com/rainerhahnekamp/ngrx-toolkit/pull/106))
+- upgrade to NgRx 19 ([f257624](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/f257624))
+- **devtools:** add `withMapper` feature ([97c0031](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/97c0031))
+- **devtools:** add `withGlitchTracking` feature ([fc972d5](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/fc972d5))
+- **signals:** add `withReset()` feature to SignalStore ([90a64b3](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/90a64b3))
+
+### 🩹 Fixes
+
+- **devtools:** do not throw if devtools are unavailable ([8c471a1](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/8c471a1))
+- **docs:** fix failed markdown ([f6430c6](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/f6430c6))
+
+### ❤️ Thank You
+
+- Lukáš Šefčík @LukasSefcik
+- marcindz88
+- Michal Štrajt @mikeshtro
+- Rainer Hahnekamp @rainerhahnekamp
+
 # 19.0.0 (2025-01-08)
 
 ### 🚀 Features
