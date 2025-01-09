@@ -63,7 +63,7 @@ export class DevtoolsSyncer implements OnDestroy {
 
     const isToolkitAvailable = Boolean(window.__REDUX_DEVTOOLS_EXTENSION__);
     if (!isToolkitAvailable) {
-      throw new Error(
+      console.info(
         'NgRx Toolkit/DevTools: Redux DevTools Extension is not available.'
       );
     }
