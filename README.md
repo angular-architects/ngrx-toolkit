@@ -17,6 +17,6 @@ To install it, run
 npm i @angular-architects/ngrx-toolkit
 ```
 
-For a more detailed guide on installation, setup, and usage, head to the [**Documentation**](https://angular-architects.github.io/ngrx-toolkit/).
+For a more detailed guide on installation, setup, and usage, head to the [**Documentation**](https://ngrx-toolkit.angulararchitects.io/).
 
-## https://angular-architects.github.io/ngrx-toolkit
+## https://ngrx-toolkit.angulararchitects.io/

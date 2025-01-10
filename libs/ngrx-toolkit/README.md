@@ -9,6 +9,6 @@ NgRx Toolkit is a set of extensions to the NgRx Signals Store, like
 - Storage Sync: Synchronize the Store with Web Storage
 - Redux Connector: Map NgRx Store Actions to a present Signal Store
 
-For a more detailed guide on installation, setup, and usage, head to the [**Documentation**](https://angular-architects.github.io/ngrx-toolkit/).
+For a more detailed guide on installation, setup, and usage, head to the [**Documentation**](https://ngrx-toolkit.angulararchitects.io//).
 
-## https://angular-architects.github.io/ngrx-toolkit
+## https://ngrx-toolkit.angulararchitects.io/
