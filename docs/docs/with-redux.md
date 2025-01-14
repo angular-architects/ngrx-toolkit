@@ -50,3 +50,60 @@ export const FlightStore = signalStore(
   })
 );
 ```
+
+## Extracting actions, reducer and effects into separate files
+
+`createReducer` and `createEffects` allow you to extract the reducer and effects into separate files.
+
+There is no need for a `createActions` function, because the actions are just an object literal.
+
+Example:
+
+```typescript
+interface FlightState {
+  flights: Flight[];
+  effect1: boolean;
+  effect2: boolean;
+}
+
+const initialState: FlightState = {
+  flights: [],
+  effect1: false,
+  effect2: false,
+};
+
+// this can be in a separate file
+const actions = {
+  init: noPayload,
+  updateEffect1: payload<{ value: boolean }>(),
+  updateEffect2: payload<{ value: boolean }>(),
+};
+
+// this can be in a separate file
+const reducer = createReducer<FlightState, typeof actions>((actions, on) => {
+  on(actions.updateEffect1, (state, { value }) => {
+    patchState(state, { effect1: value });
+  });
+
+  on(actions.updateEffect2, (state, { value }) => {
+    patchState(state, { effect2: value });
+  });
+});
+
+// this can be in a separate file
+const effects = createEffects(actions, (actions, create) => {
+  return {
+    init1$: create(actions.init).pipe(map(() => actions.updateEffect1({ value: true }))),
+    init2$: create(actions.init).pipe(map(() => actions.updateEffect2({ value: true }))),
+  };
+});
+
+signalStore(
+  withState(initialState),
+  withRedux({
+    actions,
+    effects,
+    reducer,
+  })
+);
+```

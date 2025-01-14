@@ -11,21 +11,22 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, switchMap } from 'rxjs';
 import { Flight } from './flight';
 
+const actions = {
+  public: {
+    loadFlights: payload<{ from: string; to: string }>(),
+    delayFirst: noPayload,
+  },
+  private: {
+    flightsLoaded: payload<{ flights: Flight[] }>(),
+  },
+};
+
 export const FlightStore = signalStore(
   { providedIn: 'root' },
   withDevtools('flights'),
   withState({ flights: [] as Flight[] }),
   withRedux({
-    actions: {
-      public: {
-        loadFlights: payload<{ from: string; to: string }>(),
-        delayFirst: noPayload,
-      },
-      private: {
-        flightsLoaded: payload<{ flights: Flight[] }>(),
-      },
-    },
-
+    actions,
     reducer: (actions, on) => {
       on(actions.flightsLoaded, (state, { flights }) => {
         updateState(state, 'flights loaded', { flights });
