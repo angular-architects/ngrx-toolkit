@@ -6,7 +6,13 @@ import {
   provideHttpClient,
 } from '@angular/common/http';
 import { map, switchMap } from 'rxjs';
-import { noPayload, payload, withRedux } from './with-redux';
+import {
+  createEffects,
+  createReducer,
+  noPayload,
+  payload,
+  withRedux,
+} from './with-redux';
 import { TestBed } from '@angular/core/testing';
 import {
   HttpTestingController,
@@ -149,6 +155,67 @@ describe('with redux', () => {
             ),
           };
         },
+      })
+    );
+
+    const flightStore = TestBed.configureTestingModule({
+      providers: [FlightsStore],
+    }).inject(FlightsStore);
+
+    flightStore.init();
+
+    expect(flightStore.effect1()).toBe(true);
+    expect(flightStore.effect2()).toBe(true);
+  });
+
+  it('should be possible to separate actions, reducer and effects', () => {
+    interface FlightState {
+      flights: Flight[];
+      effect1: boolean;
+      effect2: boolean;
+    }
+
+    const initialState: FlightState = {
+      flights: [],
+      effect1: false,
+      effect2: false,
+    };
+
+    const actions = {
+      init: noPayload,
+      updateEffect1: payload<{ value: boolean }>(),
+      updateEffect2: payload<{ value: boolean }>(),
+    };
+
+    const effects = createEffects(actions, (actions, create) => {
+      return {
+        init1$: create(actions.init).pipe(
+          map(() => actions.updateEffect1({ value: true }))
+        ),
+        init2$: create(actions.init).pipe(
+          map(() => actions.updateEffect2({ value: true }))
+        ),
+      };
+    });
+
+    const reducer = createReducer<FlightState, typeof actions>(
+      (actions, on) => {
+        on(actions.updateEffect1, (state, { value }) => {
+          patchState(state, { effect1: value });
+        });
+
+        on(actions.updateEffect2, (state, { value }) => {
+          patchState(state, { effect2: value });
+        });
+      }
+    );
+
+    const FlightsStore = signalStore(
+      withState(initialState),
+      withRedux({
+        actions,
+        effects,
+        reducer,
       })
     );
 

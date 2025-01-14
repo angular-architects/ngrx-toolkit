@@ -6,7 +6,13 @@ export { withGlitchTracking } from './lib/devtools/features/with-glitch-tracking
 export { patchState, updateState } from './lib/devtools/update-state';
 export { renameDevtoolsName } from './lib/devtools/rename-devtools-name';
 
-export { withRedux, payload, noPayload } from './lib/with-redux';
+export {
+  withRedux,
+  payload,
+  noPayload,
+  createReducer,
+  createEffects,
+} from './lib/with-redux';
 
 export * from './lib/with-call-state';
 export * from './lib/with-undo-redo';

@@ -70,6 +70,60 @@ type ReducerFactory<StateActionFns extends ActionFns, State> = (
   ) => void
 ) => void;
 
+/**
+ * Creates a reducer function to separate the reducer logic into another file.
+ *
+ * ```typescript
+ * interface FlightState {
+ *   flights: Flight[];
+ *   effect1: boolean;
+ *   effect2: boolean;
+ * }
+ *
+ * const initialState: FlightState = {
+ *   flights: [],
+ *   effect1: false,
+ *   effect2: false,
+ * };
+ *
+ * const actions = {
+ *   init: noPayload,
+ *   updateEffect1: payload<{ value: boolean }>(),
+ *   updateEffect2: payload<{ value: boolean }>(),
+ * };
+ *
+ * const reducer = createReducer<FlightState, typeof actions>((actions, on) => {
+ *   on(actions.updateEffect1, (state, { value }) => {
+ *     patchState(state, { effect1: value });
+ *   });
+ *
+ *   on(actions.updateEffect2, (state, { value }) => {
+ *     patchState(state, { effect2: value });
+ *   });
+ * });
+ *
+ * signalStore(
+ *   withState(initialState),
+ *   withRedux({
+ *     actions,
+ *     reducer,
+ *   })
+ * );
+ * ```
+ * @param reducerFactory
+ */
+export function createReducer<
+  State extends object,
+  Actions extends ActionsFnSpecs
+>(
+  reducerFactory: ReducerFactory<
+    ActionFnsCreator<Actions>,
+    WritableStateSource<State>
+  >
+) {
+  return reducerFactory;
+}
+
 /** Effect **/
 
 type EffectsFactory<StateActionFns extends ActionFns> = (
@@ -78,6 +132,57 @@ type EffectsFactory<StateActionFns extends ActionFns> = (
     action: EffectAction
   ) => Observable<ActionFnPayload<EffectAction>>
 ) => Record<string, Observable<unknown>>;
+
+/**
+ * Creates the effects function to separate the effects logic into another file.
+ *
+ * ```typescript
+ * interface FlightState {
+ *   flights: Flight[];
+ *   effect1: boolean;
+ *   effect2: boolean;
+ * }
+ *
+ * const initialState: FlightState = {
+ *   flights: [],
+ *   effect1: false,
+ *   effect2: false,
+ * };
+ *
+ * const actions = {
+ *   init: noPayload,
+ *   updateEffect1: payload<{ value: boolean }>(),
+ *   updateEffect2: payload<{ value: boolean }>(),
+ * };
+ *
+ * const effects = createEffects(actions, (actions, create) => {
+ *   return {
+ *     init1$: create(actions.init).pipe(
+ *       map(() => actions.updateEffect1({ value: true }))
+ *     ),
+ *     init2$: create(actions.init).pipe(
+ *       map(() => actions.updateEffect2({ value: true }))
+ *     ),
+ *   };
+ * });
+ *
+ * signalStore(
+ *   withState(initialState),
+ *   withRedux({
+ *     actions,
+ *     effects,
+ *   })
+ * );
+ * ```
+ * @param actions
+ * @param effectsFactory
+ */
+export function createEffects<Actions extends ActionsFnSpecs>(
+  actions: Actions,
+  effectsFactory: EffectsFactory<ActionFnsCreator<Actions>>
+) {
+  return effectsFactory;
+}
 
 // internal types
 
