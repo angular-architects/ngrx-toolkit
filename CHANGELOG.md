@@ -1,3 +1,13 @@
+## 19.0.2 (2025-01-14)
+
+### 🚀 Features
+
+- **redux:** add possibility to extract elements to separate files ([ef7ba1f](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/ef7ba1f))
+
+### ❤️ Thank You
+
+- Rainer Hahnekamp @rainerhahnekamp
+
 ## 19.0.1 (2025-01-09)
 
 ### 🚀 Features
