@@ -1,6 +1,8 @@
 import { getState, patchState, signalStore, withState } from '@ngrx/signals';
-import { withStorageSync } from './with-storage-sync';
+import { withStorageSync } from '../with-storage-sync';
 import { TestBed } from '@angular/core/testing';
+import * as flushPromises from 'flush-promises';
+import { IndexedDBService } from '../internal/indexeddb.service';
 
 interface StateObject {
   foo: string;
@@ -14,15 +16,20 @@ const initialState: StateObject = {
 const key = 'FooBar';
 
 describe('withStorageSync', () => {
+  let indexedDBService: IndexedDBService;
   beforeEach(() => {
     // make sure to start with a clean storage
     localStorage.removeItem(key);
+
+    indexedDBService = TestBed.inject(IndexedDBService);
   });
 
-  it('adds methods for storage access to the store', () => {
-    TestBed.runInInjectionContext(() => {
+  it('adds methods for storage access to the store', async () => {
+    await TestBed.runInInjectionContext(async () => {
       const Store = signalStore(withStorageSync({ key }));
       const store = new Store();
+
+      await flushPromises();
 
       expect(Object.keys(store)).toEqual([
         'clearStorage',
@@ -32,8 +39,8 @@ describe('withStorageSync', () => {
     });
   });
 
-  it('offers manual sync using provided methods', () => {
-    TestBed.runInInjectionContext(() => {
+  it('offers manual sync using provided methods', async () => {
+    await TestBed.runInInjectionContext(async () => {
       // prefill storage
       localStorage.setItem(
         key,
@@ -48,9 +55,12 @@ describe('withStorageSync', () => {
         withStorageSync({ key, autoSync: false })
       );
       const store = new Store();
+
+      await flushPromises();
+
       expect(getState(store)).toEqual({});
 
-      store.readFromStorage();
+      await store.readFromStorage();
       expect(getState(store)).toEqual({
         foo: 'baz',
         age: 99,
@@ -65,21 +75,21 @@ describe('withStorageSync', () => {
         age: 99,
       });
 
-      store.writeToStorage();
+      await store.writeToStorage();
       storeItem = JSON.parse(localStorage.getItem(key) || '{}');
       expect(storeItem).toEqual({
         ...initialState,
       });
 
-      store.clearStorage();
+      await store.clearStorage();
       storeItem = localStorage.getItem(key);
       expect(storeItem).toEqual(null);
     });
   });
 
   describe('autoSync', () => {
-    it('inits from storage and write to storage on changes when set to `true`', () => {
-      TestBed.runInInjectionContext(() => {
+    it('inits from storage and write to storage on changes when set to `true`', async () => {
+      await TestBed.runInInjectionContext(async () => {
         // prefill storage
         localStorage.setItem(
           key,
@@ -94,6 +104,8 @@ describe('withStorageSync', () => {
           withStorageSync(key)
         );
         const store = new Store();
+        await flushPromises();
+
         expect(getState(store)).toEqual({
           foo: 'baz',
           age: 99,
@@ -112,8 +124,8 @@ describe('withStorageSync', () => {
       });
     });
 
-    it('does not init from storage and does write to storage on changes when set to `false`', () => {
-      TestBed.runInInjectionContext(() => {
+    it('does not init from storage and does write to storage on changes when set to `false`', async () => {
+      await TestBed.runInInjectionContext(async () => {
         // prefill storage
         localStorage.setItem(
           key,
@@ -128,6 +140,9 @@ describe('withStorageSync', () => {
           withStorageSync({ key, autoSync: false })
         );
         const store = new Store();
+
+        await flushPromises();
+
         expect(getState(store)).toEqual({});
 
         patchState(store, { ...initialState });
@@ -141,15 +156,18 @@ describe('withStorageSync', () => {
   });
 
   describe('select', () => {
-    it('syncs the whole state by default', () => {
-      TestBed.runInInjectionContext(() => {
+    it('syncs the whole state by default', async () => {
+      await TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           { protectedState: false },
           withStorageSync(key)
         );
         const store = new Store();
 
+        await flushPromises();
+
         patchState(store, { ...initialState });
+
         TestBed.flushEffects();
 
         const storeItem = JSON.parse(localStorage.getItem(key) || '{}');
@@ -159,14 +177,16 @@ describe('withStorageSync', () => {
       });
     });
 
-    it('syncs selected slices when specified', () => {
-      TestBed.runInInjectionContext(() => {
+    it('syncs selected slices when specified', async () => {
+      await TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           { protectedState: false },
           withState(initialState),
           withStorageSync({ key, select: ({ foo }) => ({ foo }) })
         );
         const store = new Store();
+
+        await flushPromises();
 
         patchState(store, { foo: 'baz' });
         TestBed.flushEffects();
@@ -180,7 +200,7 @@ describe('withStorageSync', () => {
   });
 
   describe('parse/stringify', () => {
-    it('uses custom parsing/stringification when specified', () => {
+    it('uses custom parsing/stringification when specified', async () => {
       const parse = (stateString: string) => {
         const [foo, age] = stateString.split('_');
         return {
@@ -189,7 +209,7 @@ describe('withStorageSync', () => {
         };
       };
 
-      TestBed.runInInjectionContext(() => {
+      await TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           { protectedState: false },
           withState(initialState),
@@ -201,10 +221,13 @@ describe('withStorageSync', () => {
         );
         const store = new Store();
 
+        await flushPromises();
+
         patchState(store, { foo: 'baz' });
         TestBed.flushEffects();
 
         const storeItem = parse(localStorage.getItem(key) || '');
+
         expect(storeItem).toEqual({
           ...initialState,
           foo: 'baz',
@@ -213,9 +236,9 @@ describe('withStorageSync', () => {
     });
   });
 
-  describe('storage factory', () => {
-    it('uses specified storage', () => {
-      TestBed.runInInjectionContext(() => {
+  describe('storage', () => {
+    it('uses specified storage', async () => {
+      await TestBed.runInInjectionContext(async () => {
         // prefill storage
         sessionStorage.setItem(
           key,
@@ -227,9 +250,13 @@ describe('withStorageSync', () => {
 
         const Store = signalStore(
           { protectedState: false },
-          withStorageSync({ key, storage: () => sessionStorage })
+          withStorageSync({ key, storageType: 'sessionStorage' })
         );
+
         const store = new Store();
+
+        await flushPromises();
+
         expect(getState(store)).toEqual({
           foo: 'baz',
           age: 99,
@@ -246,7 +273,48 @@ describe('withStorageSync', () => {
           ...initialState,
         });
 
-        store.clearStorage();
+        await store.clearStorage();
+      });
+    });
+  });
+
+  describe('indexedDB', () => {
+    it('uses indexedDB', async () => {
+      const dbName = 'ngrx-toolkit';
+      const storeName = 'FooBar';
+
+      // set items
+      await indexedDBService.write(
+        dbName,
+        storeName,
+        JSON.stringify({
+          foo: 'baz',
+          age: 99,
+        } as StateObject)
+      );
+
+      await TestBed.runInInjectionContext(async () => {
+        const Store = signalStore(
+          { protectedState: false },
+          withStorageSync({
+            storageType: 'indexedDB',
+            dbName,
+            storeName,
+          })
+        );
+
+        const store = new Store();
+
+        // asynchronous in effect
+        await flushPromises();
+
+        // await storageService.getItem function
+        await flushPromises();
+
+        expect(getState(store)).toEqual({
+          foo: 'baz',
+          age: 99,
+        });
       });
     });
   });
