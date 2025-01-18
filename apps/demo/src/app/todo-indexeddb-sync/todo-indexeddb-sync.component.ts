@@ -4,18 +4,16 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { SyncedTodoStore } from './synced-todo-store';
 import { SelectionModel } from '@angular/cdk/collections';
-import { CategoryStore } from '../category.store';
 import { Todo } from '../shared/todo.service';
 
 @Component({
-  selector: 'demo-todo-storage-sync',
+  selector: 'demo-todo-indexeddb-sync',
   imports: [MatCheckboxModule, MatIconModule, MatTableModule],
-  templateUrl: './todo-storage-sync.component.html',
-  styleUrl: './todo-storage-sync.component.scss',
+  templateUrl: './todo-indexeddb-sync.component.html',
+  styleUrl: './todo-indexeddb-sync.component.scss',
 })
-export class TodoStorageSyncComponent {
+export class TodoIndexeddbSyncComponent {
   todoStore = inject(SyncedTodoStore);
-  categoryStore = inject(CategoryStore);
 
   displayedColumns: string[] = ['finished', 'name', 'description', 'deadline'];
   dataSource = new MatTableDataSource<Todo>([]);
