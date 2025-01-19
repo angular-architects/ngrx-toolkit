@@ -1,5 +1,5 @@
 import { getState, patchState, signalStore, withState } from '@ngrx/signals';
-import { withStorageSync } from './with-storage-sync';
+import { withStorageSync } from '../with-storage-sync';
 import { TestBed } from '@angular/core/testing';
 
 interface StateObject {

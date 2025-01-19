@@ -38,11 +38,4 @@ export const lazyRoutes: Route[] = [
     loadComponent: () =>
       import('./reset/todo.component').then((m) => m.TodoComponent),
   },
-  {
-    path: 'indexeddb-sync',
-    loadComponent: () =>
-      import('./todo-indexeddb-sync/todo-indexeddb-sync.component').then(
-        (m) => m.TodoIndexeddbSyncComponent
-      ),
-  },
 ];

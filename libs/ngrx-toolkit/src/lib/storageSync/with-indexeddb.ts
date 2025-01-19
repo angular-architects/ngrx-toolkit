@@ -54,7 +54,7 @@ export type IndexedDBSyncConfig = {
   autoSync?: boolean;
 };
 
-export function withIndexeddbSync<
+export function withIndexeddb<
   State extends object,
   Input extends SignalStoreFeatureResult
 >({
