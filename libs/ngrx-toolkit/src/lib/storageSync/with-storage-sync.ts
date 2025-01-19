@@ -78,11 +78,16 @@ export function withStorageSync<Input extends SignalStoreFeatureResult>(
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   config: SyncConfig<Input['state']>
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
+export function withStorageSync<Input extends SignalStoreFeatureResult>(
+  config: SyncConfig<Input['state']>,
+  withIndexedDB: unknown
+): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
 export function withStorageSync<
   State extends object,
   Input extends SignalStoreFeatureResult
 >(
-  configOrKey: SyncConfig<Input['state']> | string
+  configOrKey: SyncConfig<Input['state']> | string, // todo storage remove
+  withIndexedDB?: unknown
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult> {
   const {
     key,
@@ -92,6 +97,10 @@ export function withStorageSync<
     stringify = JSON.stringify,
     storage: storageFactory = () => localStorage,
   } = typeof configOrKey === 'string' ? { key: configOrKey } : configOrKey;
+
+  if (typeof withIndexedDB === 'function') {
+    return withIndexedDB(configOrKey);
+  }
 
   return signalStoreFeature(
     withMethods((store, platformId = inject(PLATFORM_ID)) => {
