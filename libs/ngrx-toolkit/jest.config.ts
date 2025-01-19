@@ -1,6 +1,6 @@
- 
 export default {
   displayName: 'ngrx-toolkit',
+  setupFiles: ['fake-indexeddb/auto'],
   preset: '../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   coverageDirectory: '../../coverage/libs/ngrx-toolkit',

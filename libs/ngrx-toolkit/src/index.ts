@@ -17,7 +17,10 @@ export {
 export * from './lib/with-call-state';
 export * from './lib/with-undo-redo';
 export * from './lib/with-data-service';
-export { withStorageSync, SyncConfig } from './lib/with-storage-sync';
 export * from './lib/with-pagination';
 export { withReset, setResetState } from './lib/with-reset';
-export { withIndexeddbSync } from './lib/with-indexeddb-sync';
+export {
+  withStorageSync,
+  SyncConfig,
+} from './lib/storageSync/with-storage-sync';
+export { withIndexeddb } from './lib/storageSync/with-indexeddb';
