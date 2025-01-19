@@ -14,6 +14,15 @@ type TodoModel = {
   }[];
 };
 
+const usernames: string[] = [
+  'Alice',
+  'Bob',
+  'Charlie',
+  'David',
+  'Eve',
+  'Frank',
+];
+
 const TodoIndexedDBSync = signalStore(
   withState<TodoModel>({
     user: {
@@ -32,12 +41,15 @@ const TodoIndexedDBSync = signalStore(
       },
     ],
   }),
-  withIndexeddbSync(),
+  withIndexeddbSync({
+    dbName: 'ngrxToolkit',
+    storeName: 'todo',
+  }),
   withMethods((store) => ({
     changeUserName(): void {
       patchState(store, {
         user: {
-          name: 'mzkmnk2',
+          name: usernames[Math.floor(Math.random() * usernames.length)],
         },
       });
     },

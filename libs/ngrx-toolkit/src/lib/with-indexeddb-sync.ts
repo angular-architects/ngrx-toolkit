@@ -1,52 +1,114 @@
 import {
+  EmptyFeatureResult,
   getState,
   patchState,
+  SignalStoreFeature,
   signalStoreFeature,
+  SignalStoreFeatureResult,
   withHooks,
   withMethods,
 } from '@ngrx/signals';
-import { effect } from '@angular/core';
+import { effect, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformServer } from '@angular/common';
 
 const keyPath: string = 'ngrxToolkitId' as const;
 
-export function withIndexeddbSync<State extends object>() {
+const PROMISE_NOOP = () => Promise.resolve();
+
+type WithIndexedDBSyncFeatureResult = EmptyFeatureResult & {
+  methods: {
+    readFromIndexedDB(): Promise<void>;
+
+    writeToIndexedDB(): Promise<void>;
+
+    clearIndexedDB(): Promise<void>;
+  };
+};
+
+const withIndexedDBSyncFeatureStub: Pick<
+  WithIndexedDBSyncFeatureResult,
+  'methods'
+>['methods'] = {
+  readFromIndexedDB: PROMISE_NOOP,
+  writeToIndexedDB: PROMISE_NOOP,
+  clearIndexedDB: PROMISE_NOOP,
+};
+
+export type IndexedDBSyncConfig = {
+  /**
+   * en: indexedDB name
+   * ja: indexedDBのデータベース名
+   */
+  dbName: string;
+
+  /**
+   * en: indexedDB store name
+   * ja: indexedDBのストア名
+   */
+  storeName: string;
+
+  /**
+   * en: flag indicating if the store should read from indexedDB on init and write to indexedDB on every state change.
+   * ja: 初期化時にindexedDBから読み込み、状態が変更されるたびにindexedDBに書き込むかどうかを示すフラグ
+   */
+  autoSync?: boolean;
+};
+
+export function withIndexeddbSync<
+  State extends object,
+  Input extends SignalStoreFeatureResult
+>({
+  dbName,
+  storeName,
+  autoSync = true,
+}: IndexedDBSyncConfig): SignalStoreFeature<
+  Input,
+  WithIndexedDBSyncFeatureResult
+> {
   return signalStoreFeature(
-    withMethods((store) => {
+    withMethods((store, platformId = inject(PLATFORM_ID)) => {
+      if (isPlatformServer(platformId)) {
+        return withIndexedDBSyncFeatureStub;
+      }
+
       return {
         async readFromIndexedDB(): Promise<void> {
-          const db = (await readFromIndexedDB(
-            'ngrx-toolkit',
-            'test-store'
-          )) as { keyPath: string; value: State };
+          const dbState = (await readFromIndexedDB(dbName, storeName)) as
+            | {
+                keyPath: string;
+                value: State;
+              }
+            | undefined;
 
-          console.log('db', db);
+          // en:do nothing if there is no value in db
+          if (dbState === undefined) {
+            return;
+          }
 
-          patchState(store, db.value);
+          patchState(store, dbState.value);
         },
 
         async writeToIndexedDB(): Promise<void> {
           const state = getState(store) as State;
 
-          await writeToIndexedDB('ngrx-toolkit', 'test-store', {
+          await writeToIndexedDB(dbName, storeName, {
             [keyPath]: keyPath,
             value: state,
           });
+        },
+
+        async clearIndexedDB(): Promise<void> {
+          await clearIndexedDB(dbName, storeName);
         },
       };
     }),
     withHooks((store) => ({
       onInit(): void {
+        if (!autoSync) return;
+
         Promise.resolve().then(async () => {
           await store.readFromIndexedDB();
         });
-
-        // effect(() => {
-        //
-        //   Promise.resolve().then(async () => {
-        //     await store.writeToIndexedDB();
-        //   });
-        //
-        // });
 
         effect(() =>
           ((_) => {
@@ -145,6 +207,37 @@ export async function readFromIndexedDB<T>(
     request.onsuccess = (): void => {
       db.close();
       resolve(request.result);
+    };
+
+    request.onerror = (): void => {
+      db.close();
+      reject();
+    };
+  });
+}
+
+/**
+ * delete indexedDB
+ * @param dbName
+ * @param storeName
+ * @returns
+ */
+export async function clearIndexedDB(
+  dbName: string,
+  storeName: string
+): Promise<void> {
+  const db = await openDB(dbName, storeName);
+
+  const tx = db.transaction(storeName, 'readwrite');
+
+  const store = tx.objectStore(storeName);
+
+  const request = store.delete(keyPath);
+
+  return new Promise((resolve, reject) => {
+    request.onsuccess = (): void => {
+      db.close();
+      resolve();
     };
 
     request.onerror = (): void => {
