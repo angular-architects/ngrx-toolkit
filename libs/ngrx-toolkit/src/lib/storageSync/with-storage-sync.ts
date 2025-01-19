@@ -10,6 +10,12 @@ import {
   SignalStoreFeatureResult,
   EmptyFeatureResult,
 } from '@ngrx/signals';
+import {
+  IndexedDBSyncConfig,
+  isIndexedDBSyncConfig,
+  WithIndexedDBSyncFeatureResult,
+  WithInexedDBFn,
+} from './with-indexeddb';
 
 const NOOP = () => void true;
 
@@ -79,16 +85,30 @@ export function withStorageSync<Input extends SignalStoreFeatureResult>(
   config: SyncConfig<Input['state']>
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
-  config: SyncConfig<Input['state']>,
-  withIndexedDB: unknown
+  config: IndexedDBSyncConfig<Input['state']>,
+  withIndexedDB: WithInexedDBFn<Input['state']>
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
 export function withStorageSync<
   State extends object,
   Input extends SignalStoreFeatureResult
 >(
-  configOrKey: SyncConfig<Input['state']> | string, // todo storage remove
-  withIndexedDB?: unknown
-): SignalStoreFeature<Input, WithStorageSyncFeatureResult> {
+  configOrKey:
+    | SyncConfig<Input['state']>
+    | IndexedDBSyncConfig<Input['state']>
+    | string, // todo storage remove
+  withIndexedDB?: WithInexedDBFn<Input['state']>
+): SignalStoreFeature<
+  Input,
+  WithStorageSyncFeatureResult | WithIndexedDBSyncFeatureResult
+> {
+  //
+  if (isIndexedDBSyncConfig(configOrKey)) {
+    if (typeof withIndexedDB === 'undefined') {
+      throw new Error('withIndexedDB is required when using indexedDB');
+    }
+    return withIndexedDB(configOrKey);
+  }
+
   const {
     key,
     autoSync = true,
@@ -97,10 +117,6 @@ export function withStorageSync<
     stringify = JSON.stringify,
     storage: storageFactory = () => localStorage,
   } = typeof configOrKey === 'string' ? { key: configOrKey } : configOrKey;
-
-  if (typeof withIndexedDB === 'function') {
-    return withIndexedDB(configOrKey);
-  }
 
   return signalStoreFeature(
     withMethods((store, platformId = inject(PLATFORM_ID)) => {
