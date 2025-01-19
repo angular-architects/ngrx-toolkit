@@ -35,7 +35,7 @@ const withIndexedDBSyncFeatureStub: Pick<
 };
 
 export type WithInexedDBFn<State extends object> = (
-  config: IndexedDBSyncConfig<State>
+  indexedDBSyncConfig: IndexedDBSyncConfig<State>
 ) => SignalStoreFeature<EmptyFeatureResult, WithIndexedDBSyncFeatureResult>;
 
 export type IndexedDBSyncConfig<State> = Omit<
@@ -58,10 +58,14 @@ export function isIndexedDBSyncConfig<Input extends SignalStoreFeatureResult>(
  * @returns
  */
 export function withIndexedDB<State extends object>(): WithInexedDBFn<State> {
-  const dbName = 'ngrx-toolkit';
-  const storeName = 'ngrx-toolkit-store';
+  return (indexedDBSyncConfig: IndexedDBSyncConfig<State>) => {
+    const {
+      autoSync,
+      dbName,
+      storeName,
+      select = (state: State) => state,
+    } = indexedDBSyncConfig;
 
-  return (config: IndexedDBSyncConfig<State>) => {
     return signalStoreFeature(
       withMethods(
         (
@@ -70,6 +74,9 @@ export function withIndexedDB<State extends object>(): WithInexedDBFn<State> {
           indexedDBService = inject(IndexedDBService)
         ) => {
           if (isPlatformServer(platformId)) {
+            console.warn(
+              `'withStorageSync' provides non-functional implementation due to server-side execution`
+            );
             return withIndexedDBSyncFeatureStub;
           }
 
@@ -94,7 +101,7 @@ export function withIndexedDB<State extends object>(): WithInexedDBFn<State> {
             },
 
             async writeToIndexedDB(): Promise<void> {
-              const state = getState(store) as State;
+              const state = select(getState(store) as State);
 
               await indexedDBService.write(dbName, storeName, state);
             },
@@ -106,8 +113,12 @@ export function withIndexedDB<State extends object>(): WithInexedDBFn<State> {
         }
       ),
       withHooks({
-        onInit(store): void {
-          if (config.autoSync) return;
+        onInit(store, platformId = inject(PLATFORM_ID)): void {
+          if (isPlatformServer(platformId)) {
+            return;
+          }
+
+          if (autoSync) return;
 
           Promise.resolve().then(async () => {
             await store.readFromIndexedDB();
