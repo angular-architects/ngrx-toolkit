@@ -6,14 +6,21 @@ import {
   updateEntity,
 } from '@ngrx/signals/entities';
 import { AddTodo, Todo } from '../devtools/todo-store';
-import { withStorageSync } from '@angular-architects/ngrx-toolkit';
+import {
+  withIndexedDB,
+  withStorageSync,
+} from '@angular-architects/ngrx-toolkit';
 
 export const SyncedTodoStore = signalStore(
   { providedIn: 'root' },
   withEntities<Todo>(),
-  withStorageSync({
-    key: 'todos',
-  }),
+  withStorageSync(
+    {
+      dbName: 'ngrx-toolkit',
+      storeName: 'todos',
+    },
+    withIndexedDB()
+  ),
   withMethods((store) => {
     let currentId = 0;
     return {

@@ -2,7 +2,9 @@ import {
   EmptyFeatureResult,
   getState,
   patchState,
+  SignalStoreFeature,
   signalStoreFeature,
+  SignalStoreFeatureResult,
   withHooks,
   withMethods,
 } from '@ngrx/signals';
@@ -11,11 +13,9 @@ import { effect, inject, PLATFORM_ID } from '@angular/core';
 import { IndexedDBService } from './internal/indexeddb.service';
 import { isPlatformServer } from '@angular/common';
 
-type IndexedDBSyncConfig<State> = Omit<SyncConfig<State>, 'storage'>;
-
 const PROMISE_NOOP = () => Promise.resolve();
 
-type WithIndexedDBSyncFeatureResult = EmptyFeatureResult & {
+export type WithIndexedDBSyncFeatureResult = EmptyFeatureResult & {
   methods: {
     readFromIndexedDB(): Promise<void>;
 
@@ -34,12 +34,30 @@ const withIndexedDBSyncFeatureStub: Pick<
   clearIndexedDB: PROMISE_NOOP,
 };
 
+export type WithInexedDBFn<State extends object> = (
+  config: IndexedDBSyncConfig<State>
+) => SignalStoreFeature<EmptyFeatureResult, WithIndexedDBSyncFeatureResult>;
+
+export type IndexedDBSyncConfig<State> = Omit<
+  SyncConfig<State>,
+  'storage' | 'key'
+> & {
+  dbName: string;
+  storeName: string;
+};
+
+export function isIndexedDBSyncConfig<Input extends SignalStoreFeatureResult>(
+  obj: SyncConfig<Input['state']> | IndexedDBSyncConfig<Input['state']> | string
+): obj is IndexedDBSyncConfig<Input['state']> {
+  return typeof obj === 'object' && 'dbName' in obj;
+}
+
 /**
  * indexeddbを利用してデータを永続化させる関数
  * withStorageSyncの第二引数で使われる
  * @returns
  */
-export function withIndexedDB<State extends object>() {
+export function withIndexedDB<State extends object>(): WithInexedDBFn<State> {
   const dbName = 'ngrx-toolkit';
   const storeName = 'ngrx-toolkit-store';
 
