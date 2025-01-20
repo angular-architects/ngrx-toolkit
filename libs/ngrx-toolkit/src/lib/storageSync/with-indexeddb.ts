@@ -48,20 +48,29 @@ export type IndexedDBSyncConfig<State> = Omit<
   SyncConfig<State>,
   'storage' | 'key' | 'parse' | 'stringify'
 > & {
+  /**
+   * indexeddb database name
+   */
   dbName: string;
+
+  /**
+   * indexed db store name (like a table in SQL)
+   */
   storeName: string;
 };
 
+/**
+ * check if the object is IndexedDBSyncConfig
+ */
 export function isIndexedDBSyncConfig<Input extends SignalStoreFeatureResult>(
   obj: SyncConfig<Input['state']> | IndexedDBSyncConfig<Input['state']> | string
 ): obj is IndexedDBSyncConfig<Input['state']> {
-  return typeof obj === 'object' && 'dbName' in obj;
+  return typeof obj === 'object' && 'dbName' in obj && 'storeName' in obj;
 }
 
 /**
- * indexeddbを利用してデータを永続化させる関数
- * withStorageSyncの第二引数で使われる
- * @returns
+ * Enable store synchronization with IndexedDB
+ * Only works on browser platform.
  */
 export function withIndexedDB<State extends object>(): WithInexedDBFn<State> {
   return (indexedDBSyncConfig: IndexedDBSyncConfig<State>) => {
@@ -98,7 +107,7 @@ export function withIndexedDB<State extends object>(): WithInexedDBFn<State> {
                   }
                 | undefined;
 
-              // en:do nothing if there is no value in db
+              // do nothing if there is no value in db
               if (dbState === undefined) {
                 return;
               }
