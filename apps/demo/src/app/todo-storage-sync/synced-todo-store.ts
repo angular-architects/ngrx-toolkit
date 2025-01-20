@@ -17,8 +17,7 @@ export const SyncedTodoStore = signalStore(
   withStorageSync(
     {
       dbName: 'ngrx-toolkit',
-      storeName: 'todo',
-      parse: (value: string) => JSON.parse(value),
+      storeName: 'todos',
     },
     withIndexedDB()
   ),
