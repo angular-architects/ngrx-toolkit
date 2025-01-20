@@ -9,7 +9,13 @@ import {
   withMethods,
 } from '@ngrx/signals';
 import { SyncConfig } from './with-storage-sync';
-import { effect, inject, PLATFORM_ID } from '@angular/core';
+import {
+  effect,
+  EnvironmentInjector,
+  inject,
+  PLATFORM_ID,
+  runInInjectionContext,
+} from '@angular/core';
 import { IndexedDBService } from './internal/indexeddb.service';
 import { isPlatformServer } from '@angular/common';
 
@@ -40,7 +46,7 @@ export type WithInexedDBFn<State extends object> = (
 
 export type IndexedDBSyncConfig<State> = Omit<
   SyncConfig<State>,
-  'storage' | 'key'
+  'storage' | 'key' | 'parse' | 'stringify'
 > & {
   dbName: string;
   storeName: string;
@@ -113,24 +119,28 @@ export function withIndexedDB<State extends object>(): WithInexedDBFn<State> {
         }
       ),
       withHooks({
-        onInit(store, platformId = inject(PLATFORM_ID)): void {
+        onInit(
+          store,
+          platformId = inject(PLATFORM_ID),
+          envInjector = inject(EnvironmentInjector)
+        ) {
           if (isPlatformServer(platformId)) {
             return;
           }
 
           if (autoSync) return;
 
-          Promise.resolve().then(async () => {
-            await store.readFromIndexedDB();
+          store.readFromIndexedDB().then((_) => {
+            runInInjectionContext(envInjector, () => {
+              effect(() =>
+                ((_state) => {
+                  Promise.resolve().then(async () => {
+                    await store.writeToIndexedDB();
+                  });
+                })(getState(store))
+              );
+            });
           });
-
-          effect(() =>
-            ((_) => {
-              Promise.resolve().then(async () => {
-                await store.writeToIndexedDB();
-              });
-            })(getState(store))
-          );
         },
       })
     );
