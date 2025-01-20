@@ -40,7 +40,7 @@ const withIndexedDBSyncFeatureStub: Pick<
   clearIndexedDB: PROMISE_NOOP,
 };
 
-export type WithInexedDBFn<State extends object> = (
+export type WithIndexedDBFn<State extends object> = (
   indexedDBSyncConfig: IndexedDBSyncConfig<State>
 ) => SignalStoreFeature<EmptyFeatureResult, WithIndexedDBSyncFeatureResult>;
 
@@ -72,7 +72,7 @@ export function isIndexedDBSyncConfig<Input extends SignalStoreFeatureResult>(
  * Enable store synchronization with IndexedDB
  * Only works on browser platform.
  */
-export function withIndexedDB<State extends object>(): WithInexedDBFn<State> {
+export function withIndexedDB<State extends object>(): WithIndexedDBFn<State> {
   return (indexedDBSyncConfig: IndexedDBSyncConfig<State>) => {
     const {
       autoSync,

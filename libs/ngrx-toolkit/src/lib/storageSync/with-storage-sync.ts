@@ -14,7 +14,7 @@ import {
   IndexedDBSyncConfig,
   isIndexedDBSyncConfig,
   WithIndexedDBSyncFeatureResult,
-  WithInexedDBFn,
+  WithIndexedDBFn,
 } from './with-indexeddb';
 
 const NOOP = () => void true;
@@ -86,7 +86,7 @@ export function withStorageSync<Input extends SignalStoreFeatureResult>(
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   config: IndexedDBSyncConfig<Input['state']>,
-  withIndexedDB: WithInexedDBFn<Input['state']>
+  withIndexedDB: WithIndexedDBFn<Input['state']>
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
 export function withStorageSync<
   State extends object,
@@ -96,7 +96,7 @@ export function withStorageSync<
     | SyncConfig<Input['state']>
     | IndexedDBSyncConfig<Input['state']>
     | string, // todo storage remove
-  withIndexedDB?: WithInexedDBFn<Input['state']>
+  withIndexedDB?: WithIndexedDBFn<Input['state']>
 ): SignalStoreFeature<
   Input,
   WithStorageSyncFeatureResult | WithIndexedDBSyncFeatureResult
