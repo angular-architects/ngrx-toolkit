@@ -134,6 +134,9 @@ export function withIndexedDB<State extends object>(): WithIndexedDBFn<State> {
           envInjector = inject(EnvironmentInjector)
         ) {
           if (isPlatformServer(platformId)) {
+            console.warn(
+              `'withStorageSync' provides non-functional implementation due to server-side execution`
+            );
             return;
           }
 
