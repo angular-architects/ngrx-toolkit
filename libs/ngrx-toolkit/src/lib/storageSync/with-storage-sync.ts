@@ -87,7 +87,7 @@ export function withStorageSync<Input extends SignalStoreFeatureResult>(
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   config: IndexedDBSyncConfig<Input['state']>,
   withIndexedDB: WithIndexedDBFn<Input['state']>
-): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
+): SignalStoreFeature<Input, WithIndexedDBSyncFeatureResult>;
 export function withStorageSync<
   State extends object,
   Input extends SignalStoreFeatureResult
