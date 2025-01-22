@@ -23,11 +23,11 @@ const PROMISE_NOOP = () => Promise.resolve();
 
 export type WithIndexedDBSyncFeatureResult = EmptyFeatureResult & {
   methods: {
-    readFromIndexedDB(): Promise<void>;
+    readFromStorage(): Promise<void>;
 
-    writeToIndexedDB(): Promise<void>;
+    writeToStorage(): Promise<void>;
 
-    clearIndexedDB(): Promise<void>;
+    clearStorage(): Promise<void>;
   };
 };
 
@@ -35,9 +35,9 @@ const withIndexedDBSyncFeatureStub: Pick<
   WithIndexedDBSyncFeatureResult,
   'methods'
 >['methods'] = {
-  readFromIndexedDB: PROMISE_NOOP,
-  writeToIndexedDB: PROMISE_NOOP,
-  clearIndexedDB: PROMISE_NOOP,
+  readFromStorage: PROMISE_NOOP,
+  writeToStorage: PROMISE_NOOP,
+  clearStorage: PROMISE_NOOP,
 };
 
 export type WithIndexedDBFn<State extends object> = (
@@ -96,7 +96,7 @@ export function withIndexedDB<State extends object>(): WithIndexedDBFn<State> {
           }
 
           return {
-            async readFromIndexedDB(): Promise<void> {
+            async readFromStorage(): Promise<void> {
               const dbState = (await indexedDBService.read(
                 dbName,
                 storeName
@@ -115,13 +115,13 @@ export function withIndexedDB<State extends object>(): WithIndexedDBFn<State> {
               patchState(store, dbState.value);
             },
 
-            async writeToIndexedDB(): Promise<void> {
+            async writeToStorage(): Promise<void> {
               const state = select(getState(store) as State);
 
               await indexedDBService.write(dbName, storeName, state);
             },
 
-            async clearIndexedDB(): Promise<void> {
+            async clearStorage(): Promise<void> {
               await indexedDBService.clear(dbName, storeName);
             },
           };
@@ -142,12 +142,12 @@ export function withIndexedDB<State extends object>(): WithIndexedDBFn<State> {
 
           if (autoSync) return;
 
-          store.readFromIndexedDB().then((_) => {
+          store.readFromStorage().then((_) => {
             runInInjectionContext(envInjector, () => {
               effect(() =>
                 ((_state) => {
                   Promise.resolve().then(async () => {
-                    await store.writeToIndexedDB();
+                    await store.writeToStorage();
                   });
                 })(getState(store))
               );
