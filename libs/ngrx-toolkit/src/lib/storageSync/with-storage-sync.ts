@@ -1,5 +1,11 @@
 import { isPlatformServer } from '@angular/common';
-import { PLATFORM_ID, effect, inject } from '@angular/core';
+import {
+  PLATFORM_ID,
+  effect,
+  inject,
+  EnvironmentInjector,
+  runInInjectionContext,
+} from '@angular/core';
 import {
   SignalStoreFeature,
   getState,
@@ -10,20 +16,15 @@ import {
   SignalStoreFeatureResult,
   EmptyFeatureResult,
 } from '@ngrx/signals';
-import {
-  IndexedDBSyncConfig,
-  isIndexedDBSyncConfig,
-  WithIndexedDBSyncFeatureResult,
-  WithIndexedDBFn,
-} from './with-indexeddb';
+import { StorageService } from './internal/storage.service';
 
-const NOOP = () => void true;
+const NOOP = () => Promise.resolve();
 
 type WithStorageSyncFeatureResult = EmptyFeatureResult & {
   methods: {
-    clearStorage(): void;
-    readFromStorage(): void;
-    writeToStorage(): void;
+    clearStorage(): Promise<void>;
+    readFromStorage(): Promise<void>;
+    writeToStorage(): Promise<void>;
   };
 };
 
@@ -70,7 +71,11 @@ export type SyncConfig<State> = {
    *
    * `localstorage` by default
    */
-  storage?: () => Storage;
+  storage: 'localStorage' | 'sessionStorage' | 'indexedDB';
+
+  // todo description
+  dbName: string;
+  storeName: string;
 };
 
 /**
@@ -84,84 +89,112 @@ export function withStorageSync<Input extends SignalStoreFeatureResult>(
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   config: SyncConfig<Input['state']>
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
-export function withStorageSync<Input extends SignalStoreFeatureResult>(
-  config: IndexedDBSyncConfig<Input['state']>,
-  withIndexedDB: WithIndexedDBFn<Input['state']>
-): SignalStoreFeature<Input, WithIndexedDBSyncFeatureResult>;
 export function withStorageSync<
   State extends object,
   Input extends SignalStoreFeatureResult
 >(
-  configOrKey:
-    | SyncConfig<Input['state']>
-    | IndexedDBSyncConfig<Input['state']>
-    | string, // todo storage remove
-  withIndexedDB?: WithIndexedDBFn<Input['state']>
-): SignalStoreFeature<
-  Input,
-  WithStorageSyncFeatureResult | WithIndexedDBSyncFeatureResult
-> {
-  //
-  if (isIndexedDBSyncConfig(configOrKey)) {
-    if (typeof withIndexedDB === 'undefined') {
-      throw new Error('withIndexedDB is required when using indexedDB');
-    }
-    return withIndexedDB(configOrKey);
-  }
-
+  configOrKey: string | SyncConfig<State>
+): SignalStoreFeature<Input, WithStorageSyncFeatureResult> {
   const {
     key,
     autoSync = true,
     select = (state: State) => state,
     parse = JSON.parse,
     stringify = JSON.stringify,
-    storage: storageFactory = () => localStorage,
+    storage: storage = 'localStorage',
+    dbName,
+    storeName,
   } = typeof configOrKey === 'string' ? { key: configOrKey } : configOrKey;
 
   return signalStoreFeature(
-    withMethods((store, platformId = inject(PLATFORM_ID)) => {
-      if (isPlatformServer(platformId)) {
-        console.warn(
-          `'withStorageSync' provides non-functional implementation due to server-side execution`
-        );
-        return StorageSyncStub;
+    withMethods(
+      (
+        store,
+        platformId = inject(PLATFORM_ID),
+        storageService = inject(StorageService)
+      ) => {
+        if (isPlatformServer(platformId)) {
+          console.warn(
+            `'withStorageSync' provides non-functional implementation due to server-side execution`
+          );
+          return StorageSyncStub;
+        }
+
+        return {
+          /**
+           * Removes the item stored in storage.
+           */
+          async clearStorage(): Promise<void> {
+            if (storage === 'indexedDB') {
+              await storageService.removeItem({
+                dbName: dbName,
+                storeName: storeName,
+              });
+            } else {
+              await storageService.removeItem(key);
+            }
+          },
+          /**
+           * Reads item from storage and patches the state.
+           */
+          async readFromStorage(): Promise<void> {
+            const stateString =
+              storage === 'indexedDB'
+                ? await storageService.getItem({
+                    dbName: dbName,
+                    storeName: storeName,
+                  })
+                : await storageService.getItem(key);
+            if (stateString) {
+              patchState(store, parse(stateString));
+            }
+          },
+          /**
+           * Writes selected portion to storage.
+           */
+          async writeToStorage(): Promise<void> {
+            const slicedState = select(getState(store) as State);
+            if (storage === 'indexedDB') {
+              await storageService.setItem(
+                { dbName: dbName, storeName: storeName },
+                stringify(slicedState)
+              );
+            } else {
+              await storageService.setItem(key, stringify(slicedState));
+            }
+          },
+        };
       }
-
-      const storage = storageFactory();
-
-      return {
-        /**
-         * Removes the item stored in storage.
-         */
-        clearStorage(): void {
-          storage.removeItem(key);
-        },
-        /**
-         * Reads item from storage and patches the state.
-         */
-        readFromStorage(): void {
-          const stateString = storage.getItem(key);
-          if (stateString) {
-            patchState(store, parse(stateString));
-          }
-        },
-        /**
-         * Writes selected portion to storage.
-         */
-        writeToStorage(): void {
-          const slicedState = select(getState(store) as State);
-          storage.setItem(key, stringify(slicedState));
-        },
-      };
-    }),
+    ),
     withHooks({
-      onInit(store, platformId = inject(PLATFORM_ID)) {
+      onInit(
+        store,
+        platformId = inject(PLATFORM_ID),
+        envInjector = inject(EnvironmentInjector),
+        storageService = inject(StorageService)
+      ) {
         if (isPlatformServer(platformId)) {
           return;
         }
 
+        if (typeof configOrKey === 'string') {
+          storageService.setStorage(localStorage);
+        }
+
+        if (storage === 'localStorage' || storage === 'sessionStorage') {
+          storageService.setStorage(window[storage]);
+        }
+
         if (autoSync) {
-          store.readFromStorage();
+          store.readFromStorage().then(() => {
+            Promise.resolve().then(async () => {
+              runInInjectionContext(envInjector, () => {
+                effect(() => {
+                  store.writeToStorage();
+                });
+              });
+            });
+          });
 
           effect(() => {
             store.writeToStorage();

@@ -23,4 +23,3 @@ export {
   withStorageSync,
   SyncConfig,
 } from './lib/storageSync/with-storage-sync';
-export { withIndexedDB } from './lib/storageSync/with-indexeddb';
