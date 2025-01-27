@@ -26,7 +26,7 @@ describe('IndexedDBService', () => {
 
     const receivedData = await indexedDBService.read(dbName, storeName);
 
-    expect(receivedData).toEqual(expectedData);
+    expect(receivedData).toEqual(expectedData.value);
   });
 
   it('It should be possible to delete data using clear()', async (): Promise<void> => {
@@ -50,7 +50,7 @@ describe('IndexedDBService', () => {
 
     const receivedData = await indexedDBService.read(dbName, storeName);
 
-    expect(receivedData).toEqual({ [keyPath]: keyPath, value: null });
+    expect(receivedData).toBeNull();
   });
 
   it('write() should handle empty object data', async (): Promise<void> => {
@@ -61,7 +61,7 @@ describe('IndexedDBService', () => {
 
     const receivedData = await indexedDBService.read(dbName, storeName);
 
-    expect(receivedData).toEqual(expectedData);
+    expect(receivedData).toEqual(expectedData.value);
   });
 
   it('write() should handle large data objects', async (): Promise<void> => {
@@ -72,7 +72,7 @@ describe('IndexedDBService', () => {
 
     const receivedData = await indexedDBService.read(dbName, storeName);
 
-    expect(receivedData).toEqual(expectedData);
+    expect(receivedData).toEqual(expectedData.value);
   });
 
   it('write() should handle special characters in data', async (): Promise<void> => {
@@ -83,6 +83,6 @@ describe('IndexedDBService', () => {
 
     const receivedData = await indexedDBService.read(dbName, storeName);
 
-    expect(receivedData).toEqual(expectedData);
+    expect(receivedData).toEqual(expectedData.value);
   });
 });
