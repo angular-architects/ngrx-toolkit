@@ -84,7 +84,7 @@ export class IndexedDBService {
     return new Promise((resolve, reject) => {
       request.onsuccess = (): void => {
         db.close();
-        resolve(request.result);
+        resolve(request.result?.['value']);
       };
 
       request.onerror = (): void => {
