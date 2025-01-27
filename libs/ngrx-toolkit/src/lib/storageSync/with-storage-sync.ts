@@ -67,14 +67,20 @@ export type SyncConfig<State> = {
    */
   stringify?: (state: State) => string;
   /**
-   * Factory function used to select the storage.
+   * Allows selection between localStorage, sessionStorage, and indexedDB
    *
-   * `localstorage` by default
+   * Defaults to `localStorage`
    */
   storage: 'localStorage' | 'sessionStorage' | 'indexedDB';
 
-  // todo description
+  /**
+   * The name of the indexedDB database
+   */
   dbName: string;
+
+  /**
+   * The store name in indexedDB (equivalent to a table name in SQL)
+   */
   storeName: string;
 };
 
@@ -125,26 +131,23 @@ export function withStorageSync<
            * Removes the item stored in storage.
            */
           async clearStorage(): Promise<void> {
-            if (storage === 'indexedDB') {
-              await storageService.removeItem({
-                dbName: dbName,
-                storeName: storeName,
-              });
-            } else {
-              await storageService.removeItem(key);
-            }
+            await storageService.removeItem({
+              storage,
+              key,
+              dbName,
+              storeName,
+            });
           },
           /**
            * Reads item from storage and patches the state.
            */
           async readFromStorage(): Promise<void> {
-            const stateString =
-              storage === 'indexedDB'
-                ? await storageService.getItem({
-                    dbName: dbName,
-                    storeName: storeName,
-                  })
-                : await storageService.getItem(key);
+            const stateString = await storageService.getItem({
+              storage,
+              key,
+              dbName,
+              storeName,
+            });
             if (stateString) {
               patchState(store, parse(stateString));
             }
@@ -154,14 +157,10 @@ export function withStorageSync<
            */
           async writeToStorage(): Promise<void> {
             const slicedState = select(getState(store) as State);
-            if (storage === 'indexedDB') {
-              await storageService.setItem(
-                { dbName: dbName, storeName: storeName },
-                stringify(slicedState)
-              );
-            } else {
-              await storageService.setItem(key, stringify(slicedState));
-            }
+            await storageService.setItem(
+              { storage, key, dbName: dbName, storeName: storeName },
+              stringify(slicedState)
+            );
           },
         };
       }
@@ -194,10 +193,6 @@ export function withStorageSync<
                 });
               });
             });
-          });
-
-          effect(() => {
-            store.writeToStorage();
           });
         }
       },
