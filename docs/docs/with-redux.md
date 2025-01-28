@@ -31,7 +31,7 @@ export const FlightStore = signalStore(
     },
     reducer(actions, on) {
       on(actions.loaded, ({ flights }, state) => {
-        patchState(state, 'flights loaded', { flights });
+        updateState(state, 'flights loaded', { flights });
       });
     },
     effects(actions, create) {
@@ -82,11 +82,11 @@ const actions = {
 // this can be in a separate file
 const reducer = createReducer<FlightState, typeof actions>((actions, on) => {
   on(actions.updateEffect1, (state, { value }) => {
-    patchState(state, { effect1: value });
+    updateState(state, 'update effect 1', { effect1: value });
   });
 
   on(actions.updateEffect2, (state, { value }) => {
-    patchState(state, { effect2: value });
+    updateState(state, 'update effect 2', { effect2: value });
   });
 });
 
