@@ -37,6 +37,24 @@ const StorageSyncStub: Pick<
   writeToStorage: NOOP,
 };
 
+export type IndexedDBSyncConfig = {
+  /**
+   * Allows selection between localStorage, sessionStorage, and indexedDB
+   *
+   */
+  storage: 'indexedDB';
+
+  /**
+   * The name of the indexedDB database
+   */
+  dbName: string;
+
+  /**
+   * The store name in indexedDB (equivalent to a table name in SQL)
+   */
+  storeName: string;
+};
+
 export type SyncConfig<State> = {
   /**
    * The key which is used to access the storage.
@@ -71,17 +89,17 @@ export type SyncConfig<State> = {
    *
    * Defaults to `localStorage`
    */
-  storage: 'localStorage' | 'sessionStorage' | 'indexedDB';
+  storage?: 'localStorage' | 'sessionStorage' | 'indexedDB';
 
   /**
    * The name of the indexedDB database
    */
-  dbName: string;
+  dbName?: string;
 
   /**
    * The store name in indexedDB (equivalent to a table name in SQL)
    */
-  storeName: string;
+  storeName?: string;
 };
 
 /**
@@ -107,9 +125,9 @@ export function withStorageSync<
     select = (state: State) => state,
     parse = JSON.parse,
     stringify = JSON.stringify,
-    storage: storage = 'localStorage',
-    dbName,
-    storeName,
+    storage = 'localStorage',
+    dbName = '',
+    storeName = '',
   } = typeof configOrKey === 'string' ? { key: configOrKey } : configOrKey;
 
   return signalStoreFeature(
