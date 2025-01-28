@@ -34,8 +34,6 @@ export class StorageService {
   }
 
   // get item from storage(localStorage, sessionStorage, indexedDB)
-  async getItem(config: Config): Promise<string | null>;
-
   async getItem(config: Config): Promise<string | null> {
     if (config.storage === 'indexedDB') {
       const { dbName, storeName } = config;
@@ -50,8 +48,6 @@ export class StorageService {
   }
 
   // set item in storage(localStorage, sessionStorage, indexedDB)
-  async setItem(config: Config, value: string): Promise<void>;
-
   async setItem(config: Config, value: string): Promise<void> {
     if (config.storage === 'indexedDB') {
       const { dbName, storeName } = config;
@@ -66,8 +62,6 @@ export class StorageService {
   }
 
   // remove item from storage(localStorage, sessionStorage, indexedDB)
-  async removeItem(config: Config): Promise<void>;
-
   async removeItem(config: Config): Promise<void> {
     if (config.storage === 'indexedDB') {
       const { dbName, storeName } = config;

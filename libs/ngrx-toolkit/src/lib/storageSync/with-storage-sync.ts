@@ -37,24 +37,6 @@ const StorageSyncStub: Pick<
   writeToStorage: NOOP,
 };
 
-export type IndexedDBSyncConfig = {
-  /**
-   * Allows selection between localStorage, sessionStorage, and indexedDB
-   *
-   */
-  storage: 'indexedDB';
-
-  /**
-   * The name of the indexedDB database
-   */
-  dbName: string;
-
-  /**
-   * The store name in indexedDB (equivalent to a table name in SQL)
-   */
-  storeName: string;
-};
-
 export type SyncConfig<State> = {
   /**
    * The key which is used to access the storage.
@@ -89,18 +71,52 @@ export type SyncConfig<State> = {
    *
    * Defaults to `localStorage`
    */
-  storage?: 'localStorage' | 'sessionStorage' | 'indexedDB';
+  storage?: 'localStorage' | 'sessionStorage';
+};
+
+export type IndexedDBSyncConfig<State> = {
+  /**
+   * Allows selection between localStorage, sessionStorage, and indexedDB
+   *
+   */
+  storage: 'indexedDB';
 
   /**
    * The name of the indexedDB database
    */
-  dbName?: string;
+  dbName: string;
 
   /**
    * The store name in indexedDB (equivalent to a table name in SQL)
    */
-  storeName?: string;
+  storeName: string;
+  /**
+   * Flag indicating if the store should read from storage on init and write to storage on every state change.
+   *
+   * `true` by default
+   */
+  autoSync?: boolean;
+  /**
+   * Function to select that portion of the state which should be stored.
+   *
+   * Returns the whole state object by default
+   */
+  select?: (state: State) => Partial<State>;
+  /**
+   * Function used to parse the state coming from storage.
+   *
+   * `JSON.parse()` by default
+   */
+  parse?: (stateString: string) => State;
+  /**
+   * Function used to tranform the state into a string representation.
+   *
+   * `JSON.stringify()` by default
+   */
+  stringify?: (state: State) => string;
 };
+
+export type Config<State> = SyncConfig<State> | IndexedDBSyncConfig<State>;
 
 /**
  * Enables store synchronization with storage.
@@ -111,24 +127,38 @@ export function withStorageSync<Input extends SignalStoreFeatureResult>(
   key: string
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
-  config: SyncConfig<Input['state']>
+  config: Config<Input['state']>
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
 export function withStorageSync<
   State extends object,
   Input extends SignalStoreFeatureResult
 >(
-  configOrKey: string | SyncConfig<State>
+  configOrKey: string | Config<State>
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult> {
   const {
-    key,
     autoSync = true,
     select = (state: State) => state,
     parse = JSON.parse,
     stringify = JSON.stringify,
     storage = 'localStorage',
-    dbName = '',
-    storeName = '',
-  } = typeof configOrKey === 'string' ? { key: configOrKey } : configOrKey;
+  } = typeof configOrKey === 'string' ? {} : configOrKey;
+
+  const key =
+    typeof configOrKey === 'string'
+      ? configOrKey
+      : configOrKey.storage === 'indexedDB'
+      ? ''
+      : configOrKey.key;
+
+  const dbName =
+    typeof configOrKey !== 'string' && configOrKey.storage === 'indexedDB'
+      ? configOrKey.dbName
+      : '';
+
+  const storeName =
+    typeof configOrKey !== 'string' && configOrKey.storage === 'indexedDB'
+      ? configOrKey.storeName
+      : '';
 
   return signalStoreFeature(
     withMethods(
