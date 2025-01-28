@@ -1,12 +1,25 @@
 import { inject, Injectable } from '@angular/core';
 import { IndexedDBService } from './indexeddb.service';
 
+// export type Config = {
+//   storage: 'localStorage' | 'sessionStorage' | 'indexedDB';
+//   key?: string;
+//   dbName?: string;
+//   storeName?: string;
+// };
+
 export type IndexedDBConfig = {
-  storage: 'localStorage' | 'sessionStorage' | 'indexedDB';
-  key?: string;
-  dbName?: string;
-  storeName?: string;
+  storage: 'indexedDB';
+  dbName: string;
+  storeName: string;
 };
+
+export type StorageConfig = {
+  storage: 'localStorage' | 'sessionStorage';
+  key: string;
+};
+
+export type Config = IndexedDBConfig | StorageConfig;
 
 @Injectable({
   providedIn: 'root',
@@ -21,15 +34,11 @@ export class StorageService {
   }
 
   // get item from storage(localStorage, sessionStorage, indexedDB)
-  async getItem(config: IndexedDBConfig): Promise<string | null>;
+  async getItem(config: Config): Promise<string | null>;
 
-  async getItem(config: IndexedDBConfig): Promise<string | null> {
+  async getItem(config: Config): Promise<string | null> {
     if (config.storage === 'indexedDB') {
       const { dbName, storeName } = config;
-
-      if (dbName === undefined || storeName === undefined) {
-        throw new Error('dbName and storeName must be set');
-      }
 
       return await this.indexedDB.read(dbName, storeName);
     }
@@ -37,25 +46,15 @@ export class StorageService {
     if (this.storage === null) {
       throw new Error('Storage not set');
     }
-
-    if (config.key === undefined) {
-      throw new Error('key is undefined');
-    }
-
     return this.storage.getItem(config.key);
   }
 
   // set item in storage(localStorage, sessionStorage, indexedDB)
-  async setItem(config: IndexedDBConfig, value: string): Promise<void>;
+  async setItem(config: Config, value: string): Promise<void>;
 
-  async setItem(config: IndexedDBConfig, value: string): Promise<void> {
+  async setItem(config: Config, value: string): Promise<void> {
     if (config.storage === 'indexedDB') {
       const { dbName, storeName } = config;
-
-      if (dbName === undefined || storeName === undefined) {
-        throw new Error('dbName and storeName must be set');
-      }
-
       return await this.indexedDB.write(dbName, storeName, value);
     }
 
@@ -63,33 +62,21 @@ export class StorageService {
       throw new Error('Storage not set');
     }
 
-    if (config.key === undefined) {
-      throw new Error('key is undefined');
-    }
-
     return this.storage.setItem(config.key, value);
   }
-  //
-  // // remove item from storage(localStorage, sessionStorage, indexedDB)
-  async removeItem(config: IndexedDBConfig): Promise<void>;
 
-  async removeItem(config: IndexedDBConfig): Promise<void> {
+  // remove item from storage(localStorage, sessionStorage, indexedDB)
+  async removeItem(config: Config): Promise<void>;
+
+  async removeItem(config: Config): Promise<void> {
     if (config.storage === 'indexedDB') {
       const { dbName, storeName } = config;
-
-      if (dbName === undefined || storeName === undefined) {
-        throw new Error('dbName and storeName must be set');
-      }
 
       return await this.indexedDB.clear(dbName, storeName);
     }
 
     if (this.storage === null) {
       throw new Error('Storage not set');
-    }
-
-    if (config.key === undefined) {
-      throw new Error('key is undefined');
     }
 
     return this.storage.removeItem(config.key);
