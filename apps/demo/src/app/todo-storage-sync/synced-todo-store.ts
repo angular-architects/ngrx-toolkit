@@ -12,7 +12,6 @@ export const SyncedTodoStore = signalStore(
   { providedIn: 'root' },
   withEntities<Todo>(),
   withStorageSync({
-    key: 'todos',
     storage: 'indexedDB',
     dbName: 'ngrx-toolkit',
     storeName: 'todos',
