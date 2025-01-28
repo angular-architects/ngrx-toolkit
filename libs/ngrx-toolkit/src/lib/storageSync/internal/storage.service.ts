@@ -1,12 +1,25 @@
 import { inject, Injectable } from '@angular/core';
 import { IndexedDBService } from './indexeddb.service';
 
-export type StorageType = 'localStorage' | 'sessionStorage';
+// export type Config = {
+//   storage: 'localStorage' | 'sessionStorage' | 'indexedDB';
+//   key?: string;
+//   dbName?: string;
+//   storeName?: string;
+// };
 
 export type IndexedDBConfig = {
-  dbName?: string;
-  storeName?: string;
+  storage: 'indexedDB';
+  dbName: string;
+  storeName: string;
 };
+
+export type StorageConfig = {
+  storage: 'localStorage' | 'sessionStorage';
+  key: string;
+};
+
+export type Config = IndexedDBConfig | StorageConfig;
 
 @Injectable({
   providedIn: 'root',
@@ -21,72 +34,51 @@ export class StorageService {
   }
 
   // get item from storage(localStorage, sessionStorage, indexedDB)
-  async getItem(key: string): Promise<string | null>;
-  async getItem(config: IndexedDBConfig): Promise<string | null>;
+  async getItem(config: Config): Promise<string | null>;
 
-  async getItem(configOrKey: IndexedDBConfig | string): Promise<string | null> {
-    if (typeof configOrKey === 'string') {
-      if (this.storage === null) {
-        throw new Error('Storage not set');
-      }
+  async getItem(config: Config): Promise<string | null> {
+    if (config.storage === 'indexedDB') {
+      const { dbName, storeName } = config;
 
-      return this.storage.getItem(configOrKey);
+      return await this.indexedDB.read(dbName, storeName);
     }
 
-    const { dbName, storeName } = configOrKey;
-
-    if (dbName === undefined || storeName === undefined) {
-      throw new Error('dbName and storeName must be set');
+    if (this.storage === null) {
+      throw new Error('Storage not set');
     }
-
-    return await this.indexedDB.read(dbName, storeName);
+    return this.storage.getItem(config.key);
   }
 
   // set item in storage(localStorage, sessionStorage, indexedDB)
-  async setItem(key: string, value: string): Promise<void>;
-  async setItem(config: IndexedDBConfig, value: string): Promise<void>;
+  async setItem(config: Config, value: string): Promise<void>;
 
-  async setItem(
-    configOrKey: IndexedDBConfig | string,
-    value: string
-  ): Promise<void> {
-    if (typeof configOrKey === 'string') {
-      if (this.storage === null) {
-        throw new Error('Storage not set');
-      }
-
-      this.storage.setItem(configOrKey, value);
-      return;
+  async setItem(config: Config, value: string): Promise<void> {
+    if (config.storage === 'indexedDB') {
+      const { dbName, storeName } = config;
+      return await this.indexedDB.write(dbName, storeName, value);
     }
 
-    const { dbName, storeName } = configOrKey;
-
-    if (dbName === undefined || storeName === undefined) {
-      throw new Error('dbName and storeName must be set');
+    if (this.storage === null) {
+      throw new Error('Storage not set');
     }
 
-    await this.indexedDB.write(dbName, storeName, value);
+    return this.storage.setItem(config.key, value);
   }
-  //
-  // // remove item from storage(localStorage, sessionStorage, indexedDB)
-  async removeItem(key: string): Promise<void>;
-  async removeItem(config: IndexedDBConfig): Promise<void>;
 
-  async removeItem(configOrKey: IndexedDBConfig | string): Promise<void> {
-    if (typeof configOrKey === 'string') {
-      if (this.storage === null) {
-        throw new Error('Storage not set');
-      }
-      this.storage.removeItem(configOrKey);
-      return;
+  // remove item from storage(localStorage, sessionStorage, indexedDB)
+  async removeItem(config: Config): Promise<void>;
+
+  async removeItem(config: Config): Promise<void> {
+    if (config.storage === 'indexedDB') {
+      const { dbName, storeName } = config;
+
+      return await this.indexedDB.clear(dbName, storeName);
     }
 
-    const { dbName, storeName } = configOrKey;
-
-    if (dbName === undefined || storeName === undefined) {
-      throw new Error('dbName and storeName must be set');
+    if (this.storage === null) {
+      throw new Error('Storage not set');
     }
 
-    return await this.indexedDB.clear(dbName, storeName);
+    return this.storage.removeItem(config.key);
   }
 }
