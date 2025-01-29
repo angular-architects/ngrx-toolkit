@@ -50,6 +50,9 @@ importers:
       core-js:
         specifier: ^3.40.0
         version: 3.40.0
+      flush-promises:
+        specifier: ^1.0.2
+        version: 1.0.2
       rxjs:
         specifier: ~7.8.0
         version: 7.8.1
@@ -5419,6 +5422,9 @@ packages:
 
   flatted@3.3.1:
     resolution: {integrity: sha512-X8cqMLLie7KsNUDSdzeN8FYK9rEt4Dt67OsG/DNGnYTSDBG4uFAJFBnUeiV+zCVAvwFy56IjM9sH51jVaEhNxw==}
+
+  flush-promises@1.0.2:
+    resolution: {integrity: sha512-G0sYfLQERwKz4+4iOZYQEZVpOt9zQrlItIxQAAYAWpfby3gbHrx0osCHz5RLl/XoXevXk0xoN4hDFky/VV9TrA==}
 
   follow-redirects@1.15.6:
     resolution: {integrity: sha512-wWN62YITEaOpSK584EZXJafH1AGpO8RVgElfkuXbTOrPX4fIfOyEpW/CsiNd8JdYrAoOvafRTOEnvsO++qCqFA==}
@@ -14911,6 +14917,8 @@ snapshots:
   flat@5.0.2: {}
 
   flatted@3.3.1: {}
+
+  flush-promises@1.0.2: {}
 
   follow-redirects@1.15.6(debug@4.4.0):
     optionalDependencies:
