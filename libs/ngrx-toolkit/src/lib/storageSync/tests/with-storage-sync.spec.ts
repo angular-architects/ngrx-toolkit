@@ -2,6 +2,7 @@ import { getState, patchState, signalStore, withState } from '@ngrx/signals';
 import { withStorageSync } from '../with-storage-sync';
 import { TestBed } from '@angular/core/testing';
 import * as flushPromises from 'flush-promises';
+// import { IndexedDBService } from '../internal/indexeddb.service';
 
 interface StateObject {
   foo: string;
@@ -15,9 +16,12 @@ const initialState: StateObject = {
 const key = 'FooBar';
 
 describe('withStorageSync', () => {
+  // let indexedDBService: IndexedDBService;
   beforeEach(() => {
     // make sure to start with a clean storage
     localStorage.removeItem(key);
+
+    // indexedDBService = TestBed.inject(IndexedDBService);
   });
 
   it('adds methods for storage access to the store', async () => {
@@ -232,7 +236,7 @@ describe('withStorageSync', () => {
     });
   });
 
-  describe('storage factory', () => {
+  describe('storage', () => {
     it('uses specified storage', async () => {
       await TestBed.runInInjectionContext(async () => {
         // prefill storage
@@ -273,4 +277,34 @@ describe('withStorageSync', () => {
       });
     });
   });
+
+  // describe('indexedDB',() => {
+  //
+  //   it('uses indexedDB',async () => {
+  //
+  //     const dbName = 'ngrx-toolkit';
+  //     const storeName = 'FooBar';
+  //
+  //     // set items
+  //     await indexedDBService.write(dbName,storeName,{
+  //       foo: 'baz',
+  //       age: 99,
+  //     } as StateObject);
+  //
+  //     await TestBed.runInInjectionContext(async () => {
+  //
+  //       const Store = signalStore({protectedState:false},withStorageSync({
+  //         storage:'indexedDB',
+  //         dbName,
+  //         storeName,
+  //       }))
+  //
+  //       const store = new Store();
+  //
+  //       await flushPromises();
+  //
+  //       expect(getState(store)).toEqual({...initialState})
+  //     })
+  //   })
+  // })
 });
