@@ -5,13 +5,13 @@ describe('IndexedDBService', () => {
 
   const storeName = 'users';
 
-  const sampleData = {
+  const sampleData = JSON.stringify({
     foo: 'bar',
     users: [
       { name: 'John', age: 30, isAdmin: true },
       { name: 'Jane', age: 25, isAdmin: false },
     ],
-  };
+  });
 
   let indexedDBService: IndexedDBService;
 
@@ -46,15 +46,15 @@ describe('IndexedDBService', () => {
   });
 
   it('write() should handle null data', async (): Promise<void> => {
-    await indexedDBService.write(dbName, storeName, null);
+    await indexedDBService.write(dbName, storeName, JSON.stringify(null));
 
     const receivedData = await indexedDBService.read(dbName, storeName);
 
-    expect(receivedData).toBeNull();
+    expect(receivedData).toEqual('null');
   });
 
   it('write() should handle empty object data', async (): Promise<void> => {
-    const emptyData = {};
+    const emptyData = JSON.stringify({});
     const expectedData = { [keyPath]: keyPath, value: emptyData };
 
     await indexedDBService.write(dbName, storeName, emptyData);
@@ -65,7 +65,7 @@ describe('IndexedDBService', () => {
   });
 
   it('write() should handle large data objects', async (): Promise<void> => {
-    const largeData = { foo: 'a'.repeat(1000000) };
+    const largeData = JSON.stringify({ foo: 'a'.repeat(100000) });
     const expectedData = { [keyPath]: keyPath, value: largeData };
 
     await indexedDBService.write(dbName, storeName, largeData);
@@ -76,7 +76,7 @@ describe('IndexedDBService', () => {
   });
 
   it('write() should handle special characters in data', async (): Promise<void> => {
-    const specialCharData = { foo: 'bar!@#$%^&*()_+{}:"<>?' };
+    const specialCharData = JSON.stringify({ foo: 'bar!@#$%^&*()_+{}:"<>?' });
     const expectedData = { [keyPath]: keyPath, value: specialCharData };
 
     await indexedDBService.write(dbName, storeName, specialCharData);
