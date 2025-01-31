@@ -42,7 +42,7 @@ export class IndexedDBService {
    * @param storeName
    * @param data
    */
-  async write<T>(dbName: string, storeName: string, data: T): Promise<void> {
+  async write(dbName: string, storeName: string, data: string): Promise<void> {
     const db = await this.openDB(dbName, storeName);
 
     const tx = db.transaction(storeName, 'readwrite');
