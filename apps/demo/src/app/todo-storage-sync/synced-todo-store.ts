@@ -12,9 +12,7 @@ export const SyncedTodoStore = signalStore(
   { providedIn: 'root' },
   withEntities<Todo>(),
   withStorageSync({
-    storage: 'indexedDB',
-    dbName: 'ngrx-toolkit',
-    storeName: 'todos',
+    key: 'todos',
   }),
   withMethods((store) => {
     let currentId = 0;
