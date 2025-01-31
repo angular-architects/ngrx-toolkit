@@ -196,6 +196,7 @@ export function withStorageSync<
               dbName,
               storeName,
             });
+
             if (stateString) {
               patchState(store, parse(stateString));
             }
