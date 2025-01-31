@@ -37,11 +37,7 @@ const StorageSyncStub: Pick<
   writeToStorage: NOOP,
 };
 
-export type SyncConfig<State> = {
-  /**
-   * The key which is used to access the storage.
-   */
-  key: string;
+export type BaseSyncConfig<State> = {
   /**
    * Flag indicating if the store should read from storage on init and write to storage on every state change.
    *
@@ -66,20 +62,27 @@ export type SyncConfig<State> = {
    * `JSON.stringify()` by default
    */
   stringify?: (state: State) => string;
+};
+
+export type SyncConfig<State> = BaseSyncConfig<State> & {
+  /**
+   * The key which is used to access the storage.
+   */
+  key: string;
   /**
    * Allows selection between localStorage, sessionStorage, and indexedDB
    *
    * Defaults to `localStorage`
    */
-  storage?: 'localStorage' | 'sessionStorage';
+  storageType?: 'localStorage' | 'sessionStorage';
 };
 
-export type IndexedDBSyncConfig<State> = {
+export type IndexedDBSyncConfig<State> = BaseSyncConfig<State> & {
   /**
    * Allows selection between localStorage, sessionStorage, and indexedDB
    *
    */
-  storage: 'indexedDB';
+  storageType: 'indexedDB';
 
   /**
    * The name of the indexedDB database
@@ -90,30 +93,6 @@ export type IndexedDBSyncConfig<State> = {
    * The store name in indexedDB (equivalent to a table name in SQL)
    */
   storeName: string;
-  /**
-   * Flag indicating if the store should read from storage on init and write to storage on every state change.
-   *
-   * `true` by default
-   */
-  autoSync?: boolean;
-  /**
-   * Function to select that portion of the state which should be stored.
-   *
-   * Returns the whole state object by default
-   */
-  select?: (state: State) => Partial<State>;
-  /**
-   * Function used to parse the state coming from storage.
-   *
-   * `JSON.parse()` by default
-   */
-  parse?: (stateString: string) => State;
-  /**
-   * Function used to tranform the state into a string representation.
-   *
-   * `JSON.stringify()` by default
-   */
-  stringify?: (state: State) => string;
 };
 
 export type Config<State> = SyncConfig<State> | IndexedDBSyncConfig<State>;
@@ -140,23 +119,23 @@ export function withStorageSync<
     select = (state: State) => state,
     parse = JSON.parse,
     stringify = JSON.stringify,
-    storage = 'localStorage',
+    storageType = 'localStorage',
   } = typeof configOrKey === 'string' ? {} : configOrKey;
 
   const key =
     typeof configOrKey === 'string'
       ? configOrKey
-      : configOrKey.storage === 'indexedDB'
+      : configOrKey.storageType === 'indexedDB'
       ? ''
       : configOrKey.key;
 
   const dbName =
-    typeof configOrKey !== 'string' && configOrKey.storage === 'indexedDB'
+    typeof configOrKey !== 'string' && configOrKey.storageType === 'indexedDB'
       ? configOrKey.dbName
       : '';
 
   const storeName =
-    typeof configOrKey !== 'string' && configOrKey.storage === 'indexedDB'
+    typeof configOrKey !== 'string' && configOrKey.storageType === 'indexedDB'
       ? configOrKey.storeName
       : '';
 
@@ -179,8 +158,8 @@ export function withStorageSync<
            * Removes the item stored in storage.
            */
           async clearStorage(): Promise<void> {
-            await storageService.removeItem({
-              storage,
+            await storageService.clear({
+              storageType,
               key,
               dbName,
               storeName,
@@ -191,7 +170,7 @@ export function withStorageSync<
            */
           async readFromStorage(): Promise<void> {
             const stateString = await storageService.getItem({
-              storage,
+              storageType,
               key,
               dbName,
               storeName,
@@ -207,7 +186,7 @@ export function withStorageSync<
           async writeToStorage(): Promise<void> {
             const slicedState = select(getState(store) as State);
             await storageService.setItem(
-              { storage, key, dbName: dbName, storeName: storeName },
+              { storageType, key, dbName: dbName, storeName: storeName },
               stringify(slicedState)
             );
           },
@@ -218,19 +197,10 @@ export function withStorageSync<
       onInit(
         store,
         platformId = inject(PLATFORM_ID),
-        envInjector = inject(EnvironmentInjector),
-        storageService = inject(StorageService)
+        envInjector = inject(EnvironmentInjector)
       ) {
         if (isPlatformServer(platformId)) {
           return;
-        }
-
-        if (typeof configOrKey === 'string') {
-          storageService.setStorage(localStorage);
-        }
-
-        if (storage === 'localStorage' || storage === 'sessionStorage') {
-          storageService.setStorage(window[storage]);
         }
 
         if (autoSync) {

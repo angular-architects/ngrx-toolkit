@@ -250,7 +250,7 @@ describe('withStorageSync', () => {
 
         const Store = signalStore(
           { protectedState: false },
-          withStorageSync({ key, storage: 'sessionStorage' })
+          withStorageSync({ key, storageType: 'sessionStorage' })
         );
 
         const store = new Store();
@@ -297,7 +297,7 @@ describe('withStorageSync', () => {
         const Store = signalStore(
           { protectedState: false },
           withStorageSync({
-            storage: 'indexedDB',
+            storageType: 'indexedDB',
             dbName,
             storeName,
           })
