@@ -379,7 +379,7 @@ export function withRedux<
     );
     return {
       ...store,
-      methods,
+      methods: { ...store.methods, ...methods },
     };
   };
 }
