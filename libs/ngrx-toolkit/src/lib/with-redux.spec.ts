@@ -1,4 +1,4 @@
-import { patchState, signalStore, withState } from '@ngrx/signals';
+import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { inject } from '@angular/core';
 import {
   HttpClient,
@@ -227,5 +227,32 @@ describe('with redux', () => {
 
     expect(flightStore.effect1()).toBe(true);
     expect(flightStore.effect2()).toBe(true);
+  });
+
+  it('should not override methods defined before', () => {
+    const FlightsStore = signalStore(
+      withMethods(() => ({
+        sayHi() {
+          return 'hi';
+        },
+      })),
+      withRedux({
+        actions: {
+          init: noPayload,
+        },
+        reducer() {
+          return {};
+        },
+        effects() {
+          return {};
+        },
+      })
+    );
+
+    const flightStore = TestBed.configureTestingModule({
+      providers: [FlightsStore],
+    }).inject(FlightsStore);
+
+    expect(flightStore.sayHi()).toBe('hi');
   });
 });
