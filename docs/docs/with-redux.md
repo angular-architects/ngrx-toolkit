@@ -30,7 +30,7 @@ export const FlightStore = signalStore(
       },
     },
     reducer(actions, on) {
-      on(actions.loaded, ({ flights }, state) => {
+      on(actions.loaded, (state, { flights }) => {
         updateState(state, 'flights loaded', { flights });
       });
     },
