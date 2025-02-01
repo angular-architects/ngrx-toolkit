@@ -21,5 +21,6 @@ export * from './lib/with-pagination';
 export { withReset, setResetState } from './lib/with-reset';
 export {
   withStorageSync,
+  IndexedDBSyncConfig,
   SyncConfig,
-} from './lib/storageSync/with-storage-sync';
+} from './lib/storage-sync/with-storage-sync';
