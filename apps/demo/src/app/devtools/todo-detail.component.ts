@@ -1,6 +1,5 @@
 import { Component, effect, inject, input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
-import { Todo } from './todo-store';
 import { patchState, signalStore, withHooks, withState } from '@ngrx/signals';
 import {
   renameDevtoolsName,
@@ -8,6 +7,7 @@ import {
   withGlitchTracking,
   withMapper,
 } from '@angular-architects/ngrx-toolkit';
+import { Todo } from '../shared/todo.service';
 
 /**
  * This Store can be instantiated multiple times, if the user
