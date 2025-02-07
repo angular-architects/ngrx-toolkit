@@ -3,70 +3,113 @@ import {
   signalStoreFeature,
   SignalStoreFeature,
   SignalStoreFeatureResult,
+  withHooks,
   withState,
+  watchState,
 } from '@ngrx/signals';
 import { deepFreeze } from './deep-freeze';
 import { isDevMode } from './is-dev-mode';
 
 /**
- * Adds a state which is protected from being modified.
+ * The implementation of this feature is a little bit tricky.
+ *
+ * `signalStore` does a shallow clone in the initial phase, in order to
+ * merge all different states together.
+ *
+ * Shallow cloning also happens in `patchState`.
+ *
+ * With shallow cloning, the root state object is replaced, which means,
+ * the freezing only stays for its nested properties but not for
+ * the primitive and immediate properties.
+ *
+ * For example:
+ *
+ * ```ts
+ * const state = {
+ *   id: 1,
+ *   address: {
+ *     street: 'Main St',
+ *     city: 'Springfield',
+ *   }
+ * }
+ * ```
+ *
+ * Running `Object.freeze` on `state` will freeze the `address` object, and
+ * the `id`. But since `state` is shallow cloned, the "frozing" state of the
+ * `id` is lost. `address`, being an object, is still frozen.
+ *
+ * To overcome that, we run `watchState` and run `deepFreeze`
+ * on every change.
+ */
+
+/**
+ * Prevents mutation of the state.
  *
  * This is done by deeply applying `Object.freeze`. Any mutable change within
  * or outside the `SignalStore` will throw an error.
  *
- * In order to keep the state protected, you need to run `updateState`.
- * In contrast to `patchState`, `updateState` will check if the original state
- * is frozen and would re-apply it again.
- *
  * @param state the state object
- * @param options disable protection in production (default: true)
+ * @param options enable protection in production (default: false)
  */
 export function withImmutableState<State extends object>(
   state: State,
-  options?: { disableProtectionInProd?: boolean }
+  options?: { enableInProduction?: boolean }
 ): SignalStoreFeature<
   SignalStoreFeatureResult,
   EmptyFeatureResult & { state: State }
 >;
 /**
- * Adds a state which is protected from being modified.
+ * Prevents mutation of the state.
  *
  * This is done by deeply applying `Object.freeze`. Any mutable change within
  * or outside the `SignalStore` will throw an error.
  *
- * In order to keep the state protected, you need to run `updateState`.
- * In contrast to `patchState`, `updateState` will check if the original state
- * is frozen and would re-apply it again.
- *
  * @param stateFactory a function returning the state object
- * @param options disable protection in production (default: true)
+ * @param options enable protection in production (default: false)
  */
 export function withImmutableState<State extends object>(
   stateFactory: () => State,
-  options?: { disableProtectionInProd?: boolean }
+  options?: { enableInProduction?: boolean }
 ): SignalStoreFeature<
   SignalStoreFeatureResult,
   EmptyFeatureResult & { state: State }
 >;
 export function withImmutableState<State extends object>(
   stateOrFactory: State | (() => State),
-  options?: { disableProtectionInProd?: boolean }
+  options?: { enableInProduction?: boolean }
 ): SignalStoreFeature<
   SignalStoreFeatureResult,
   EmptyFeatureResult & { state: State }
 > {
-  return signalStoreFeature(
-    withState(() => {
-      const disableProtectionInProd = options?.disableProtectionInProd ?? true;
-      const state =
-        typeof stateOrFactory === 'function'
-          ? stateOrFactory()
-          : stateOrFactory;
-      if (isDevMode() || !disableProtectionInProd) {
-        deepFreeze(state as Record<string | symbol, unknown>);
-      }
+  const immutableState =
+    typeof stateOrFactory === 'function' ? stateOrFactory() : stateOrFactory;
+  const stateKeys = Reflect.ownKeys(immutableState);
 
-      return state;
-    })
+  const applyFreezing = isDevMode() || options?.enableInProduction === true;
+  return signalStoreFeature(
+    withState(immutableState),
+    withHooks((store) => ({
+      onInit() {
+        if (!applyFreezing) {
+          return;
+        }
+        /**
+         * `immutableState` will be initially frozen. That is because
+         * of potential mutations outside the SignalStore
+         *
+         * ```ts
+         * const initialState = {id: 1};
+         * signalStore(withImmutableState(initialState));
+         *
+         * initialState.id = 2; // must throw immutability
+         * ```
+         */
+
+        Object.freeze(immutableState);
+        watchState(store, (state) => {
+          deepFreeze(state, stateKeys);
+        });
+      },
+    }))
   );
 }

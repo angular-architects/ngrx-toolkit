@@ -12,6 +12,7 @@ It offers extensions like:
 - [Storage Sync](./with-storage-sync): Synchronizes the Store with Web Storage
 - [Undo Redo](./with-undo-redo): Adds Undo/Redo functionality to your store
 - [Reset](./with-reset): Adds a `resetState` method to your store
+- [State Immutability Protection](./with-immutable-state): Protects the state from being mutated outside or inside the Store.
 
 To install it, run
 

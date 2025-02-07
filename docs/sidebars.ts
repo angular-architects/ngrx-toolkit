@@ -21,6 +21,7 @@ const sidebars: SidebarsConfig = {
     'with-redux',
     'with-storage-sync',
     'with-undo-redo',
+    'with-immutable-state',
   ],
   reduxConnectorSidebar: [
     {

@@ -38,4 +38,11 @@ export const lazyRoutes: Route[] = [
     loadComponent: () =>
       import('./reset/todo.component').then((m) => m.TodoComponent),
   },
+  {
+    path: 'immutable-state',
+    loadComponent: () =>
+      import('./immutable-state/immutable-state.component').then(
+        (m) => m.ImmutableStateComponent
+      ),
+  },
 ];
