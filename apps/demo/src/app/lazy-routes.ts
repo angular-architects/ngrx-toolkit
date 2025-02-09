@@ -45,4 +45,11 @@ export const lazyRoutes: Route[] = [
         (m) => m.ImmutableStateComponent
       ),
   },
+  {
+    path: 'feature-factory',
+    loadComponent: () =>
+      import('./feature-factory/feature-factory.component').then(
+        (m) => m.FeatureFactoryComponent
+      ),
+  },
 ];

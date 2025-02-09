@@ -21,3 +21,4 @@ export { withStorageSync, SyncConfig } from './lib/with-storage-sync';
 export * from './lib/with-pagination';
 export { withReset, setResetState } from './lib/with-reset';
 export { withImmutableState } from './lib/immutable-state/with-immutable-state';
+export { withFeatureFactory } from './lib/with-feature-factory';
