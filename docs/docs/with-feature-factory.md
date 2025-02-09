@@ -26,8 +26,6 @@ signalStore(
 `signalStoreFeature` can define input constraints that must be fulfilled by the SignalStore calling the feature. For example, a method `load` needs to be present to fetch data. The default implementation would be:
 
 ```typescript
-import { signalStoreFeature } from '@ngrx/signals';
-
 type Entity = {
   id: number;
   name: string;
