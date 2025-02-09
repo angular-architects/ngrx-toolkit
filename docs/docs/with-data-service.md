@@ -45,38 +45,38 @@ Once the store is defined, it gives its consumers numerous signals and methods t
 ```typescript
 @Component(...)
 export class FlightSearchSimpleComponent {
-private store = inject(SimpleFlightBookingStore);
+  private store = inject(SimpleFlightBookingStore);
 
-from = this.store.filter.from;
-to = this.store.filter.to;
-flights = this.store.entities;
-selected = this.store.selectedEntities;
-selectedIds = this.store.selectedIds;
+  from = this.store.filter.from;
+  to = this.store.filter.to;
+  flights = this.store.entities;
+  selected = this.store.selectedEntities;
+  selectedIds = this.store.selectedIds;
 
-loading = this.store.loading;
+  loading = this.store.loading;
 
-canUndo = this.store.canUndo;
-canRedo = this.store.canRedo;
+  canUndo = this.store.canUndo;
+  canRedo = this.store.canRedo;
 
-async search() {
-  this.store.load();
-}
+  async search() {
+    this.store.load();
+  }
 
-undo(): void {
-  this.store.undo();
-}
+  undo(): void {
+    this.store.undo();
+  }
 
-redo(): void {
-  this.store.redo();
-}
+  redo(): void {
+    this.store.redo();
+  }
 
-updateCriteria(from: string, to: string): void {
-  this.store.updateFilter({ from, to });
-}
+  updateCriteria(from: string, to: string): void {
+    this.store.updateFilter({ from, to });
+  }
 
-updateBasket(id: number, selected: boolean): void {
-  this.store.updateSelected(id, selected);
-}
+  updateBasket(id: number, selected: boolean): void {
+    this.store.updateSelected(id, selected);
+  }
 
 }
 ```

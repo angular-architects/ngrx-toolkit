@@ -10,7 +10,7 @@ As Web Storage only works in browser environments it will fallback to a stub imp
 
 Example:
 
-```ts
+```typescript
 const SyncStore = signalStore(
   withStorageSync<User>({
     key: 'synced', // key used when writing to/reading from storage
@@ -23,7 +23,7 @@ const SyncStore = signalStore(
 );
 ```
 
-```ts
+```typescript
 @Component(...)
 public class SyncedStoreComponent {
   private syncStore = inject(SyncStore);
