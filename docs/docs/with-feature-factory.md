@@ -128,7 +128,7 @@ define the entity type. Alongside `withEntityLoader`, there's another feature,
 Due to [certain TypeScript limitations](https://ngrx.io/guide/signals/signal-store/custom-store-features#known-typescript-issues),  
 the following code will not compile:
 
-```ts
+```typescript
 function withEntityLoader<T>() {
   return signalStoreFeature(
     type<{
@@ -172,7 +172,7 @@ signalStore(
 
 Again, `withFeatureFactory` can solve this issue by replacing the input constraint with a function parameter:
 
-```ts
+```typescript
 function withEntityLoader<T>(loader: (id: number) => Promise<T>) {
   return signalStoreFeature(
     withState({

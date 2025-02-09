@@ -9,7 +9,7 @@ a runtime error.
 The protection is not limited to changes within the
 SignalStore but also outside of it.
 
-```ts
+```typescript
 const initialState = { user: { id: 1, name: 'Konrad' } };
 
 const UserStore = signalStore(
@@ -28,7 +28,7 @@ const UserStore = signalStore(
 
 If `mutateState` is called, a runtime error will be thrown.
 
-```ts
+```typescript
 class SomeComponent {
   userStore = inject(UserStore);
 
@@ -40,7 +40,7 @@ class SomeComponent {
 
 The same is also true, when `initialState` is changed:
 
-```ts
+```typescript
 initialState.user.id = 2; // 🔥 throws an error
 ```
 
@@ -48,7 +48,7 @@ Finally, it could also happen, if third-party libraries or the Angular API does 
 
 A common example is the usage in template-driven forms:
 
-```ts
+```typescript
 @Component({
   template: ` <input [(ngModel)]="userStore.user().id" /> `,
 })
@@ -61,6 +61,6 @@ By default, `withImmutableState` is only active in development mode.
 
 There is a way to enable it in production mode as well:
 
-```ts
+```typescript
 const UserStore = signalStore({ providedIn: 'root' }, withImmutableState(initialState, { enableInProduction: true }));
 ```

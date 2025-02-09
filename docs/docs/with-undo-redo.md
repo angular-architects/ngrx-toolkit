@@ -6,7 +6,7 @@ title: withUndoRedo()
 
 Example:
 
-```ts
+```typescript
 const SyncStore = signalStore(
   withUndoRedo({
     maxStackSize: 100, // limit of undo/redo steps - `100` by default
@@ -17,7 +17,7 @@ const SyncStore = signalStore(
 );
 ```
 
-```ts
+```typescript
 @Component(...)
 public class UndoRedoComponent {
   private syncStore = inject(SyncStore);
