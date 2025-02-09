@@ -23,6 +23,7 @@ const sidebars: SidebarsConfig = {
     'with-undo-redo',
     'with-immutable-state',
     'with-feature-factory',
+    'with-conditional',
   ],
   reduxConnectorSidebar: [
     {
