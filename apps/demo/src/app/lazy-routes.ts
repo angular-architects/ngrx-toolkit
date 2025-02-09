@@ -52,4 +52,11 @@ export const lazyRoutes: Route[] = [
         (m) => m.FeatureFactoryComponent
       ),
   },
+  {
+    path: 'conditional',
+    loadComponent: () =>
+      import('./with-conditional/conditional.component').then(
+        (m) => m.ConditionalSettingComponent
+      ),
+  },
 ];
