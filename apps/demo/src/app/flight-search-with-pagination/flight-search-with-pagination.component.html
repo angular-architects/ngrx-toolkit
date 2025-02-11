@@ -1,22 +1,31 @@
 <h2 class="title">Flight Search (Pagination)</h2>
 
-
 <form (ngSubmit)="search()">
   <div>
     <mat-form-field>
       <mat-label>Name</mat-label>
-      <input [(ngModel)]="searchParams.from" name="from" matInput />
+      <input
+        [(ngModel)]="searchParams.from"
+        name="from"
+        matInput
+        aria-label="From airport"
+      />
     </mat-form-field>
   </div>
 
   <div>
     <mat-form-field>
       <mat-label>Name</mat-label>
-      <input [(ngModel)]="searchParams.to" name="to" matInput />
+      <input
+        [(ngModel)]="searchParams.to"
+        name="to"
+        matInput
+        aria-label="To airport"
+      />
     </mat-form-field>
   </div>
 
-  <button mat-raised-button>Search</button>
+  <button mat-raised-button type="submit">Search</button>
 </form>
 
 <mat-table [dataSource]="dataSource">
@@ -46,11 +55,13 @@
     (click)="selection.toggle(row)"
   ></mat-row>
 </mat-table>
-<mat-paginator [length]="flightStore.flightTotalCount()"
-              [pageSize]="flightStore.flightPageSize()"
-              [pageIndex]="flightStore.flightCurrentPage()"
-              [showFirstLastButtons]="true"
-              [pageSizeOptions]="[5, 10, 25]"
-              (page)="handlePageEvent($event)"
-              aria-label="Select page">
+<mat-paginator
+  [length]="flightStore.flightTotalCount()"
+  [pageSize]="flightStore.flightPageSize()"
+  [pageIndex]="flightStore.flightCurrentPage()"
+  [showFirstLastButtons]="true"
+  [pageSizeOptions]="[5, 10, 25]"
+  (page)="handlePageEvent($event)"
+  aria-label="Select page"
+>
 </mat-paginator>
