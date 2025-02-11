@@ -9,20 +9,13 @@
 import { Signal, computed } from '@angular/core';
 import {
   SignalStoreFeature,
-  patchState,
   signalStoreFeature,
   withComputed,
-  withMethods,
   withState,
-  WritableStateSource,
   EmptyFeatureResult,
 } from '@ngrx/signals';
 import { capitalize } from './with-data-service';
-import {
-  EntityComputed,
-  EntityState,
-  NamedEntityComputed,
-} from './shared/signal-store-models';
+import { MethodsDictionary } from '@ngrx/signals/src/signal-store-models';
 
 // This is a virtual page which is can be used to create a pagination control
 export type Page = { label: string | number; value: number };
@@ -63,20 +56,6 @@ export type NamedPaginationServiceSignals<E, Collection extends string> = {
   [K in Collection as `hasPrevious${Capitalize<K>}Page`]: Signal<boolean>;
 };
 
-export type NamedPaginationServiceMethods<Collection extends string> = {
-  [K in Collection as `set${Capitalize<K>}PageSize`]: (size: number) => void;
-} & {
-  [K in Collection as `next${Capitalize<K>}Page`]: () => void;
-} & {
-  [K in Collection as `previous${Capitalize<K>}Page`]: () => void;
-} & {
-  [K in Collection as `last${Capitalize<K>}Page`]: () => void;
-} & {
-  [K in Collection as `first${Capitalize<K>}Page`]: () => void;
-} & {
-  [K in Collection as `goto${Capitalize<K>}Page`]: (page: number) => void;
-};
-
 export type PaginationServiceState<E> = {
   selectedPageEntities: Array<E>;
   currentPage: number;
@@ -99,15 +78,6 @@ export type PaginationServiceSignals<E> = {
   hasPreviousPage: Signal<boolean>;
 };
 
-export type PaginationServiceMethods = {
-  setPageSize: (size: number) => void;
-  nextPageKey: () => void;
-  previousPage: () => void;
-  lastPage: () => void;
-  firstPage: () => void;
-  gotoPage: (page: number) => void;
-};
-
 export type SetPaginationState<
   E,
   Collection extends string | undefined
@@ -119,31 +89,27 @@ export function withPagination<E, Collection extends string>(options: {
   entity: E;
   collection: Collection;
 }): SignalStoreFeature<
-  EmptyFeatureResult & { props: NamedEntityComputed<E, Collection> },
+  EmptyFeatureResult,
   {
     state: NamedPaginationServiceState<E, Collection>;
     props: NamedPaginationServiceSignals<E, Collection>;
-    methods: NamedPaginationServiceMethods<Collection>;
+    methods: MethodsDictionary;
   }
 >;
 
 export function withPagination<E>(): SignalStoreFeature<
-  EmptyFeatureResult & {
-    state: EntityState<E>;
-    props: EntityComputed<E>;
-  },
+  EmptyFeatureResult,
   {
     state: PaginationServiceState<E>;
     props: PaginationServiceSignals<E>;
-    methods: PaginationServiceMethods;
+    methods: MethodsDictionary;
   }
 >;
 
 export function withPagination<E, Collection extends string>(options?: {
   entity: E;
   collection: Collection;
-}): /* eslint-disable @typescript-eslint/no-explicit-any */
-SignalStoreFeature<any, any> {
+}): SignalStoreFeature {
   const {
     pageKey,
     pageSizeKey,
@@ -153,12 +119,6 @@ SignalStoreFeature<any, any> {
     pageCountKey,
     pageNavigationArrayMaxKey,
     pageNavigationArrayKey,
-    setPageSizeKey,
-    nextPageKey,
-    previousPageKey,
-    lastPageKey,
-    firstPageKey,
-    gotoPageKey,
     hasNextPageKey,
     hasPreviousPageKey,
   } = createPaginationKeys<Collection>(options);
@@ -216,37 +176,7 @@ SignalStoreFeature<any, any> {
           return page() > 1;
         }),
       };
-    }),
-    withMethods(
-      (store: Record<string, unknown> & WritableStateSource<object>) => {
-        return {
-          [setPageSizeKey]: (size: number) => {
-            patchState(store, setPageSize(size, options));
-          },
-          [nextPageKey]: () => {
-            patchState(store, nextPage(options));
-          },
-
-          [previousPageKey]: () => {
-            patchState(store, previousPage(options));
-          },
-
-          [lastPageKey]: () => {
-            const lastPage = (store[pageCountKey] as Signal<number>)();
-            if (lastPage === 0) return;
-            patchState(store, gotoPage(lastPage - 1, options));
-          },
-
-          [firstPageKey]: () => {
-            patchState(store, firstPage());
-          },
-
-          [gotoPageKey]: (page: number) => {
-            patchState(store, gotoPage(page, options));
-          },
-        };
-      }
-    )
+    })
   );
 }
 
@@ -330,48 +260,30 @@ function createPaginationKeys<Collection extends string>(
   const selectedPageEntitiesKey = options?.collection
     ? `selectedPage${capitalize(options?.collection)}Entities`
     : 'selectedPageEntities';
+
   const pageKey = options?.collection
     ? `${options.collection}CurrentPage`
     : 'currentPage';
+
   const pageSizeKey = options?.collection
     ? `${options.collection}PageSize`
     : 'pageSize';
+
   const totalCountKey = options?.collection
     ? `${options.collection}TotalCount`
     : 'totalCount';
+
   const pageCountKey = options?.collection
     ? `${options.collection}PageCount`
     : 'pageCount';
+
   const pageNavigationArrayMaxKey = options?.collection
     ? `${options.collection}PageNavigationArrayMax`
     : 'pageNavigationArrayMax';
+
   const pageNavigationArrayKey = options?.collection
     ? `${options.collection}PageNavigationArray`
     : 'pageNavigationArray';
-
-  const setPageSizeKey = options?.collection
-    ? `set${capitalize(options.collection)}PageSize`
-    : 'setPageSize';
-
-  const nextPageKey = options?.collection
-    ? `next${capitalize(options.collection)}Page`
-    : 'nextPage';
-
-  const previousPageKey = options?.collection
-    ? `previous${capitalize(options.collection)}Page`
-    : 'previousPage';
-
-  const lastPageKey = options?.collection
-    ? `last${capitalize(options.collection)}Page`
-    : 'lastPage';
-
-  const firstPageKey = options?.collection
-    ? `first${capitalize(options.collection)}Page`
-    : 'firstPage';
-
-  const gotoPageKey = options?.collection
-    ? `goto${capitalize(options.collection)}Page`
-    : 'gotoPage';
 
   const hasNextPageKey = options?.collection
     ? `hasNext${capitalize(options.collection)}Page`
@@ -390,12 +302,6 @@ function createPaginationKeys<Collection extends string>(
     pageCountKey,
     pageNavigationArrayKey,
     pageNavigationArrayMaxKey,
-    setPageSizeKey,
-    nextPageKey,
-    previousPageKey,
-    lastPageKey,
-    firstPageKey,
-    gotoPageKey,
     hasNextPageKey,
     hasPreviousPageKey,
   };
