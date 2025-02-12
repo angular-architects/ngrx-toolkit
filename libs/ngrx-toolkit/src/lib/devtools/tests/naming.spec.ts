@@ -103,12 +103,58 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
     );
   });
 
-  it('should throw if name already exists', () => {
-    setupExtensions();
-    signalStore(withDevtools('flights'));
-    expect(() => signalStore(withDevtools('flights'))).toThrow(
-      'The store "flights" has already been registered in the DevTools. Duplicate registration is not allowed.'
+  it('should index for two different stores with same devtools name', () => {
+    const { sendSpy } = setupExtensions();
+
+    TestBed.inject(
+      signalStore({ providedIn: 'root' }, withDevtools('flights'))
     );
+    TestBed.inject(
+      signalStore({ providedIn: 'root' }, withDevtools('flights'))
+    );
+
+    TestBed.flushEffects();
+    expect(sendSpy.mock.calls).toEqual([
+      [
+        { type: 'Store Update' },
+        {
+          flights: {},
+          'flights-1': {},
+        },
+      ],
+    ]);
+  });
+
+  it('should throw for two different stores when indexing is disabled', () => {
+    setupExtensions();
+
+    TestBed.inject(
+      signalStore({ providedIn: 'root' }, withDevtools('flights'))
+    );
+    expect(() =>
+      TestBed.inject(
+        signalStore(
+          { providedIn: 'root' },
+          withDevtools('flights', withDisabledNameIndices())
+        )
+      )
+    ).toThrow();
+  });
+
+  it('should not throw for two different stores if only the first one has indexing disabled', () => {
+    setupExtensions();
+
+    TestBed.inject(
+      signalStore(
+        { providedIn: 'root' },
+        withDevtools('flights', withDisabledNameIndices())
+      )
+    );
+    expect(() =>
+      TestBed.inject(
+        signalStore({ providedIn: 'root' }, withDevtools('flights'))
+      )
+    ).not.toThrow();
   });
 
   describe('renaming', () => {

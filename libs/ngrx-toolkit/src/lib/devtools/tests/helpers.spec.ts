@@ -1,4 +1,3 @@
-import { existingNames } from '../with-devtools';
 import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
@@ -34,8 +33,6 @@ export function setupExtensions(
       ],
     });
   }
-
-  existingNames.clear();
 
   return { sendSpy, connectSpy };
 }
