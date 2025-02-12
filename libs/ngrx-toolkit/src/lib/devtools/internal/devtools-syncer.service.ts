@@ -116,9 +116,9 @@ export class DevtoolsSyncer implements OnDestroy {
     const names = Object.values(this.#stores).map((store) => store.name);
 
     if (names.includes(storeName)) {
-      const { options } = throwIfNull(
-        Object.values(this.#stores).find((store) => store.name === storeName)
-      );
+      // const { options } = throwIfNull(
+      //   Object.values(this.#stores).find((store) => store.name === storeName)
+      // );
       if (!options.indexNames) {
         throw new Error(`An instance of the store ${storeName} already exists. \
 Enable automatic indexing via withDevTools('${storeName}', { indexNames: true }), or rename it upon instantiation.`);

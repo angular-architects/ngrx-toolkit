@@ -1,5 +1,5 @@
 import { signalStoreFeature, withHooks, withMethods } from '@ngrx/signals';
-import { inject } from '@angular/core';
+import { inject, InjectionToken } from '@angular/core';
 import { DevtoolsSyncer } from './internal/devtools-syncer.service';
 import {
   DevtoolsFeature,
@@ -14,10 +14,13 @@ declare global {
   }
 }
 
-export const existingNames = new Map<string, unknown>();
-
 export const renameDevtoolsMethodName = '___renameDevtoolsName';
 export const uniqueDevtoolsId = '___uniqueDevtoolsId';
+
+const EXISTING_NAMES = new InjectionToken(
+  'Array contain existing names for the signal stores',
+  { factory: () => [] as string[], providedIn: 'root' }
+);
 
 /**
  * Adds this store as a feature state to the Redux DevTools.
@@ -33,16 +36,10 @@ export const uniqueDevtoolsId = '___uniqueDevtoolsId';
  * @param features features to extend or modify the behavior of the Devtools
  */
 export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
-  if (existingNames.has(name)) {
-    throw new Error(
-      `The store "${name}" has already been registered in the DevTools. Duplicate registration is not allowed.`
-    );
-  }
-  existingNames.set(name, true);
-
   return signalStoreFeature(
     withMethods(() => {
       const syncer = inject(DevtoolsSyncer);
+
       const id = syncer.getNextId();
 
       // TODO: use withProps and symbols
