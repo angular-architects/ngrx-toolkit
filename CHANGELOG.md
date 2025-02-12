@@ -1,3 +1,22 @@
+## 19.1.0 (2025-02-12)
+
+### 🚀 Features
+
+- add `withImmutableState` ([8203d33](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/8203d33))
+- add `withFeatureFactory()` ([aead6f8](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/aead6f8))
+- add `withConditional()` ([bef1528](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/bef1528))
+
+### 🩹 Fixes
+
+- improve tree shaking for with-pagination ([ad09e31](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/ad09e31))
+- **devtools:** fix existing name error in SSR ([b638698](https://github.com/rainerhahnekamp/ngrx-toolkit/commit/b638698))
+- **redux:** don't override methods of innerStore ([#132](https://github.com/rainerhahnekamp/ngrx-toolkit/pull/132))
+
+### ❤️ Thank You
+
+- Murat Sari
+- Rainer Hahnekamp @rainerhahnekamp
+
 ## 19.0.2 (2025-01-14)
 
 ### 🚀 Features
