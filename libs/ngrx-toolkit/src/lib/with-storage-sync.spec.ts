@@ -1,8 +1,8 @@
 import { getState, patchState, signalStore, withState } from '@ngrx/signals';
-import { withStorageSync } from '../with-storage-sync';
+import { withStorageSync } from './with-storage-sync';
 import { TestBed } from '@angular/core/testing';
 import * as flushPromises from 'flush-promises';
-import { IndexedDBService } from '../internal/indexeddb.service';
+import { IndexedDBService } from './storage-sync/internal/indexeddb.service';
 
 interface StateObject {
   foo: string;

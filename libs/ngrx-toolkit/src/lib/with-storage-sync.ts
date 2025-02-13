@@ -16,7 +16,7 @@ import {
   SignalStoreFeatureResult,
   EmptyFeatureResult,
 } from '@ngrx/signals';
-import { StorageService } from './internal/storage.service';
+import { StorageService } from './storage-sync/internal/storage.service';
 
 const NOOP = () => Promise.resolve();
 
