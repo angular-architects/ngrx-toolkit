@@ -16,7 +16,6 @@ import {
   SignalStoreFeatureResult,
   EmptyFeatureResult,
 } from '@ngrx/signals';
-import { StorageService } from './storage-sync/internal/storage.service';
 
 const NOOP = () => Promise.resolve();
 
@@ -37,7 +36,11 @@ const StorageSyncStub: Pick<
   writeToStorage: NOOP,
 };
 
-export type BaseSyncConfig<State> = {
+export type SyncConfig<State> = {
+  /**
+   * The key which is used to access the storage.
+   */
+  key: string;
   /**
    * Flag indicating if the store should read from storage on init and write to storage on every state change.
    *
@@ -57,45 +60,18 @@ export type BaseSyncConfig<State> = {
    */
   parse?: (stateString: string) => State;
   /**
-   * Function used to tranform the state into a string representation.
+   * Function used to transform the state into a string representation.
    *
    * `JSON.stringify()` by default
    */
   stringify?: (state: State) => string;
-};
-
-export type SyncConfig<State> = BaseSyncConfig<State> & {
   /**
-   * The key which is used to access the storage.
-   */
-  key: string;
-  /**
-   * Allows selection between localStorage, sessionStorage, and indexedDB
+   * Factory function used to select the storage.
    *
-   * Defaults to `localStorage`
+   * `localstorage` by default
    */
-  storageType?: 'localStorage' | 'sessionStorage';
+  storage?: () => Storage;
 };
-
-export type IndexedDBSyncConfig<State> = BaseSyncConfig<State> & {
-  /**
-   * Allows selection between localStorage, sessionStorage, and indexedDB
-   *
-   */
-  storageType: 'indexedDB';
-
-  /**
-   * The name of the indexedDB database
-   */
-  dbName: string;
-
-  /**
-   * The store name in indexedDB (equivalent to a table name in SQL)
-   */
-  storeName: string;
-};
-
-export type Config<State> = SyncConfig<State> | IndexedDBSyncConfig<State>;
 
 /**
  * Enables store synchronization with storage.
@@ -106,93 +82,59 @@ export function withStorageSync<Input extends SignalStoreFeatureResult>(
   key: string
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
-  config: Config<Input['state']>
+  config: SyncConfig<Input['state']>
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
 export function withStorageSync<
   State extends object,
   Input extends SignalStoreFeatureResult
 >(
-  configOrKey: string | Config<State>
+  configOrKey: SyncConfig<Input['state']> | string
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult> {
   const {
+    key,
     autoSync = true,
     select = (state: State) => state,
     parse = JSON.parse,
     stringify = JSON.stringify,
-    storageType = 'localStorage',
-  } = typeof configOrKey === 'string' ? {} : configOrKey;
-
-  const key =
-    typeof configOrKey === 'string'
-      ? configOrKey
-      : configOrKey.storageType === 'indexedDB'
-      ? ''
-      : configOrKey.key;
-
-  const dbName =
-    typeof configOrKey !== 'string' && configOrKey.storageType === 'indexedDB'
-      ? configOrKey.dbName
-      : '';
-
-  const storeName =
-    typeof configOrKey !== 'string' && configOrKey.storageType === 'indexedDB'
-      ? configOrKey.storeName
-      : '';
+    storage: storageFactory = () => localStorage,
+  } = typeof configOrKey === 'string' ? { key: configOrKey } : configOrKey;
 
   return signalStoreFeature(
-    withMethods(
-      (
-        store,
-        platformId = inject(PLATFORM_ID),
-        storageService = inject(StorageService)
-      ) => {
-        if (isPlatformServer(platformId)) {
-          console.warn(
-            `'withStorageSync' provides non-functional implementation due to server-side execution`
-          );
-          return StorageSyncStub;
-        }
-
-        return {
-          /**
-           * Removes the item stored in storage.
-           */
-          async clearStorage(): Promise<void> {
-            await storageService.clear({
-              storageType,
-              key,
-              dbName,
-              storeName,
-            });
-          },
-          /**
-           * Reads item from storage and patches the state.
-           */
-          async readFromStorage(): Promise<void> {
-            const stateString = await storageService.getItem({
-              storageType,
-              key,
-              dbName,
-              storeName,
-            });
-
-            if (stateString) {
-              patchState(store, parse(stateString));
-            }
-          },
-          /**
-           * Writes selected portion to storage.
-           */
-          async writeToStorage(): Promise<void> {
-            const slicedState = select(getState(store) as State);
-            await storageService.setItem(
-              { storageType, key, dbName: dbName, storeName: storeName },
-              stringify(slicedState)
-            );
-          },
-        };
+    withMethods((store, platformId = inject(PLATFORM_ID)) => {
+      if (isPlatformServer(platformId)) {
+        console.warn(
+          `'withStorageSync' provides non-functional implementation due to server-side execution`
+        );
+        return StorageSyncStub;
       }
-    ),
+
+      const storage = storageFactory();
+
+      return {
+        /**
+         * Removes the item stored in storage.
+         */
+        async clearStorage(): Promise<void> {
+          storage.removeItem(key);
+        },
+        /**
+         * Reads item from storage and patches the state.
+         */
+        async readFromStorage(): Promise<void> {
+          const stateString = storage.getItem(key);
+          if (stateString) {
+            patchState(store, parse(stateString));
+          }
+        },
+        /**
+         * Writes selected portion to storage.
+         */
+        async writeToStorage(): Promise<void> {
+          const slicedState = select(getState(store) as State);
+          storage.setItem(key, stringify(slicedState));
+        },
+      };
+    }),
     withHooks({
       onInit(
         store,
