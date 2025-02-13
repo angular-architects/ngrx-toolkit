@@ -6,8 +6,7 @@ import {
   updateEntity,
 } from '@ngrx/signals/entities';
 import { withStorageSync } from '@angular-architects/ngrx-toolkit';
-import { inject } from '@angular/core';
-import { Todo, TodoService, AddTodo } from '../shared/todo.service';
+import { Todo, AddTodo } from '../shared/todo.service';
 
 export const SyncedTodoStore = signalStore(
   { providedIn: 'root' },
@@ -36,9 +35,9 @@ export const SyncedTodoStore = signalStore(
     };
   }),
   withHooks({
-    onInit(store, todoService = inject(TodoService)) {
-      const todos = todoService.getData();
-      todos.forEach((todo) => store.add(todo));
-    },
+    // onInit(store, todoService = inject(TodoService)) {
+    //   const todos = todoService.getData();
+    //   todos.forEach((todo) => store.add(todo));
+    // },
   })
 );

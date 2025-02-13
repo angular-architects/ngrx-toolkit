@@ -1,22 +1,20 @@
 import { Injectable } from '@angular/core';
 
+export const dbName: string = 'ngrxToolkit' as const;
+
 export const keyPath: string = 'ngrxToolkitId' as const;
+
+export const VERSION: number = 1 as const;
 
 @Injectable({ providedIn: 'root' })
 export class IndexedDBService {
   /**
    * open indexedDB
-   * @param dbName
    * @param storeName
-   * @param version
    */
-  private async openDB(
-    dbName: string,
-    storeName: string,
-    version: number | undefined = 1
-  ): Promise<IDBDatabase> {
+  private async openDB(storeName: string): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open(dbName, version);
+      const request = indexedDB.open(dbName, VERSION);
 
       request.onupgradeneeded = () => {
         const db = request.result;
@@ -38,12 +36,11 @@ export class IndexedDBService {
 
   /**
    * write to indexedDB
-   * @param dbName
    * @param storeName
    * @param data
    */
-  async write(dbName: string, storeName: string, data: string): Promise<void> {
-    const db = await this.openDB(dbName, storeName);
+  async setItem(storeName: string, data: string): Promise<void> {
+    const db = await this.openDB(storeName);
 
     const tx = db.transaction(storeName, 'readwrite');
 
@@ -69,11 +66,10 @@ export class IndexedDBService {
 
   /**
    * read from indexedDB
-   * @param dbName
    * @param storeName
    */
-  async read<T>(dbName: string, storeName: string): Promise<T> {
-    const db = await this.openDB(dbName, storeName);
+  async getItem<T>(storeName: string): Promise<T> {
+    const db = await this.openDB(storeName);
 
     const tx = db.transaction(storeName, 'readonly');
 
@@ -96,12 +92,11 @@ export class IndexedDBService {
 
   /**
    * delete indexedDB
-   * @param dbName
    * @param storeName
    * @returns
    */
-  async clear(dbName: string, storeName: string): Promise<void> {
-    const db = await this.openDB(dbName, storeName);
+  async clear(storeName: string): Promise<void> {
+    const db = await this.openDB(storeName);
 
     const tx = db.transaction(storeName, 'readwrite');
 

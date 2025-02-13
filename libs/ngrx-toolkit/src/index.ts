@@ -19,11 +19,7 @@ export * from './lib/with-undo-redo';
 export * from './lib/with-data-service';
 export * from './lib/with-pagination';
 export { withReset, setResetState } from './lib/with-reset';
-export {
-  withStorageSync,
-  IndexedDBSyncConfig,
-  SyncConfig,
-} from './lib/with-storage-sync';
+export { withStorageSync, SyncConfig } from './lib/with-storage-sync';
 export { withImmutableState } from './lib/immutable-state/with-immutable-state';
 export { withFeatureFactory } from './lib/with-feature-factory';
 export { withConditional, emptyFeature } from './lib/with-conditional';

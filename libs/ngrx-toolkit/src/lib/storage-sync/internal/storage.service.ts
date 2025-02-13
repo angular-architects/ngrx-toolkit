@@ -1,54 +1,21 @@
-import { inject, Injectable } from '@angular/core';
-import { IndexedDBService } from './indexeddb.service';
-
-export type IndexedDBConfig = {
-  storageType: 'indexedDB';
-  dbName: string;
-  storeName: string;
-};
-
-export type StorageConfig = {
-  storageType: 'localStorage' | 'sessionStorage';
-  key: string;
-};
-
-export type Config = IndexedDBConfig | StorageConfig;
+import { Injectable } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
 })
 export class StorageService {
-  private readonly indexedDB = inject(IndexedDBService);
-
-  // get item from storage(localStorage, sessionStorage, indexedDB)
-  async getItem(config: Config): Promise<string | null> {
-    if (config.storageType === 'indexedDB') {
-      const { dbName, storeName } = config;
-
-      return await this.indexedDB.read(dbName, storeName);
-    }
-
-    return window[config.storageType].getItem(config.key);
+  // get item from storage(localStorage, sessionStorage)
+  async getItem(storage: Storage, key: string): Promise<string | null> {
+    return storage.getItem(key);
   }
 
-  // set item in storage(localStorage, sessionStorage, indexedDB)
-  async setItem(config: Config, value: string): Promise<void> {
-    if (config.storageType === 'indexedDB') {
-      const { dbName, storeName } = config;
-      return await this.indexedDB.write(dbName, storeName, value);
-    }
-
-    return window[config.storageType].setItem(config.key, value);
+  // set item in storage(localStorage, sessionStorage)
+  async setItem(storage: Storage, key: string, value: string): Promise<void> {
+    return storage.setItem(key, value);
   }
 
-  // remove item from storage(localStorage, sessionStorage, indexedDB)
-  async clear(config: Config): Promise<void> {
-    if (config.storageType === 'indexedDB') {
-      const { dbName, storeName } = config;
-
-      return await this.indexedDB.clear(dbName, storeName);
-    }
-
-    return window[config.storageType].removeItem(config.key);
+  // remove item from storage(localStorage, sessionStorage)
+  async clear(storage: Storage, key: string): Promise<void> {
+    return storage.removeItem(key);
   }
 }
