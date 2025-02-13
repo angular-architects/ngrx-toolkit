@@ -23,5 +23,5 @@ export {
   withStorageSync,
   IndexedDBSyncConfig,
   SyncConfig,
-} from './lib/storage-sync/with-storage-sync';
+} from './lib/with-storage-sync';
 export { withImmutableState } from './lib/immutable-state/with-immutable-state';
