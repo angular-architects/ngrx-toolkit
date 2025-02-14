@@ -1,23 +1,23 @@
 import { isPlatformServer } from '@angular/common';
 import {
-  PLATFORM_ID,
   effect,
-  inject,
   EnvironmentInjector,
+  inject,
+  PLATFORM_ID,
   runInInjectionContext,
 } from '@angular/core';
 import {
-  SignalStoreFeature,
+  EmptyFeatureResult,
   getState,
   patchState,
   signalStoreFeature,
+  SignalStoreFeature,
+  SignalStoreFeatureResult,
   withHooks,
   withMethods,
-  SignalStoreFeatureResult,
-  EmptyFeatureResult,
 } from '@ngrx/signals';
-import { withIndexeddb } from './storage-sync/features/with-indexeddb';
 import { StorageServiceFactory } from './storage-sync/internal/storage.service';
+import { withLocalStorage } from './storage-sync/features/with-local-storage';
 
 const NOOP = () => Promise.resolve();
 
@@ -98,7 +98,7 @@ export function withStorageSync<
   Input extends SignalStoreFeatureResult
 >(
   configOrKey: SyncConfig<Input['state']> | string,
-  StorageServiceClass: StorageServiceFactory = withIndexeddb()
+  StorageServiceClass: StorageServiceFactory = withLocalStorage()
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult> {
   const {
     key,
@@ -106,7 +106,6 @@ export function withStorageSync<
     select = (state: State) => state,
     parse = JSON.parse,
     stringify = JSON.stringify,
-    storage: storageFactory = () => localStorage,
   } = typeof configOrKey === 'string' ? { key: configOrKey } : configOrKey;
 
   return signalStoreFeature(
@@ -123,20 +122,18 @@ export function withStorageSync<
           return StorageSyncStub;
         }
 
-        const storage = storageFactory();
-
         return {
           /**
            * Removes the item stored in storage.
            */
           async clearStorage(): Promise<void> {
-            storage.removeItem(key);
+            await storageService.clear(key);
           },
           /**
            * Reads item from storage and patches the state.
            */
           async readFromStorage(): Promise<void> {
-            const stateString = storage.getItem(key);
+            const stateString = await storageService.getItem(key);
             if (stateString) {
               patchState(store, parse(stateString));
             }
@@ -146,7 +143,7 @@ export function withStorageSync<
            */
           async writeToStorage(): Promise<void> {
             const slicedState = select(getState(store) as State);
-            storage.setItem(key, stringify(slicedState));
+            await storageService.setItem(key, stringify(slicedState));
           },
         };
       }

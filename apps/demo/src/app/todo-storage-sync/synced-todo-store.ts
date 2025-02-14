@@ -1,19 +1,17 @@
-import { patchState, signalStore, withMethods } from '@ngrx/signals';
+import { patchState, signalStore, withHooks, withMethods } from '@ngrx/signals';
 import {
-  withEntities,
-  setEntity,
   removeEntity,
+  setEntity,
   updateEntity,
+  withEntities,
 } from '@ngrx/signals/entities';
 import { withStorageSync } from '@angular-architects/ngrx-toolkit';
-import { Todo, AddTodo } from '../shared/todo.service';
+import { AddTodo, Todo, TodoService } from '../shared/todo.service';
+import { inject } from '@angular/core';
 
 export const SyncedTodoStore = signalStore(
   { providedIn: 'root' },
   withEntities<Todo>(),
-  withStorageSync({
-    key: 'todos',
-  }),
   withMethods((store) => {
     let currentId = 0;
     return {
@@ -33,11 +31,14 @@ export const SyncedTodoStore = signalStore(
         );
       },
     };
+  }),
+  withHooks({
+    onInit(store, todoService = inject(TodoService)) {
+      const todos = todoService.getData();
+      todos.forEach((todo) => store.add(todo));
+    },
+  }),
+  withStorageSync({
+    key: 'todos',
   })
-  //withHooks({
-  //   onInit(store, todoService = inject(TodoService)) {
-  //     const todos = todoService.getData();
-  //     todos.forEach((todo) => store.add(todo));
-  //   },
-  //})
 );

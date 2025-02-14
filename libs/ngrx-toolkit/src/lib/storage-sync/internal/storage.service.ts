@@ -6,4 +6,4 @@ export interface StorageService {
   setItem(key: string, data: string): Promise<void>;
 }
 
-export type StorageServiceFactory = () => Type<StorageService>;
+export type StorageServiceFactory = Type<StorageService>;

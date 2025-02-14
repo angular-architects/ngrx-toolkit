@@ -11,6 +11,7 @@ import { Todo } from '../shared/todo.service';
   imports: [MatCheckboxModule, MatIconModule, MatTableModule],
   templateUrl: './todo-indexeddb-sync.component.html',
   styleUrl: './todo-indexeddb-sync.component.scss',
+  standalone: true,
 })
 export class TodoIndexeddbSyncComponent {
   todoStore = inject(SyncedTodoStore);
