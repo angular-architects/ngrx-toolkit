@@ -1,21 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Type } from '@angular/core';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class StorageService {
-  // get item from storage(localStorage, sessionStorage)
-  async getItem(storage: Storage, key: string): Promise<string | null> {
-    return storage.getItem(key);
-  }
-
-  // set item in storage(localStorage, sessionStorage)
-  async setItem(storage: Storage, key: string, value: string): Promise<void> {
-    return storage.setItem(key, value);
-  }
-
-  // remove item from storage(localStorage, sessionStorage)
-  async clear(storage: Storage, key: string): Promise<void> {
-    return storage.removeItem(key);
-  }
+export interface StorageService {
+  clear(key: string): Promise<void>;
+  getItem(key: string): Promise<string | null>;
+  setItem(key: string, data: string): Promise<void>;
 }
+
+export type StorageServiceFactory = () => Type<StorageService>;

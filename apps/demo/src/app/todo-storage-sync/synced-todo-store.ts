@@ -1,4 +1,4 @@
-import { patchState, signalStore, withHooks, withMethods } from '@ngrx/signals';
+import { patchState, signalStore, withMethods } from '@ngrx/signals';
 import {
   withEntities,
   setEntity,
@@ -33,11 +33,11 @@ export const SyncedTodoStore = signalStore(
         );
       },
     };
-  }),
-  withHooks({
-    // onInit(store, todoService = inject(TodoService)) {
-    //   const todos = todoService.getData();
-    //   todos.forEach((todo) => store.add(todo));
-    // },
   })
+  //withHooks({
+  //   onInit(store, todoService = inject(TodoService)) {
+  //     const todos = todoService.getData();
+  //     todos.forEach((todo) => store.add(todo));
+  //   },
+  //})
 );

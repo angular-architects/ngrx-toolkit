@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { StorageService } from './storage.service';
 
 export const dbName: string = 'ngrxToolkit' as const;
 
@@ -7,7 +8,7 @@ export const keyPath: string = 'ngrxToolkitId' as const;
 export const VERSION: number = 1 as const;
 
 @Injectable({ providedIn: 'root' })
-export class IndexedDBService {
+export class IndexedDBService implements StorageService {
   /**
    * open indexedDB
    * @param storeName

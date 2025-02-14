@@ -16,6 +16,8 @@ import {
   SignalStoreFeatureResult,
   EmptyFeatureResult,
 } from '@ngrx/signals';
+import { withIndexeddb } from './storage-sync/features/with-indexeddb';
+import { StorageServiceFactory } from './storage-sync/internal/storage.service';
 
 const NOOP = () => Promise.resolve();
 
@@ -81,14 +83,22 @@ export type SyncConfig<State> = {
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   key: string
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
+
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   config: SyncConfig<Input['state']>
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
+
+export function withStorageSync<Input extends SignalStoreFeatureResult>(
+  config: SyncConfig<Input['state']>,
+  StorageServiceClass: StorageServiceFactory
+): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
+
 export function withStorageSync<
   State extends object,
   Input extends SignalStoreFeatureResult
 >(
-  configOrKey: SyncConfig<Input['state']> | string
+  configOrKey: SyncConfig<Input['state']> | string,
+  StorageServiceClass: StorageServiceFactory = withIndexeddb()
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult> {
   const {
     key,
@@ -100,41 +110,47 @@ export function withStorageSync<
   } = typeof configOrKey === 'string' ? { key: configOrKey } : configOrKey;
 
   return signalStoreFeature(
-    withMethods((store, platformId = inject(PLATFORM_ID)) => {
-      if (isPlatformServer(platformId)) {
-        console.warn(
-          `'withStorageSync' provides non-functional implementation due to server-side execution`
-        );
-        return StorageSyncStub;
+    withMethods(
+      (
+        store,
+        platformId = inject(PLATFORM_ID),
+        storageService = inject(StorageServiceClass)
+      ) => {
+        if (isPlatformServer(platformId)) {
+          console.warn(
+            `'withStorageSync' provides non-functional implementation due to server-side execution`
+          );
+          return StorageSyncStub;
+        }
+
+        const storage = storageFactory();
+
+        return {
+          /**
+           * Removes the item stored in storage.
+           */
+          async clearStorage(): Promise<void> {
+            storage.removeItem(key);
+          },
+          /**
+           * Reads item from storage and patches the state.
+           */
+          async readFromStorage(): Promise<void> {
+            const stateString = storage.getItem(key);
+            if (stateString) {
+              patchState(store, parse(stateString));
+            }
+          },
+          /**
+           * Writes selected portion to storage.
+           */
+          async writeToStorage(): Promise<void> {
+            const slicedState = select(getState(store) as State);
+            storage.setItem(key, stringify(slicedState));
+          },
+        };
       }
-
-      const storage = storageFactory();
-
-      return {
-        /**
-         * Removes the item stored in storage.
-         */
-        async clearStorage(): Promise<void> {
-          storage.removeItem(key);
-        },
-        /**
-         * Reads item from storage and patches the state.
-         */
-        async readFromStorage(): Promise<void> {
-          const stateString = storage.getItem(key);
-          if (stateString) {
-            patchState(store, parse(stateString));
-          }
-        },
-        /**
-         * Writes selected portion to storage.
-         */
-        async writeToStorage(): Promise<void> {
-          const slicedState = select(getState(store) as State);
-          storage.setItem(key, stringify(slicedState));
-        },
-      };
-    }),
+    ),
     withHooks({
       onInit(
         store,
