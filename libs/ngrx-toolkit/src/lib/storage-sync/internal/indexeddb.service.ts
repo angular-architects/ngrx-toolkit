@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from './storage.service';
 
-export const dbName: string = 'ngrxToolkit' as const;
-
 export const keyPath: string = 'ngrxToolkitId' as const;
 
 export const VERSION: number = 1 as const;
@@ -10,42 +8,16 @@ export const VERSION: number = 1 as const;
 @Injectable({ providedIn: 'root' })
 export class IndexedDBService implements StorageService {
   /**
-   * open indexedDB
-   * @param storeName
-   */
-  private async openDB(storeName: string): Promise<IDBDatabase> {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(dbName, VERSION);
-
-      request.onupgradeneeded = () => {
-        const db = request.result;
-
-        if (!db.objectStoreNames.contains(storeName)) {
-          db.createObjectStore(storeName, { keyPath });
-        }
-      };
-
-      request.onsuccess = (): void => {
-        resolve(request.result);
-      };
-
-      request.onerror = (): void => {
-        reject(request.error);
-      };
-    });
-  }
-
-  /**
    * write to indexedDB
-   * @param storeName
+   * @param storeAndDbName
    * @param data
    */
-  async setItem(storeName: string, data: string): Promise<void> {
-    const db = await this.openDB(storeName);
+  async setItem(storeAndDbName: string, data: string): Promise<void> {
+    const db = await this.openDB(storeAndDbName);
 
-    const tx = db.transaction(storeName, 'readwrite');
+    const tx = db.transaction(storeAndDbName, 'readwrite');
 
-    const store = tx.objectStore(storeName);
+    const store = tx.objectStore(storeAndDbName);
 
     store.put({
       [keyPath]: keyPath,
@@ -67,20 +39,25 @@ export class IndexedDBService implements StorageService {
 
   /**
    * read from indexedDB
-   * @param storeName
+   * @param storeAndDbName
    */
-  async getItem<T>(storeName: string): Promise<T> {
-    const db = await this.openDB(storeName);
+  async getItem(storeAndDbName: string): Promise<string | null> {
+    const db = await this.openDB(storeAndDbName);
 
-    const tx = db.transaction(storeName, 'readonly');
+    const tx = db.transaction(storeAndDbName, 'readonly');
 
-    const store = tx.objectStore(storeName);
+    const store = tx.objectStore(storeAndDbName);
 
     const request = store.get(keyPath);
 
     return new Promise((resolve, reject) => {
       request.onsuccess = (): void => {
         db.close();
+        // localStorage(sessionStorage) returns null if the key does not exist
+        // Similarly, indexedDB should return null
+        if (request.result === undefined) {
+          resolve(null);
+        }
         resolve(request.result?.['value']);
       };
 
@@ -93,15 +70,15 @@ export class IndexedDBService implements StorageService {
 
   /**
    * delete indexedDB
-   * @param storeName
+   * @param storeAndDbName
    * @returns
    */
-  async clear(storeName: string): Promise<void> {
-    const db = await this.openDB(storeName);
+  async clear(storeAndDbName: string): Promise<void> {
+    const db = await this.openDB(storeAndDbName);
 
-    const tx = db.transaction(storeName, 'readwrite');
+    const tx = db.transaction(storeAndDbName, 'readwrite');
 
-    const store = tx.objectStore(storeName);
+    const store = tx.objectStore(storeAndDbName);
 
     const request = store.delete(keyPath);
 
@@ -114,6 +91,32 @@ export class IndexedDBService implements StorageService {
       request.onerror = (): void => {
         db.close();
         reject();
+      };
+    });
+  }
+
+  /**
+   * open indexedDB
+   * @param storeAndDbName
+   */
+  private async openDB(storeAndDbName: string): Promise<IDBDatabase> {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(storeAndDbName, VERSION);
+
+      request.onupgradeneeded = () => {
+        const db = request.result;
+
+        if (!db.objectStoreNames.contains(storeAndDbName)) {
+          db.createObjectStore(storeAndDbName, { keyPath });
+        }
+      };
+
+      request.onsuccess = (): void => {
+        resolve(request.result);
+      };
+
+      request.onerror = (): void => {
+        reject(request.error);
       };
     });
   }

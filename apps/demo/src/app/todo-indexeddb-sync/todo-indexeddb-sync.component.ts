@@ -5,10 +5,11 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { SyncedTodoStore } from './synced-todo-store';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Todo } from '../shared/todo.service';
+import { MatButton } from '@angular/material/button';
 
 @Component({
   selector: 'demo-todo-indexeddb-sync',
-  imports: [MatCheckboxModule, MatIconModule, MatTableModule],
+  imports: [MatCheckboxModule, MatIconModule, MatTableModule, MatButton],
   templateUrl: './todo-indexeddb-sync.component.html',
   styleUrl: './todo-indexeddb-sync.component.scss',
   standalone: true,
@@ -32,5 +33,9 @@ export class TodoIndexeddbSyncComponent {
 
   removeTodo(todo: Todo) {
     this.todoStore.remove(todo.id);
+  }
+
+  onClickReset() {
+    this.todoStore.reset();
   }
 }

@@ -34,13 +34,13 @@ describe('IndexedDBService', () => {
 
     const receivedData = await indexedDBService.getItem(storeName);
 
-    expect(receivedData).toBeUndefined();
+    expect(receivedData).toEqual(null);
   });
 
-  it('When there is no data, read() should return undefined', async (): Promise<void> => {
+  it('When there is no data, read() should return null', async (): Promise<void> => {
     const receivedData = await indexedDBService.getItem(storeName);
 
-    expect(receivedData).toBeUndefined();
+    expect(receivedData).toEqual(null);
   });
 
   it('write() should handle null data', async (): Promise<void> => {

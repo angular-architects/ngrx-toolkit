@@ -1,11 +1,13 @@
+<h2>StorageType:LocalStorage</h2>
+<button (click)="onClickReset()" mat-flat-button>reset</button>
 <mat-table [dataSource]="dataSource" class="mat-elevation-z8">
   <!-- Checkbox Column -->
   <ng-container matColumnDef="finished">
     <mat-header-cell *matHeaderCellDef></mat-header-cell>
     <mat-cell *matCellDef="let row" class="actions">
       <mat-checkbox
-        (click)="$event.stopPropagation()"
         (change)="checkboxLabel(row)"
+        (click)="$event.stopPropagation()"
         [checked]="row.finished"
       >
       </mat-checkbox>
@@ -27,17 +29,17 @@
 
   <!-- Deadline Column -->
   <ng-container matColumnDef="deadline">
-    <mat-header-cell mat-header-cell *matHeaderCellDef
-      >Deadline</mat-header-cell
-    >
-    <mat-cell mat-cell *matCellDef="let element">{{
-      element.deadline
-    }}</mat-cell>
+    <mat-header-cell *matHeaderCellDef mat-header-cell
+      >Deadline
+    </mat-header-cell>
+    <mat-cell *matCellDef="let element" mat-cell
+      >{{ element.deadline }}
+    </mat-cell>
   </ng-container>
 
   <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
   <mat-row
-    *matRowDef="let row; columns: displayedColumns"
     (click)="selection.toggle(row)"
+    *matRowDef="let row; columns: displayedColumns"
   ></mat-row>
 </mat-table>

@@ -67,12 +67,6 @@ export type SyncConfig<State> = {
    * `JSON.stringify()` by default
    */
   stringify?: (state: State) => string;
-  /**
-   * Factory function used to select the storage.
-   *
-   * `localstorage` by default
-   */
-  storage?: () => Storage;
 };
 
 /**
@@ -134,6 +128,7 @@ export function withStorageSync<
            */
           async readFromStorage(): Promise<void> {
             const stateString = await storageService.getItem(key);
+
             if (stateString) {
               patchState(store, parse(stateString));
             }
