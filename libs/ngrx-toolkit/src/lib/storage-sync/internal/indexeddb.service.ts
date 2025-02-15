@@ -9,15 +9,15 @@ export const VERSION: number = 1 as const;
 export class IndexedDBService implements StorageService {
   /**
    * write to indexedDB
-   * @param storeAndDbName
+   * @param storeNameAndDbName
    * @param data
    */
-  async setItem(storeAndDbName: string, data: string): Promise<void> {
-    const db = await this.openDB(storeAndDbName);
+  async setItem(storeNameAndDbName: string, data: string): Promise<void> {
+    const db = await this.openDB(storeNameAndDbName);
 
-    const tx = db.transaction(storeAndDbName, 'readwrite');
+    const tx = db.transaction(storeNameAndDbName, 'readwrite');
 
-    const store = tx.objectStore(storeAndDbName);
+    const store = tx.objectStore(storeNameAndDbName);
 
     store.put({
       [keyPath]: keyPath,
@@ -39,14 +39,14 @@ export class IndexedDBService implements StorageService {
 
   /**
    * read from indexedDB
-   * @param storeAndDbName
+   * @param storeNameAndDbName
    */
-  async getItem(storeAndDbName: string): Promise<string | null> {
-    const db = await this.openDB(storeAndDbName);
+  async getItem(storeNameAndDbName: string): Promise<string | null> {
+    const db = await this.openDB(storeNameAndDbName);
 
-    const tx = db.transaction(storeAndDbName, 'readonly');
+    const tx = db.transaction(storeNameAndDbName, 'readonly');
 
-    const store = tx.objectStore(storeAndDbName);
+    const store = tx.objectStore(storeNameAndDbName);
 
     const request = store.get(keyPath);
 
@@ -70,15 +70,15 @@ export class IndexedDBService implements StorageService {
 
   /**
    * delete indexedDB
-   * @param storeAndDbName
+   * @param storeNameAndDbName
    * @returns
    */
-  async clear(storeAndDbName: string): Promise<void> {
-    const db = await this.openDB(storeAndDbName);
+  async clear(storeNameAndDbName: string): Promise<void> {
+    const db = await this.openDB(storeNameAndDbName);
 
-    const tx = db.transaction(storeAndDbName, 'readwrite');
+    const tx = db.transaction(storeNameAndDbName, 'readwrite');
 
-    const store = tx.objectStore(storeAndDbName);
+    const store = tx.objectStore(storeNameAndDbName);
 
     const request = store.delete(keyPath);
 
@@ -97,17 +97,17 @@ export class IndexedDBService implements StorageService {
 
   /**
    * open indexedDB
-   * @param storeAndDbName
+   * @param storeNameAndDbName
    */
-  private async openDB(storeAndDbName: string): Promise<IDBDatabase> {
+  private async openDB(storeNameAndDbName: string): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open(storeAndDbName, VERSION);
+      const request = indexedDB.open(storeNameAndDbName, VERSION);
 
       request.onupgradeneeded = () => {
         const db = request.result;
 
-        if (!db.objectStoreNames.contains(storeAndDbName)) {
-          db.createObjectStore(storeAndDbName, { keyPath });
+        if (!db.objectStoreNames.contains(storeNameAndDbName)) {
+          db.createObjectStore(storeNameAndDbName, { keyPath });
         }
       };
 
