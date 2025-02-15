@@ -12,9 +12,7 @@ import { inject } from '@angular/core';
 export const SyncedTodoStore = signalStore(
   { providedIn: 'root' },
   withEntities<Todo>(),
-  withStorageSync({
-    key: 'todos',
-  }),
+  withStorageSync('todos'),
   withMethods((store, todoService = inject(TodoService)) => {
     let currentId = 0;
     return {

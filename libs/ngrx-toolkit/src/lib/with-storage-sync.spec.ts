@@ -117,7 +117,7 @@ describe('withStorageSync', () => {
         await TestBed.runInInjectionContext(async () => {
           const Store = signalStore(
             { protectedState: false },
-            withStorageSync({ key }, adapter)
+            withStorageSync(key, adapter)
           );
           const store = new Store();
 
@@ -183,7 +183,7 @@ describe('withStorageSync', () => {
         await TestBed.runInInjectionContext(async () => {
           const Store = signalStore(
             { protectedState: false },
-            withStorageSync({ key }, adapter)
+            withStorageSync(key, adapter)
           );
           const store = new Store();
 

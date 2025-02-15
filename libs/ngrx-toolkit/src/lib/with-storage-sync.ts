@@ -79,6 +79,11 @@ export function withStorageSync<Input extends SignalStoreFeatureResult>(
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
 
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
+  key: string,
+  StorageServiceClass: StorageServiceFactory
+): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
+
+export function withStorageSync<Input extends SignalStoreFeatureResult>(
   config: SyncConfig<Input['state']>
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
 
