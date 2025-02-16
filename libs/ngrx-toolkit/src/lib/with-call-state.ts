@@ -42,7 +42,7 @@ export function getCallStateKeys(config?: { collection?: string }) {
 }
 
 export function withCallState<Collection extends string>(config: {
-  collection: Collection;
+  collection: Collection | Collection[];
 }): SignalStoreFeature<
   EmptyFeatureResult,
   EmptyFeatureResult & {
@@ -58,51 +58,61 @@ export function withCallState(): SignalStoreFeature<
   }
 >;
 export function withCallState<Collection extends string>(config?: {
-  collection: Collection;
+  collection: Collection | Collection[];
 }): SignalStoreFeature {
-  const { callStateKey, errorKey, loadedKey, loadingKey } =
-    getCallStateKeys(config);
+  const collections = Array.isArray(config?.collection) ? config.collection : [config?.collection];
+  const keys = collections.reduce((acc, collection) => {
+    const { callStateKey, errorKey, loadedKey, loadingKey } = getCallStateKeys({ collection });
+    acc.callStateKeys.push(callStateKey);
+    acc.errorKeys.push(errorKey);
+    acc.loadedKeys.push(loadedKey);
+    acc.loadingKeys.push(loadingKey);
+    return acc;
+  }, { callStateKeys: [], errorKeys: [], loadedKeys: [], loadingKeys: [] });
 
   return signalStoreFeature(
-    withState({ [callStateKey]: 'init' }),
+    withState(keys.callStateKeys.reduce((acc, key) => {
+      acc[key] = 'init';
+      return acc;
+    }, {})),
     withComputed((state: Record<string, Signal<unknown>>) => {
-      const callState = state[callStateKey] as Signal<CallState>;
-
-      return {
-        [loadingKey]: computed(() => callState() === 'loading'),
-        [loadedKey]: computed(() => callState() === 'loaded'),
-        [errorKey]: computed(() => {
+      return keys.callStateKeys.reduce((acc, callStateKey, index) => {
+        const callState = state[callStateKey] as Signal<CallState>;
+        acc[keys.loadingKeys[index]] = computed(() => callState() === 'loading');
+        acc[keys.loadedKeys[index]] = computed(() => callState() === 'loaded');
+        acc[keys.errorKeys[index]] = computed(() => {
           const v = callState();
           return typeof v === 'object' ? v.error : null;
-        }),
-      };
+        });
+        return acc;
+      }, {});
     })
   );
 }
 
-export function setLoading<Prop extends string | undefined = undefined>(
-  prop?: Prop
+export function setLoading<Prop extends string>(
+  prop: Prop | Prop[]
 ): SetCallState<Prop> {
-  if (prop) {
-    return { [`${prop}CallState`]: 'loading' } as SetCallState<Prop>;
-  }
-
-  return { callState: 'loading' } as SetCallState<Prop>;
+  const props = Array.isArray(prop) ? prop : [prop];
+  return props.reduce((acc, p) => {
+    acc[`${p}CallState`] = 'loading';
+    return acc;
+  }, {} as SetCallState<Prop>);
 }
 
-export function setLoaded<Prop extends string | undefined = undefined>(
-  prop?: Prop
+export function setLoaded<Prop extends string>(
+  prop: Prop | Prop[]
 ): SetCallState<Prop> {
-  if (prop) {
-    return { [`${prop}CallState`]: 'loaded' } as SetCallState<Prop>;
-  } else {
-    return { callState: 'loaded' } as SetCallState<Prop>;
-  }
+  const props = Array.isArray(prop) ? prop : [prop];
+  return props.reduce((acc, p) => {
+    acc[`${p}CallState`] = 'loaded';
+    return acc;
+  }, {} as SetCallState<Prop>);
 }
 
-export function setError<Prop extends string | undefined = undefined>(
+export function setError<Prop extends string>(
   error: unknown,
-  prop?: Prop
+  prop: Prop | Prop[]
 ): SetCallState<Prop> {
   let errorMessage: string;
 
@@ -114,11 +124,9 @@ export function setError<Prop extends string | undefined = undefined>(
     errorMessage = String(error);
   }
 
-  if (prop) {
-    return {
-      [`${prop}CallState`]: { error: errorMessage },
-    } as SetCallState<Prop>;
-  } else {
-    return { callState: { error: errorMessage } } as SetCallState<Prop>;
-  }
+  const props = Array.isArray(prop) ? prop : [prop];
+  return props.reduce((acc, p) => {
+    acc[`${p}CallState`] = { error: errorMessage };
+    return acc;
+  }, {} as SetCallState<Prop>);
 }
