@@ -16,8 +16,8 @@ import {
   withHooks,
   withMethods,
 } from '@ngrx/signals';
-import { StorageServiceFactory } from './storage-sync/internal/storage.service';
-import { withLocalStorage } from './storage-sync/features/with-local-storage';
+import { StorageServiceFactory } from './internal/storage.service';
+import { withLocalStorage } from './features/with-local-storage';
 
 const NOOP = () => Promise.resolve();
 

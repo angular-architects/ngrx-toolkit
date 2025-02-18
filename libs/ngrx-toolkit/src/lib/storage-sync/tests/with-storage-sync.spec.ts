@@ -1,10 +1,10 @@
 import { getState, patchState, signalStore, withState } from '@ngrx/signals';
-import { withStorageSync } from './with-storage-sync';
 import { TestBed } from '@angular/core/testing';
 import * as flushPromises from 'flush-promises';
-import { withIndexeddb } from './storage-sync/features/with-indexeddb';
-import { withLocalStorage } from './storage-sync/features/with-local-storage';
-import { StorageServiceFactory } from './storage-sync/internal/storage.service';
+import { StorageServiceFactory } from '../internal/storage.service';
+import { withIndexeddb } from '../features/with-indexeddb';
+import { withLocalStorage } from '../features/with-local-storage';
+import { withStorageSync } from '../with-storage-sync';
 
 interface StateObject {
   foo: string;
