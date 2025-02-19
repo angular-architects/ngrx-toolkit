@@ -2,7 +2,11 @@ import { Injectable } from '@angular/core';
 import { StorageService } from './storage.service';
 import { PROMISE_NOOP, WithStorageSyncFeatureResult } from './models';
 
-export const keyPath: string = 'ngrxToolkitId' as const;
+export const keyPath = 'ngrxToolkitKeyPath';
+
+export const dbName = 'ngrxToolkitDb';
+
+export const storeName = 'ngrxToolkitStore';
 
 export const VERSION: number = 1 as const;
 
@@ -10,18 +14,18 @@ export const VERSION: number = 1 as const;
 export class IndexedDBService implements StorageService {
   /**
    * write to indexedDB
-   * @param storeNameAndDbName
+   * @param key
    * @param data
    */
-  async setItem(storeNameAndDbName: string, data: string): Promise<void> {
-    const db = await this.openDB(storeNameAndDbName);
+  async setItem(key: string, data: string): Promise<void> {
+    const db = await this.openDB();
 
-    const tx = db.transaction(storeNameAndDbName, 'readwrite');
+    const tx = db.transaction(storeName, 'readwrite');
 
-    const store = tx.objectStore(storeNameAndDbName);
+    const store = tx.objectStore(storeName);
 
     store.put({
-      [keyPath]: keyPath,
+      [keyPath]: key,
       value: data,
     });
 
@@ -40,16 +44,16 @@ export class IndexedDBService implements StorageService {
 
   /**
    * read from indexedDB
-   * @param storeNameAndDbName
+   * @param key
    */
-  async getItem(storeNameAndDbName: string): Promise<string | null> {
-    const db = await this.openDB(storeNameAndDbName);
+  async getItem(key: string): Promise<string | null> {
+    const db = await this.openDB();
 
-    const tx = db.transaction(storeNameAndDbName, 'readonly');
+    const tx = db.transaction(storeName, 'readonly');
 
-    const store = tx.objectStore(storeNameAndDbName);
+    const store = tx.objectStore(storeName);
 
-    const request = store.get(keyPath);
+    const request = store.get(key);
 
     return new Promise((resolve, reject) => {
       request.onsuccess = (): void => {
@@ -71,17 +75,16 @@ export class IndexedDBService implements StorageService {
 
   /**
    * delete indexedDB
-   * @param storeNameAndDbName
-   * @returns
+   * @param key
    */
-  async clear(storeNameAndDbName: string): Promise<void> {
-    const db = await this.openDB(storeNameAndDbName);
+  async clear(key: string): Promise<void> {
+    const db = await this.openDB();
 
-    const tx = db.transaction(storeNameAndDbName, 'readwrite');
+    const tx = db.transaction(storeName, 'readwrite');
 
-    const store = tx.objectStore(storeNameAndDbName);
+    const store = tx.objectStore(storeName);
 
-    const request = store.delete(keyPath);
+    const request = store.delete(key);
 
     return new Promise((resolve, reject) => {
       request.onsuccess = (): void => {
@@ -107,17 +110,16 @@ export class IndexedDBService implements StorageService {
 
   /**
    * open indexedDB
-   * @param storeNameAndDbName
    */
-  private async openDB(storeNameAndDbName: string): Promise<IDBDatabase> {
+  private async openDB(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open(storeNameAndDbName, VERSION);
+      const request = indexedDB.open(dbName, VERSION);
 
       request.onupgradeneeded = () => {
         const db = request.result;
 
-        if (!db.objectStoreNames.contains(storeNameAndDbName)) {
-          db.createObjectStore(storeNameAndDbName, { keyPath });
+        if (!db.objectStoreNames.contains(storeName)) {
+          db.createObjectStore(storeName, { keyPath });
         }
       };
 

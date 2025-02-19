@@ -1,8 +1,6 @@
-import { IndexedDBService, keyPath } from '../internal/indexeddb.service';
+import { IndexedDBService } from '../internal/indexeddb.service';
 
 describe('IndexedDBService', () => {
-  const storeNameAndDbName = 'users';
-
   const sampleData = JSON.stringify({
     foo: 'bar',
     users: [
@@ -18,69 +16,83 @@ describe('IndexedDBService', () => {
   });
 
   it('It should be possible to write data using write() and then read the data using read()', async (): Promise<void> => {
-    const expectedData = { [keyPath]: keyPath, value: sampleData };
+    const key = 'users';
 
-    await indexedDBService.setItem(storeNameAndDbName, sampleData);
+    const expectedData = sampleData;
 
-    const receivedData = await indexedDBService.getItem(storeNameAndDbName);
+    await indexedDBService.setItem(key, sampleData);
 
-    expect(receivedData).toEqual(expectedData.value);
+    const receivedData = await indexedDBService.getItem(key);
+
+    expect(receivedData).toEqual(expectedData);
   });
 
   it('It should be possible to delete data using clear()', async (): Promise<void> => {
-    await indexedDBService.setItem(storeNameAndDbName, sampleData);
+    const key = 'sample';
 
-    await indexedDBService.clear(storeNameAndDbName);
+    await indexedDBService.setItem(key, sampleData);
 
-    const receivedData = await indexedDBService.getItem(storeNameAndDbName);
+    await indexedDBService.clear(key);
+
+    const receivedData = await indexedDBService.getItem(key);
 
     expect(receivedData).toEqual(null);
   });
 
   it('When there is no data, read() should return null', async (): Promise<void> => {
-    const receivedData = await indexedDBService.getItem(storeNameAndDbName);
+    const key = 'nullData';
+
+    const receivedData = await indexedDBService.getItem(key);
 
     expect(receivedData).toEqual(null);
   });
 
   it('write() should handle null data', async (): Promise<void> => {
-    await indexedDBService.setItem(storeNameAndDbName, JSON.stringify(null));
+    const key = 'nullData';
 
-    const receivedData = await indexedDBService.getItem(storeNameAndDbName);
+    await indexedDBService.setItem(key, JSON.stringify(null));
+
+    const receivedData = await indexedDBService.getItem(key);
 
     expect(receivedData).toEqual('null');
   });
 
   it('write() should handle empty object data', async (): Promise<void> => {
+    const key = 'emptyData';
+
     const emptyData = JSON.stringify({});
-    const expectedData = { [keyPath]: keyPath, value: emptyData };
+    const expectedData = emptyData;
 
-    await indexedDBService.setItem(storeNameAndDbName, emptyData);
+    await indexedDBService.setItem(key, emptyData);
 
-    const receivedData = await indexedDBService.getItem(storeNameAndDbName);
+    const receivedData = await indexedDBService.getItem(key);
 
-    expect(receivedData).toEqual(expectedData.value);
+    expect(receivedData).toEqual(expectedData);
   });
 
   it('write() should handle large data objects', async (): Promise<void> => {
+    const key = 'largeData';
+
     const largeData = JSON.stringify({ foo: 'a'.repeat(100000) });
-    const expectedData = { [keyPath]: keyPath, value: largeData };
+    const expectedData = largeData;
 
-    await indexedDBService.setItem(storeNameAndDbName, largeData);
+    await indexedDBService.setItem(key, largeData);
 
-    const receivedData = await indexedDBService.getItem(storeNameAndDbName);
+    const receivedData = await indexedDBService.getItem(key);
 
-    expect(receivedData).toEqual(expectedData.value);
+    expect(receivedData).toEqual(expectedData);
   });
 
   it('write() should handle special characters in data', async (): Promise<void> => {
+    const key = 'specialCharData';
+
     const specialCharData = JSON.stringify({ foo: 'bar!@#$%^&*()_+{}:"<>?' });
-    const expectedData = { [keyPath]: keyPath, value: specialCharData };
+    const expectedData = specialCharData;
 
-    await indexedDBService.setItem(storeNameAndDbName, specialCharData);
+    await indexedDBService.setItem(key, specialCharData);
 
-    const receivedData = await indexedDBService.getItem(storeNameAndDbName);
+    const receivedData = await indexedDBService.getItem(key);
 
-    expect(receivedData).toEqual(expectedData.value);
+    expect(receivedData).toEqual(expectedData);
   });
 });
