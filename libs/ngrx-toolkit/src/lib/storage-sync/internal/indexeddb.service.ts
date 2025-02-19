@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from './storage.service';
+import { PROMISE_NOOP, WithStorageSyncFeatureResult } from './models';
 
 export const keyPath: string = 'ngrxToolkitId' as const;
 
@@ -93,6 +94,15 @@ export class IndexedDBService implements StorageService {
         reject();
       };
     });
+  }
+
+  /** return stub */
+  getStub(): Pick<WithStorageSyncFeatureResult, 'methods'>['methods'] {
+    return {
+      clearStorage: PROMISE_NOOP,
+      readFromStorage: PROMISE_NOOP,
+      writeToStorage: PROMISE_NOOP,
+    };
   }
 
   /**

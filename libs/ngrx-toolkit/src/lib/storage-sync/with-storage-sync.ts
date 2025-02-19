@@ -7,7 +7,6 @@ import {
   runInInjectionContext,
 } from '@angular/core';
 import {
-  EmptyFeatureResult,
   getState,
   patchState,
   signalStoreFeature,
@@ -18,25 +17,7 @@ import {
 } from '@ngrx/signals';
 import { StorageServiceFactory } from './internal/storage.service';
 import { withLocalStorage } from './features/with-local-storage';
-
-const NOOP = () => Promise.resolve();
-
-type WithStorageSyncFeatureResult = EmptyFeatureResult & {
-  methods: {
-    clearStorage(): Promise<void>;
-    readFromStorage(): Promise<void>;
-    writeToStorage(): Promise<void>;
-  };
-};
-
-const StorageSyncStub: Pick<
-  WithStorageSyncFeatureResult,
-  'methods'
->['methods'] = {
-  clearStorage: NOOP,
-  readFromStorage: NOOP,
-  writeToStorage: NOOP,
-};
+import { WithStorageSyncFeatureResult } from './internal/models';
 
 export type SyncConfig<State> = {
   /**
@@ -115,7 +96,7 @@ export function withStorageSync<
         storageService = inject(StorageServiceClass)
       ) => {
         if (isPlatformServer(platformId)) {
-          return StorageSyncStub;
+          return storageService.getStub();
         }
 
         return {
