@@ -115,9 +115,6 @@ export function withStorageSync<
         storageService = inject(StorageServiceClass)
       ) => {
         if (isPlatformServer(platformId)) {
-          console.warn(
-            `'withStorageSync' provides non-functional implementation due to server-side execution`
-          );
           return StorageSyncStub;
         }
 
