@@ -17,6 +17,8 @@ export const SyncedTodoStore = signalStore(
     let currentId = 0;
     return {
       add(todo: AddTodo) {
+        store.readFromStorage();
+
         patchState(store, setEntity({ id: ++currentId, ...todo }));
       },
 
