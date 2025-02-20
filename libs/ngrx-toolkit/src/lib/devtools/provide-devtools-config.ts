@@ -31,32 +31,12 @@ export const REDUX_DEVTOOLS_CONFIG = new InjectionToken<ReduxDevtoolsConfig>(
  * @example
  * const devToolsOptions: ReduxDevtoolsConfig = {
  *   name: 'My App',
- *   trace: true,
- *   traceLimit: 10,
- *   latency: 300,
- *   maxAge: 50,
- *   autoPause: true,
- *   shouldHotReload: false,
- *   shouldRecordChanges: true
+ *   maxAge: 50
  * };
  */
 export type ReduxDevtoolsConfig = {
-  /** Optional name for the devtools instance */
+  /** Optional name for the devtools instance. If empty, "NgRx SignalStore" will be used. */
   name?: string;
-  /** An optional unique instance ID (useful when you have multiple stores) */
-  instanceId?: string;
-  /** Enables stack trace recording for dispatched actions */
-  trace?: boolean;
-  /** Limits the number of stack trace frames stored per action */
-  traceLimit?: number;
-  /** Specifies a delay (in milliseconds) between dispatching actions */
-  latency?: number;
   /** Maximum number of actions to keep in the history */
   maxAge?: number;
-  /** Automatically pause recording when the devtools window is not open */
-  autoPause?: boolean;
-  /** Recompute state on hot reload */
-  shouldHotReload?: boolean;
-  /** Record state changes; set to false to disable */
-  shouldRecordChanges?: boolean;
 };
