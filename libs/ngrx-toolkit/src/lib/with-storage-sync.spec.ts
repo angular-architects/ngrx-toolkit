@@ -4,7 +4,7 @@ import * as flushPromises from 'flush-promises';
 import { StorageServiceFactory } from './storage-sync/internal/storage.service';
 import { withIndexeddb } from './storage-sync/features/with-indexeddb';
 import { withLocalStorage } from './storage-sync/features/with-local-storage';
-import { withStorageSync } from './with-storage-sync';
+import { withStorageSync } from './storage-sync/with-storage-sync';
 
 interface StateObject {
   foo: string;
