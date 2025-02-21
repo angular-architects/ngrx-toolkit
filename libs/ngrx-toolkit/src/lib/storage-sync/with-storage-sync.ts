@@ -15,15 +15,9 @@ import {
   withHooks,
   withMethods,
 } from '@ngrx/signals';
+import { StorageServiceFactory } from './internal/storage.service';
 import { withLocalStorage } from './features/with-local-storage';
-import {
-  IndexedDBServiceFactory,
-  LocalStorageServiceFactory,
-  SessionStorageServiceFactory,
-  StorageServiceFactory,
-  WithIndexeddbStorageSyncFeatureResult,
-  WithStorageSyncFeatureResult,
-} from './internal/models';
+import { WithStorageSyncFeatureResult } from './internal/models';
 
 export type SyncConfig<State> = {
   /**
@@ -67,13 +61,8 @@ export function withStorageSync<Input extends SignalStoreFeatureResult>(
 
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   key: string,
-  StorageServiceClass: LocalStorageServiceFactory | SessionStorageServiceFactory
+  StorageServiceClass: StorageServiceFactory
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
-
-export function withStorageSync<Input extends SignalStoreFeatureResult>(
-  key: string,
-  StorageServiceClass: IndexedDBServiceFactory
-): SignalStoreFeature<Input, WithIndexeddbStorageSyncFeatureResult>;
 
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   config: SyncConfig<Input['state']>
@@ -81,13 +70,8 @@ export function withStorageSync<Input extends SignalStoreFeatureResult>(
 
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   config: SyncConfig<Input['state']>,
-  StorageServiceClass: LocalStorageServiceFactory | SessionStorageServiceFactory
+  StorageServiceClass: StorageServiceFactory
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
-
-export function withStorageSync<Input extends SignalStoreFeatureResult>(
-  config: SyncConfig<Input['state']>,
-  StorageServiceClass: IndexedDBServiceFactory
-): SignalStoreFeature<Input, WithIndexeddbStorageSyncFeatureResult>;
 
 export function withStorageSync<
   State extends object,
@@ -95,10 +79,7 @@ export function withStorageSync<
 >(
   configOrKey: SyncConfig<Input['state']> | string,
   StorageServiceClass: StorageServiceFactory = withLocalStorage()
-): SignalStoreFeature<
-  Input,
-  WithStorageSyncFeatureResult | WithIndexeddbStorageSyncFeatureResult
-> {
+): SignalStoreFeature<Input, WithStorageSyncFeatureResult> {
   const {
     key,
     autoSync = true,
@@ -156,10 +137,12 @@ export function withStorageSync<
         }
 
         if (autoSync) {
-          Promise.resolve(store.readFromStorage()).then(() => {
-            runInInjectionContext(envInjector, () => {
-              effect(() => {
-                store.writeToStorage();
+          store.readFromStorage().then(() => {
+            Promise.resolve().then(async () => {
+              runInInjectionContext(envInjector, () => {
+                effect(() => {
+                  store.writeToStorage();
+                });
               });
             });
           });

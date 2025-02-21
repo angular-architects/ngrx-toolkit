@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from './storage.service';
-import { WithStorageSyncFeatureResult } from './models';
-import { PROMISE_NOOP } from './utils';
+import { PROMISE_NOOP, WithStorageSyncFeatureResult } from './models';
 
 export const keyPath = 'ngrxToolkitKeyPath';
 
