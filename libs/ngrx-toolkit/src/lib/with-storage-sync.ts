@@ -15,9 +15,9 @@ import {
   withHooks,
   withMethods,
 } from '@ngrx/signals';
-import { StorageServiceFactory } from './internal/storage.service';
-import { withLocalStorage } from './features/with-local-storage';
-import { WithStorageSyncFeatureResult } from './internal/models';
+import { WithStorageSyncFeatureResult } from './storage-sync/internal/models';
+import { StorageServiceFactory } from './storage-sync/internal/storage.service';
+import { withLocalStorage } from './storage-sync/features/with-local-storage';
 
 export type SyncConfig<State> = {
   /**
