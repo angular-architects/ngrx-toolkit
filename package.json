@@ -14,7 +14,7 @@
   "private": true,
   "engines": {
     "node": ">=18",
-    "pnpm": "9"
+    "pnpm": "10"
   },
   "dependencies": {
     "@angular/animations": "19.0.5",
