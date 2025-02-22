@@ -5,6 +5,7 @@ import {
   inject,
   PLATFORM_ID,
   runInInjectionContext,
+  Type,
 } from '@angular/core';
 import {
   getState,
@@ -15,9 +16,14 @@ import {
   withHooks,
   withMethods,
 } from '@ngrx/signals';
-import { WithStorageSyncFeatureResult } from './internal/models';
-import { StorageServiceFactory } from './internal/storage.service';
-import { withLocalStorage } from './features/with-local-storage';
+import {
+  IndexeddbService,
+  StorageService,
+  StorageServiceFactory,
+  WithIndexeddbSyncFeatureResult,
+  WithStorageSyncFeatureResult,
+} from './internal/models';
+import { withIndexeddb } from './features/with-indexeddb';
 
 export type SyncConfig<State> = {
   /**
@@ -55,22 +61,39 @@ export type SyncConfig<State> = {
  *
  * Only works on browser platform.
  */
+
+// only key
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   key: string
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
 
+// key + indexeddb
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   key: string,
-  StorageServiceClass: StorageServiceFactory
+  StorageServiceClass: Type<IndexeddbService>
+): SignalStoreFeature<Input, WithIndexeddbSyncFeatureResult>;
+
+// key + localStorage(or sessionStorage)
+export function withStorageSync<Input extends SignalStoreFeatureResult>(
+  key: string,
+  StorageServiceClass: Type<StorageService>
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
 
+// config + localStorage
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   config: SyncConfig<Input['state']>
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
 
+// config + indexeddb
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   config: SyncConfig<Input['state']>,
-  StorageServiceClass: StorageServiceFactory
+  StorageServiceClass: Type<IndexeddbService>
+): SignalStoreFeature<Input, WithIndexeddbSyncFeatureResult>;
+
+// config + localStorage(or sessionStorage)
+export function withStorageSync<Input extends SignalStoreFeatureResult>(
+  config: SyncConfig<Input['state']>,
+  StorageServiceClass: Type<StorageService>
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
 
 export function withStorageSync<
@@ -78,8 +101,11 @@ export function withStorageSync<
   Input extends SignalStoreFeatureResult
 >(
   configOrKey: SyncConfig<Input['state']> | string,
-  StorageServiceClass: StorageServiceFactory = withLocalStorage()
-): SignalStoreFeature<Input, WithStorageSyncFeatureResult> {
+  StorageServiceClass: StorageServiceFactory = withIndexeddb()
+): SignalStoreFeature<
+  Input,
+  WithStorageSyncFeatureResult | WithIndexeddbSyncFeatureResult
+> {
   const {
     key,
     autoSync = true,

@@ -5,14 +5,17 @@ import {
   updateEntity,
   withEntities,
 } from '@ngrx/signals/entities';
-import { withStorageSync } from '@angular-architects/ngrx-toolkit';
+import {
+  withLocalStorage,
+  withStorageSync,
+} from '@angular-architects/ngrx-toolkit';
 import { AddTodo, Todo, TodoService } from '../shared/todo.service';
 import { inject } from '@angular/core';
 
 export const SyncedTodoStore = signalStore(
   { providedIn: 'root' },
   withEntities<Todo>(),
-  withStorageSync('todos'),
+  withStorageSync('todos', withLocalStorage()),
   withMethods((store, todoService = inject(TodoService)) => {
     let currentId = 0;
     return {

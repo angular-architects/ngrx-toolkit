@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
-import { StorageService } from './storage.service';
-import { PROMISE_NOOP, WithStorageSyncFeatureResult } from './models';
+import {
+  IndexeddbService,
+  PROMISE_NOOP,
+  WithIndexeddbSyncFeatureResult,
+} from './models';
 
 export const keyPath = 'ngrxToolkitKeyPath';
 
@@ -11,7 +14,7 @@ export const storeName = 'ngrxToolkitStore';
 export const VERSION: number = 1 as const;
 
 @Injectable({ providedIn: 'root' })
-export class IndexedDBService implements StorageService {
+export class IndexedDBService implements IndexeddbService {
   /**
    * write to indexedDB
    * @param key
@@ -100,7 +103,7 @@ export class IndexedDBService implements StorageService {
   }
 
   /** return stub */
-  getStub(): Pick<WithStorageSyncFeatureResult, 'methods'>['methods'] {
+  getStub(): Pick<WithIndexeddbSyncFeatureResult, 'methods'>['methods'] {
     return {
       clearStorage: PROMISE_NOOP,
       readFromStorage: PROMISE_NOOP,
