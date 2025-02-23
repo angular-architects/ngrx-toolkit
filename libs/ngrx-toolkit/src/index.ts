@@ -5,6 +5,10 @@ export { withMapper } from './lib/devtools/features/with-mapper';
 export { withGlitchTracking } from './lib/devtools/features/with-glitch-tracking';
 export { patchState, updateState } from './lib/devtools/update-state';
 export { renameDevtoolsName } from './lib/devtools/rename-devtools-name';
+export {
+  provideDevtoolsConfig,
+  ReduxDevtoolsConfig,
+} from './lib/devtools/provide-devtools-config';
 
 export {
   withRedux,

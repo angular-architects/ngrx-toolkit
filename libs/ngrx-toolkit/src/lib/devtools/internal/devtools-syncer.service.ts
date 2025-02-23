@@ -5,6 +5,7 @@ import { StateSource } from '@ngrx/signals';
 import { DevtoolsInnerOptions } from './devtools-feature';
 import { throwIfNull } from '../../shared/throw-if-null';
 import { Connection, StoreRegistry, Tracker } from './models';
+import { REDUX_DEVTOOLS_CONFIG } from '../provide-devtools-config';
 
 const dummyConnection: Connection = {
   send: () => void true,
@@ -30,6 +31,10 @@ export class DevtoolsSyncer implements OnDestroy {
   #stores: StoreRegistry = {};
   readonly #isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   readonly #trackers = [] as Tracker[];
+  readonly #devtoolsConfig = {
+    name: 'NgRx SignalStore',
+    ...inject(REDUX_DEVTOOLS_CONFIG, { optional: true }),
+  };
 
   /**
    * Maintains the current states of all stores to avoid conflicts
@@ -50,9 +55,7 @@ export class DevtoolsSyncer implements OnDestroy {
 
   readonly #connection: Connection = this.#isBrowser
     ? window.__REDUX_DEVTOOLS_EXTENSION__
-      ? window.__REDUX_DEVTOOLS_EXTENSION__.connect({
-          name: 'NgRx SignalStore',
-        })
+      ? window.__REDUX_DEVTOOLS_EXTENSION__.connect(this.#devtoolsConfig)
       : dummyConnection
     : dummyConnection;
 
