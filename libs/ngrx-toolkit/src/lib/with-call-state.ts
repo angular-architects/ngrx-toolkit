@@ -76,7 +76,7 @@ export function withCallState<Collection extends string>(config?: {
           )
       }
       return {
-        callStateKey: 'init',
+        callState: 'init',
       };
     }),
     withComputed((state: Record<string, Signal<unknown>>) => {
