@@ -31,7 +31,7 @@ export type SetCallState<Prop extends string | undefined> = Prop extends string
   ? NamedCallStateSlice<Prop>
   : CallStateSlice;
 
-export function getCallStateKeys(collection?: string) {
+export function deriveCallStateKeys<Collection extends string>(collection?: Collection) {
   return {
     callStateKey: collection ? `${collection}CallState` : 'callState',
     loadingKey: collection ? `${collection}Loading` : 'loading',
@@ -40,7 +40,12 @@ export function getCallStateKeys(collection?: string) {
   };
 }
 
-function getCollectionArray(collection: string | string[]){
+export function getCallStateKeys(config?: { collection?: string}) {
+  const prop = config?.collection;
+  return deriveCallStateKeys(prop);
+}
+
+export function getCollectionArray(collection: string | string[]){
   return Array.isArray(collection) ? collection : [collection];
 }
 
@@ -84,7 +89,7 @@ export function withCallState<Collection extends string>(config?: {
         const collection = getCollectionArray(config.collection);
         return collection.reduce<Record<string, Signal<unknown>>>((acc, cur: string) => {
           const { callStateKey, errorKey, loadedKey, loadingKey } =
-            getCallStateKeys(cur);
+            deriveCallStateKeys(cur);
           const callState = state[callStateKey] as Signal<CallState>;
           return {
             ...acc,
@@ -97,7 +102,7 @@ export function withCallState<Collection extends string>(config?: {
           };
         }, {});
       } 
-      const { callStateKey, errorKey, loadedKey, loadingKey } = getCallStateKeys();
+      const { callStateKey, errorKey, loadedKey, loadingKey } = deriveCallStateKeys();
       const callState = state[callStateKey] as Signal<CallState>;
       return {
         [loadingKey]: computed(() => callState() === 'loading'),
