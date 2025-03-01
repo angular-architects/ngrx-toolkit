@@ -37,5 +37,6 @@ describe('withCallState', () => {
     expect(dataStore.entitiesCallState()).toBe('loaded');
     expect(dataStore.productsCallState()).toBe('loaded');
     expect(dataStore.entitiesLoaded()).toBe(true);
+    expect(dataStore.productsLoaded()).toBe(true);
   });
 });
