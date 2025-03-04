@@ -8,12 +8,13 @@ import { Todo } from '../shared/todo.service';
 import { MatButton } from '@angular/material/button';
 
 @Component({
-  selector: 'demo-todo-storage-sync',
+  selector: 'demo-todo-indexeddb-sync',
   imports: [MatCheckboxModule, MatIconModule, MatTableModule, MatButton],
-  templateUrl: './todo-storage-sync.component.html',
-  styleUrl: './todo-storage-sync.component.scss',
+  templateUrl: './todo-indexeddb-sync.component.html',
+  styleUrl: './todo-indexeddb-sync.component.scss',
+  standalone: true,
 })
-export class TodoStorageSyncComponent {
+export class TodoIndexeddbSyncComponent {
   todoStore = inject(SyncedTodoStore);
 
   displayedColumns: string[] = ['finished', 'name', 'description', 'deadline'];

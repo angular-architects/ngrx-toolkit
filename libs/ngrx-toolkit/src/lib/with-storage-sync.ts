@@ -1,34 +1,29 @@
 import { isPlatformServer } from '@angular/common';
-import { PLATFORM_ID, effect, inject } from '@angular/core';
 import {
-  SignalStoreFeature,
+  effect,
+  EnvironmentInjector,
+  inject,
+  PLATFORM_ID,
+  runInInjectionContext,
+  Type,
+} from '@angular/core';
+import {
   getState,
   patchState,
   signalStoreFeature,
+  SignalStoreFeature,
+  SignalStoreFeatureResult,
   withHooks,
   withMethods,
-  SignalStoreFeatureResult,
-  EmptyFeatureResult,
 } from '@ngrx/signals';
-
-const NOOP = () => void true;
-
-type WithStorageSyncFeatureResult = EmptyFeatureResult & {
-  methods: {
-    clearStorage(): void;
-    readFromStorage(): void;
-    writeToStorage(): void;
-  };
-};
-
-const StorageSyncStub: Pick<
+import {
+  IndexeddbService,
+  StorageService,
+  StorageServiceFactory,
+  WithIndexeddbSyncFeatureResult,
   WithStorageSyncFeatureResult,
-  'methods'
->['methods'] = {
-  clearStorage: NOOP,
-  readFromStorage: NOOP,
-  writeToStorage: NOOP,
-};
+} from './storage-sync/internal/models';
+import { withIndexeddb } from './storage-sync/features/with-indexeddb';
 
 export type SyncConfig<State> = {
   /**
@@ -54,17 +49,11 @@ export type SyncConfig<State> = {
    */
   parse?: (stateString: string) => State;
   /**
-   * Function used to tranform the state into a string representation.
+   * Function used to transform the state into a string representation.
    *
    * `JSON.stringify()` by default
    */
   stringify?: (state: State) => string;
-  /**
-   * Factory function used to select the storage.
-   *
-   * `localstorage` by default
-   */
-  storage?: () => Storage;
 };
 
 /**
@@ -72,74 +61,116 @@ export type SyncConfig<State> = {
  *
  * Only works on browser platform.
  */
+
+// only key
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   key: string
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
+
+// key + indexeddb
+export function withStorageSync<Input extends SignalStoreFeatureResult>(
+  key: string,
+  StorageServiceClass: Type<IndexeddbService>
+): SignalStoreFeature<Input, WithIndexeddbSyncFeatureResult>;
+
+// key + localStorage(or sessionStorage)
+export function withStorageSync<Input extends SignalStoreFeatureResult>(
+  key: string,
+  StorageServiceClass: Type<StorageService>
+): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
+
+// config + localStorage
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   config: SyncConfig<Input['state']>
 ): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
+
+// config + indexeddb
+export function withStorageSync<Input extends SignalStoreFeatureResult>(
+  config: SyncConfig<Input['state']>,
+  StorageServiceClass: Type<IndexeddbService>
+): SignalStoreFeature<Input, WithIndexeddbSyncFeatureResult>;
+
+// config + localStorage(or sessionStorage)
+export function withStorageSync<Input extends SignalStoreFeatureResult>(
+  config: SyncConfig<Input['state']>,
+  StorageServiceClass: Type<StorageService>
+): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
+
 export function withStorageSync<
   State extends object,
   Input extends SignalStoreFeatureResult
 >(
-  configOrKey: SyncConfig<Input['state']> | string
-): SignalStoreFeature<Input, WithStorageSyncFeatureResult> {
+  configOrKey: SyncConfig<Input['state']> | string,
+  StorageServiceClass: StorageServiceFactory = withIndexeddb()
+): SignalStoreFeature<
+  Input,
+  WithStorageSyncFeatureResult | WithIndexeddbSyncFeatureResult
+> {
   const {
     key,
     autoSync = true,
     select = (state: State) => state,
     parse = JSON.parse,
     stringify = JSON.stringify,
-    storage: storageFactory = () => localStorage,
   } = typeof configOrKey === 'string' ? { key: configOrKey } : configOrKey;
 
   return signalStoreFeature(
-    withMethods((store, platformId = inject(PLATFORM_ID)) => {
-      if (isPlatformServer(platformId)) {
-        console.warn(
-          `'withStorageSync' provides non-functional implementation due to server-side execution`
-        );
-        return StorageSyncStub;
+    withMethods(
+      (
+        store,
+        platformId = inject(PLATFORM_ID),
+        storageService = inject(StorageServiceClass)
+      ) => {
+        if (isPlatformServer(platformId)) {
+          return storageService.getStub();
+        }
+
+        return {
+          /**
+           * Removes the item stored in storage.
+           */
+          async clearStorage(): Promise<void> {
+            await storageService.clear(key);
+          },
+          /**
+           * Reads item from storage and patches the state.
+           */
+          async readFromStorage(): Promise<void> {
+            const stateString = await storageService.getItem(key);
+
+            if (stateString) {
+              patchState(store, parse(stateString));
+            }
+          },
+          /**
+           * Writes selected portion to storage.
+           */
+          async writeToStorage(): Promise<void> {
+            const slicedState = select(getState(store) as State);
+            await storageService.setItem(key, stringify(slicedState));
+          },
+        };
       }
-
-      const storage = storageFactory();
-
-      return {
-        /**
-         * Removes the item stored in storage.
-         */
-        clearStorage(): void {
-          storage.removeItem(key);
-        },
-        /**
-         * Reads item from storage and patches the state.
-         */
-        readFromStorage(): void {
-          const stateString = storage.getItem(key);
-          if (stateString) {
-            patchState(store, parse(stateString));
-          }
-        },
-        /**
-         * Writes selected portion to storage.
-         */
-        writeToStorage(): void {
-          const slicedState = select(getState(store) as State);
-          storage.setItem(key, stringify(slicedState));
-        },
-      };
-    }),
+    ),
     withHooks({
-      onInit(store, platformId = inject(PLATFORM_ID)) {
+      onInit(
+        store,
+        platformId = inject(PLATFORM_ID),
+        envInjector = inject(EnvironmentInjector)
+      ) {
         if (isPlatformServer(platformId)) {
           return;
         }
 
         if (autoSync) {
-          store.readFromStorage();
-
-          effect(() => {
-            store.writeToStorage();
+          store.readFromStorage().then(() => {
+            Promise.resolve().then(async () => {
+              runInInjectionContext(envInjector, () => {
+                effect(() => {
+                  store.writeToStorage();
+                });
+              });
+            });
           });
         }
       },

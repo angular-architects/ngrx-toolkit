@@ -47,6 +47,12 @@ importers:
       '@nx/angular':
         specifier: 20.4.0
         version: 20.4.0(ix3k5rlwg32z2ghruh5rmsouzu)
+      core-js:
+        specifier: ^3.40.0
+        version: 3.40.0
+      flush-promises:
+        specifier: ^1.0.2
+        version: 1.0.2
       rxjs:
         specifier: ~7.8.0
         version: 7.8.1
@@ -153,6 +159,9 @@ importers:
       eslint-plugin-unused-imports:
         specifier: ^4.1.4
         version: 4.1.4(@typescript-eslint/eslint-plugin@8.19.0(@typescript-eslint/parser@8.19.0(eslint@9.17.0(jiti@1.21.6))(typescript@5.7.3))(eslint@9.17.0(jiti@1.21.6))(typescript@5.7.3))(eslint@9.17.0(jiti@1.21.6))
+      fake-indexeddb:
+        specifier: ^6.0.0
+        version: 6.0.0
       husky:
         specifier: ^9.0.11
         version: 9.1.1
@@ -4151,6 +4160,9 @@ packages:
   core-js-compat@3.39.0:
     resolution: {integrity: sha512-VgEUx3VwlExr5no0tXlBt+silBvhTryPwCXRI2Id1PN8WTKu7MreethvddqOubrYxkFdv/RnYrqlv1sFNAUelw==}
 
+  core-js@3.40.0:
+    resolution: {integrity: sha512-7vsMc/Lty6AGnn7uFpYT56QesI5D2Y/UkgKounk87OP9Z2H9Z8kj6jzcSGAxFmUtDOS0ntK6lbQz+Nsa0Jj6mQ==}
+
   core-util-is@1.0.3:
     resolution: {integrity: sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==}
 
@@ -4795,6 +4807,10 @@ packages:
     resolution: {integrity: sha512-hMQ4CX1p1izmuLYyZqLMO/qGNw10wSv9QDCPfzXfyFrOaCSSoRfqE1Kf1s5an66J5JZC62NewG+mK49jOCtQew==}
     engines: {node: '>=4'}
 
+  fake-indexeddb@6.0.0:
+    resolution: {integrity: sha512-YEboHE5VfopUclOck7LncgIqskAqnv4q0EWbYCaxKKjAvO93c+TJIaBuGy8CBFdbg9nKdpN3AuPRwVBJ4k7NrQ==}
+    engines: {node: '>=18'}
+
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
 
@@ -4898,6 +4914,9 @@ packages:
 
   flatted@3.3.1:
     resolution: {integrity: sha512-X8cqMLLie7KsNUDSdzeN8FYK9rEt4Dt67OsG/DNGnYTSDBG4uFAJFBnUeiV+zCVAvwFy56IjM9sH51jVaEhNxw==}
+
+  flush-promises@1.0.2:
+    resolution: {integrity: sha512-G0sYfLQERwKz4+4iOZYQEZVpOt9zQrlItIxQAAYAWpfby3gbHrx0osCHz5RLl/XoXevXk0xoN4hDFky/VV9TrA==}
 
   follow-redirects@1.15.6:
     resolution: {integrity: sha512-wWN62YITEaOpSK584EZXJafH1AGpO8RVgElfkuXbTOrPX4fIfOyEpW/CsiNd8JdYrAoOvafRTOEnvsO++qCqFA==}
@@ -12972,6 +12991,8 @@ snapshots:
     dependencies:
       browserslist: 4.24.3
 
+  core-js@3.40.0: {}
+
   core-util-is@1.0.3: {}
 
   corser@2.0.1: {}
@@ -13711,6 +13732,8 @@ snapshots:
       iconv-lite: 0.4.24
       tmp: 0.0.33
 
+  fake-indexeddb@6.0.0: {}
+
   fast-deep-equal@3.1.3: {}
 
   fast-glob@3.3.2:
@@ -13839,6 +13862,8 @@ snapshots:
   flat@5.0.2: {}
 
   flatted@3.3.1: {}
+
+  flush-promises@1.0.2: {}
 
   follow-redirects@1.15.6(debug@4.4.0):
     optionalDependencies:

@@ -9,6 +9,7 @@ import { FlightSearchWithPaginationComponent } from './flight-search-with-pagina
 import { FlightSearchReducConnectorComponent } from './flight-search-redux-connector/flight-search.component';
 import { provideFlightStore } from './flight-search-redux-connector/+state/redux';
 import { TodoComponent } from './devtools/todo.component';
+import { TodoIndexeddbSyncComponent } from './todo-indexeddb-sync/todo-indexeddb-sync.component';
 
 export const lazyRoutes: Route[] = [
   { path: 'todo', component: TodoComponent },
@@ -28,6 +29,7 @@ export const lazyRoutes: Route[] = [
   },
   { path: 'flight-edit-dynamic/:id', component: FlightEditDynamicComponent },
   { path: 'todo-storage-sync', component: TodoStorageSyncComponent },
+  { path: 'todo-indexeddb-sync', component: TodoIndexeddbSyncComponent },
   {
     path: 'flight-search-redux-connector',
     providers: [provideFlightStore()],
