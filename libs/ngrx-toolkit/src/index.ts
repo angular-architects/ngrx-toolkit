@@ -23,10 +23,7 @@ export { withReset, setResetState } from './lib/with-reset';
 export { withLocalStorage } from './lib/storage-sync/features/with-local-storage';
 export { withSessionStorage } from './lib/storage-sync/features/with-session-storage';
 export { withIndexeddb } from './lib/storage-sync/features/with-indexeddb';
-export {
-  withStorageSync,
-  SyncConfig,
-} from './lib/storage-sync/with-storage-sync';
+export { withStorageSync, SyncConfig } from './lib/with-storage-sync';
 export { withImmutableState } from './lib/immutable-state/with-immutable-state';
 export { withFeatureFactory } from './lib/with-feature-factory';
 export { withConditional, emptyFeature } from './lib/with-conditional';
