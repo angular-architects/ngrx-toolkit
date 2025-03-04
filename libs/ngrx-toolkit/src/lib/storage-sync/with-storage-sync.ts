@@ -22,8 +22,8 @@ import {
   StorageServiceFactory,
   WithIndexeddbSyncFeatureResult,
   WithStorageSyncFeatureResult,
-} from './storage-sync/internal/models';
-import { withIndexeddb } from './storage-sync/features/with-indexeddb';
+} from './internal/models';
+import { withIndexeddb } from './features/with-indexeddb';
 
 export type SyncConfig<State> = {
   /**
