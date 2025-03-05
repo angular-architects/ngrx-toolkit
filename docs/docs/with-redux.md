@@ -107,3 +107,36 @@ signalStore(
   })
 );
 ```
+
+### Configuring the Redux Devtools Extension
+
+The `provideDevtoolsConfig` function allows you to configure the Redux DevTools integration for your NgRx SignalStore. This function is essential for setting up the DevTools with custom options. The function only needs to be called once in your appConfig or AppModule.
+
+To use `provideDevtoolsConfig`, you need to import it and call it in your providers array.
+
+Here is an example of how to use it with the standalone api:
+
+```typescript
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { provideDevtoolsConfig } from '@angular-architects/ngrx-toolkit';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideDevtoolsConfig({
+      name: 'MyApp',
+    }),
+  ],
+};
+
+// main.ts
+import { bootstrapApplication } from '@angular/platform-browser';
+import { AppComponent } from './app/app.component';
+import { appConfig } from './app/app.config.ts';
+
+await bootstrapApplication(AppComponent, appConfig);
+```
+
+### Additional Information
+
+For more details on the available options and their usage, refer to the [Redux DevTools Extension documentation](https://github.com/reduxjs/redux-devtools).
