@@ -112,8 +112,6 @@ signalStore(
 
 The `provideDevtoolsConfig` function allows you to configure the Redux DevTools integration for your NgRx SignalStore. This function is essential for setting up the DevTools with custom options. The function only needs to be called once in your appConfig or AppModule.
 
-### Usage
-
 To use `provideDevtoolsConfig`, you need to import it and call it in your providers array.
 
 Here is an example of how to use it with the standalone api:
@@ -127,7 +125,6 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideDevtoolsConfig({
       name: 'MyApp',
-      maxAge: 50,
     }),
   ],
 };
@@ -140,13 +137,6 @@ import { appConfig } from './app/app.config.ts';
 await bootstrapApplication(AppComponent, appConfig);
 ```
 
-### Options
-
-The `provideDevtoolsConfig` function accepts an object with the following properties:
-
-- `name` (string): Optional name for the DevTools instance. The default is "NgRx SignalStore".
-- `maxAge` (number): Maximum number of actions to keep in the history. The default is 50.
-
 ### Additional Information
 
-For more details on the available options and their usage, refer to the [Redux DevTools Extension documentation](https://github.com/zalmoxisus/redux-devtools-extension).
+For more details on the available options and their usage, refer to the [Redux DevTools Extension documentation](https://github.com/reduxjs/redux-devtools).

@@ -15,12 +15,11 @@ describe('provideDevtoolsConfig', () => {
   it('DevtoolsSyncer should use the configuration provided', () => {
     const { connectSpy } = setupExtensions();
     TestBed.configureTestingModule({
-      providers: [provideDevtoolsConfig({ name: 'test', maxAge: 10 })],
+      providers: [provideDevtoolsConfig({ name: 'test' })],
     });
     TestBed.inject(DevtoolsSyncer);
     expect(connectSpy).toHaveBeenCalledWith({
       name: 'test',
-      maxAge: 10,
     });
   });
 });
