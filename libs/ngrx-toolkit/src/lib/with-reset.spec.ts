@@ -109,4 +109,33 @@ describe('withReset', () => {
       'Cannot set reset state, since store is not configured with withReset()'
     );
   });
+
+  it('should reset one slice of state to initial', () => {
+    const { store } = setup();
+
+    store.changeUser(2, 'John');
+    store.changeAddress('Vilnus', 'LT-00104');
+    expect(getState(store)).toEqual({
+      user: { id: 2, name: 'John' },
+      address: { city: 'Vilnus', zip: 'LT-00104' },
+    });
+    store.resetSlice('address');
+    expect(getState(store)).toEqual({
+      user: { id: 2, name: 'John' },
+      address: { city: 'Vienna', zip: '1010' },
+    });
+  });
+
+  it('should reset both slice of state to initial', () => {
+    const { store, initialState } = setup();
+
+    store.changeUser(2, 'John');
+    store.changeAddress('Vilnus', 'LT-00104');
+    expect(getState(store)).toEqual({
+      user: { id: 2, name: 'John' },
+      address: { city: 'Vilnus', zip: 'LT-00104' },
+    });
+    store.resetSlice(['address', 'user']);
+    expect(getState(store)).toStrictEqual(initialState);
+  });
 });

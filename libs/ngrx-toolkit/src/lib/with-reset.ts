@@ -10,6 +10,7 @@ import {
 
 export type PublicMethods = {
   resetState(): void;
+  resetSlice(slice: string | string[]): void;
 };
 
 /**
@@ -20,12 +21,23 @@ export type PublicMethods = {
  */
 export function withReset() {
   return signalStoreFeature(
-    withProps(() => ({ _resetState: { value: {} } })),
+    withProps(() => ({ _resetState: { value: {} as Record<string, any> } })),
     withMethods((store): PublicMethods => {
       // workaround to TS excessive property check
       const methods = {
         resetState() {
           patchState(store, store._resetState.value);
+        },
+        resetSlice(slice: string | string[]) {
+          patchState(store, (state) => ({
+            ...state,
+            ...(typeof slice === 'string'
+              ? { [slice]: store._resetState.value[slice] }
+              : slice.reduce((acc, key) => {
+                  acc[key] = store._resetState.value[key];
+                  return acc;
+                }, {} as Record<string, any>)),
+          }));
         },
         __setResetState__(state: object) {
           store._resetState.value = state;
