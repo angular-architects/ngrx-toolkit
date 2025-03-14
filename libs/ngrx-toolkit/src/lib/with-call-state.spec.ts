@@ -21,7 +21,7 @@ describe('withCallState', () => {
     patchState(dataStore, setInitial());
 
     expect(dataStore.callState()).toBe('init');
-    expect(dataStore.initial()).toBe(true);
+    expect(dataStore.init()).toBe(true);
   });
 
   it('should use the callState for a collection', () => {
