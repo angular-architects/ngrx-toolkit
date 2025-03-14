@@ -18,7 +18,7 @@ export type NamedCallStateSlice<Collection extends string> = {
 };
 
 export type CallStateSignals = {
-  initial: Signal<boolean>;
+  init: Signal<boolean>;
   loading: Signal<boolean>;
   loaded: Signal<boolean>;
   error: Signal<string | null>;
