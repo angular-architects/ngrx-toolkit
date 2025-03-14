@@ -1,46 +1,39 @@
-import { EmptyFeatureResult } from '@ngrx/signals';
-import { Type } from '@angular/core';
+import { EmptyFeatureResult, WritableStateSource } from '@ngrx/signals';
+import { SyncConfig } from '../with-storage-sync';
+import { Signal } from '@angular/core';
 
-export interface StorageService {
-  clear(key: string): void;
-
-  getItem(key: string): string | null;
-
-  setItem(key: string, data: string): void;
-
-  getStub(): Pick<WithStorageSyncFeatureResult, 'methods'>['methods'];
-}
-
-export interface IndexeddbService {
-  clear(key: string): Promise<void>;
-
-  getItem(key: string): Promise<string | null>;
-
-  setItem(key: string, data: string): Promise<void>;
-
-  getStub(): Pick<WithIndexeddbSyncFeatureResult, 'methods'>['methods'];
-}
-
-export type StorageServiceFactory =
-  | Type<IndexeddbService>
-  | Type<StorageService>;
-
-export type WithIndexeddbSyncFeatureResult = EmptyFeatureResult & {
-  methods: {
-    clearStorage(): Promise<void>;
-    readFromStorage(): Promise<void>;
-    writeToStorage(): Promise<void>;
-  };
+export type SyncMethods = {
+  clearStorage(): void;
+  readFromStorage(): void;
+  writeToStorage(): void;
 };
 
-export type WithStorageSyncFeatureResult = EmptyFeatureResult & {
-  methods: {
-    clearStorage(): void;
-    readFromStorage(): void;
-    writeToStorage(): void;
-  };
+export type SyncFeatureResult = EmptyFeatureResult & {
+  methods: SyncMethods;
 };
 
-export const NOOP = () => void true;
+export type SyncStorageStrategy<State extends object> = ((
+  config: Required<SyncConfig<State>>,
+  store: WritableStateSource<State>,
+  useStubs: boolean
+) => SyncMethods) & { type: 'sync' };
 
-export const PROMISE_NOOP = () => Promise.resolve();
+export type AsyncMethods = {
+  clearStorage(): Promise<void>;
+  readFromStorage(): Promise<void>;
+  writeToStorage(): Promise<void>;
+};
+
+export type AsyncFeatureResult = EmptyFeatureResult & {
+  methods: AsyncMethods;
+  props: { isSynced: Signal<boolean>; whenSynced: () => Promise<void> };
+};
+
+export type AsyncStorageStrategy<State extends object> = ((
+  config: Required<SyncConfig<State>>,
+  store: WritableStateSource<State>,
+  useStubs: boolean,
+  setSyncStatus: SetSyncStatus
+) => AsyncMethods) & { type: 'async' };
+
+export type SetSyncStatus = (status: 'idle' | 'syncing' | 'synced') => void;

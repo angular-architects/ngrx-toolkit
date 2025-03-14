@@ -1,29 +1,25 @@
 import { isPlatformServer } from '@angular/common';
+import { computed, inject, PLATFORM_ID, signal } from '@angular/core';
 import {
-  effect,
-  EnvironmentInjector,
-  inject,
-  PLATFORM_ID,
-  runInInjectionContext,
-  Type,
-} from '@angular/core';
-import {
-  getState,
-  patchState,
+  EmptyFeatureResult,
   signalStoreFeature,
   SignalStoreFeature,
   SignalStoreFeatureResult,
+  watchState,
+  withComputed,
   withHooks,
   withMethods,
+  withProps,
 } from '@ngrx/signals';
 import {
-  IndexeddbService,
-  StorageService,
-  StorageServiceFactory,
-  WithIndexeddbSyncFeatureResult,
-  WithStorageSyncFeatureResult,
+  AsyncFeatureResult,
+  AsyncMethods,
+  AsyncStorageStrategy,
+  SyncFeatureResult,
+  SyncMethods,
+  SyncStorageStrategy,
 } from './internal/models';
-import { withIndexeddb } from './features/with-indexeddb';
+import { withLocalStorage } from './features/with-local-storage';
 
 export type SyncConfig<State> = {
   /**
@@ -41,7 +37,7 @@ export type SyncConfig<State> = {
    *
    * Returns the whole state object by default
    */
-  select?: (state: State) => Partial<State>;
+  select?: (state: State) => unknown;
   /**
    * Function used to parse the state coming from storage.
    *
@@ -53,7 +49,7 @@ export type SyncConfig<State> = {
    *
    * `JSON.stringify()` by default
    */
-  stringify?: (state: State) => string;
+  stringify?: (state: unknown) => string;
 };
 
 /**
@@ -65,113 +61,92 @@ export type SyncConfig<State> = {
 // only key
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   key: string
-): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
+): SignalStoreFeature<Input, SyncFeatureResult>;
 
 // key + indexeddb
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   key: string,
-  StorageServiceClass: Type<IndexeddbService>
-): SignalStoreFeature<Input, WithIndexeddbSyncFeatureResult>;
+  storageStrategy: AsyncStorageStrategy<Input['state']>
+): SignalStoreFeature<Input, AsyncFeatureResult>;
 
 // key + localStorage(or sessionStorage)
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   key: string,
-  StorageServiceClass: Type<StorageService>
-): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
+  storageStrategy: SyncStorageStrategy<Input['state']>
+): SignalStoreFeature<Input, SyncFeatureResult>;
 
 // config + localStorage
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   config: SyncConfig<Input['state']>
-): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
+): SignalStoreFeature<Input, SyncFeatureResult>;
 
 // config + indexeddb
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   config: SyncConfig<Input['state']>,
-  StorageServiceClass: Type<IndexeddbService>
-): SignalStoreFeature<Input, WithIndexeddbSyncFeatureResult>;
+  storageStrategy: AsyncStorageStrategy<Input['state']>
+): SignalStoreFeature<Input, AsyncFeatureResult>;
 
 // config + localStorage(or sessionStorage)
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   config: SyncConfig<Input['state']>,
-  StorageServiceClass: Type<StorageService>
-): SignalStoreFeature<Input, WithStorageSyncFeatureResult>;
+  storageStrategy: SyncStorageStrategy<Input['state']>
+): SignalStoreFeature<Input, SyncFeatureResult>;
 
-export function withStorageSync<
-  State extends object,
-  Input extends SignalStoreFeatureResult
->(
+export function withStorageSync<Input extends SignalStoreFeatureResult>(
   configOrKey: SyncConfig<Input['state']> | string,
-  StorageServiceClass: StorageServiceFactory = withIndexeddb()
+  storageStrategy?:
+    | AsyncStorageStrategy<Input['state']>
+    | SyncStorageStrategy<Input['state']>
 ): SignalStoreFeature<
   Input,
-  WithStorageSyncFeatureResult | WithIndexeddbSyncFeatureResult
+  EmptyFeatureResult & { methods: AsyncMethods | SyncMethods }
 > {
-  const {
-    key,
-    autoSync = true,
-    select = (state: State) => state,
-    parse = JSON.parse,
-    stringify = JSON.stringify,
-  } = typeof configOrKey === 'string' ? { key: configOrKey } : configOrKey;
+  const config: Required<SyncConfig<Input['state']>> = {
+    autoSync: true,
+    select: (state: Input['state']) => state,
+    parse: JSON.parse,
+    stringify: JSON.stringify,
+    ...(typeof configOrKey === 'string' ? { key: configOrKey } : configOrKey),
+  };
+
+  const factory = storageStrategy ?? withLocalStorage();
 
   return signalStoreFeature(
-    withMethods(
-      (
+    withProps(() => ({
+      // it is necessary to have a signal here, so that its changes are
+      // not tracked by the autoSync mechanism and trigger an infinite loop.
+      _syncStatus: signal<'idle' | 'syncing' | 'synced'>('idle'),
+    })),
+    withComputed(({ _syncStatus }) => ({
+      isSynced: computed(() => _syncStatus() === 'synced'),
+    })),
+    withMethods((store, platformId = inject(PLATFORM_ID)) => {
+      const setSyncStatus = (status: 'idle' | 'syncing' | 'synced') =>
+        store._syncStatus.set(status);
+
+      return factory(
+        config,
         store,
-        platformId = inject(PLATFORM_ID),
-        storageService = inject(StorageServiceClass)
-      ) => {
-        if (isPlatformServer(platformId)) {
-          return storageService.getStub();
-        }
-
-        return {
-          /**
-           * Removes the item stored in storage.
-           */
-          async clearStorage(): Promise<void> {
-            await storageService.clear(key);
-          },
-          /**
-           * Reads item from storage and patches the state.
-           */
-          async readFromStorage(): Promise<void> {
-            const stateString = await storageService.getItem(key);
-
-            if (stateString) {
-              patchState(store, parse(stateString));
-            }
-          },
-          /**
-           * Writes selected portion to storage.
-           */
-          async writeToStorage(): Promise<void> {
-            const slicedState = select(getState(store) as State);
-            await storageService.setItem(key, stringify(slicedState));
-          },
-        };
-      }
-    ),
+        isPlatformServer(platformId),
+        setSyncStatus
+      );
+    }),
     withHooks({
-      onInit(
-        store,
-        platformId = inject(PLATFORM_ID),
-        envInjector = inject(EnvironmentInjector)
-      ) {
+      onInit(store, platformId = inject(PLATFORM_ID)) {
         if (isPlatformServer(platformId)) {
           return;
         }
 
-        if (autoSync) {
-          store.readFromStorage().then(() => {
-            Promise.resolve().then(async () => {
-              runInInjectionContext(envInjector, () => {
-                effect(() => {
-                  store.writeToStorage();
-                });
-              });
-            });
-          });
+        if (config.autoSync) {
+          const initAutoSync = () =>
+            watchState(store, () => store.writeToStorage());
+          const possiblePromise =
+            store.readFromStorage() as void | Promise<void>;
+          if (possiblePromise) {
+            possiblePromise.then(initAutoSync);
+          } else {
+            initAutoSync();
+          }
         }
       },
     })

@@ -24,8 +24,10 @@ export * from './lib/with-data-service';
 export * from './lib/with-pagination';
 export { withReset, setResetState } from './lib/with-reset';
 
-export { withLocalStorage } from './lib/storage-sync/features/with-local-storage';
-export { withSessionStorage } from './lib/storage-sync/features/with-session-storage';
+export {
+  withLocalStorage,
+  withSessionStorage,
+} from './lib/storage-sync/features/with-local-storage';
 export { withIndexeddb } from './lib/storage-sync/features/with-indexeddb';
 export {
   withStorageSync,
