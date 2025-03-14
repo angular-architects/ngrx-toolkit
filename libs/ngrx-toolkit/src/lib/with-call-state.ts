@@ -18,7 +18,6 @@ export type NamedCallStateSlice<Collection extends string> = {
 };
 
 export type CallStateSignals = {
-  init: Signal<boolean>;
   loading: Signal<boolean>;
   loaded: Signal<boolean>;
   error: Signal<string | null>;
@@ -36,7 +35,6 @@ export function getCallStateKeys(config?: { collection?: string }) {
   const prop = config?.collection;
   return {
     callStateKey: prop ? `${config.collection}CallState` : 'callState',
-    initialKey: prop ? `${config.collection}Initial` : 'init',
     loadingKey: prop ? `${config.collection}Loading` : 'loading',
     loadedKey: prop ? `${config.collection}Loaded` : 'loaded',
     errorKey: prop ? `${config.collection}Error` : 'error',
@@ -62,7 +60,7 @@ export function withCallState(): SignalStoreFeature<
 export function withCallState<Collection extends string>(config?: {
   collection: Collection;
 }): SignalStoreFeature {
-  const { callStateKey, errorKey, loadedKey, loadingKey, initialKey } =
+  const { callStateKey, errorKey, loadedKey, loadingKey } =
     getCallStateKeys(config);
 
   return signalStoreFeature(
@@ -71,7 +69,6 @@ export function withCallState<Collection extends string>(config?: {
       const callState = state[callStateKey] as Signal<CallState>;
 
       return {
-        [initialKey]: computed(() => callState() === 'init'),
         [loadingKey]: computed(() => callState() === 'loading'),
         [loadedKey]: computed(() => callState() === 'loaded'),
         [errorKey]: computed(() => {
@@ -81,16 +78,6 @@ export function withCallState<Collection extends string>(config?: {
       };
     })
   );
-}
-
-export function setInitial<Prop extends string | undefined = undefined>(
-  prop?: Prop
-): SetCallState<Prop> {
-  if (prop) {
-    return { [`${prop}CallState`]: 'init' } as SetCallState<Prop>;
-  }
-
-  return { callState: 'init' } as SetCallState<Prop>;
 }
 
 export function setLoading<Prop extends string | undefined = undefined>(
