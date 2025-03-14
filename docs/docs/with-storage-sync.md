@@ -41,3 +41,39 @@ public class SyncedStoreComponent {
   }
 }
 ```
+## Injecting services
+The `storage` property requires a factory function that returns a `Storage` implementation. If you have a custom `Storage` implementation that is `Injectable`, you can provide it as a factory parameters using the `inject` function.
+
+ Example:
+ 
+ ```typescript
+@Injectable({providedIn: 'root'})
+export class MyStorage implements Storage {
+    [name: string]: any;
+    length: number;
+    clear(): void {
+        ...
+    }
+    getItem(key: string): string | null {
+        ...
+    }
+    key(index: number): string | null {
+        ...
+    }
+    removeItem(key: string): void {
+        ...
+    }
+    setItem(key: string, value: string): void {
+        ...
+    }
+
+}
+ ```
+
+ ```typescript
+const SyncStore = signalStore(
+  withStorageSync<User>({
+    storage: (myStorageImplementation = inject(MyStorage)) => myStorageImplementation,
+  })
+);
+```
