@@ -2,6 +2,10 @@
 title: withReset()
 ---
 
+```typescript
+import { withReset } from '@angular-architects/ngrx-toolkit';
+```
+
 `withReset()` adds a method to reset the state of the Signal Store to its initial value. Nothing more to say about it 😅
 
 Example:
