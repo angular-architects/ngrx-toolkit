@@ -2,6 +2,10 @@
 title: withConditional()
 ---
 
+```typescript
+import { withConditional } from '@angular-architects/ngrx-toolkit';
+```
+
 `withConditional` activates a feature based on a given condition.
 
 ## Use Cases

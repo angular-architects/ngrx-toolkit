@@ -2,6 +2,10 @@
 title: withDevtools()
 ---
 
+```typescript
+import { withDevtools } from '@angular-architects/ngrx-toolkit';
+```
+
 Redux Devtools is a powerful browser extension tool, that allows you to inspect every change in your stores. Originally, it was designed for Redux, but it can also be used with the SignalStore. You can download it for Chrome [here](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd).
 
 To use the Devtools, you need to add the `withDevtools()` extension to your SignalStore:

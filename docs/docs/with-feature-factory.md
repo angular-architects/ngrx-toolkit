@@ -2,6 +2,10 @@
 title: withFeatureFactory()
 ---
 
+```typescript
+import { withFeatureFactory } from '@angular-architects/ngrx-toolkit';
+```
+
 The `withFeatureFactory()` function allows passing properties, methods, or signals from a SignalStore to a feature. It is an advanced feature, primarily targeted for library authors for SignalStore features.
 
 Its usage is very simple. It is a function which gets the current store:

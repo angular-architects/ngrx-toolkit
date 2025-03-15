@@ -2,6 +2,10 @@
 title: withDataService()
 ---
 
+```typescript
+import { withDataService } from '@angular-architects/ngrx-toolkit';
+```
+
 `withDataService()` allows to connect a Data Service to the store:
 
 This gives you a store for a CRUD use case:

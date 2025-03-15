@@ -2,6 +2,10 @@
 title: withUndoRedo()
 ---
 
+```typescript
+import { withUndoRedo } from '@angular-architects/ngrx-toolkit';
+```
+
 `withUndoRedo` adds undo and redo functionality to the store.
 
 Example:

@@ -2,6 +2,10 @@
 title: withImmutableState()
 ---
 
+```typescript
+import { withImmutableState } from '@angular-architects/ngrx-toolkit';
+```
+
 `withImmutableState` acts like `withState` but protects
 the state against unintended mutable changes, by throwing
 a runtime error.

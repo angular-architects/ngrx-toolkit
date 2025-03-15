@@ -2,6 +2,10 @@
 title: withRedux()
 ---
 
+```typescript
+import { withRedux } from '@angular-architects/ngrx-toolkit';
+```
+
 `withRedux()` brings back the Redux pattern into the Signal Store.
 
 It can be combined with any other extension of the Signal Store.

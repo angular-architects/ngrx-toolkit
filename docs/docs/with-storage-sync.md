@@ -2,6 +2,10 @@
 title: withStorageSync()
 ---
 
+```typescript
+import { withStorageSync } from '@angular-architects/ngrx-toolkit';
+```
+
 `withStorageSync` adds automatic or manual synchronization with Web Storage (`localstorage`/`sessionstorage`).
 
 :::warning
