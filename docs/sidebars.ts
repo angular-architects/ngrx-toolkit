@@ -21,6 +21,7 @@ const sidebars: SidebarsConfig = {
     'with-redux',
     'with-storage-sync',
     'with-undo-redo',
+    'with-reset',
     'with-immutable-state',
     'with-feature-factory',
     'with-conditional',
