@@ -11,6 +11,8 @@ Redux Devtools is a powerful browser extension tool, that allows you to inspect 
 To use the Devtools, you need to add the `withDevtools()` extension to your SignalStore:
 
 ```typescript
+import { withDevtools } from '@angular-architects/ngrx-toolkit';
+
 export const FlightStore = signalStore(
   { providedIn: 'root' },
   withDevtools('flights'), // <-- add this
@@ -31,9 +33,15 @@ The extensions don't activate during app initialization (as it is with `@ngrx/st
 
 ## `updateState()` vs `patchState()`
 
+```typescript
+import { updateState } from '@angular-architects/ngrx-toolkit';
+```
+
 The Signal Store does not use the Redux pattern, so there are no action names involved by default. Instead, every action is referred to as a "Store Update". If you want to customize the action name for better clarity, you can use the `updateState()` function instead of `patchState()`:
 
 ```typescript
+import { updateState } from '@angular-architects/ngrx-toolkit';
+
 patchState(this.store, { loading: false });
 
 // updateState is a wrapper around patchState and has an action name as second parameter
@@ -42,6 +50,10 @@ updateState(this.store, 'update loading', { loading: false });
 
 ## `renameDevtoolsName()`
 
+```typescript
+import { renameDevtoolsName } from '@angular-architects/ngrx-toolkit';
+```
+
 If multiple instances of a given SignalStore exist, the Devtools will index the names. For example, if you have two `TodoDetail` instances with the name `todo-detail`, the first one will be named `todo-detail` and the second one `todo-detail-1`.
 
 At any time, you can use `renameDevtoolsName()` to change the name of the store in the Devtools.
@@ -49,6 +61,8 @@ At any time, you can use `renameDevtoolsName()` to change the name of the store 
 The following example shows a component, which has a locally provided store and renames it according to the `id` of the `todo` Signal.
 
 ```typescript
+import { renameDevtoolsName, withDevtools } from '@angular-architects/ngrx-toolkit';
+
 const TodoDetailStore = signalStore(withDevtools('todo-detail'), withState({ id: 1 }));
 
 @Component({
@@ -69,6 +83,10 @@ export class TodoDetailComponent {
 
 ## `withGlitchTracking()`
 
+```typescript
+import { withGlitchTracking } from '@angular-architects/ngrx-toolkit';
+```
+
 It tracks all state changes of the State, including intermediary updates
 that are typically suppressed by Angular's glitch-free mechanism.
 
@@ -77,6 +95,8 @@ This feature is especially useful for debugging.
 Example:
 
 ```typescript
+import { withGlitchTracking, withDevtools } from '@angular-architects/ngrx-toolkit';
+
 const Store = signalStore(
   { providedIn: 'root' },
   withState({ count: 0 }),
@@ -100,6 +120,10 @@ It is also possible to mix. So one store could have `withGlitchTracking()` and a
 
 ## `withDisabledNameIndices()`
 
+```typescript
+import { withDisabledNameIndices } from '@angular-architects/ngrx-toolkit';
+```
+
 `withDevtools()` foresees the possibility to add features which extend or modify it. At the moment, `withDisabledNameIndices()` is the only feature available. It disables the automatic indexing of the store names in the Devtools.
 
 If multiple instances exist at the same time, `withDisabledNameIndices()` will throw an error. This is useful if you want to ensure that only one instance of a store is active at a time or that the store name is unique.
@@ -107,16 +131,24 @@ If multiple instances exist at the same time, `withDisabledNameIndices()` will t
 You activate per store:
 
 ```typescript
+import { withDisabledNameIndices, withDevtools } from '@angular-architects/ngrx-toolkit';
+
 const Store = signalStore({ providedIn: 'root' }, withDevtools('flights', withDisabledNameIndices()), withState({ airline: 'Lufthansa' }));
 ```
 
 ## `withMapper()`
+
+```typescript
+import { withMapper } from '@angular-architects/ngrx-toolkit';
+```
 
 `withMapper()` allows you to define a function that maps the state before it is sent to the Devtools.
 
 Sometimes, it is necessary to map the state before it is sent to the Devtools. For example, you might want to exclude some properties, like passwords or other sensitive data.
 
 ```typescript
+import { withMapper, withDevtools } from '@angular-architects/ngrx-toolkit';
+
 const initialState = {
   id: 1,
   email: 'john.list@host.com',

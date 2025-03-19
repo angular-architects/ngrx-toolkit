@@ -21,6 +21,8 @@ There is also a [Redux Connector](./create-redux-state) available, which is a se
 Example:
 
 ```typescript
+import { withRedux } from '@angular-architects/ngrx-toolkit';
+
 export const FlightStore = signalStore(
   { providedIn: 'root' },
   withState({ flights: [] as Flight[] }),
@@ -57,6 +59,14 @@ export const FlightStore = signalStore(
 
 ## Extracting actions, reducer and effects into separate files
 
+```typescript
+import { createReducer } from '@angular-architects/ngrx-toolkit';
+```
+
+```typescript
+import { createEffects } from '@angular-architects/ngrx-toolkit';
+```
+
 `createReducer` and `createEffects` allow you to extract the reducer and effects into separate files.
 
 There is no need for a `createActions` function, because the actions are just an object literal.
@@ -64,6 +74,8 @@ There is no need for a `createActions` function, because the actions are just an
 Example:
 
 ```typescript
+import { withRedux, createReducer, createEffects } from '@angular-architects/ngrx-toolkit';
+
 interface FlightState {
   flights: Flight[];
   effect1: boolean;
@@ -113,6 +125,10 @@ signalStore(
 ```
 
 ### Configuring the Redux Devtools Extension
+
+```typescript
+import { provideDevtoolsConfig } from '@angular-architects/ngrx-toolkit';
+```
 
 The `provideDevtoolsConfig` function allows you to configure the Redux DevTools integration for your NgRx SignalStore. This function is essential for setting up the DevTools with custom options. The function only needs to be called once in your appConfig or AppModule.
 

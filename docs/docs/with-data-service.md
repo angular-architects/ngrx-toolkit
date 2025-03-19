@@ -11,6 +11,8 @@ import { withDataService } from '@angular-architects/ngrx-toolkit';
 This gives you a store for a CRUD use case:
 
 ```typescript
+import { withDataService, withCallState, withUndoRedo } from '@angular-architects/ngrx-toolkit';
+
 export const SimpleFlightBookingStore = signalStore(
   { providedIn: 'root' },
   withCallState(),
@@ -90,6 +92,8 @@ export class FlightSearchSimpleComponent {
 To avoid naming conflicts, the properties set up by `withDataService` and the connected features can be configured in a typesafe way:
 
 ```typescript
+import { withDataService, withCallState, withUndoRedo } from '@angular-architects/ngrx-toolkit';
+
 export const FlightBookingStore = signalStore(
   { providedIn: 'root' },
   withCallState({

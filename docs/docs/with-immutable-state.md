@@ -14,6 +14,8 @@ The protection is not limited to changes within the
 SignalStore but also outside of it.
 
 ```typescript
+import { withImmutableState } from '@angular-architects/ngrx-toolkit';
+
 const initialState = { user: { id: 1, name: 'Konrad' } };
 
 const UserStore = signalStore(
@@ -66,5 +68,7 @@ By default, `withImmutableState` is only active in development mode.
 There is a way to enable it in production mode as well:
 
 ```typescript
+import { withImmutableState } from '@angular-architects/ngrx-toolkit';
+
 const UserStore = signalStore({ providedIn: 'root' }, withImmutableState(initialState, { enableInProduction: true }));
 ```
