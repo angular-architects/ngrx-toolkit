@@ -383,6 +383,22 @@ describe('withDataService', () => {
     });
   }));
 
+  it('should ensure that collection name is provided in callState ', () => {
+    // @ts-expect-error should not allow `withCallState` without collection name if `withDataService` has it
+    signalStore(
+      withCallState(),
+      withEntities({
+        entity: type<Flight>(),
+        collection: 'flight',
+      }),
+      withDataService({
+        dataServiceType: MockFlightService,
+        filter: { from: 'Paris', to: 'New York' },
+        collection: 'flight',
+      })
+    );
+  });
+
   // TODO 3A: setting error state (without named collection)
   // TODO 3B: setting error state (with named collection)
 });
