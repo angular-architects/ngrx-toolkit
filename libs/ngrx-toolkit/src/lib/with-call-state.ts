@@ -14,7 +14,7 @@ export type CallStateSlice = {
 };
 
 export type NamedCallStateSlice<Collection extends string> = {
-  [K in keyof CallStateSlice as `${Collection}${Capitalize<K>}`]: CallStateSlice[K];
+  [K in keyof CallStateSlice as Collection extends '' ? `${Collection}${K}` : `${Collection}${Capitalize<K>}`]: CallStateSlice[K];
 };
 
 export type CallStateSignals = {
@@ -24,25 +24,33 @@ export type CallStateSignals = {
 };
 
 export type NamedCallStateSignals<Prop extends string> = {
-  [K in keyof CallStateSignals as `${Prop}${Capitalize<K>}`]: CallStateSignals[K];
+  [K in keyof CallStateSignals as Prop extends '' ? `${Prop}${K}` : `${Prop}${Capitalize<K>}`]: CallStateSignals[K];
 };
 
 export type SetCallState<Prop extends string | undefined> = Prop extends string
   ? NamedCallStateSlice<Prop>
   : CallStateSlice;
 
-export function getCallStateKeys(config?: { collection?: string }) {
-  const prop = config?.collection;
+export function deriveCallStateKeys<Collection extends string>(collection?: Collection) {
   return {
-    callStateKey: prop ? `${config.collection}CallState` : 'callState',
-    loadingKey: prop ? `${config.collection}Loading` : 'loading',
-    loadedKey: prop ? `${config.collection}Loaded` : 'loaded',
-    errorKey: prop ? `${config.collection}Error` : 'error',
+    callStateKey: collection ? `${collection}CallState` : 'callState',
+    loadingKey: collection ? `${collection}Loading` : 'loading',
+    loadedKey: collection ? `${collection}Loaded` : 'loaded',
+    errorKey: collection ? `${collection}Error` : 'error',
   };
 }
 
+export function getCallStateKeys(config?: { collection?: string}) {
+  const prop = config?.collection;
+  return deriveCallStateKeys(prop);
+}
+
+export function getCollectionArray(collection: string | string[]){
+  return Array.isArray(collection) ? collection : [collection];
+}
+
 export function withCallState<Collection extends string>(config: {
-  collection: Collection;
+  collection: Collection | Collection[];
 }): SignalStoreFeature<
   EmptyFeatureResult,
   EmptyFeatureResult & {
@@ -58,16 +66,44 @@ export function withCallState(): SignalStoreFeature<
   }
 >;
 export function withCallState<Collection extends string>(config?: {
-  collection: Collection;
+  collection: Collection | Collection[];
 }): SignalStoreFeature {
-  const { callStateKey, errorKey, loadedKey, loadingKey } =
-    getCallStateKeys(config);
-
   return signalStoreFeature(
-    withState({ [callStateKey]: 'init' }),
+    withState(() => {
+      if (config) {
+        const collection = getCollectionArray(config.collection);
+        return collection.reduce(
+            (acc, cur) => ({
+              ...acc,
+              ...{ [cur ? `${cur}CallState` : 'callState']: 'init' },
+            }),
+            {}
+          )
+      }
+      return {
+        callState: 'init',
+      };
+    }),
     withComputed((state: Record<string, Signal<unknown>>) => {
+      if (config) {
+        const collection = getCollectionArray(config.collection);
+        return collection.reduce<Record<string, Signal<unknown>>>((acc, cur: string) => {
+          const { callStateKey, errorKey, loadedKey, loadingKey } =
+            deriveCallStateKeys(cur);
+          const callState = state[callStateKey] as Signal<CallState>;
+          return {
+            ...acc,
+            [loadingKey]: computed(() => callState() === 'loading'),
+            [loadedKey]: computed(() => callState() === 'loaded'),
+            [errorKey]: computed(() => {
+              const v = callState();
+              return typeof v === 'object' ? v.error : null;
+            }),
+          };
+        }, {});
+      } 
+      const { callStateKey, errorKey, loadedKey, loadingKey } = deriveCallStateKeys();
       const callState = state[callStateKey] as Signal<CallState>;
-
       return {
         [loadingKey]: computed(() => callState() === 'loading'),
         [loadedKey]: computed(() => callState() === 'loaded'),
