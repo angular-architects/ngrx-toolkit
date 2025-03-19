@@ -2,11 +2,17 @@
 title: withUndoRedo()
 ---
 
+```typescript
+import { withUndoRedo } from '@angular-architects/ngrx-toolkit';
+```
+
 `withUndoRedo` adds undo and redo functionality to the store.
 
 Example:
 
 ```typescript
+import { withUndoRedo } from '@angular-architects/ngrx-toolkit';
+
 const SyncStore = signalStore(
   withUndoRedo({
     maxStackSize: 100, // limit of undo/redo steps - `100` by default

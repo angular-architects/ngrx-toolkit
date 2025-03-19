@@ -2,6 +2,10 @@
 title: withStorageSync()
 ---
 
+```typescript
+import { withStorageSync } from '@angular-architects/ngrx-toolkit';
+```
+
 `withStorageSync` adds automatic or manual synchronization with Web Storage (`localstorage`/`sessionstorage`).
 
 :::warning
@@ -11,6 +15,8 @@ As Web Storage only works in browser environments it will fallback to a stub imp
 Example:
 
 ```typescript
+import { withStorageSync } from '@angular-architects/ngrx-toolkit';
+
 const SyncStore = signalStore(
   withStorageSync<User>({
     key: 'synced', // key used when writing to/reading from storage

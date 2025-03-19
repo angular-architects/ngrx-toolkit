@@ -2,6 +2,10 @@
 title: withConditional()
 ---
 
+```typescript
+import { withConditional } from '@angular-architects/ngrx-toolkit';
+```
+
 `withConditional` activates a feature based on a given condition.
 
 ## Use Cases
@@ -17,6 +21,8 @@ Otherwise, a type error will occur.
 ## Usage
 
 ```typescript
+import { withConditional } from '@angular-architects/ngrx-toolkit';
+
 const withUser = signalStoreFeature(
   withState({ id: 1, name: 'Konrad' }),
   withHooks((store) => ({

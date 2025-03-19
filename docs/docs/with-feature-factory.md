@@ -2,11 +2,17 @@
 title: withFeatureFactory()
 ---
 
+```typescript
+import { withFeatureFactory } from '@angular-architects/ngrx-toolkit';
+```
+
 The `withFeatureFactory()` function allows passing properties, methods, or signals from a SignalStore to a feature. It is an advanced feature, primarily targeted for library authors for SignalStore features.
 
 Its usage is very simple. It is a function which gets the current store:
 
 ```typescript
+import { withFeatureFactory } from '@angular-architects/ngrx-toolkit';
+
 function withSum(a: Signal<number>, b: Signal<number>) {
   return signalStoreFeature(
     withComputed(() => ({
@@ -103,6 +109,8 @@ function withEntityLoader(load: (id: number) => Promise<Entity>) {
 `withFeatureFactory` can now map the existing `load` method to the required one.
 
 ```typescript
+import { withFeatureFactory } from '@angular-architects/ngrx-toolkit';
+
 const store = signalStore(
   withMethods((store) => ({
     load(id: number): Observable<Entity> {
@@ -171,6 +179,8 @@ signalStore(
 Again, `withFeatureFactory` can solve this issue by replacing the input constraint with a function parameter:
 
 ```typescript
+import { withFeatureFactory } from '@angular-architects/ngrx-toolkit';
+
 function withEntityLoader<T>(loader: (id: number) => Promise<T>) {
   return signalStoreFeature(
     withState({
