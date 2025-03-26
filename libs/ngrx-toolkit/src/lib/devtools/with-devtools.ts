@@ -1,4 +1,10 @@
-import { signalStoreFeature, withHooks, withMethods } from '@ngrx/signals';
+import {
+  EmptyFeatureResult,
+  SignalStoreFeature,
+  signalStoreFeature,
+  withHooks,
+  withMethods,
+} from '@ngrx/signals';
 import { inject, InjectionToken } from '@angular/core';
 import { DevtoolsSyncer } from './internal/devtools-syncer.service';
 import {
@@ -71,5 +77,5 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
         },
       };
     })
-  );
+  ) as SignalStoreFeature<EmptyFeatureResult, EmptyFeatureResult>;
 }
