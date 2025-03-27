@@ -45,12 +45,25 @@ export function getCallStateKeys(config?: { collection?: string}) {
   return deriveCallStateKeys(prop);
 }
 
-export function getCollectionArray(collection: string | string[]){
-  return Array.isArray(collection) ? collection : [collection];
+export function getCollectionArray(config: { collection?: string } | { collections?: string[] }){
+  return 'collections' in config
+  ? config.collections
+  : 'collection' in config && config.collection
+    ? [config.collection]
+    : undefined;
 }
 
 export function withCallState<Collection extends string>(config: {
-  collection: Collection | Collection[];
+  collections: Collection[];
+}): SignalStoreFeature<
+  EmptyFeatureResult,
+  EmptyFeatureResult & {
+    state: NamedCallStateSlice<Collection>;
+    props: NamedCallStateSignals<Collection>;
+  }
+>;
+export function withCallState<Collection extends string>(config: {
+  collection: Collection;
 }): SignalStoreFeature<
   EmptyFeatureResult,
   EmptyFeatureResult & {
@@ -64,43 +77,48 @@ export function withCallState(): SignalStoreFeature<
     state: CallStateSlice;
     props: CallStateSignals;
   }
->;
-export function withCallState<Collection extends string>(config?: {
-  collection: Collection | Collection[];
+>;export function withCallState<Collection extends string>(config?: {
+  collection: Collection;
+} | {
+  collections: Collection[];
 }): SignalStoreFeature {
   return signalStoreFeature(
     withState(() => {
-      if (config) {
-        const collection = getCollectionArray(config.collection);
-        return collection.reduce(
-            (acc, cur) => ({
-              ...acc,
-              ...{ [cur ? `${cur}CallState` : 'callState']: 'init' },
-            }),
-            {}
-          )
+      if (!config) {
+        return { callState: 'init' };
       }
-      return {
-        callState: 'init',
-      };
+      const collections = getCollectionArray(config);
+      if (collections) {
+        return collections.reduce(
+          (acc, cur) => ({
+            ...acc,
+            ...{ [cur ? `${cur}CallState` : 'callState']: 'init' },
+          }),
+          {}
+        );
+      }
+
+      return { callState: 'init' };
     }),
     withComputed((state: Record<string, Signal<unknown>>) => {
       if (config) {
-        const collection = getCollectionArray(config.collection);
-        return collection.reduce<Record<string, Signal<unknown>>>((acc, cur: string) => {
-          const { callStateKey, errorKey, loadedKey, loadingKey } =
-            deriveCallStateKeys(cur);
-          const callState = state[callStateKey] as Signal<CallState>;
-          return {
-            ...acc,
-            [loadingKey]: computed(() => callState() === 'loading'),
-            [loadedKey]: computed(() => callState() === 'loaded'),
-            [errorKey]: computed(() => {
-              const v = callState();
-              return typeof v === 'object' ? v.error : null;
-            }),
-          };
-        }, {});
+        const collections = getCollectionArray(config);
+        if (collections) {
+          return collections.reduce<Record<string, Signal<unknown>>>((acc, cur: string) => {
+            const { callStateKey, errorKey, loadedKey, loadingKey } =
+              deriveCallStateKeys(cur);
+            const callState = state[callStateKey] as Signal<CallState>;
+            return {
+              ...acc,
+              [loadingKey]: computed(() => callState() === 'loading'),
+              [loadedKey]: computed(() => callState() === 'loaded'),
+              [errorKey]: computed(() => {
+                const v = callState();
+                return typeof v === 'object' ? v.error : null;
+              }),
+            };
+          }, {});
+        } 
       } 
       const { callStateKey, errorKey, loadedKey, loadingKey } = deriveCallStateKeys();
       const callState = state[callStateKey] as Signal<CallState>;
