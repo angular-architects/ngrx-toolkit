@@ -28,7 +28,7 @@ describe('withCallState', () => {
   it('should use the callState for multiple collections with an array', () => {
     const DataStore = signalStore(
       { protectedState: false },
-      withCallState({ collection: ['entities', 'products'] })
+      withCallState({ collections: ['entities', 'products'] })
     );
     const dataStore = new DataStore();
 
