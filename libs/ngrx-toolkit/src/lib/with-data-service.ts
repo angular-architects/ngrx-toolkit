@@ -11,19 +11,21 @@ import {
 } from '@ngrx/signals';
 import {
   CallState,
+  NamedCallStateSlice,
   getCallStateKeys,
   setError,
   setLoaded,
   setLoading,
 } from './with-call-state';
 import {
+  NamedEntityState,
   setAllEntities,
   EntityId,
   addEntity,
   updateEntity,
   removeEntity,
 } from '@ngrx/signals/entities';
-import { EntityState, NamedEntityComputed } from './shared/signal-store-models';
+import { EntityState } from './shared/signal-store-models';
 
 export type Filter = Record<string, unknown>;
 export type Entity = { id: EntityId };
@@ -201,10 +203,9 @@ export function withDataService<
   filter: F;
   collection: Collection;
 }): SignalStoreFeature<
-  // These alternatives break type inference:
-  // state: { callState: CallState } & NamedEntityState<E, Collection>,
-  // state: NamedEntityState<E, Collection>,
-  EmptyFeatureResult & { props: NamedEntityComputed<E, Collection> },
+  EmptyFeatureResult & {
+    state: NamedCallStateSlice<Collection> & NamedEntityState<E, Collection>;
+  },
   {
     state: NamedDataServiceState<E, F, Collection>;
     props: NamedDataServiceComputed<E, Collection>;
