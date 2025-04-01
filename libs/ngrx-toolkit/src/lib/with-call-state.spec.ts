@@ -24,4 +24,19 @@ describe('withCallState', () => {
     expect(dataStore.entitiesCallState()).toBe('loaded');
     expect(dataStore.entitiesLoaded()).toBe(true);
   });
+
+  it('should use the callState for multiple collections with an array', () => {
+    const DataStore = signalStore(
+      { protectedState: false },
+      withCallState({ collections: ['entities', 'products'] })
+    );
+    const dataStore = new DataStore();
+
+    patchState(dataStore, setLoaded('entities'), setLoaded('products'));
+
+    expect(dataStore.entitiesCallState()).toBe('loaded');
+    expect(dataStore.productsCallState()).toBe('loaded');
+    expect(dataStore.entitiesLoaded()).toBe(true);
+    expect(dataStore.productsLoaded()).toBe(true);
+  });
 });
