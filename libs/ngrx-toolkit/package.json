@@ -9,8 +9,8 @@
   "peerDependencies": {
     "@angular/core": "^19.0.0",
     "@angular/common": "^19.0.0",
-    "@ngrx/signals": "^19.0.0",
-    "@ngrx/store": "^19.0.0",
+    "@ngrx/signals": "^19.1.0",
+    "@ngrx/store": "^19.1.0",
     "rxjs": "^7.0.0"
   },
   "peerDependenciesMeta": {
