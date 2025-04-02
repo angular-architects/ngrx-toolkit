@@ -3,6 +3,10 @@ title: withFeatureFactory()
 ---
 
 ```typescript
+// DEPRECATED
+// Use `import { withFeature } from '@ngrx/signals'` instead,
+//     starting with `ngrx/signals` 19.1
+// https://ngrx.io/guide/signals/signal-store/custom-store-features#connecting-a-custom-feature-with-the-store
 import { withFeatureFactory } from '@angular-architects/ngrx-toolkit';
 ```
 
