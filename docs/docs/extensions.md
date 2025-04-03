@@ -13,6 +13,7 @@ It offers extensions like:
 - [Immutable State Protection](./with-immutable-state): Protects the state from being mutated outside or inside the Store.
 - [Redux](./with-redux): Possibility to use the Redux Pattern (Reducer, Actions, Effects)
 - [Reset](./with-reset): Adds a `resetState` method to your store
+- [Call State](./with-call-state): Add call state management to your signal stores
 - [Storage Sync](./with-storage-sync): Synchronizes the Store with Web Storage
 - [Undo Redo](./with-undo-redo): Adds Undo/Redo functionality to your store
 
