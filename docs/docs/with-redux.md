@@ -3,17 +3,22 @@ title: withRedux()
 ---
 
 ```typescript
+// DEPRECATED
 import { withRedux } from '@angular-architects/ngrx-toolkit';
+
+// Use `@ngrx/signals/events` instead
 ```
 
 `withRedux()` brings back the Redux pattern into the Signal Store.
 
 It can be combined with any other extension of the Signal Store.
 
-:::note
-Please note, that there is an [official RFC](https://github.com/ngrx/platform/issues/4580) that a Redux extension will be added to the SignalStore in the future.
+:::warning
+## Deprecation
 
-If you use `withRedux`, you will probably need to refactor your store when the official Redux extension is released.
+Please note, `@ngrx/signals/events` [was released as experimental in `@ngrx/signals/` v19.2](https://dev.to/ngrx/announcing-events-plugin-for-ngrx-signalstore-a-modern-take-on-flux-architecture-4dhn).
+
+If you use `withRedux`, you should transition to using the official `@ngrx/signals/events` features.
 :::
 
 There is also a [Redux Connector](./create-redux-state) available, which is a separate package and has a dependency to `@ngrx/store`.

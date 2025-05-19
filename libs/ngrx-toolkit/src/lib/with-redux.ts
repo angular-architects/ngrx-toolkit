@@ -134,6 +134,8 @@ type EffectsFactory<StateActionFns extends ActionFns> = (
 ) => Record<string, Observable<unknown>>;
 
 /**
+ * @deprecated Use NgRx's `@ngrx/signals/events` starting in 19.2
+ * 
  * Creates the effects function to separate the effects logic into another file.
  *
  * ```typescript
