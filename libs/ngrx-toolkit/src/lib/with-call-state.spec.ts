@@ -10,6 +10,11 @@ describe('withCallState', () => {
 
     expect(dataStore.callState()).toBe('loading');
     expect(dataStore.loading()).toBe(true);
+
+    dataStore.setLoaded();
+
+    expect(dataStore.callState()).toBe('loaded');
+    expect(dataStore.loaded()).toBe(true);
   });
 
   it('should use the callState for a collection', () => {
@@ -23,6 +28,11 @@ describe('withCallState', () => {
 
     expect(dataStore.entitiesCallState()).toBe('loaded');
     expect(dataStore.entitiesLoaded()).toBe(true);
+
+    dataStore.entitiesSetLoading();
+
+    expect(dataStore.entitiesCallState()).toBe('loading');
+    expect(dataStore.entitiesLoading()).toBe(true);
   });
 
   it('should use the callState for multiple collections with an array', () => {
@@ -38,5 +48,11 @@ describe('withCallState', () => {
     expect(dataStore.productsCallState()).toBe('loaded');
     expect(dataStore.entitiesLoaded()).toBe(true);
     expect(dataStore.productsLoaded()).toBe(true);
+
+    dataStore.entitiesSetLoading();
+    dataStore.productsSetLoading();
+
+    expect(dataStore.entitiesCallState()).toBe('loading');
+    expect(dataStore.productsCallState()).toBe('loading');
   });
 });
