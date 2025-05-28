@@ -14,33 +14,16 @@ The simplest way to use `withCallState` is without any configuration:
 
 ```typescript
 export const TodosStore = signalStore(
-  withCallState(),
+  withCallState()
   // ... other features
 );
 ```
 
 This provides you with:
+
 - A `callState` state property of type `'init' | 'loading' | 'loaded' | { error: string }`
 - Computed signals: `loading`, `loaded`, and `error`
 - Helper methods: `setLoading()`, `setLoaded()`, and `setError()`
-
-Example usage:
-
-```typescript
-export class TodosComponent {
-  store = inject(TodosStore);
-
-  loadTodos() {
-    this.store.setLoading(); // callState = 'loading'
-    try {
-      // ... fetch todos
-      this.store.setLoaded(); // callState = 'loaded'
-    } catch (error) {
-      this.store.setError(error); // callState = { error: 'error message' }
-    }
-  }
-}
-```
 
 ## Use Cases
 
@@ -51,6 +34,7 @@ export class TodosComponent {
 ## Type Constraints
 
 The call state can be one of these types:
+
 - `'init'` - Initial state
 - `'loading'` - Operation in progress
 - `'loaded'` - Operation completed successfully
@@ -59,20 +43,20 @@ The call state can be one of these types:
 ## Usage
 
 ```typescript
-import { withCallState } from '@angular-architects/ngrx-toolkit';
+import { withCallState, setLoading, setLoaded, setError } from '@angular-architects/ngrx-toolkit';
 
 const store = signalStore(
   withCallState(),
   withMethods((store) => ({
     async loadData() {
-      store.setLoading();
+      patchState(store, setLoading());
       try {
         // ... async operation
-        store.setLoaded();
+        patchState(store, setLoaded());
       } catch (error) {
-        store.setError(error);
+        patchState(store, setError(error));
       }
-    }
+    },
   }))
 );
 ```
@@ -83,12 +67,13 @@ You can track state for a specific collection by providing a collection name:
 
 ```typescript
 export const TodosStore = signalStore(
-  withCallState({ collection: 'todos' }),
+  withCallState({ collection: 'todos' })
   // ... other features
 );
 ```
 
 This provides:
+
 - A `todosCallState` state property
 - Computed signals: `todosLoading`, `todosLoaded`, and `todosError`
 - Helper methods with optional collection parameter
@@ -98,14 +83,14 @@ const store = signalStore(
   withCallState({ collection: 'todos' }),
   withMethods((store) => ({
     async loadTodos() {
-      store.todosSetLoading();
+      patchState(store, setLoading('todos'));
       try {
         // ... load todos
-        store.todosSetLoaded();
+        patchState(store, setLoaded('todos'));
       } catch (error) {
-        store.todosSetError(error);
+        patchState(store, setError(error, 'todos'));
       }
-    }
+    },
   }))
 );
 ```
@@ -116,12 +101,13 @@ For managing multiple async operations, use the collections configuration:
 
 ```typescript
 export const TodosStore = signalStore(
-  withCallState({ collections: ['todos', 'categories'] }),
+  withCallState({ collections: ['todos', 'categories'] })
   // ... other features
 );
 ```
 
 This creates separate states and signals for each collection:
+
 - States: `todosCallState`, `categoriesCallState`
 - Signals: `todosLoading`, `todosLoaded`, `todosError`, `categoriesLoading`, etc.
 
@@ -130,10 +116,9 @@ const store = signalStore(
   withCallState({ collections: ['todos', 'users'] }),
   withMethods((store) => ({
     async loadAll() {
-      store.todosSetLoading();
-      store.usersSetLoading();
+      patchState(store, setLoading('todos'), setLoading('users'));
       // ... load data for both collections
-    }
+    },
   }))
 );
 ```
@@ -141,24 +126,30 @@ const store = signalStore(
 ## Helper Methods
 
 ### setLoading()
+
 Sets the call state to 'loading':
+
 ```typescript
-store.setLoading(); // Basic usage
-store.setLoading('todos'); // With collection
+patchState(store, setLoading()); // Basic usage
+patchState(store, setLoading('todos')); // With collection
 ```
 
 ### setLoaded()
+
 Sets the call state to 'loaded':
+
 ```typescript
-store.setLoaded(); // Basic usage
-store.setLoaded('todos'); // With collection
+patchState(store, setLoaded()); // Basic usage
+patchState(store, setLoaded('todos')); // With collection
 ```
 
 ### setError()
+
 Sets the call state to error with a message:
+
 ```typescript
-store.setError(error); // Basic usage
-store.setError(error, 'todos'); // With collection
+patchState(store, setError(error)); // Basic usage
+patchState(store, setError(error, 'todos')); // With collection
 ```
 
 ## Accessing State
@@ -169,15 +160,13 @@ Access the computed signals in your templates or component code:
 @Component({
   template: `
     @if (store.loading()) {
-      <div>Loading...</div>
+    <div>Loading...</div>
+    } @if (store.error()) {
+    <div>Error: {{ store.error() }}</div>
+    } @if (store.loaded()) {
+    <div>Content loaded!</div>
     }
-    @if (store.error()) {
-      <div>Error: {{ store.error() }}</div>
-    }
-    @if (store.loaded()) {
-      <div>Content loaded!</div>
-    }
-  `
+  `,
 })
 export class MyComponent {
   store = inject(MyStore);
@@ -185,6 +174,7 @@ export class MyComponent {
 ```
 
 For collections:
+
 ```typescript
 @Component({
   template: `
@@ -196,3 +186,4 @@ For collections:
    }
   `
 })
+```
