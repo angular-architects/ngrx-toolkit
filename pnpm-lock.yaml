@@ -39,11 +39,11 @@ importers:
         specifier: 20.0.6
         version: 20.0.6(@angular/common@20.0.6(@angular/core@20.0.6(@angular/compiler@20.0.6)(rxjs@7.8.1)(zone.js@0.15.0))(rxjs@7.8.1))(@angular/core@20.0.6(@angular/compiler@20.0.6)(rxjs@7.8.1)(zone.js@0.15.0))(@angular/platform-browser@20.0.6(@angular/animations@20.0.6(@angular/common@20.0.6(@angular/core@20.0.6(@angular/compiler@20.0.6)(rxjs@7.8.1)(zone.js@0.15.0))(rxjs@7.8.1))(@angular/core@20.0.6(@angular/compiler@20.0.6)(rxjs@7.8.1)(zone.js@0.15.0)))(@angular/common@20.0.6(@angular/core@20.0.6(@angular/compiler@20.0.6)(rxjs@7.8.1)(zone.js@0.15.0))(rxjs@7.8.1))(@angular/core@20.0.6(@angular/compiler@20.0.6)(rxjs@7.8.1)(zone.js@0.15.0)))(rxjs@7.8.1)
       '@ngrx/signals':
-        specifier: 20.0.0-beta.0
-        version: 20.0.0-beta.0(@angular/core@20.0.6(@angular/compiler@20.0.6)(rxjs@7.8.1)(zone.js@0.15.0))(rxjs@7.8.1)
+        specifier: 20.0.0-rc.0
+        version: 20.0.0-rc.0(@angular/core@20.0.6(@angular/compiler@20.0.6)(rxjs@7.8.1)(zone.js@0.15.0))(rxjs@7.8.1)
       '@ngrx/store':
-        specifier: 20.0.0-beta.0
-        version: 20.0.0-beta.0(@angular/core@20.0.6(@angular/compiler@20.0.6)(rxjs@7.8.1)(zone.js@0.15.0))(rxjs@7.8.1)
+        specifier: 20.0.0-rc.0
+        version: 20.0.0-rc.0(@angular/core@20.0.6(@angular/compiler@20.0.6)(rxjs@7.8.1)(zone.js@0.15.0))(rxjs@7.8.1)
       '@nx/angular':
         specifier: 21.2.2
         version: 21.2.2(63c5cb9e9c848f34d277932556a262cf)
@@ -3136,8 +3136,8 @@ packages:
   '@napi-rs/wasm-runtime@0.2.4':
     resolution: {integrity: sha512-9zESzOO5aDByvhIAsOy9TbpZ0Ur2AJbUI7UT73kcUTS2mxAMHOBaa1st/jAymNoCtvrit99kkzT1FZuXVcgfIQ==}
 
-  '@ngrx/signals@20.0.0-beta.0':
-    resolution: {integrity: sha512-2tokIrLCilgSbgR9zpNPkvPHatBdkzB266P3MbTPdSyIjslwQ/3C4hlX5bihQ1MQD+UZ7P7zPxFYqqWNhA6mRw==}
+  '@ngrx/signals@20.0.0-rc.0':
+    resolution: {integrity: sha512-c+ADG19ucRZbJ0Hh51YOc5122i4JCvheoZkcRJX9u5ovP6TD1P4uMrN0Yku6mJg85/eHKK/VWUCoM1KSxkL54w==}
     peerDependencies:
       '@angular/core': ^20.0.0
       rxjs: ^6.5.3 || ^7.4.0
@@ -3145,8 +3145,8 @@ packages:
       rxjs:
         optional: true
 
-  '@ngrx/store@20.0.0-beta.0':
-    resolution: {integrity: sha512-Nnlq0JHRnZnMUK7sbGmpDdtmdgvevoFR38RqlWMUdnLSZbWa64Byl0FFbp12veBLj34xmlBIEbur3ZfHi8aMkA==}
+  '@ngrx/store@20.0.0-rc.0':
+    resolution: {integrity: sha512-dKuW2UV8OgLGPLIh1be9H8T1oGyC3irU0baqdlaX2CKXIb1O2sZg7biJ+5FmKnokfR/DQuh/OQr6rku+U7u3hQ==}
     peerDependencies:
       '@angular/core': ^20.0.0
       rxjs: ^6.5.3 || ^7.5.0
@@ -12912,14 +12912,14 @@ snapshots:
       '@emnapi/runtime': 1.2.0
       '@tybys/wasm-util': 0.9.0
 
-  '@ngrx/signals@20.0.0-beta.0(@angular/core@20.0.6(@angular/compiler@20.0.6)(rxjs@7.8.1)(zone.js@0.15.0))(rxjs@7.8.1)':
+  '@ngrx/signals@20.0.0-rc.0(@angular/core@20.0.6(@angular/compiler@20.0.6)(rxjs@7.8.1)(zone.js@0.15.0))(rxjs@7.8.1)':
     dependencies:
       '@angular/core': 20.0.6(@angular/compiler@20.0.6)(rxjs@7.8.1)(zone.js@0.15.0)
       tslib: 2.8.1
     optionalDependencies:
       rxjs: 7.8.1
 
-  '@ngrx/store@20.0.0-beta.0(@angular/core@20.0.6(@angular/compiler@20.0.6)(rxjs@7.8.1)(zone.js@0.15.0))(rxjs@7.8.1)':
+  '@ngrx/store@20.0.0-rc.0(@angular/core@20.0.6(@angular/compiler@20.0.6)(rxjs@7.8.1)(zone.js@0.15.0))(rxjs@7.8.1)':
     dependencies:
       '@angular/core': 20.0.6(@angular/compiler@20.0.6)(rxjs@7.8.1)(zone.js@0.15.0)
       rxjs: 7.8.1
