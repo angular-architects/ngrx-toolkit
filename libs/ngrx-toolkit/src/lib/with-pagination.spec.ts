@@ -45,7 +45,7 @@ describe('withPagination', () => {
       setAllEntities(generateBooks(55), { collection: 'books' }),
     );
 
-    patchState(store, gotoPage(5, { collection: 'books' }));
+    patchState(store, gotoPage<Book, 'books'>(5, { collection: 'books' }));
     expect(store.booksCurrentPage()).toBe(5);
     expect(store.selectedPageBooksEntities().length).toBe(5);
     expect(store.booksPageCount()).toBe(6);
