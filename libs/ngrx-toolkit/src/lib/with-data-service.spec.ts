@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { Observable, firstValueFrom, of, delay } from 'rxjs';
 import { signalStore, type } from '@ngrx/signals';
-import { withEntities } from '@ngrx/signals/entities';
-import { EntityId } from '@ngrx/signals/entities';
+import { EntityId, withEntities } from '@ngrx/signals/entities';
+import { delay, firstValueFrom, Observable, of } from 'rxjs';
 import { withCallState } from './with-call-state';
 import { DataService, withDataService } from './with-data-service';
 
@@ -39,6 +38,19 @@ describe('withDataService', () => {
       expect(store.flightEntities().length).toBe(1);
     });
   }));
+  it('should load from a service and set entities in the store (with named selectId)', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new StoreWithSelectId();
+
+      tick();
+      expect(store.entities().length).toBe(0);
+
+      store.load();
+      tick();
+
+      expect(store.entities().length).toBe(1);
+    });
+  }));
   it('should load by ID from a service and set entities in the store', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
@@ -63,6 +75,21 @@ describe('withDataService', () => {
       tick();
 
       expect(store.currentFlight()).toEqual(createFlight({ id: 2 }));
+    });
+  }));
+  it('should load by ID from a service and set entities in the store (with named selectId)', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new StoreWithSelectId();
+
+      tick();
+
+      store.loadById(2);
+
+      tick();
+
+      expect(store.current()).toEqual(
+        createFlightWithCustomId({ flightId: '2' })
+      );
     });
   }));
   it('should create from a service and set an entity in the store', fakeAsync(() => {
@@ -97,6 +124,24 @@ describe('withDataService', () => {
       expect(store.currentFlight()).toEqual(createFlight({ id: 3 }));
     });
   }));
+  it('should create from a service and set an entity in the store (with named selectId)', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new StoreWithSelectId();
+
+      tick();
+
+      expect(store.entities().length).toBe(0);
+
+      store.create(createFlightWithCustomId({ flightId: '3' }));
+
+      tick();
+
+      expect(store.entities().length).toBe(1);
+      expect(store.current()).toEqual(
+        createFlightWithCustomId({ flightId: '3' })
+      );
+    });
+  }));
   it('should update from a service and update an entity in the store', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
@@ -127,6 +172,26 @@ describe('withDataService', () => {
       tick();
 
       expect(store.currentFlight()).toEqual(createFlight({ id: 3 }));
+    });
+  }));
+  it('should update from a service and update an entity in the store (with named selectId)', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new StoreWithSelectId();
+
+      tick();
+
+      expect(store.entities().length).toBe(0);
+
+      store.create(
+        createFlightWithCustomId({ flightId: '3', from: 'Wadena MN' })
+      );
+      tick();
+      store.update(createFlightWithCustomId({ flightId: '3' }));
+      tick();
+
+      expect(store.current()).toEqual(
+        createFlightWithCustomId({ flightId: '3' })
+      );
     });
   }));
   it('should update all from a service and update all entities in the store', fakeAsync(() => {
@@ -165,6 +230,35 @@ describe('withDataService', () => {
       expect(store.flightEntities().at(1)).toEqual(createFlight({ id: 4 }));
     });
   }));
+  it('should update all from a service and update all entities in the store (with named selectId)', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new StoreWithSelectId();
+
+      tick();
+
+      expect(store.entities().length).toBe(0);
+
+      store.create(
+        createFlightWithCustomId({ flightId: '3', from: 'Wadena MN' })
+      );
+      store.create(
+        createFlightWithCustomId({ flightId: '4', from: 'Wadena MN' })
+      );
+      tick();
+      store.updateAll([
+        createFlightWithCustomId({ flightId: '3' }),
+        createFlightWithCustomId({ flightId: '4' }),
+      ]);
+      tick();
+      expect(store.entities().length).toBe(2);
+      expect(store.entities().at(0)).toEqual(
+        createFlightWithCustomId({ flightId: '3' })
+      );
+      expect(store.entities().at(1)).toEqual(
+        createFlightWithCustomId({ flightId: '4' })
+      );
+    });
+  }));
   it('should delete from a service and update that entity in the store', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
@@ -197,6 +291,25 @@ describe('withDataService', () => {
       store.deleteFlight(createFlight({ id: 3 }));
       tick();
       expect(store.flightEntities().length).toBe(0);
+    });
+  }));
+  it('should delete from a service and update that entity in the store (with named selectId)', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new StoreWithSelectId();
+
+      tick();
+
+      expect(store.entities().length).toBe(0);
+
+      store.create(createFlightWithCustomId({ flightId: '3' }));
+      tick();
+      expect(store.entities().length).toBe(1);
+      expect(store.entities().at(0)).toEqual(
+        createFlightWithCustomId({ flightId: '3' })
+      );
+      store.delete(createFlightWithCustomId({ flightId: '3' }));
+      tick();
+      expect(store.entities().length).toBe(0);
     });
   }));
   it('should update the selected flight of the store', fakeAsync(() => {
@@ -235,6 +348,25 @@ describe('withDataService', () => {
       );
     });
   }));
+  it('should update selected flight of the store (with named selectId)', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new StoreWithSelectId();
+
+      tick();
+
+      store.create(createFlightWithCustomId({ flightId: '3' }));
+      expect(store.selectedEntities().length).toBe(0);
+
+      store.updateSelected('3', true);
+
+      tick();
+
+      expect(store.selectedEntities().length).toBe(1);
+      expect(store.selectedEntities()).toContainEqual(
+        createFlightWithCustomId({ flightId: '3' })
+      );
+    });
+  }));
   it('should update the filter of the service', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
@@ -268,6 +400,21 @@ describe('withDataService', () => {
       });
     });
   }));
+  it('should update the filter of the service (with named selectId)', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new StoreWithSelectId();
+
+      tick();
+
+      expect(store.filter()).toEqual({ from: 'Paris', to: 'New York' });
+
+      store.updateFilter({ from: 'Wadena MN', to: 'New York' });
+
+      tick();
+
+      expect(store.filter()).toEqual({ from: 'Wadena MN', to: 'New York' });
+    });
+  }));
   it('should set the current entity', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
@@ -290,6 +437,20 @@ describe('withDataService', () => {
       store.setCurrentFlight(createFlight({ id: 4 }));
 
       expect(store.currentFlight()).toEqual(createFlight({ id: 4 }));
+    });
+  }));
+  it('should set the current entity (with named selectId)', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new StoreWithSelectId();
+      tick();
+
+      store.create(createFlightWithCustomId({ flightId: '3' }));
+
+      store.setCurrent(createFlightWithCustomId({ flightId: '4' }));
+
+      expect(store.current()).toEqual(
+        createFlightWithCustomId({ flightId: '4' })
+      );
     });
   }));
 
@@ -415,6 +576,19 @@ const createFlight = (flight: Partial<Flight> = {}) => ({
   },
   ...flight,
 });
+
+let currentCustomFlightId = 0;
+const createFlightWithCustomId = (
+  flight: Partial<FlightWithCustomId> = {}
+): FlightWithCustomId => ({
+  flightId: `${++currentCustomFlightId}`,
+  from: 'Paris',
+  to: 'New York',
+  date: new Date().toDateString(),
+  delayed: false,
+  ...flight,
+});
+
 type Flight = {
   id: number;
   from: string;
@@ -422,6 +596,8 @@ type Flight = {
   date: string;
   delayed: boolean;
 };
+
+type FlightWithCustomId = Omit<Flight, 'id'> & { flightId: string };
 
 type FlightFilter = {
   from: string;
@@ -469,6 +645,53 @@ class MockFlightService implements DataService<Flight, FlightFilter> {
   }
 
   private remove(_flight: Flight): Observable<void> {
+    return of(undefined);
+  }
+}
+
+@Injectable({
+  providedIn: 'root',
+})
+class MockFlightWithSelectIdService
+  implements DataService<FlightWithCustomId, FlightFilter>
+{
+  loadById(id: EntityId): Promise<FlightWithCustomId> {
+    return firstValueFrom(this.findById('' + id));
+  }
+
+  create(entity: FlightWithCustomId): Promise<FlightWithCustomId> {
+    return firstValueFrom(this.save(entity));
+  }
+
+  update(entity: FlightWithCustomId): Promise<FlightWithCustomId> {
+    return firstValueFrom(this.save(entity));
+  }
+
+  updateAll(entity: FlightWithCustomId[]): Promise<FlightWithCustomId[]> {
+    return firstValueFrom(of(entity));
+  }
+
+  delete(entity: FlightWithCustomId): Promise<void> {
+    return firstValueFrom(this.remove(entity));
+  }
+
+  load(filter: FlightFilter): Promise<FlightWithCustomId[]> {
+    return firstValueFrom(this.find(filter.from, filter.to));
+  }
+
+  private find(_from: string, _to: string): Observable<FlightWithCustomId[]> {
+    return of([createFlightWithCustomId()]);
+  }
+
+  private findById(id: string): Observable<FlightWithCustomId> {
+    return of(createFlightWithCustomId({ flightId: id }));
+  }
+
+  private save(flight: FlightWithCustomId): Observable<FlightWithCustomId> {
+    return of(flight);
+  }
+
+  private remove(_flight: FlightWithCustomId): Observable<void> {
     return of(undefined);
   }
 }
@@ -561,5 +784,17 @@ const StoreWithNamedCollectionForLoading = signalStore(
     dataServiceType: MockFlightServiceForLoading,
     filter: { from: 'Paris', to: 'New York' },
     collection: 'flight',
+  })
+);
+
+const StoreWithSelectId = signalStore(
+  withCallState(),
+  withEntities({
+    entity: type<FlightWithCustomId>(),
+  }),
+  withDataService({
+    dataServiceType: MockFlightWithSelectIdService,
+    filter: { from: 'Paris', to: 'New York' },
+    selectId: (flight: FlightWithCustomId) => flight.flightId,
   })
 );
