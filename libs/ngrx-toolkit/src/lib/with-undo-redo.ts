@@ -130,6 +130,7 @@ export function withUndoRedo<
       clearStack(): void {
         undoStack.splice(0);
         redoStack.splice(0);
+        previous = null;
         updateInternal();
       },
     })),

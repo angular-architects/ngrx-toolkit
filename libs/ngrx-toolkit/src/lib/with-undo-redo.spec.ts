@@ -210,5 +210,36 @@ describe('withUndoRedo', () => {
       expect(store.canUndo()).toBe(false);
       expect(store.canRedo()).toBe(false);
     })
+
+    it('cannot undo after clearing and setting a new value', fakeAsync(() => {
+      const Store = signalStore(
+        { providedIn: 'root' },
+        withState(testState),
+        withMethods((store) => ({
+          update: (value: string) => patchState(store, { test: value }),
+        })),
+        withUndoRedo({ keys: testKeys })
+      );
+
+      const store = TestBed.inject(Store);
+
+      store.update('Alan');
+      tick(1);
+
+      store.update('Gordon');
+      tick(1);
+
+      store.clearStack();
+      tick(1);
+
+      // After clearing the undo/redo stack, there is no previous item anymore.
+      // The following update becomes the first value.
+      // Since there is no other value before, it cannot be undone.
+      store.update('Hugh');
+      tick(1);
+
+      expect(store.canUndo()).toBe(false);
+      expect(store.canRedo()).toBe(false);
+    }));
   });
 });
