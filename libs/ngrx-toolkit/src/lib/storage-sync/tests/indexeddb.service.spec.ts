@@ -1,3 +1,4 @@
+import 'fake-indexeddb/auto';
 import { IndexedDBService } from '../internal/indexeddb.service';
 
 describe('IndexedDBService', () => {

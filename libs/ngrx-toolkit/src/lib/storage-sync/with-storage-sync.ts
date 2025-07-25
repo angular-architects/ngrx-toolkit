@@ -1,25 +1,24 @@
 import { isPlatformServer } from '@angular/common';
-import { computed, inject, PLATFORM_ID, signal } from '@angular/core';
+import { computed, effect, inject, PLATFORM_ID, signal } from '@angular/core';
 import {
   EmptyFeatureResult,
+  getState,
   signalStoreFeature,
   SignalStoreFeature,
   SignalStoreFeatureResult,
   watchState,
-  withComputed,
   withHooks,
   withMethods,
   withProps,
 } from '@ngrx/signals';
+import { withLocalStorage } from './features/with-local-storage';
 import {
   AsyncFeatureResult,
-  AsyncMethods,
   AsyncStorageStrategy,
+  SYNC_STATUS,
   SyncFeatureResult,
-  SyncMethods,
   SyncStorageStrategy,
 } from './internal/models';
-import { withLocalStorage } from './features/with-local-storage';
 
 export type SyncConfig<State> = {
   /**
@@ -51,12 +50,6 @@ export type SyncConfig<State> = {
    */
   stringify?: (state: unknown) => string;
 };
-
-/**
- * Enables store synchronization with storage.
- *
- * Only works on browser platform.
- */
 
 // only key
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
@@ -99,7 +92,7 @@ export function withStorageSync<Input extends SignalStoreFeatureResult>(
     | SyncStorageStrategy<Input['state']>
 ): SignalStoreFeature<
   Input,
-  EmptyFeatureResult & { methods: AsyncMethods | SyncMethods }
+  EmptyFeatureResult & (SyncFeatureResult | AsyncFeatureResult)
 > {
   const config: Required<SyncConfig<Input['state']>> = {
     autoSync: true,
@@ -111,25 +104,20 @@ export function withStorageSync<Input extends SignalStoreFeatureResult>(
 
   const factory = storageStrategy ?? withLocalStorage();
 
-  return signalStoreFeature(
-    withProps(() => ({
-      // it is necessary to have a signal here, so that its changes are
-      // not tracked by the autoSync mechanism and trigger an infinite loop.
-      _syncStatus: signal<'idle' | 'syncing' | 'synced'>('idle'),
-    })),
-    withComputed(({ _syncStatus }) => ({
-      isSynced: computed(() => _syncStatus() === 'synced'),
-    })),
-    withMethods((store, platformId = inject(PLATFORM_ID)) => {
-      const setSyncStatus = (status: 'idle' | 'syncing' | 'synced') =>
-        store._syncStatus.set(status);
+  if (factory.type === 'sync') {
+    return createSyncStorageSync(factory, config);
+  } else {
+    return createAsyncStorageSync(factory, config);
+  }
+}
 
-      return factory(
-        config,
-        store,
-        isPlatformServer(platformId),
-        setSyncStatus
-      );
+function createSyncStorageSync<Input extends SignalStoreFeatureResult>(
+  factory: SyncStorageStrategy<Input['state']>,
+  config: Required<SyncConfig<Input['state']>>
+) {
+  return signalStoreFeature(
+    withMethods((store, platformId = inject(PLATFORM_ID)) => {
+      return factory(config, store, isPlatformServer(platformId));
     }),
     withHooks({
       onInit(store, platformId = inject(PLATFORM_ID)) {
@@ -138,17 +126,88 @@ export function withStorageSync<Input extends SignalStoreFeatureResult>(
         }
 
         if (config.autoSync) {
-          const initAutoSync = () =>
-            watchState(store, () => store.writeToStorage());
-          const possiblePromise =
-            store.readFromStorage() as void | Promise<void>;
-          if (possiblePromise) {
-            possiblePromise.then(initAutoSync);
-          } else {
-            initAutoSync();
-          }
+          store.readFromStorage();
+          watchState(store, () => store.writeToStorage());
         }
       },
     })
-  );
+  ) satisfies SignalStoreFeature<EmptyFeatureResult, SyncFeatureResult>;
+}
+
+function createAsyncStorageSync<Input extends SignalStoreFeatureResult>(
+  factory: AsyncStorageStrategy<Input['state']>,
+  config: Required<SyncConfig<Input['state']>>
+) {
+  return signalStoreFeature(
+    withProps(() => {
+      const props = {
+        /*
+        // we need to have that as property (and not state)
+        // Otherwise the state watcher fires when updating the sync status
+        */
+        [SYNC_STATUS]: signal<'idle' | 'syncing' | 'synced'>('idle'),
+      };
+
+      const resolves = [] as (() => void)[];
+
+      effect(() => {
+        const syncStatus = props[SYNC_STATUS]();
+        if (syncStatus === 'synced') {
+          resolves.forEach((resolve) => resolve());
+          resolves.splice(0, resolves.length);
+        }
+      });
+
+      return {
+        ...props,
+        isSynced: computed(() => props[SYNC_STATUS]() === 'synced'),
+        whenSynced: () =>
+          new Promise<void>((resolve) => {
+            if (props[SYNC_STATUS]() === 'synced') {
+              resolve();
+            } else {
+              resolves.push(resolve);
+            }
+          }),
+      };
+    }),
+    withMethods((store, platformId = inject(PLATFORM_ID)) => {
+      return factory(config, store, isPlatformServer(platformId));
+    }),
+    withHooks({
+      async onInit(store, platformId = inject(PLATFORM_ID)) {
+        if (isPlatformServer(platformId)) {
+          return;
+        }
+
+        const initialState = getState(store);
+        console.log('Initial state:', initialState);
+        if (config.autoSync) {
+          let startWatching = false;
+          watchState(store, () => {
+            if (!startWatching) {
+              if (getState(store) === initialState) {
+                return;
+              }
+
+              console.log(
+                'Received state change, starting to watch state changes..., %o',
+                getState(store)
+              );
+              console.warn(
+                `Writing to Store (${config.key}) happened before the state was initially read from storage.`,
+                'Please ensure that the store is not in syncing state via `store.whenSynced()` before writing to the state.',
+                'Alternatively, you can disable autoSync by passing `autoSync: false` in the config.'
+              );
+              return;
+            }
+            return store.writeToStorage();
+          });
+
+          await store.readFromStorage();
+          startWatching = true;
+        }
+      },
+    })
+  ) satisfies SignalStoreFeature<EmptyFeatureResult, AsyncFeatureResult>;
 }

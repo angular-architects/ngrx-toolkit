@@ -1,8 +1,8 @@
 import { inject, Type } from '@angular/core';
-import { getState, patchState, WritableStateSource } from '@ngrx/signals';
-import { SyncStorageStrategy } from '../internal/models';
-import { SessionStorageService } from '../internal/session-storage.service';
+import { getState, patchState } from '@ngrx/signals';
 import { LocalStorageService } from '../internal/local-storage.service';
+import { SyncStorageStrategy, SyncStoreForFactory } from '../internal/models';
+import { SessionStorageService } from '../internal/session-storage.service';
 import { SyncConfig } from '../with-storage-sync';
 
 export function withLocalStorage<
@@ -20,7 +20,7 @@ function createSyncMethods<State extends object>(
 ): SyncStorageStrategy<State> {
   function factory(
     { key, parse, select, stringify }: Required<SyncConfig<State>>,
-    store: WritableStateSource<State>,
+    store: SyncStoreForFactory<State>,
     useStubs: boolean
   ) {
     if (useStubs) {

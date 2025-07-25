@@ -1,6 +1,6 @@
+import { Signal, WritableSignal } from '@angular/core';
 import { EmptyFeatureResult, WritableStateSource } from '@ngrx/signals';
 import { SyncConfig } from '../with-storage-sync';
-import { Signal } from '@angular/core';
 
 export type SyncMethods = {
   clearStorage(): void;
@@ -12,9 +12,12 @@ export type SyncFeatureResult = EmptyFeatureResult & {
   methods: SyncMethods;
 };
 
+export type SyncStoreForFactory<State extends object> =
+  WritableStateSource<State>;
+
 export type SyncStorageStrategy<State extends object> = ((
   config: Required<SyncConfig<State>>,
-  store: WritableStateSource<State>,
+  store: SyncStoreForFactory<State>,
   useStubs: boolean
 ) => SyncMethods) & { type: 'sync' };
 
@@ -24,16 +27,23 @@ export type AsyncMethods = {
   writeToStorage(): Promise<void>;
 };
 
+export const SYNC_STATUS = Symbol('SYNC_STATUS');
+export type SyncStatus = 'idle' | 'syncing' | 'synced';
+
 export type AsyncFeatureResult = EmptyFeatureResult & {
   methods: AsyncMethods;
-  props: { isSynced: Signal<boolean>; whenSynced: () => Promise<void> };
+  props: {
+    isSynced: Signal<boolean>;
+    whenSynced: () => Promise<void>;
+    [SYNC_STATUS]: WritableSignal<SyncStatus>;
+  };
 };
+
+export type AsyncStoreForFactory<State extends object> =
+  WritableStateSource<State> & AsyncFeatureResult['props'];
 
 export type AsyncStorageStrategy<State extends object> = ((
   config: Required<SyncConfig<State>>,
-  store: WritableStateSource<State>,
-  useStubs: boolean,
-  setSyncStatus: SetSyncStatus
+  store: AsyncStoreForFactory<State>,
+  useStubs: boolean
 ) => AsyncMethods) & { type: 'async' };
-
-export type SetSyncStatus = (status: 'idle' | 'syncing' | 'synced') => void;
