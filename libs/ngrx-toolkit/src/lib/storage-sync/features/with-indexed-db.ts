@@ -69,7 +69,6 @@ export function withIndexedDB<
       async writeToStorage(): Promise<void> {
         warnOnSyncing('write');
         store[SYNC_STATUS].set('syncing');
-        // TODO: select doesn't guarantee that State is returned
         const slicedState = select(getState(store)) as State;
         await indexeddbService.setItem(key, stringify(slicedState));
         store[SYNC_STATUS].set('synced');
