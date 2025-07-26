@@ -48,7 +48,7 @@ export type SyncConfig<State> = {
    *
    * `JSON.stringify()` by default
    */
-  stringify?: (state: unknown) => string;
+  stringify?: (state: State) => string;
 };
 
 // only key
