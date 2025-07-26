@@ -11,7 +11,10 @@ import {
   withMethods,
   withProps,
 } from '@ngrx/signals';
-import { withLocalStorage } from './features/with-local-storage';
+import {
+  withLocalStorage,
+  withSessionStorage,
+} from './features/with-local-storage';
 import {
   AsyncFeatureResult,
   AsyncStorageStrategy,
@@ -49,6 +52,14 @@ export type SyncConfig<State> = {
    * `JSON.stringify()` by default
    */
   stringify?: (state: State) => string;
+
+  /**
+   * @deprecated Use {@link withSessionStorage} instead.
+   * Factory function used to switch to sessionStorage.
+   *
+   * `localStorage` by default
+   */
+  storage?: () => Storage;
 };
 
 // only key
@@ -94,15 +105,29 @@ export function withStorageSync<Input extends SignalStoreFeatureResult>(
   Input,
   EmptyFeatureResult & (SyncFeatureResult | AsyncFeatureResult)
 > {
+  if (
+    typeof configOrKey !== 'string' &&
+    configOrKey.storage &&
+    storageStrategy
+  ) {
+    throw new Error(
+      'You can either pass a storage strategy or a config with storage, but not both.'
+    );
+  }
   const config: Required<SyncConfig<Input['state']>> = {
     autoSync: true,
     select: (state: Input['state']) => state,
     parse: JSON.parse,
     stringify: JSON.stringify,
+    storage: () => localStorage,
     ...(typeof configOrKey === 'string' ? { key: configOrKey } : configOrKey),
   };
 
-  const factory = storageStrategy ?? withLocalStorage();
+  const factory =
+    storageStrategy ??
+    (config.storage() === localStorage
+      ? withLocalStorage()
+      : withSessionStorage());
 
   if (factory.type === 'sync') {
     return createSyncStorageSync(factory, config);
@@ -181,7 +206,6 @@ function createAsyncStorageSync<Input extends SignalStoreFeatureResult>(
         }
 
         const initialState = getState(store);
-        console.log('Initial state:', initialState);
         if (config.autoSync) {
           let startWatching = false;
           watchState(store, () => {
@@ -190,10 +214,6 @@ function createAsyncStorageSync<Input extends SignalStoreFeatureResult>(
                 return;
               }
 
-              console.log(
-                'Received state change, starting to watch state changes..., %o',
-                getState(store)
-              );
               console.warn(
                 `Writing to Store (${config.key}) happened before the state was initially read from storage.`,
                 'Please ensure that the store is not in syncing state via `store.whenSynced()` before writing to the state.',

@@ -47,7 +47,8 @@ function createSyncMethods<State extends object>(
       },
 
       writeToStorage() {
-        const slicedState = select(getState(store));
+        // TODO: select doesn't guarantee that State is returned
+        const slicedState = select(getState(store)) as State;
         storage.setItem(key, stringify(slicedState));
       },
     };

@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { getState, patchState, signalStore, withState } from '@ngrx/signals';
+import { withLocalStorage } from '../features/with-local-storage';
 import { withStorageSync } from '../with-storage-sync';
 
 interface StateObject {
@@ -13,7 +14,7 @@ const initialState: StateObject = {
 };
 const key = 'FooBar';
 
-describe('withStorageSync', () => {
+describe('withStorageSync (sync storage)', () => {
   beforeEach(() => {
     // make sure to start with a clean storage
     localStorage.removeItem(key);
@@ -214,6 +215,20 @@ describe('withStorageSync', () => {
   });
 
   describe('storage factory', () => {
+    it('should throw an error when both config and storage strategy are provided', () => {
+      const signalStoreFactory = () =>
+        signalStore(
+          withStorageSync(
+            { key: 'foo', storage: () => localStorage },
+            withLocalStorage()
+          )
+        );
+
+      expect(signalStoreFactory).toThrow(
+        'You can either pass a storage strategy or a config with storage, but not both.'
+      );
+    });
+
     it('uses specified storage', () => {
       TestBed.runInInjectionContext(() => {
         // prefill storage

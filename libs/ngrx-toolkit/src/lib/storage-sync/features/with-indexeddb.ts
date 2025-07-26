@@ -67,10 +67,10 @@ export function withIndexeddb<
        * Writes selected portion to storage.
        */
       async writeToStorage(): Promise<void> {
-        console.log('Writing to storage... %o', getState(store));
         warnOnSyncing('write');
         store[SYNC_STATUS].set('syncing');
-        const slicedState = select(getState(store));
+        // TODO: select doesn't guarantee that State is returned
+        const slicedState = select(getState(store)) as State;
         await indexeddbService.setItem(key, stringify(slicedState));
         store[SYNC_STATUS].set('synced');
       },
