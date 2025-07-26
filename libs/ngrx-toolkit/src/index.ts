@@ -26,6 +26,11 @@ export * from './lib/with-undo-redo';
 
 export { withImmutableState } from './lib/immutable-state/with-immutable-state';
 export { withIndexedDB } from './lib/storage-sync/features/with-indexed-db';
+
+/**
+ * @deprecated Use {@link withIndexedDB} instead.
+ */
+export { withIndexedDB as withIndexeddb } from './lib/storage-sync/features/with-indexed-db';
 export {
   withLocalStorage,
   withSessionStorage,
