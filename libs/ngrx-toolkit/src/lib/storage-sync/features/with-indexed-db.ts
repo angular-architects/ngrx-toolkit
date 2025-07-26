@@ -9,7 +9,7 @@ import {
 } from '../internal/models';
 import { SyncConfig } from '../with-storage-sync';
 
-export function withIndexeddb<
+export function withIndexedDB<
   State extends object
 >(): AsyncStorageStrategy<State> {
   function factory(

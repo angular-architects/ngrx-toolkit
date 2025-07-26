@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { getState, patchState, signalStore, withState } from '@ngrx/signals';
 import 'fake-indexeddb/auto';
-import { withIndexeddb } from '../features/with-indexeddb';
+import { withIndexedDB } from '../features/with-indexed-db';
 import { IndexedDBService } from '../internal/indexeddb.service';
 import { withStorageSync } from '../with-storage-sync';
 
@@ -32,7 +32,7 @@ describe('withStorageSync (async storage)', () => {
 
   it('adds methods for storage access to the store', () => {
     TestBed.runInInjectionContext(() => {
-      const Store = signalStore(withStorageSync({ key }, withIndexeddb()));
+      const Store = signalStore(withStorageSync({ key }, withIndexedDB()));
       const store = new Store();
 
       expect(Object.keys(store)).toEqual([
@@ -59,7 +59,7 @@ describe('withStorageSync (async storage)', () => {
 
       const Store = signalStore(
         { protectedState: false },
-        withStorageSync({ key, autoSync: false }, withIndexeddb())
+        withStorageSync({ key, autoSync: false }, withIndexedDB())
       );
       const store = TestBed.inject(Store);
       await waitForSyncStable(store);
@@ -105,7 +105,7 @@ describe('withStorageSync (async storage)', () => {
 
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
-        withStorageSync(key, withIndexeddb())
+        withStorageSync(key, withIndexedDB())
       );
 
       const store = TestBed.inject(Store);
@@ -139,7 +139,7 @@ describe('withStorageSync (async storage)', () => {
 
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
-        withStorageSync({ key, autoSync: false }, withIndexeddb())
+        withStorageSync({ key, autoSync: false }, withIndexedDB())
       );
       const store = TestBed.inject(Store);
       expect(store.isSynced()).toBe(false);
@@ -163,7 +163,7 @@ describe('withStorageSync (async storage)', () => {
       const indexedDBService = TestBed.inject(IndexedDBService);
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
-        withStorageSync(key, withIndexeddb())
+        withStorageSync(key, withIndexedDB())
       );
       const store = TestBed.inject(Store);
       await waitForSyncStable(store);
@@ -183,7 +183,7 @@ describe('withStorageSync (async storage)', () => {
         withState(initialState),
         withStorageSync(
           { key, select: ({ foo }) => ({ foo }) },
-          withIndexeddb()
+          withIndexedDB()
         )
       );
       const store = TestBed.inject(Store);
@@ -221,7 +221,7 @@ describe('withStorageSync (async storage)', () => {
             parse,
             stringify: (state) => `${state.foo}_${state.age}`,
           },
-          withIndexeddb()
+          withIndexedDB()
         )
       );
 
@@ -253,7 +253,7 @@ describe('withStorageSync (async storage)', () => {
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
         withState({ name: 'Delta', age: 52 }),
-        withStorageSync('flights', withIndexeddb())
+        withStorageSync('flights', withIndexedDB())
       );
       const store = TestBed.inject(Store);
 
@@ -271,7 +271,7 @@ describe('withStorageSync (async storage)', () => {
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
         withState({ name: 'Delta', age: 52 }),
-        withStorageSync('flights', withIndexeddb())
+        withStorageSync('flights', withIndexedDB())
       );
 
       const store = TestBed.inject(Store);
@@ -290,7 +290,7 @@ describe('withStorageSync (async storage)', () => {
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
         withState({ name: 'Delta', age: 52 }),
-        withStorageSync('flights', withIndexeddb())
+        withStorageSync('flights', withIndexedDB())
       );
 
       const store = TestBed.inject(Store);
