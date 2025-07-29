@@ -9,7 +9,8 @@
     "test:e2e": "nx e2e demo",
     "build:all": "nx run-many --targets=build",
     "verify:all": "nx run-many --targets=lint,test,build",
-    "prepare": "husky"
+    "prepare": "husky",
+    "format:check": "prettier --check ./**/*.{js,ts,json,html,scss,md}"
   },
   "private": true,
   "engines": {
