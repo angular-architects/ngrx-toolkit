@@ -44,21 +44,21 @@ export const lazyRoutes: Route[] = [
     path: 'immutable-state',
     loadComponent: () =>
       import('./immutable-state/immutable-state.component').then(
-        (m) => m.ImmutableStateComponent
+        (m) => m.ImmutableStateComponent,
       ),
   },
   {
     path: 'feature-factory',
     loadComponent: () =>
       import('./feature-factory/feature-factory.component').then(
-        (m) => m.FeatureFactoryComponent
+        (m) => m.FeatureFactoryComponent,
       ),
   },
   {
     path: 'conditional',
     loadComponent: () =>
       import('./with-conditional/conditional.component').then(
-        (m) => m.ConditionalSettingComponent
+        (m) => m.ConditionalSettingComponent,
       ),
   },
 ];

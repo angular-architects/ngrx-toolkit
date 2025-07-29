@@ -38,7 +38,7 @@ export function withReset() {
       onInit() {
         store._resetState.value = getState(store);
       },
-    }))
+    })),
   );
 }
 
@@ -51,11 +51,11 @@ export function withReset() {
  */
 export function setResetState<State extends object>(
   store: StateSource<State>,
-  state: State
+  state: State,
 ): void {
   if (!('__setResetState__' in store)) {
     throw new Error(
-      'Cannot set reset state, since store is not configured with withReset()'
+      'Cannot set reset state, since store is not configured with withReset()',
     );
   }
   (store.__setResetState__ as (state: State) => void)(state);

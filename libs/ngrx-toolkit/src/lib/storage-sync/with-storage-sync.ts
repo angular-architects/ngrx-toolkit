@@ -64,43 +64,43 @@ export type SyncConfig<State> = {
 
 // only key
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
-  key: string
+  key: string,
 ): SignalStoreFeature<Input, SyncFeatureResult>;
 
 // key + indexeddb
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   key: string,
-  storageStrategy: AsyncStorageStrategy<Input['state']>
+  storageStrategy: AsyncStorageStrategy<Input['state']>,
 ): SignalStoreFeature<Input, AsyncFeatureResult>;
 
 // key + localStorage(or sessionStorage)
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   key: string,
-  storageStrategy: SyncStorageStrategy<Input['state']>
+  storageStrategy: SyncStorageStrategy<Input['state']>,
 ): SignalStoreFeature<Input, SyncFeatureResult>;
 
 // config + localStorage
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
-  config: SyncConfig<Input['state']>
+  config: SyncConfig<Input['state']>,
 ): SignalStoreFeature<Input, SyncFeatureResult>;
 
 // config + indexeddb
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   config: SyncConfig<Input['state']>,
-  storageStrategy: AsyncStorageStrategy<Input['state']>
+  storageStrategy: AsyncStorageStrategy<Input['state']>,
 ): SignalStoreFeature<Input, AsyncFeatureResult>;
 
 // config + localStorage(or sessionStorage)
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   config: SyncConfig<Input['state']>,
-  storageStrategy: SyncStorageStrategy<Input['state']>
+  storageStrategy: SyncStorageStrategy<Input['state']>,
 ): SignalStoreFeature<Input, SyncFeatureResult>;
 
 export function withStorageSync<Input extends SignalStoreFeatureResult>(
   configOrKey: SyncConfig<Input['state']> | string,
   storageStrategy?:
     | AsyncStorageStrategy<Input['state']>
-    | SyncStorageStrategy<Input['state']>
+    | SyncStorageStrategy<Input['state']>,
 ): SignalStoreFeature<
   Input,
   EmptyFeatureResult & (SyncFeatureResult | AsyncFeatureResult)
@@ -111,7 +111,7 @@ export function withStorageSync<Input extends SignalStoreFeatureResult>(
     storageStrategy
   ) {
     throw new Error(
-      'You can either pass a storage strategy or a config with storage, but not both.'
+      'You can either pass a storage strategy or a config with storage, but not both.',
     );
   }
   const config: Required<SyncConfig<Input['state']>> = {
@@ -138,7 +138,7 @@ export function withStorageSync<Input extends SignalStoreFeatureResult>(
 
 function createSyncStorageSync<Input extends SignalStoreFeatureResult>(
   factory: SyncStorageStrategy<Input['state']>,
-  config: Required<SyncConfig<Input['state']>>
+  config: Required<SyncConfig<Input['state']>>,
 ) {
   return signalStoreFeature(
     withMethods((store, platformId = inject(PLATFORM_ID)) => {
@@ -155,13 +155,13 @@ function createSyncStorageSync<Input extends SignalStoreFeatureResult>(
           watchState(store, () => store.writeToStorage());
         }
       },
-    })
+    }),
   ) satisfies SignalStoreFeature<EmptyFeatureResult, SyncFeatureResult>;
 }
 
 function createAsyncStorageSync<Input extends SignalStoreFeatureResult>(
   factory: AsyncStorageStrategy<Input['state']>,
-  config: Required<SyncConfig<Input['state']>>
+  config: Required<SyncConfig<Input['state']>>,
 ) {
   return signalStoreFeature(
     withProps(() => {
@@ -217,7 +217,7 @@ function createAsyncStorageSync<Input extends SignalStoreFeatureResult>(
               console.warn(
                 `Writing to Store (${config.key}) happened before the state was initially read from storage.`,
                 'Please ensure that the store is not in syncing state via `store.whenSynced()` before writing to the state.',
-                'Alternatively, you can disable autoSync by passing `autoSync: false` in the config.'
+                'Alternatively, you can disable autoSync by passing `autoSync: false` in the config.',
               );
               return;
             }
@@ -228,6 +228,6 @@ function createAsyncStorageSync<Input extends SignalStoreFeatureResult>(
           startWatching = true;
         }
       },
-    })
+    }),
   ) satisfies SignalStoreFeature<EmptyFeatureResult, AsyncFeatureResult>;
 }

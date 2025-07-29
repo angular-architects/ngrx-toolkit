@@ -16,7 +16,7 @@ const UserStore = signalStore(
         return state;
       });
     },
-  }))
+  })),
 );
 
 @Component({

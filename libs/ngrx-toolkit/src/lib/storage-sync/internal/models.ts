@@ -18,7 +18,7 @@ export type SyncStoreForFactory<State extends object> =
 export type SyncStorageStrategy<State extends object> = ((
   config: Required<SyncConfig<State>>,
   store: SyncStoreForFactory<State>,
-  useStubs: boolean
+  useStubs: boolean,
 ) => SyncMethods) & { type: 'sync' };
 
 export type AsyncMethods = {
@@ -45,5 +45,5 @@ export type AsyncStoreForFactory<State extends object> =
 export type AsyncStorageStrategy<State extends object> = ((
   config: Required<SyncConfig<State>>,
   store: AsyncStoreForFactory<State>,
-  useStubs: boolean
+  useStubs: boolean,
 ) => AsyncMethods) & { type: 'async' };

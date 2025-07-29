@@ -26,14 +26,14 @@ describe('with-mapper', () => {
         name: 'Car',
         carElement: document.createElement('div'),
       }),
-      withDevtools('shop', withMapper(domRemover))
+      withDevtools('shop', withMapper(domRemover)),
     );
 
     TestBed.inject(Store);
     TestBed.flushEffects();
     expect(sendSpy).toHaveBeenCalledWith(
       { type: 'Store Update' },
-      { shop: { name: 'Car' } }
+      { shop: { name: 'Car' } },
     );
   });
 
@@ -54,16 +54,16 @@ describe('with-mapper', () => {
             } else {
               return { ...acc, [key]: state[key] };
             }
-          }, {})
-        )
-      )
+          }, {}),
+        ),
+      ),
     );
 
     TestBed.inject(Store);
     TestBed.flushEffects();
     expect(sendSpy).toHaveBeenCalledWith(
       { type: 'Store Update' },
-      { shop: { name: 'Car' } }
+      { shop: { name: 'Car' } },
     );
   });
 });

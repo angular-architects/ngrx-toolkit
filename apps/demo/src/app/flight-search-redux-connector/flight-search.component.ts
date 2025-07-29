@@ -34,7 +34,7 @@ export class FlightSearchReducConnectorComponent {
       ticketActions.flightsLoad({
         from: this.localState.filter.from(),
         to: this.localState.filter.to(),
-      })
+      }),
     );
   }
 

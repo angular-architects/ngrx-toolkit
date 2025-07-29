@@ -36,7 +36,7 @@ export const TodoStore = signalStore(
         const todo = store.entityMap()[id];
         patchState(
           store,
-          updateEntity({ id, changes: { finished: !todo.finished } })
+          updateEntity({ id, changes: { finished: !todo.finished } }),
         );
       },
     };
@@ -80,5 +80,5 @@ export const TodoStore = signalStore(
 
       setResetState(store, getState(store));
     },
-  })
+  }),
 );

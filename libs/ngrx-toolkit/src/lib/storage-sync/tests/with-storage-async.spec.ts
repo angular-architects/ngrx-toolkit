@@ -54,12 +54,12 @@ describe('withStorageSync (async storage)', () => {
         JSON.stringify({
           foo: 'baz',
           age: 99,
-        })
+        }),
       );
 
       const Store = signalStore(
         { protectedState: false },
-        withStorageSync({ key, autoSync: false }, withIndexedDB())
+        withStorageSync({ key, autoSync: false }, withIndexedDB()),
       );
       const store = TestBed.inject(Store);
       await waitForSyncStable(store);
@@ -100,12 +100,12 @@ describe('withStorageSync (async storage)', () => {
         JSON.stringify({
           foo: 'baz',
           age: 99,
-        } as StateObject)
+        } as StateObject),
       );
 
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
-        withStorageSync(key, withIndexedDB())
+        withStorageSync(key, withIndexedDB()),
       );
 
       const store = TestBed.inject(Store);
@@ -123,7 +123,7 @@ describe('withStorageSync (async storage)', () => {
       });
 
       expect(await indexedDBService.getItem(key)).toEqual(
-        JSON.stringify(initialState)
+        JSON.stringify(initialState),
       );
     });
 
@@ -134,12 +134,12 @@ describe('withStorageSync (async storage)', () => {
         JSON.stringify({
           foo: 'baz',
           age: 99,
-        })
+        }),
       );
 
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
-        withStorageSync({ key, autoSync: false }, withIndexedDB())
+        withStorageSync({ key, autoSync: false }, withIndexedDB()),
       );
       const store = TestBed.inject(Store);
       expect(store.isSynced()).toBe(false);
@@ -149,7 +149,7 @@ describe('withStorageSync (async storage)', () => {
       expect(store.isSynced()).toBe(false);
 
       const storeItem = JSON.parse(
-        (await indexedDBService.getItem(key)) || '{}'
+        (await indexedDBService.getItem(key)) || '{}',
       );
       expect(storeItem).toEqual({
         foo: 'baz',
@@ -163,7 +163,7 @@ describe('withStorageSync (async storage)', () => {
       const indexedDBService = TestBed.inject(IndexedDBService);
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
-        withStorageSync(key, withIndexedDB())
+        withStorageSync(key, withIndexedDB()),
       );
       const store = TestBed.inject(Store);
       await waitForSyncStable(store);
@@ -172,7 +172,7 @@ describe('withStorageSync (async storage)', () => {
       await waitForSyncStable(store);
 
       expect(await indexedDBService.getItem(key)).toEqual(
-        JSON.stringify(initialState)
+        JSON.stringify(initialState),
       );
     });
 
@@ -183,8 +183,8 @@ describe('withStorageSync (async storage)', () => {
         withState(initialState),
         withStorageSync(
           { key, select: ({ foo }) => ({ foo }) },
-          withIndexedDB()
-        )
+          withIndexedDB(),
+        ),
       );
       const store = TestBed.inject(Store);
       await waitForSyncStable(store);
@@ -193,7 +193,7 @@ describe('withStorageSync (async storage)', () => {
       await waitForSyncStable(store);
 
       const storeItem = JSON.parse(
-        (await indexedDBService.getItem(key)) || '{}'
+        (await indexedDBService.getItem(key)) || '{}',
       );
       expect(storeItem).toEqual({
         foo: 'baz',
@@ -221,8 +221,8 @@ describe('withStorageSync (async storage)', () => {
             parse,
             stringify: (state) => `${state.foo}_${state.age}`,
           },
-          withIndexedDB()
-        )
+          withIndexedDB(),
+        ),
       );
 
       const store = TestBed.inject(Store);
@@ -253,7 +253,7 @@ describe('withStorageSync (async storage)', () => {
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
         withState({ name: 'Delta', age: 52 }),
-        withStorageSync('flights', withIndexedDB())
+        withStorageSync('flights', withIndexedDB()),
       );
       const store = TestBed.inject(Store);
 
@@ -271,7 +271,7 @@ describe('withStorageSync (async storage)', () => {
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
         withState({ name: 'Delta', age: 52 }),
-        withStorageSync('flights', withIndexedDB())
+        withStorageSync('flights', withIndexedDB()),
       );
 
       const store = TestBed.inject(Store);
@@ -290,7 +290,7 @@ describe('withStorageSync (async storage)', () => {
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
         withState({ name: 'Delta', age: 52 }),
-        withStorageSync('flights', withIndexedDB())
+        withStorageSync('flights', withIndexedDB()),
       );
 
       const store = TestBed.inject(Store);

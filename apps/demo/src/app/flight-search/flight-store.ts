@@ -43,12 +43,12 @@ export const FlightStore = signalStore(
               'https://demo.angulararchitects.io/api/flight',
               {
                 params: new HttpParams().set('from', from).set('to', to),
-              }
+              },
             );
           }),
-          map((flights) => actions.flightsLoaded({ flights }))
+          map((flights) => actions.flightsLoaded({ flights })),
         ),
       };
     },
-  })
+  }),
 );

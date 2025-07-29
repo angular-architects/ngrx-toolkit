@@ -37,5 +37,5 @@ export const FlightBookingStore = signalStore(
     gotoFlightPage: (page: number) => {
       patchState(store, gotoPage(page, { collection: collectionName }));
     },
-  }))
+  })),
 );

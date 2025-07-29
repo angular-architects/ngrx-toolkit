@@ -57,7 +57,7 @@ type OptionsForState<Store extends SignalStoreFeatureResult> = Partial<
 };
 
 export function withUndoRedo<Input extends EmptyFeatureResult>(
-  options?: OptionsForState<Input>
+  options?: OptionsForState<Input>,
 ): SignalStoreFeature<
   Input,
   EmptyFeatureResult & {
@@ -194,6 +194,6 @@ export function withUndoRedo<Input extends EmptyFeatureResult>(
           untracked(() => updateInternal());
         });
       },
-    })
+    }),
   );
 }

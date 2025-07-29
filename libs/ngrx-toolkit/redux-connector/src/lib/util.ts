@@ -2,7 +2,7 @@ import { ActionCreator } from '@ngrx/store';
 import { Unsubscribable } from 'rxjs';
 
 export function isUnsubscribable<F extends (...args: unknown[]) => unknown>(
-  fn: F | (F & Unsubscribable)
+  fn: F | (F & Unsubscribable),
 ): fn is F & Unsubscribable {
   return !!(fn as F & Unsubscribable)?.unsubscribe;
 }
@@ -17,6 +17,6 @@ export function isActionCreator(action: unknown): action is ActionCreator {
       action &&
       'type' in action &&
       action.type &&
-      typeof action.type === 'string'
+      typeof action.type === 'string',
   );
 }

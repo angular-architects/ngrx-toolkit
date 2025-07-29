@@ -17,12 +17,12 @@ describe('withDevtools / renaming', () => {
     const Store = signalStore(
       { providedIn: 'root' },
       withDevtools('flights'),
-      withState({ airline: 'Lufthansa' })
+      withState({ airline: 'Lufthansa' }),
     );
 
     const childContext = createEnvironmentInjector(
       [Store],
-      TestBed.inject(EnvironmentInjector)
+      TestBed.inject(EnvironmentInjector),
     );
 
     TestBed.inject(Store);
@@ -35,7 +35,7 @@ describe('withDevtools / renaming', () => {
       {
         flights: { airline: 'Lufthansa' },
         'flights-1': { airline: 'Lufthansa' },
-      }
+      },
     );
   });
 
@@ -43,7 +43,7 @@ describe('withDevtools / renaming', () => {
     const { sendSpy } = setupExtensions();
     const Store = signalStore(
       withDevtools('flights'),
-      withState({ airline: 'Lufthansa' })
+      withState({ airline: 'Lufthansa' }),
     );
 
     const envInjector = TestBed.inject(EnvironmentInjector);
@@ -86,20 +86,20 @@ describe('withDevtools / renaming', () => {
     const Store = signalStore(
       { providedIn: 'root' },
       withDevtools('flights', withDisabledNameIndices()),
-      withState({ airline: 'Lufthansa' })
+      withState({ airline: 'Lufthansa' }),
     );
 
     const childContext = createEnvironmentInjector(
       [Store],
-      TestBed.inject(EnvironmentInjector)
+      TestBed.inject(EnvironmentInjector),
     );
 
     TestBed.inject(Store);
     expect(() =>
-      runInInjectionContext(childContext, () => inject(Store))
+      runInInjectionContext(childContext, () => inject(Store)),
     ).toThrow(
       `An instance of the store flights already exists. \
-Enable automatic indexing via withDevTools('flights', { indexNames: true }), or rename it upon instantiation.`
+Enable automatic indexing via withDevTools('flights', { indexNames: true }), or rename it upon instantiation.`,
     );
   });
 
@@ -107,10 +107,10 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
     const { sendSpy } = setupExtensions();
 
     TestBed.inject(
-      signalStore({ providedIn: 'root' }, withDevtools('flights'))
+      signalStore({ providedIn: 'root' }, withDevtools('flights')),
     );
     TestBed.inject(
-      signalStore({ providedIn: 'root' }, withDevtools('flights'))
+      signalStore({ providedIn: 'root' }, withDevtools('flights')),
     );
 
     TestBed.flushEffects();
@@ -129,15 +129,15 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
     setupExtensions();
 
     TestBed.inject(
-      signalStore({ providedIn: 'root' }, withDevtools('flights'))
+      signalStore({ providedIn: 'root' }, withDevtools('flights')),
     );
     expect(() =>
       TestBed.inject(
         signalStore(
           { providedIn: 'root' },
-          withDevtools('flights', withDisabledNameIndices())
-        )
-      )
+          withDevtools('flights', withDisabledNameIndices()),
+        ),
+      ),
     ).toThrow();
   });
 
@@ -147,13 +147,13 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
     TestBed.inject(
       signalStore(
         { providedIn: 'root' },
-        withDevtools('flights', withDisabledNameIndices())
-      )
+        withDevtools('flights', withDisabledNameIndices()),
+      ),
     );
     expect(() =>
       TestBed.inject(
-        signalStore({ providedIn: 'root' }, withDevtools('flights'))
-      )
+        signalStore({ providedIn: 'root' }, withDevtools('flights')),
+      ),
     ).not.toThrow();
   });
 
@@ -164,7 +164,7 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
       const Store = signalStore(
         { providedIn: 'root' },
         withState({ name: 'Product', price: 10.5 }),
-        withDevtools('flight')
+        withDevtools('flight'),
       );
 
       const store = TestBed.inject(Store);
@@ -173,7 +173,7 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
 
       expect(sendSpy).toHaveBeenCalledWith(
         { type: 'Store Update' },
-        { flights: { name: 'Product', price: 10.5 } }
+        { flights: { name: 'Product', price: 10.5 } },
       );
     });
 
@@ -182,20 +182,20 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
       const Store1 = signalStore(
         { providedIn: 'root' },
         withState({ name: 'Product', price: 10.5 }),
-        withDevtools('shop')
+        withDevtools('shop'),
       );
 
       const Store2 = signalStore(
         { providedIn: 'root' },
         withState({ name: 'Product', price: 10.5 }),
-        withDevtools('mall')
+        withDevtools('mall'),
       );
       TestBed.inject(Store1);
       const store = TestBed.inject(Store2);
       TestBed.flushEffects();
 
       expect(() => renameDevtoolsName(store, 'shop')).toThrow(
-        'NgRx Toolkit/DevTools: cannot rename from mall to shop. shop is already assigned to another SignalStore instance.'
+        'NgRx Toolkit/DevTools: cannot rename from mall to shop. shop is already assigned to another SignalStore instance.',
       );
     });
 
@@ -203,13 +203,13 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
       setupExtensions();
       const Store = signalStore(
         { providedIn: 'root' },
-        withState({ name: 'Product', price: 10.5 })
+        withState({ name: 'Product', price: 10.5 }),
       );
 
       const store = TestBed.inject(Store);
 
       expect(() => renameDevtoolsName(store, 'shop')).toThrow(
-        "Devtools extensions haven't been added to this store."
+        "Devtools extensions haven't been added to this store.",
       );
     });
   });

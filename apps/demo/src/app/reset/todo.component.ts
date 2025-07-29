@@ -41,9 +41,10 @@ import { Todo, TodoStore } from './todo-store';
       </mat-table>
     </div>
   `,
-  styles: `.button {
-    margin-bottom: 1em;
-  }
+  styles: `
+    .button {
+      margin-bottom: 1em;
+    }
   `,
   imports: [MatCheckboxModule, MatIconModule, MatTableModule, MatButton],
 })

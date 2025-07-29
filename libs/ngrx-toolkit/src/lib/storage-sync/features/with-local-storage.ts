@@ -6,7 +6,7 @@ import { SessionStorageService } from '../internal/session-storage.service';
 import { SyncConfig } from '../with-storage-sync';
 
 export function withLocalStorage<
-  State extends object
+  State extends object,
 >(): SyncStorageStrategy<State> {
   return createSyncMethods<State>(LocalStorageService);
 }
@@ -16,12 +16,12 @@ export function withSessionStorage<State extends object>() {
 }
 
 function createSyncMethods<State extends object>(
-  Storage: Type<LocalStorageService | SessionStorageService>
+  Storage: Type<LocalStorageService | SessionStorageService>,
 ): SyncStorageStrategy<State> {
   function factory(
     { key, parse, select, stringify }: Required<SyncConfig<State>>,
     store: SyncStoreForFactory<State>,
-    useStubs: boolean
+    useStubs: boolean,
   ) {
     if (useStubs) {
       return {

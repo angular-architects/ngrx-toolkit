@@ -53,7 +53,7 @@ import { isDevMode } from './is-dev-mode';
  */
 export function withImmutableState<State extends object>(
   state: State,
-  options?: { enableInProduction?: boolean }
+  options?: { enableInProduction?: boolean },
 ): SignalStoreFeature<
   SignalStoreFeatureResult,
   EmptyFeatureResult & { state: State }
@@ -69,14 +69,14 @@ export function withImmutableState<State extends object>(
  */
 export function withImmutableState<State extends object>(
   stateFactory: () => State,
-  options?: { enableInProduction?: boolean }
+  options?: { enableInProduction?: boolean },
 ): SignalStoreFeature<
   SignalStoreFeatureResult,
   EmptyFeatureResult & { state: State }
 >;
 export function withImmutableState<State extends object>(
   stateOrFactory: State | (() => State),
-  options?: { enableInProduction?: boolean }
+  options?: { enableInProduction?: boolean },
 ): SignalStoreFeature<
   SignalStoreFeatureResult,
   EmptyFeatureResult & { state: State }
@@ -110,6 +110,6 @@ export function withImmutableState<State extends object>(
           deepFreeze(state, stateKeys);
         });
       },
-    }))
+    })),
   );
 }

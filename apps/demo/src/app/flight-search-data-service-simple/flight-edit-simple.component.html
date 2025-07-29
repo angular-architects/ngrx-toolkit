@@ -1,22 +1,24 @@
 <h1 class="title">Flight Edit (Simple)</h1>
 
-@if(loading()) {
-<div class="status">One moment please ...</div>
-} @if(error()) {
-<h2 class="error">Error: {{ error() }}</h2>
-} @if(current()) {
-<form>
-  <div>
-    <input [ngModel]="current().id" name="id" />
-    <input [ngModel]="current().from" name="from" />
-    <input [ngModel]="current().to" name="to" />
-    <input [ngModel]="current().date" name="date" />
-    <input [ngModel]="current().delayed" name="delayed" type="checkbox" />
-  </div>
-  <div>
-    <button (click)="createNew()">New</button>
-    <button (click)="save()">Save</button>
-    <button (click)="deleteFlight()">Delete</button>
-  </div>
-</form>
+@if (loading()) {
+  <div class="status">One moment please ...</div>
+}
+@if (error()) {
+  <h2 class="error">Error: {{ error() }}</h2>
+}
+@if (current()) {
+  <form>
+    <div>
+      <input [ngModel]="current().id" name="id" />
+      <input [ngModel]="current().from" name="from" />
+      <input [ngModel]="current().to" name="to" />
+      <input [ngModel]="current().date" name="date" />
+      <input [ngModel]="current().delayed" name="delayed" type="checkbox" />
+    </div>
+    <div>
+      <button (click)="createNew()">New</button>
+      <button (click)="save()">Save</button>
+      <button (click)="deleteFlight()">Delete</button>
+    </div>
+  </form>
 }

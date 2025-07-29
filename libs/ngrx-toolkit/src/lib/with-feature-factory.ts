@@ -36,11 +36,11 @@ type StoreForFactory<Input extends SignalStoreFeatureResult> = StateSignals<
  */
 export function withFeatureFactory<
   Input extends SignalStoreFeatureResult,
-  Output extends SignalStoreFeatureResult
+  Output extends SignalStoreFeatureResult,
 >(
   factoryFn: (
-    store: StoreForFactory<Input>
-  ) => SignalStoreFeature<Input, Output>
+    store: StoreForFactory<Input>,
+  ) => SignalStoreFeature<Input, Output>,
 ): SignalStoreFeature<Input, Output> {
   return (store) => {
     const storeForFactory = {

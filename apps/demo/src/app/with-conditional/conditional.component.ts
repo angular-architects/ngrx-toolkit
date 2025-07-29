@@ -21,11 +21,11 @@ const withUser = signalStoreFeature(
     onInit() {
       patchState(store, { id: 1, name: 'Konrad' });
     },
-  }))
+  })),
 );
 
 const withFakeUser = signalStoreFeature(
-  withState({ id: 0, name: 'Tommy Fake' })
+  withState({ id: 0, name: 'Tommy Fake' }),
 );
 
 const UserServiceStore = signalStore(
@@ -35,15 +35,15 @@ const UserServiceStore = signalStore(
     setImplementation(implementation: 'real' | 'fake') {
       patchState(store, { implementation });
     },
-  }))
+  })),
 );
 
 const UserStore = signalStore(
   withConditional(
     () => inject(UserServiceStore).implementation() === 'real',
     withUser,
-    withFakeUser
-  )
+    withFakeUser,
+  ),
 );
 
 @Component({
@@ -79,7 +79,7 @@ class ConditionalUserComponent {
       </button>
     </div>
     @if (showUserComponent()) {
-    <demo-conditional-user />
+      <demo-conditional-user />
     }
   `,
   imports: [

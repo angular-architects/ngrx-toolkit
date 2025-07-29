@@ -39,7 +39,7 @@ export class GlitchTrackerService implements Tracker {
         }
         return newStore;
       },
-      {} as Stores
+      {} as Stores,
     );
 
     throwIfNull(this.#callback)({});

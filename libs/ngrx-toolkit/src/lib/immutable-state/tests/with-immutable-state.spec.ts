@@ -29,7 +29,7 @@ describe('withImmutableState', () => {
       { protectedState: false },
       enableInProduction === undefined
         ? withImmutableState(initialState)
-        : withImmutableState(initialState, { enableInProduction })
+        : withImmutableState(initialState, { enableInProduction }),
     );
     return TestBed.configureTestingModule({ providers: [Store] }).inject(Store);
   };
@@ -71,7 +71,7 @@ describe('withImmutableState', () => {
 
             if (protectionOn) {
               expect(patch).toThrowError(
-                "Cannot assign to read only property 'ngrx' of object"
+                "Cannot assign to read only property 'ngrx' of object",
               );
             } else {
               expect(patch).not.toThrowError();
@@ -91,7 +91,7 @@ describe('withImmutableState', () => {
 
             if (protectionOn) {
               expect(patch).toThrowError(
-                "Cannot assign to read only property 'firstName' of object"
+                "Cannot assign to read only property 'firstName' of object",
               );
             } else {
               expect(patch).not.toThrowError();
@@ -108,7 +108,7 @@ describe('withImmutableState', () => {
               };
               if (protectionOn) {
                 expect(patch).toThrowError(
-                  "Cannot assign to read only property 'firstName' of object"
+                  "Cannot assign to read only property 'firstName' of object",
                 );
               } else {
                 expect(patch).not.toThrowError();
@@ -125,7 +125,7 @@ describe('withImmutableState', () => {
 
               if (protectionOn) {
                 expect(patch).toThrowError(
-                  "Cannot assign to read only property 'ngrx' of object"
+                  "Cannot assign to read only property 'ngrx' of object",
                 );
               } else {
                 expect(patch).not.toThrowError();
@@ -143,7 +143,7 @@ describe('withImmutableState', () => {
               };
               if (protectionOn) {
                 expect(patch).toThrowError(
-                  "Cannot assign to read only property 'firstName' of object"
+                  "Cannot assign to read only property 'firstName' of object",
                 );
               } else {
                 expect(patch).not.toThrowError();
@@ -162,7 +162,7 @@ describe('withImmutableState', () => {
 
               if (protectionOn) {
                 expect(patch).toThrowError(
-                  "Cannot assign to read only property 'code' of object"
+                  "Cannot assign to read only property 'code' of object",
                 );
               } else {
                 expect(patch).not.toThrowError();
@@ -181,7 +181,7 @@ describe('withImmutableState', () => {
 
               if (protectionOn) {
                 expect(patch).toThrowError(
-                  "Cannot assign to read only property 'Symbol(secret)' of object"
+                  "Cannot assign to read only property 'Symbol(secret)' of object",
                 );
               } else {
                 expect(patch).not.toThrowError();
@@ -212,8 +212,8 @@ describe('withImmutableState', () => {
                   }),
                   withImmutableState(
                     { location: { city: 'London' } },
-                    { enableInProduction }
-                  )
+                    { enableInProduction },
+                  ),
                 );
                 const store = TestBed.inject(UserStore);
                 const state = getState(store);
@@ -239,7 +239,7 @@ describe('withImmutableState', () => {
             const TestStore = signalStore(
               { providedIn: 'root', protectedState: false },
               withImmutableState(immutableState, { enableInProduction }),
-              withState(mutableState)
+              withState(mutableState),
             );
 
             TestBed.inject(TestStore);
@@ -250,7 +250,7 @@ describe('withImmutableState', () => {
               expect(() => (immutableState.name = 'Jane')).not.toThrow();
             }
             expect(
-              () => (mutableState.address = 'Glastonbury')
+              () => (mutableState.address = 'Glastonbury'),
             ).not.toThrowError();
           });
         });

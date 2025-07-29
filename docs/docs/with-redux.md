@@ -53,13 +53,13 @@ export const FlightStore = signalStore(
           switchMap(({ from, to }) =>
             httpClient.get<Flight[]>('https://demo.angulararchitects.io/api/flight', {
               params: new HttpParams().set('from', from).set('to', to),
-            })
+            }),
           ),
-          tap((flights) => actions.loaded({ flights }))
+          tap((flights) => actions.loaded({ flights })),
         ),
       };
     },
-  })
+  }),
 );
 ```
 
@@ -126,7 +126,7 @@ signalStore(
     actions,
     effects,
     reducer,
-  })
+  }),
 );
 ```
 

@@ -36,8 +36,8 @@ export class SignalReduxStore {
         }
 
         return;
-      })
-    )
+      }),
+    ),
   );
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -48,8 +48,8 @@ export class SignalReduxStore {
           (this.mapperDict[action] = {
             storeMethod: mapper.storeMethod,
             resultMethod: mapper.resultMethod,
-          })
-      )
+          }),
+      ),
     );
   }
 }

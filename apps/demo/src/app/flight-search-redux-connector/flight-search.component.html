@@ -35,21 +35,21 @@
     </button>
 
     @if (flights().length) {
-    <button (click)="reset()" class="btn btn-default">Reset</button>
+      <button (click)="reset()" class="btn btn-default">Reset</button>
     }
   </div>
 </form>
 
 <div class="row">
   @for (flight of flights(); track flight.id) {
-  <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-3">
-    <demo-flight-card
-      [item]="flight"
-      [selected]="localState.basket()[flight.id]"
-      (selectedChange)="select(flight.id, $event)"
-    >
-    </demo-flight-card>
-  </div>
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-3">
+      <demo-flight-card
+        [item]="flight"
+        [selected]="localState.basket()[flight.id]"
+        (selectedChange)="select(flight.id, $event)"
+      >
+      </demo-flight-card>
+    </div>
   }
 </div>
 

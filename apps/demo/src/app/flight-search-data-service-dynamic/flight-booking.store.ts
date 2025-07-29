@@ -26,5 +26,5 @@ export const FlightBookingStore = signalStore(
   }),
   withUndoRedo({
     collections: ['flight'],
-  })
+  }),
 );

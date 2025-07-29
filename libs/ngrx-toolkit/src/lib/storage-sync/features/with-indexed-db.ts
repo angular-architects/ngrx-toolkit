@@ -10,12 +10,12 @@ import {
 import { SyncConfig } from '../with-storage-sync';
 
 export function withIndexedDB<
-  State extends object
+  State extends object,
 >(): AsyncStorageStrategy<State> {
   function factory(
     { key, parse, select, stringify }: Required<SyncConfig<State>>,
     store: AsyncStoreForFactory<State>,
-    useStubs: boolean
+    useStubs: boolean,
   ): AsyncMethods {
     if (useStubs) {
       return {
@@ -33,7 +33,7 @@ export function withIndexedDB<
         console.warn(
           `${prettyMode} to Store (${key}) happened during an ongoing synchronization process.`,
           'Please ensure that the store is not in syncing state via `store.whenSynced()`.',
-          'Alternatively, you can disable the autoSync by passing `autoSync: false` in the config.'
+          'Alternatively, you can disable the autoSync by passing `autoSync: false` in the config.',
         );
       }
     }

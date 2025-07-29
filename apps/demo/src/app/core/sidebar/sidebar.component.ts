@@ -26,10 +26,10 @@ import { map, shareReplay } from 'rxjs';
 export class SidebarComponent {
   isHandset$ = this.breakpointObserver.observe(Breakpoints.Handset).pipe(
     map((result) => result.matches),
-    shareReplay()
+    shareReplay(),
   );
 
   constructor(
-    @Inject(BreakpointObserver) private breakpointObserver: BreakpointObserver
+    @Inject(BreakpointObserver) private breakpointObserver: BreakpointObserver,
   ) {}
 }

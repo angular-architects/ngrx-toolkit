@@ -41,12 +41,12 @@ describe('withStorageSync (sync storage)', () => {
         JSON.stringify({
           foo: 'baz',
           age: 99,
-        } as StateObject)
+        } as StateObject),
       );
 
       const Store = signalStore(
         { protectedState: false },
-        withStorageSync({ key, autoSync: false })
+        withStorageSync({ key, autoSync: false }),
       );
       const store = new Store();
       expect(getState(store)).toEqual({});
@@ -87,12 +87,12 @@ describe('withStorageSync (sync storage)', () => {
           JSON.stringify({
             foo: 'baz',
             age: 99,
-          } as StateObject)
+          } as StateObject),
         );
 
         const Store = signalStore(
           { protectedState: false },
-          withStorageSync(key)
+          withStorageSync(key),
         );
         const store = new Store();
         expect(getState(store)).toEqual({
@@ -121,12 +121,12 @@ describe('withStorageSync (sync storage)', () => {
           JSON.stringify({
             foo: 'baz',
             age: 99,
-          } as StateObject)
+          } as StateObject),
         );
 
         const Store = signalStore(
           { protectedState: false },
-          withStorageSync({ key, autoSync: false })
+          withStorageSync({ key, autoSync: false }),
         );
         const store = new Store();
         expect(getState(store)).toEqual({});
@@ -146,7 +146,7 @@ describe('withStorageSync (sync storage)', () => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
           { protectedState: false },
-          withStorageSync(key)
+          withStorageSync(key),
         );
         const store = new Store();
 
@@ -165,7 +165,7 @@ describe('withStorageSync (sync storage)', () => {
         const Store = signalStore(
           { protectedState: false },
           withState(initialState),
-          withStorageSync({ key, select: ({ foo }) => ({ foo }) })
+          withStorageSync({ key, select: ({ foo }) => ({ foo }) }),
         );
         const store = new Store();
 
@@ -198,7 +198,7 @@ describe('withStorageSync (sync storage)', () => {
             key,
             parse,
             stringify: (state) => `${state.foo}_${state.age}`,
-          })
+          }),
         );
         const store = new Store();
 
@@ -220,12 +220,12 @@ describe('withStorageSync (sync storage)', () => {
         signalStore(
           withStorageSync(
             { key: 'foo', storage: () => localStorage },
-            withLocalStorage()
-          )
+            withLocalStorage(),
+          ),
         );
 
       expect(signalStoreFactory).toThrow(
-        'You can either pass a storage strategy or a config with storage, but not both.'
+        'You can either pass a storage strategy or a config with storage, but not both.',
       );
     });
 
@@ -237,12 +237,12 @@ describe('withStorageSync (sync storage)', () => {
           JSON.stringify({
             foo: 'baz',
             age: 99,
-          } as StateObject)
+          } as StateObject),
         );
 
         const Store = signalStore(
           { protectedState: false },
-          withStorageSync({ key, storage: () => sessionStorage })
+          withStorageSync({ key, storage: () => sessionStorage }),
         );
         const store = new Store();
         expect(getState(store)).toEqual({

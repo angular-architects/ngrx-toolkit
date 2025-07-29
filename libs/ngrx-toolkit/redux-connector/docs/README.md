@@ -40,11 +40,11 @@ export const FlightStore = signalStore(
     loadFlights: reduxMethod<FlightFilter, { flights: Flight[] }>(
       pipe(
         switchMap((filter) => from(flightService.load({ from: filter.from, to: filter.to }))),
-        map((flights) => ({ flights }))
+        map((flights) => ({ flights })),
       ),
-      store.setFlights
+      store.setFlights,
     ),
-  }))
+  })),
 );
 ```
 
@@ -74,18 +74,18 @@ export const { provideFlightStore, injectFlightStore } = createReduxState('fligh
       // Side-Effect
       store.loadFlights,
       // Result Action
-      ticketActions.flightsLoaded
+      ticketActions.flightsLoaded,
     ),
     mapAction(
       // Filtered Actions
       ticketActions.flightsLoaded,
       ticketActions.flightsLoadedByPassenger,
       // State Updater Method (like Reducers)
-      store.setFlights
+      store.setFlights,
     ),
     mapAction(ticketActions.flightUpdate, store.updateFlight),
-    mapAction(ticketActions.flightsClear, store.clearFlights)
-  )
+    mapAction(ticketActions.flightsClear, store.clearFlights),
+  ),
 );
 ```
 
@@ -120,7 +120,7 @@ export class FlightSearchReducConnectorComponent {
       ticketActions.flightsLoad({
         from: this.localState.filter.from(),
         to: this.localState.filter.to(),
-      })
+      }),
     );
   }
 

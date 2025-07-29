@@ -22,23 +22,26 @@ const TodoDetailStore = signalStore(
   withDevtools(
     'todo-detail',
     withMapper((state: Record<string, unknown>) => {
-      return Object.keys(state).reduce((acc, key) => {
-        if (key === 'secret') {
-          return acc;
-        }
-        acc[key] = state[key];
+      return Object.keys(state).reduce(
+        (acc, key) => {
+          if (key === 'secret') {
+            return acc;
+          }
+          acc[key] = state[key];
 
-        return acc;
-      }, {} as Record<string, unknown>);
+          return acc;
+        },
+        {} as Record<string, unknown>,
+      );
     }),
-    withGlitchTracking()
+    withGlitchTracking(),
   ),
   withState({
     id: 1,
     secret: 'do not show in DevTools',
     active: false,
   }),
-  withHooks((store) => ({ onInit: () => patchState(store, { active: true }) }))
+  withHooks((store) => ({ onInit: () => patchState(store, { active: true }) })),
 );
 
 @Component({

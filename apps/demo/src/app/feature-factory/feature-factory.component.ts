@@ -27,7 +27,7 @@ function withMyEntity<Entity>(loadMethod: (id: number) => Promise<Entity>) {
         const entity = await loadMethod(1);
         patchState(store, { entity, currentId: id });
       },
-    }))
+    })),
   );
 }
 
@@ -41,7 +41,7 @@ const UserStore = signalStore(
   withFeatureFactory((store) => {
     const loader = (id: number) => lastValueFrom(store.findById(id));
     return withMyEntity<User>(loader);
-  })
+  }),
 );
 
 @Component({

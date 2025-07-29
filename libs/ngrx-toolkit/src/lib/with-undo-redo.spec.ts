@@ -22,7 +22,7 @@ describe('withUndoRedo', () => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
         withState(testState),
-        withUndoRedo({ keys: testKeys })
+        withUndoRedo({ keys: testKeys }),
       );
       const store = new Store();
 
@@ -41,34 +41,34 @@ describe('withUndoRedo', () => {
     signalStore(
       withState(testState),
       // @ts-expect-error - should not allow invalid keys
-      withUndoRedo({ keys: ['tes'] })
+      withUndoRedo({ keys: ['tes'] }),
     );
     signalStore(
       withState(testState),
       withEntities({ entity: type(), collection: 'flight' }),
       // @ts-expect-error - should not allow invalid keys when entities are present
-      withUndoRedo({ keys: ['flightIdsTest'] })
+      withUndoRedo({ keys: ['flightIdsTest'] }),
     );
     signalStore(
       withState(testState),
       // @ts-expect-error - should not allow collections without named entities
-      withUndoRedo({ collections: ['tee'] })
+      withUndoRedo({ collections: ['tee'] }),
     );
     signalStore(
       withState(testState),
       withComputed((store) => ({ testComputed: computed(() => store.test()) })),
       // @ts-expect-error - should not allow collections without named entities with other computed
-      withUndoRedo({ collections: ['tested'] })
+      withUndoRedo({ collections: ['tested'] }),
     );
     signalStore(
       withEntities({ entity: type() }),
       // @ts-expect-error - should not allow collections without named entities
-      withUndoRedo({ collections: ['test'] })
+      withUndoRedo({ collections: ['test'] }),
     );
     signalStore(
       withEntities({ entity: type(), collection: 'flight' }),
       // @ts-expect-error - should not allow invalid collections
-      withUndoRedo({ collections: ['test'] })
+      withUndoRedo({ collections: ['test'] }),
     );
   });
 
@@ -81,7 +81,7 @@ describe('withUndoRedo', () => {
             updateTest: (newTest: string) =>
               patchState(store, { test: newTest }),
           })),
-          withUndoRedo({ keys: testKeys })
+          withUndoRedo({ keys: testKeys }),
         );
 
         const store = new Store();
@@ -110,7 +110,7 @@ describe('withUndoRedo', () => {
             updateTest: (newTest: string) =>
               patchState(store, { test: newTest }),
           })),
-          withUndoRedo({ keys: testKeys, skip: 1 })
+          withUndoRedo({ keys: testKeys, skip: 1 }),
         );
 
         const store = new Store();
@@ -144,7 +144,7 @@ describe('withUndoRedo', () => {
           addEntity: (newTest: string) =>
             patchState(store, addEntity({ id: newTest })),
         })),
-        withUndoRedo()
+        withUndoRedo(),
       );
       TestBed.configureTestingModule({ providers: [Store] });
       TestBed.runInInjectionContext(() => {
@@ -207,11 +207,11 @@ describe('withUndoRedo', () => {
             addEntity: (newTest: string) =>
               patchState(
                 store,
-                addEntity({ id: newTest }, { collection: 'flight' })
+                addEntity({ id: newTest }, { collection: 'flight' }),
               ),
           })),
           withCallState({ collection: 'flight' }),
-          withUndoRedo({ collections: ['flight'] })
+          withUndoRedo({ collections: ['flight'] }),
         );
 
         const store = new Store();
@@ -239,7 +239,7 @@ describe('withUndoRedo', () => {
         withMethods((store) => ({
           update: (value: string) => patchState(store, { test: value }),
         })),
-        withUndoRedo({ keys: testKeys })
+        withUndoRedo({ keys: testKeys }),
       );
 
       const store = TestBed.inject(Store);
@@ -260,7 +260,7 @@ describe('withUndoRedo', () => {
         withMethods((store) => ({
           update: (value: string) => patchState(store, { test: value }),
         })),
-        withUndoRedo({ keys: testKeys })
+        withUndoRedo({ keys: testKeys }),
       );
 
       const store = TestBed.inject(Store);

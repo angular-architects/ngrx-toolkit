@@ -51,19 +51,20 @@ import { TodoStore } from './todo-store';
 
     <div class="details">
       @for (todo of todoStore.selectedTodos(); track todo) {
-      <demo-todo-detail [todo]="todo"></demo-todo-detail>
+        <demo-todo-detail [todo]="todo"></demo-todo-detail>
       }
     </div>
   `,
-  styles: `.actions {
-    display: flex;
-    align-items: center;
-  }
+  styles: `
+    .actions {
+      display: flex;
+      align-items: center;
+    }
 
-  .details {
-    margin: 20px;
-    display: flex;
-  }
+    .details {
+      margin: 20px;
+      display: flex;
+    }
   `,
   imports: [
     MatCheckboxModule,

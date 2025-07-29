@@ -33,7 +33,8 @@ import { RouterLink, RouterOutlet } from '@angular/router';
       display: inline;
     }
     .content {
-    margin: 4em;
-  }`,
+      margin: 4em;
+    }
+  `,
 })
 export class AppComponent {}

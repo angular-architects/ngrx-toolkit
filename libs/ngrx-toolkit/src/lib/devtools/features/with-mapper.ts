@@ -28,7 +28,7 @@ import { createDevtoolsFeature, Mapper } from '../internal/devtools-feature';
  * @param map function which maps the state
  */
 export function withMapper<State extends object>(
-  map: (state: State) => Record<string, unknown>
+  map: (state: State) => Record<string, unknown>,
 ) {
   return createDevtoolsFeature({ map: map as Mapper });
 }

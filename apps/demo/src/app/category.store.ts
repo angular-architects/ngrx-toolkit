@@ -18,8 +18,8 @@ export const CategoryStore = signalStore(
         setAllEntities([
           { id: 1, name: 'Important' },
           { id: 2, name: 'Nice to Have' },
-        ])
+        ]),
       );
     },
-  })
+  }),
 );

@@ -36,7 +36,7 @@ export type SetCallState<Prop extends string | undefined> = Prop extends string
   : CallStateSlice;
 
 export function deriveCallStateKeys<Collection extends string>(
-  collection?: Collection
+  collection?: Collection,
 ) {
   return {
     callStateKey: collection ? `${collection}CallState` : 'callState',
@@ -52,13 +52,13 @@ export function getCallStateKeys(config?: { collection?: string }) {
 }
 
 export function getCollectionArray(
-  config: { collection?: string } | { collections?: string[] }
+  config: { collection?: string } | { collections?: string[] },
 ) {
   return 'collections' in config
     ? config.collections
     : 'collection' in config && config.collection
-    ? [config.collection]
-    : undefined;
+      ? [config.collection]
+      : undefined;
 }
 
 export function withCallState<Collection extends string>(config: {
@@ -93,7 +93,7 @@ export function withCallState<Collection extends string>(
       }
     | {
         collections: Collection[];
-      }
+      },
 ): SignalStoreFeature {
   return signalStoreFeature(
     withState(() => {
@@ -107,7 +107,7 @@ export function withCallState<Collection extends string>(
             ...acc,
             ...{ [cur ? `${cur}CallState` : 'callState']: 'init' },
           }),
-          {}
+          {},
         );
       }
 
@@ -132,7 +132,7 @@ export function withCallState<Collection extends string>(
                 }),
               };
             },
-            {}
+            {},
           );
         }
       }
@@ -147,12 +147,12 @@ export function withCallState<Collection extends string>(
           return typeof v === 'object' ? v.error : null;
         }),
       };
-    })
+    }),
   );
 }
 
 export function setLoading<Prop extends string | undefined = undefined>(
-  prop?: Prop
+  prop?: Prop,
 ): SetCallState<Prop> {
   if (prop) {
     return { [`${prop}CallState`]: 'loading' } as SetCallState<Prop>;
@@ -162,7 +162,7 @@ export function setLoading<Prop extends string | undefined = undefined>(
 }
 
 export function setLoaded<Prop extends string | undefined = undefined>(
-  prop?: Prop
+  prop?: Prop,
 ): SetCallState<Prop> {
   if (prop) {
     return { [`${prop}CallState`]: 'loaded' } as SetCallState<Prop>;
@@ -173,7 +173,7 @@ export function setLoaded<Prop extends string | undefined = undefined>(
 
 export function setError<Prop extends string | undefined = undefined>(
   error: unknown,
-  prop?: Prop
+  prop?: Prop,
 ): SetCallState<Prop> {
   let errorMessage: string;
 

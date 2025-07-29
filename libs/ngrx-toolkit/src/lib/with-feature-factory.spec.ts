@@ -28,7 +28,7 @@ function withMyEntity<Entity>(loadMethod: (id: number) => Promise<Entity>) {
         const entity = await loadMethod(1);
         patchState(store, { entity, currentId: id });
       },
-    }))
+    })),
   );
 }
 
@@ -36,12 +36,12 @@ describe('withFeatureFactory', () => {
   it('should allow a sum feature', () => {
     function withSum(a: Signal<number>, b: Signal<number>) {
       return signalStoreFeature(
-        withComputed(() => ({ sum: computed(() => a() + b()) }))
+        withComputed(() => ({ sum: computed(() => a() + b()) })),
       );
     }
     signalStore(
       withState({ a: 1, b: 2 }),
-      withFeatureFactory((store) => withSum(store.a, store.b))
+      withFeatureFactory((store) => withSum(store.a, store.b)),
     );
   });
 
@@ -56,7 +56,7 @@ describe('withFeatureFactory', () => {
       withFeatureFactory((store) => {
         const loader = (id: number) => lastValueFrom(store.findById(id));
         return withMyEntity<User>(loader);
-      })
+      }),
     );
 
     const userStore = TestBed.inject(UserStore);

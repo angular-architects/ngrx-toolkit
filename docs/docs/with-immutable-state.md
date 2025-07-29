@@ -28,7 +28,7 @@ const UserStore = signalStore(
         return state;
       });
     },
-  }))
+  })),
 );
 ```
 

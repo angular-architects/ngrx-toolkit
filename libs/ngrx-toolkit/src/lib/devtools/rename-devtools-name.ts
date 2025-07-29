@@ -8,7 +8,7 @@ import { renameDevtoolsMethodName } from './with-devtools';
  */
 export function renameDevtoolsName<State extends object>(
   store: StateSource<State>,
-  newName: string
+  newName: string,
 ): void {
   const renameMethod = (store as Record<string, (newName: string) => void>)[
     renameDevtoolsMethodName

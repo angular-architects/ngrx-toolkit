@@ -12,13 +12,13 @@ describe('Devtools Basics', () => {
       signalStore(
         { providedIn: 'root' },
         withDevtools('shop'),
-        withState({ name: 'Car' })
-      )
+        withState({ name: 'Car' }),
+      ),
     );
     TestBed.flushEffects();
     expect(sendSpy).toHaveBeenCalledWith(
       { type: 'Store Update' },
-      { shop: { name: 'Car' } }
+      { shop: { name: 'Car' } },
     );
   });
 
@@ -33,7 +33,7 @@ describe('Devtools Basics', () => {
       {
         category: {},
         booking: {},
-      }
+      },
     );
   });
 
@@ -43,7 +43,7 @@ describe('Devtools Basics', () => {
     const Store = signalStore(withDevtools('flight'));
     const childInjector = createEnvironmentInjector(
       [Store],
-      TestBed.inject(EnvironmentInjector)
+      TestBed.inject(EnvironmentInjector),
     );
 
     childInjector.get(Store);
@@ -51,7 +51,7 @@ describe('Devtools Basics', () => {
 
     expect(sendSpy).toHaveBeenCalledWith(
       { type: 'Store Update' },
-      { flight: {} }
+      { flight: {} },
     );
 
     childInjector.destroy();
@@ -65,7 +65,7 @@ describe('Devtools Basics', () => {
     const Store = signalStore(withDevtools('flight'));
     const childInjector = createEnvironmentInjector(
       [Store],
-      TestBed.inject(EnvironmentInjector)
+      TestBed.inject(EnvironmentInjector),
     );
 
     const store = childInjector.get(Store);
@@ -73,7 +73,7 @@ describe('Devtools Basics', () => {
 
     expect(sendSpy).toHaveBeenCalledWith(
       { type: 'Store Update' },
-      { flight: {} }
+      { flight: {} },
     );
 
     renameDevtoolsName(store, 'flights');
@@ -96,8 +96,8 @@ describe('Devtools Basics', () => {
               amount: value.amount + 1,
             }));
           },
-        }))
-      )
+        })),
+      ),
     );
 
     store.increment();

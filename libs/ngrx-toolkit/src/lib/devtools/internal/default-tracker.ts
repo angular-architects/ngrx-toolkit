@@ -18,9 +18,12 @@ export class DefaultTracker implements Tracker {
     }
     const stores = this.#stores();
 
-    const fullState = Object.entries(stores).reduce((acc, [id, store]) => {
-      return { ...acc, [id]: getState(store) };
-    }, {} as Record<string, object>);
+    const fullState = Object.entries(stores).reduce(
+      (acc, [id, store]) => {
+        return { ...acc, [id]: getState(store) };
+      },
+      {} as Record<string, object>,
+    );
 
     this.#trackCallback(fullState);
   });
@@ -43,7 +46,7 @@ export class DefaultTracker implements Tracker {
           newStore[storeId] = state;
         }
         return newStore;
-      }, {} as TrackerStores)
+      }, {} as TrackerStores),
     );
   }
 

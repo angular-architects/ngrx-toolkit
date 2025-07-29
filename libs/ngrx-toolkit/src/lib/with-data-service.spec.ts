@@ -230,7 +230,7 @@ describe('withDataService', () => {
 
       expect(store.selectedFlightEntities().length).toBe(1);
       expect(store.selectedFlightEntities()).toContainEqual(
-        createFlight({ id: 3 })
+        createFlight({ id: 3 }),
       );
     });
   }));
@@ -394,7 +394,7 @@ describe('withDataService', () => {
         dataServiceType: MockFlightService,
         filter: { from: 'Paris', to: 'New York' },
         collection: 'flight',
-      })
+      }),
     );
   });
 
@@ -523,7 +523,7 @@ const Store = signalStore(
   withDataService({
     dataServiceType: MockFlightService,
     filter: { from: 'Paris', to: 'New York' },
-  })
+  }),
 );
 const StoreWithNamedCollection = signalStore(
   withCallState({
@@ -537,7 +537,7 @@ const StoreWithNamedCollection = signalStore(
     dataServiceType: MockFlightService,
     filter: { from: 'Paris', to: 'New York' },
     collection: 'flight',
-  })
+  }),
 );
 
 const StoreForLoading = signalStore(
@@ -546,7 +546,7 @@ const StoreForLoading = signalStore(
   withDataService({
     dataServiceType: MockFlightServiceForLoading,
     filter: { from: 'Paris', to: 'New York' },
-  })
+  }),
 );
 const StoreWithNamedCollectionForLoading = signalStore(
   withCallState({
@@ -560,5 +560,5 @@ const StoreWithNamedCollectionForLoading = signalStore(
     dataServiceType: MockFlightServiceForLoading,
     filter: { from: 'Paris', to: 'New York' },
     collection: 'flight',
-  })
+  }),
 );

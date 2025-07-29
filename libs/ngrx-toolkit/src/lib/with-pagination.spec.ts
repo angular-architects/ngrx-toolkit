@@ -21,7 +21,7 @@ describe('withPagination', () => {
     const Store = signalStore(
       { protectedState: false },
       withEntities({ entity: type<Book>() }),
-      withPagination()
+      withPagination(),
     );
 
     const store = new Store();
@@ -35,14 +35,14 @@ describe('withPagination', () => {
     const Store = signalStore(
       { protectedState: false },
       withEntities({ entity: type<Book>(), collection: 'books' }),
-      withPagination({ entity: type<Book>(), collection: 'books' })
+      withPagination({ entity: type<Book>(), collection: 'books' }),
     );
 
     const store = new Store();
 
     patchState(
       store,
-      setAllEntities(generateBooks(55), { collection: 'books' })
+      setAllEntities(generateBooks(55), { collection: 'books' }),
     );
 
     patchState(store, gotoPage(5, { collection: 'books' }));
@@ -55,7 +55,7 @@ describe('withPagination', () => {
     const Store = signalStore(
       { protectedState: false },
       withEntities({ entity: type<Book>() }),
-      withPagination()
+      withPagination(),
     );
 
     const store = new Store();

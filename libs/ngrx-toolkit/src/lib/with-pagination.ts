@@ -80,7 +80,7 @@ export type PaginationServiceSignals<E> = {
 
 export type SetPaginationState<
   E,
-  Collection extends string | undefined
+  Collection extends string | undefined,
 > = Collection extends string
   ? NamedPaginationServiceState<E, Collection>
   : PaginationServiceState<E>;
@@ -145,7 +145,7 @@ export function withPagination<E, Collection extends string>(options?: {
 
           return entities().slice(
             pageValue * pageSizeValue,
-            (pageValue + 1) * pageSizeValue
+            (pageValue + 1) * pageSizeValue,
           ) as E[];
         }),
         [totalCountKey]: computed(() => entities().length),
@@ -164,8 +164,8 @@ export function withPagination<E, Collection extends string>(options?: {
             page(),
             pageSize(),
             entities().length,
-            pageNavigationArrayMax()
-          )
+            pageNavigationArrayMax(),
+          ),
         ),
 
         [hasNextPageKey]: computed(() => {
@@ -176,7 +176,7 @@ export function withPagination<E, Collection extends string>(options?: {
           return page() > 1;
         }),
       };
-    })
+    }),
   );
 }
 
@@ -184,7 +184,7 @@ export function gotoPage<E, Collection extends string>(
   page: number,
   options?: {
     collection: Collection;
-  }
+  },
 ): Partial<SetPaginationState<E, Collection>> {
   const { pageKey } = createPaginationKeys<Collection>(options);
 
@@ -197,7 +197,7 @@ export function setPageSize<E, Collection extends string>(
   pageSize: number,
   options?: {
     collection: Collection;
-  }
+  },
 ): Partial<SetPaginationState<E, Collection>> {
   const { pageSizeKey } = createPaginationKeys<Collection>(options);
 
@@ -240,7 +240,7 @@ export function setMaxPageNavigationArrayItems<E, Collection extends string>(
   maxPageNavigationArrayItems: number,
   options?: {
     collection: Collection;
-  }
+  },
 ): Partial<SetPaginationState<E, Collection>> {
   const { pageNavigationArrayMaxKey } =
     createPaginationKeys<Collection>(options);
@@ -251,7 +251,7 @@ export function setMaxPageNavigationArrayItems<E, Collection extends string>(
 }
 
 function createPaginationKeys<Collection extends string>(
-  options: { collection: Collection } | undefined
+  options: { collection: Collection } | undefined,
 ) {
   const entitiesKey = options?.collection
     ? `${options.collection}Entities`
@@ -311,7 +311,7 @@ export function createPageArray(
   currentPage: number,
   itemsPerPage: number,
   totalItems: number,
-  paginationRange: number
+  paginationRange: number,
 ): Page[] {
   // Convert paginationRange to number in case it's a string
   paginationRange = +paginationRange;

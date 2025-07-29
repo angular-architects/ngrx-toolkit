@@ -18,7 +18,7 @@ describe('withGlitchTracking', () => {
     const Store = signalStore(
       { providedIn: 'root' },
       withDevtools('counter', withGlitchTracking()),
-      withState({ count: 0 })
+      withState({ count: 0 }),
     );
 
     expect(sendSpy).not.toHaveBeenCalled();
@@ -26,7 +26,7 @@ describe('withGlitchTracking', () => {
 
     expect(sendSpy).toHaveBeenCalledWith(
       { type: 'Store Update' },
-      { counter: { count: 0 } }
+      { counter: { count: 0 } },
     );
   });
 
@@ -40,7 +40,7 @@ describe('withGlitchTracking', () => {
       withMethods((store) => ({
         increase: () =>
           patchState(store, (value) => ({ count: value.count + 1 })),
-      }))
+      })),
     );
 
     const store = TestBed.inject(Store);
@@ -68,7 +68,7 @@ describe('withGlitchTracking', () => {
       withMethods((store) => ({
         increase: () =>
           patchState(store, (value) => ({ count: value.count + 1 })),
-      }))
+      })),
     );
 
     const GlitchStore = signalStore(
@@ -78,7 +78,7 @@ describe('withGlitchTracking', () => {
       withMethods((store) => ({
         increase: () =>
           patchState(store, (value) => ({ count: value.count + 1 })),
-      }))
+      })),
     );
 
     const glitchFreeStore = TestBed.inject(GlitchFreeStore);
@@ -122,7 +122,7 @@ describe('withGlitchTracking', () => {
       withMethods((store) => ({
         increase: () =>
           patchState(store, (value) => ({ count: value.count + 1 })),
-      }))
+      })),
     );
 
     const GlitchStore2 = signalStore(
@@ -132,7 +132,7 @@ describe('withGlitchTracking', () => {
       withMethods((store) => ({
         increase: () =>
           patchState(store, (value) => ({ count: value.count + 1 })),
-      }))
+      })),
     );
 
     const glitchStore1 = TestBed.inject(GlitchStore1);
@@ -175,13 +175,13 @@ describe('withGlitchTracking', () => {
     const GlitchFreeStore = signalStore(
       { providedIn: 'root' },
       withState({ name: 'Product', price: 10.5 }),
-      withDevtools('flight1')
+      withDevtools('flight1'),
     );
 
     const GlitchStore = signalStore(
       { providedIn: 'root' },
       withState({ name: 'Product', price: 10.5 }),
-      withDevtools('flight2', withGlitchTracking())
+      withDevtools('flight2', withGlitchTracking()),
     );
 
     TestBed.inject(GlitchFreeStore);
@@ -221,13 +221,13 @@ describe('withGlitchTracking', () => {
     const GlitchFreeStore = signalStore(
       { providedIn: 'root' },
       withState({ name: 'Product', price: 10.5 }),
-      withDevtools('flight1')
+      withDevtools('flight1'),
     );
 
     const GlitchStore = signalStore(
       { providedIn: 'root' },
       withState({ name: 'Product', price: 10.5 }),
-      withDevtools('glitched Flights', withGlitchTracking())
+      withDevtools('glitched Flights', withGlitchTracking()),
     );
 
     const glitchFreeStore = TestBed.inject(GlitchFreeStore);
@@ -255,12 +255,12 @@ describe('withGlitchTracking', () => {
 
     const GlitchStore = signalStore(
       withState({ name: 'Product', price: 10.5 }),
-      withDevtools('Glitched Store', withGlitchTracking())
+      withDevtools('Glitched Store', withGlitchTracking()),
     );
 
     const childContext = createEnvironmentInjector(
       [GlitchStore],
-      TestBed.inject(EnvironmentInjector)
+      TestBed.inject(EnvironmentInjector),
     );
     runInInjectionContext(childContext, () => inject(GlitchStore));
 
