@@ -1,12 +1,12 @@
-import { Component, effect, inject } from '@angular/core';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { DatePipe } from '@angular/common';
 import { SelectionModel } from '@angular/cdk/collections';
-import { Flight } from './flight';
-import { FlightStore } from './flight-store';
-import { MatInputModule } from '@angular/material/input';
+import { DatePipe } from '@angular/common';
+import { Component, effect, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { Flight } from './flight';
+import { FlightStore } from './flight-store';
 
 @Component({
   selector: 'demo-flight-search',

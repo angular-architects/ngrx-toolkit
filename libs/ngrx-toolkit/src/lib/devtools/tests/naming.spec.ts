@@ -1,15 +1,15 @@
-import { signalStore, withState } from '@ngrx/signals';
-import { withDevtools } from '../with-devtools';
-import { TestBed } from '@angular/core/testing';
-import { setupExtensions } from './helpers.spec';
 import {
   createEnvironmentInjector,
   EnvironmentInjector,
   inject,
   runInInjectionContext,
 } from '@angular/core';
-import { renameDevtoolsName } from '../rename-devtools-name';
+import { TestBed } from '@angular/core/testing';
+import { signalStore, withState } from '@ngrx/signals';
 import { withDisabledNameIndices } from '../features/with-disabled-name-indicies';
+import { renameDevtoolsName } from '../rename-devtools-name';
+import { withDevtools } from '../with-devtools';
+import { setupExtensions } from './helpers.spec';
 
 describe('withDevtools / renaming', () => {
   it('should automatically index multiple instances', () => {

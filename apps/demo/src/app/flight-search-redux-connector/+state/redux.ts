@@ -1,10 +1,10 @@
-import { ticketActions } from './actions';
-import { FlightStore } from './store';
 import {
   createReduxState,
-  withActionMappers,
   mapAction,
+  withActionMappers,
 } from '@angular-architects/ngrx-toolkit/redux-connector';
+import { ticketActions } from './actions';
+import { FlightStore } from './store';
 
 export const { provideFlightStore, injectFlightStore } =
   /**

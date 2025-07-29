@@ -1,3 +1,5 @@
+import { effect } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import {
   getState,
   patchState,
@@ -6,8 +8,6 @@ import {
   withState,
 } from '@ngrx/signals';
 import { setResetState, withReset } from './with-reset';
-import { TestBed } from '@angular/core/testing';
-import { effect } from '@angular/core';
 
 describe('withReset', () => {
   const setup = () => {

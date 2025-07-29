@@ -1,14 +1,14 @@
-import { FlightService } from '../shared/flight.service';
-import { patchState, signalStore, type, withMethods } from '@ngrx/signals';
-import { withEntities } from '@ngrx/signals/entities';
 import {
+  gotoPage,
+  setPageSize,
   withCallState,
   withDataService,
   withPagination,
-  setPageSize,
-  gotoPage,
 } from '@angular-architects/ngrx-toolkit';
+import { patchState, signalStore, type, withMethods } from '@ngrx/signals';
+import { withEntities } from '@ngrx/signals/entities';
 import { Flight } from '../shared/flight';
+import { FlightService } from '../shared/flight.service';
 
 // Name of the collection
 const collectionName = 'flight';

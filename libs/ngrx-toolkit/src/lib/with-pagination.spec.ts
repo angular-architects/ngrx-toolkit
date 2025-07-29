@@ -1,11 +1,11 @@
 import { patchState, signalStore, type } from '@ngrx/signals';
+import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 import {
   createPageArray,
   gotoPage,
   setPageSize,
   withPagination,
 } from './with-pagination';
-import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 
 type Book = { id: number; title: string; author: string };
 const generateBooks = (count = 10) => {

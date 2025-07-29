@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { Observable, firstValueFrom, of, delay } from 'rxjs';
 import { signalStore, type } from '@ngrx/signals';
-import { withEntities } from '@ngrx/signals/entities';
-import { EntityId } from '@ngrx/signals/entities';
+import { EntityId, withEntities } from '@ngrx/signals/entities';
+import { delay, firstValueFrom, Observable, of } from 'rxjs';
 import { withCallState } from './with-call-state';
 import { DataService, withDataService } from './with-data-service';
 

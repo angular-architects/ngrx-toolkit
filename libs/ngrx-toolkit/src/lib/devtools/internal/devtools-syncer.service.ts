@@ -1,11 +1,11 @@
-import { inject, Injectable, OnDestroy, PLATFORM_ID } from '@angular/core';
-import { currentActionNames } from './current-action-names';
 import { isPlatformBrowser } from '@angular/common';
+import { inject, Injectable, OnDestroy, PLATFORM_ID } from '@angular/core';
 import { StateSource } from '@ngrx/signals';
-import { DevtoolsInnerOptions } from './devtools-feature';
 import { throwIfNull } from '../../shared/throw-if-null';
-import { Connection, StoreRegistry, Tracker } from './models';
 import { REDUX_DEVTOOLS_CONFIG } from '../provide-devtools-config';
+import { currentActionNames } from './current-action-names';
+import { DevtoolsInnerOptions } from './devtools-feature';
+import { Connection, StoreRegistry, Tracker } from './models';
 
 const dummyConnection: Connection = {
   send: () => void true,

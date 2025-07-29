@@ -1,5 +1,5 @@
-import { test, expect } from '@playwright/test';
 import { Action } from '@ngrx/store';
+import { expect, test } from '@playwright/test';
 
 test.describe('DevTools', () => {
   test('DevTools do not throw an error when not available', async ({

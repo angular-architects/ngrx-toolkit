@@ -1,3 +1,4 @@
+import { reduxMethod } from '@angular-architects/ngrx-toolkit/redux-connector';
 import { computed, inject } from '@angular/core';
 import {
   patchState,
@@ -12,7 +13,6 @@ import {
   updateEntity,
   withEntities,
 } from '@ngrx/signals/entities';
-import { reduxMethod } from '@angular-architects/ngrx-toolkit/redux-connector';
 import { from, map, pipe, switchMap } from 'rxjs';
 import { Flight } from '../../shared/flight';
 import { FlightFilter, FlightService } from '../../shared/flight.service';

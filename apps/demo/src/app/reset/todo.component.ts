@@ -1,10 +1,10 @@
+import { SelectionModel } from '@angular/cdk/collections';
 import { Component, effect, inject } from '@angular/core';
+import { MatButton } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { SelectionModel } from '@angular/cdk/collections';
 import { Todo, TodoStore } from './todo-store';
-import { MatButton } from '@angular/material/button';
 
 @Component({
   template: `

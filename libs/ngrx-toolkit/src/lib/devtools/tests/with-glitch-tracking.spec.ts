@@ -1,15 +1,15 @@
-import { setupExtensions } from './helpers.spec';
-import { withDevtools } from '../with-devtools';
-import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
-import { withGlitchTracking } from '../features/with-glitch-tracking';
-import { TestBed } from '@angular/core/testing';
-import { renameDevtoolsName } from '../rename-devtools-name';
 import {
   createEnvironmentInjector,
   EnvironmentInjector,
   inject,
   runInInjectionContext,
 } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
+import { withGlitchTracking } from '../features/with-glitch-tracking';
+import { renameDevtoolsName } from '../rename-devtools-name';
+import { withDevtools } from '../with-devtools';
+import { setupExtensions } from './helpers.spec';
 
 describe('withGlitchTracking', () => {
   it('should sync immediately upon instantiation', () => {

@@ -1,13 +1,13 @@
-import { signalStore, withState } from '@ngrx/signals';
 import {
   noPayload,
   payload,
+  updateState,
   withDevtools,
   withRedux,
-  updateState,
 } from '@angular-architects/ngrx-toolkit';
-import { inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { signalStore, withState } from '@ngrx/signals';
 import { map, switchMap } from 'rxjs';
 import { Flight } from './flight';
 

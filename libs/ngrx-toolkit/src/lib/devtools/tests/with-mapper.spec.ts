@@ -1,8 +1,8 @@
-import { setupExtensions } from './helpers.spec';
 import { TestBed } from '@angular/core/testing';
 import { signalStore, withState } from '@ngrx/signals';
 import { withMapper } from '../features/with-mapper';
 import { withDevtools } from '../with-devtools';
+import { setupExtensions } from './helpers.spec';
 
 function domRemover(state: Record<string, unknown>) {
   return Object.keys(state).reduce((acc, key) => {

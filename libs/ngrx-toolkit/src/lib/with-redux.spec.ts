@@ -1,10 +1,15 @@
-import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
-import { inject } from '@angular/core';
 import {
   HttpClient,
   HttpParams,
   provideHttpClient,
 } from '@angular/common/http';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
+import { inject } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { map, switchMap } from 'rxjs';
 import {
   createEffects,
@@ -13,11 +18,6 @@ import {
   payload,
   withRedux,
 } from './with-redux';
-import { TestBed } from '@angular/core/testing';
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
 
 interface Flight {
   id: number;

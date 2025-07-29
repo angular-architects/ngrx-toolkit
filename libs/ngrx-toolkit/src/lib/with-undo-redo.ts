@@ -1,14 +1,14 @@
+import { Signal, effect, isSignal, signal, untracked } from '@angular/core';
 import {
+  EmptyFeatureResult,
   SignalStoreFeature,
+  SignalStoreFeatureResult,
   patchState,
   signalStoreFeature,
   withComputed,
   withHooks,
   withMethods,
-  EmptyFeatureResult,
-  SignalStoreFeatureResult,
 } from '@ngrx/signals';
-import { Signal, effect, signal, untracked, isSignal } from '@angular/core';
 import { capitalize } from './with-data-service';
 
 export type StackItem = Record<string, unknown>;

@@ -1,3 +1,5 @@
+import { computed, inject } from '@angular/core';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import {
   patchState,
   signalStore,
@@ -6,11 +8,9 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import { fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { withUndoRedo } from './with-undo-redo';
 import { addEntity, withEntities } from '@ngrx/signals/entities';
-import { computed, inject } from '@angular/core';
 import { withCallState } from './with-call-state';
+import { withUndoRedo } from './with-undo-redo';
 
 const testState = { test: '' };
 const testKeys = ['test' as const];

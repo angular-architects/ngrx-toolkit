@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, ViewChild, inject } from '@angular/core';
-import { RouterModule } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
-import { FlightBookingStore } from './flight-booking.store';
+import { RouterModule } from '@angular/router';
 import { Flight } from '../shared/flight';
+import { FlightBookingStore } from './flight-booking.store';
 
 @Component({
   imports: [CommonModule, RouterModule, FormsModule],

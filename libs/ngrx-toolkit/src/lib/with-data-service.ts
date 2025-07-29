@@ -1,14 +1,23 @@
 import { ProviderToken, Signal, computed, inject } from '@angular/core';
 import {
+  EmptyFeatureResult,
   SignalStoreFeature,
+  WritableStateSource,
   patchState,
   signalStoreFeature,
   withComputed,
   withMethods,
   withState,
-  EmptyFeatureResult,
-  WritableStateSource,
 } from '@ngrx/signals';
+import {
+  EntityId,
+  NamedEntityState,
+  addEntity,
+  removeEntity,
+  setAllEntities,
+  updateEntity,
+} from '@ngrx/signals/entities';
+import { EntityState } from './shared/signal-store-models';
 import {
   CallState,
   NamedCallStateSlice,
@@ -17,15 +26,6 @@ import {
   setLoaded,
   setLoading,
 } from './with-call-state';
-import {
-  NamedEntityState,
-  setAllEntities,
-  EntityId,
-  addEntity,
-  updateEntity,
-  removeEntity,
-} from '@ngrx/signals/entities';
-import { EntityState } from './shared/signal-store-models';
 
 export type Filter = Record<string, unknown>;
 export type Entity = { id: EntityId };

@@ -1,3 +1,5 @@
+import { computed, Signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import {
   getState,
   patchState,
@@ -9,8 +11,6 @@ import {
 } from '@ngrx/signals';
 import { lastValueFrom, of } from 'rxjs';
 import { withFeatureFactory } from './with-feature-factory';
-import { TestBed } from '@angular/core/testing';
-import { computed, Signal } from '@angular/core';
 
 type User = {
   id: number;

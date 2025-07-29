@@ -3,9 +3,9 @@ import {
   signalStoreFeature,
   SignalStoreFeature,
   SignalStoreFeatureResult,
+  watchState,
   withHooks,
   withState,
-  watchState,
 } from '@ngrx/signals';
 import { deepFreeze } from './deep-freeze';
 import { isDevMode } from './is-dev-mode';

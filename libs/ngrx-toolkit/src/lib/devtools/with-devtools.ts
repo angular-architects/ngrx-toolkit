@@ -1,3 +1,4 @@
+import { inject, InjectionToken } from '@angular/core';
 import {
   EmptyFeatureResult,
   SignalStoreFeature,
@@ -5,13 +6,12 @@ import {
   withHooks,
   withMethods,
 } from '@ngrx/signals';
-import { inject, InjectionToken } from '@angular/core';
-import { DevtoolsSyncer } from './internal/devtools-syncer.service';
+import { DefaultTracker } from './internal/default-tracker';
 import {
   DevtoolsFeature,
   DevtoolsInnerOptions,
 } from './internal/devtools-feature';
-import { DefaultTracker } from './internal/default-tracker';
+import { DevtoolsSyncer } from './internal/devtools-syncer.service';
 import { ReduxDevtoolsExtension } from './internal/models';
 
 declare global {

@@ -1,3 +1,5 @@
+import { updateState, withDevtools } from '@angular-architects/ngrx-toolkit';
+import { computed, inject } from '@angular/core';
 import {
   signalStore,
   withComputed,
@@ -11,9 +13,7 @@ import {
   updateEntity,
   withEntities,
 } from '@ngrx/signals/entities';
-import { updateState, withDevtools } from '@angular-architects/ngrx-toolkit';
-import { computed, inject } from '@angular/core';
-import { Todo, AddTodo, TodoService } from '../shared/todo.service';
+import { AddTodo, Todo, TodoService } from '../shared/todo.service';
 
 export const TodoStore = signalStore(
   { providedIn: 'root' },

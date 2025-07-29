@@ -1,12 +1,12 @@
+import { SelectionModel } from '@angular/cdk/collections';
 import { Component, effect, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { SelectionModel } from '@angular/cdk/collections';
-import { TodoStore } from './todo-store';
-import { TodoDetailComponent } from './todo-detail.component';
-import { FormsModule } from '@angular/forms';
 import { Todo } from '../shared/todo.service';
+import { TodoDetailComponent } from './todo-detail.component';
+import { TodoStore } from './todo-store';
 
 @Component({
   selector: 'demo-todo',

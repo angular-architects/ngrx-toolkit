@@ -1,12 +1,12 @@
 import { JsonPipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { patchState, signalState } from '@ngrx/signals';
+import { Flight } from '../shared/flight';
 import { FlightCardComponent } from '../shared/flight-card.component';
+import { FlightFilter } from '../shared/flight.service';
 import { ticketActions } from './+state/actions';
 import { injectFlightStore } from './+state/redux';
-import { patchState, signalState } from '@ngrx/signals';
-import { FlightFilter } from '../shared/flight.service';
-import { Flight } from '../shared/flight';
 
 @Component({
   imports: [JsonPipe, FormsModule, FlightCardComponent],

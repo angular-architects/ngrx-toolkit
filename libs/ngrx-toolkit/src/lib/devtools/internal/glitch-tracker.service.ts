@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Tracker, TrackerStores } from './models';
 import { getState, StateSource, watchState } from '@ngrx/signals';
 import { throwIfNull } from '../../shared/throw-if-null';
+import { Tracker, TrackerStores } from './models';
 
 type Stores = Record<
   string,

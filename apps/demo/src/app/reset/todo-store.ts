@@ -1,3 +1,4 @@
+import { setResetState, withReset } from '@angular-architects/ngrx-toolkit';
 import {
   getState,
   patchState,
@@ -7,7 +8,6 @@ import {
   withState,
 } from '@ngrx/signals';
 import { addEntity, updateEntity, withEntities } from '@ngrx/signals/entities';
-import { setResetState, withReset } from '@angular-architects/ngrx-toolkit';
 
 export interface Todo {
   id: number;

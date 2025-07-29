@@ -1,3 +1,5 @@
+import { inject, InjectionToken } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import {
   getState,
   patchState,
@@ -7,10 +9,8 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import { emptyFeature, withConditional } from './with-conditional';
-import { inject, InjectionToken } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
 import { withDevtools } from './devtools/with-devtools';
+import { emptyFeature, withConditional } from './with-conditional';
 
 describe('withConditional', () => {
   const withUser = signalStoreFeature(

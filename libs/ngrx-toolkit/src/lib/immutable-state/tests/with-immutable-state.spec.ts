@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { withImmutableState } from '../with-immutable-state';
 import { getState, patchState, signalStore, withState } from '@ngrx/signals';
 import * as devMode from '../is-dev-mode';
+import { withImmutableState } from '../with-immutable-state';
 
 describe('withImmutableState', () => {
   const SECRET = Symbol('secret');

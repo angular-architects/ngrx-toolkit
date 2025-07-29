@@ -1,11 +1,11 @@
+import { SelectionModel } from '@angular/cdk/collections';
 import { Component, effect, inject } from '@angular/core';
+import { MatButton } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { SyncedTodoStore } from './synced-todo-store';
-import { SelectionModel } from '@angular/cdk/collections';
 import { Todo } from '../shared/todo.service';
-import { MatButton } from '@angular/material/button';
+import { SyncedTodoStore } from './synced-todo-store';
 
 @Component({
   selector: 'demo-todo-storage-sync',

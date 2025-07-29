@@ -8,14 +8,14 @@
 
 import { Signal, computed } from '@angular/core';
 import {
+  EmptyFeatureResult,
   SignalStoreFeature,
   signalStoreFeature,
   withComputed,
   withState,
-  EmptyFeatureResult,
 } from '@ngrx/signals';
-import { capitalize } from './with-data-service';
 import { MethodsDictionary } from '@ngrx/signals/src/signal-store-models';
+import { capitalize } from './with-data-service';
 
 // This is a virtual page which is can be used to create a pagination control
 export type Page = { label: string | number; value: number };
