@@ -1,5 +1,4 @@
-import { Flight } from "../../shared/flight";
-
+import { Flight } from '../../shared/flight';
 
 export type FlightState = {
   flights: Flight[];
@@ -12,5 +11,5 @@ export const initialTicketState: FlightState = {
   flights: [],
   basket: {},
   tickets: {},
-  hide: [3, 5]
+  hide: [3, 5],
 };

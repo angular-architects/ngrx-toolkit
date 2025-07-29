@@ -20,7 +20,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
     FormsModule,
     MatButtonModule,
   ],
-  providers: [FlightBookingStore]
+  providers: [FlightBookingStore],
 })
 export class FlightSearchWithPaginationComponent {
   searchParams: { from: string; to: string } = { from: 'Wien', to: '' };
@@ -38,9 +38,7 @@ export class FlightSearchWithPaginationComponent {
   }
 
   search() {
-    this.flightStore.updateFlightFilter(
-      this.searchParams
-    );
+    this.flightStore.updateFlightFilter(this.searchParams);
     this.flightStore.loadFlightEntities();
   }
 

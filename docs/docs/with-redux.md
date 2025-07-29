@@ -14,6 +14,7 @@ import { withRedux } from '@angular-architects/ngrx-toolkit';
 It can be combined with any other extension of the Signal Store.
 
 :::warning
+
 ## Deprecation
 
 Please note, `@ngrx/signals/events` [was released as experimental in `@ngrx/signals/` v19.2](https://dev.to/ngrx/announcing-events-plugin-for-ngrx-signalstore-a-modern-take-on-flux-architecture-4dhn).

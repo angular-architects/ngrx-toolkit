@@ -11,7 +11,6 @@ import { Flight } from '../shared/flight';
   templateUrl: './flight-edit.component.html',
 })
 export class FlightEditDynamicComponent implements OnInit {
-
   @ViewChild(NgForm)
   private form!: NgForm;
 
@@ -32,8 +31,7 @@ export class FlightEditDynamicComponent implements OnInit {
     const flight = this.form.value as Flight;
     if (flight.id) {
       await this.store.updateFlight(flight);
-    }
-    else {
+    } else {
       await this.store.createFlight(flight);
     }
   }
@@ -43,7 +41,6 @@ export class FlightEditDynamicComponent implements OnInit {
   }
 
   async deleteFlight() {
-    await this.store.deleteFlight(this.form.value)
+    await this.store.deleteFlight(this.form.value);
   }
-
 }

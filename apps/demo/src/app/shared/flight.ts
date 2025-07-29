@@ -1,11 +1,10 @@
-
 export type Flight = {
   id: number;
   from: string;
   to: string;
   date: string;
   delayed: boolean;
-}
+};
 
 export const initFlight: Flight = {
   id: 0,

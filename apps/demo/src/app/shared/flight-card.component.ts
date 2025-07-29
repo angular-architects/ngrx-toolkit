@@ -1,7 +1,13 @@
-import { CommonModule } from "@angular/common";
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from "@angular/core";
-import { RouterModule } from "@angular/router";
-import { initFlight } from "./flight";
+import { CommonModule } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { initFlight } from './flight';
 
 @Component({
   selector: 'demo-flight-card',
@@ -23,5 +29,4 @@ export class FlightCardComponent {
     this.selected = false;
     this.selectedChange.next(false);
   }
-
 }
