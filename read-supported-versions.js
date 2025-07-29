@@ -13,7 +13,7 @@ const os = require('os');
 const packageJsonPath = path.join(
   __dirname,
   'libs/ngrx-toolkit',
-  'package.json'
+  'package.json',
 );
 // Define the path for the output file
 const outputPath = path.join(__dirname, 'versions.txt');

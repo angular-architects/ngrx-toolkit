@@ -17,7 +17,7 @@ import { capitalize, isActionCreator } from './util';
 export function mapAction<Creators extends readonly ActionCreator[]>(
   ...args: [
     ...creators: Creators,
-    storeMethod: (action: ActionType<Creators[number]>) => unknown
+    storeMethod: (action: ActionType<Creators[number]>) => unknown,
   ]
 ): MapperTypes<Creators>;
 export function mapAction<Creators extends readonly ActionCreator[], T>(
@@ -25,23 +25,23 @@ export function mapAction<Creators extends readonly ActionCreator[], T>(
     ...creators: Creators,
     storeMethod: (
       action: ActionType<Creators[number]>,
-      resultMethod: (input: T) => unknown
+      resultMethod: (input: T) => unknown,
     ) => unknown,
-    resultMethod: (input: T) => unknown
+    resultMethod: (input: T) => unknown,
   ]
 ): MapperTypes<Creators>;
 export function mapAction<Creators extends readonly ActionCreator[]>(
   ...args: [
     ...creators: Creators,
     storeMethod: (action: ActionType<Creators[number]>) => unknown,
-    resultMethod?: (input: unknown) => unknown
+    resultMethod?: (input: unknown) => unknown,
   ]
 ): MapperTypes<Creators> {
   let resultMethod = args.pop() as unknown as
     | ((input: unknown) => unknown)
     | undefined;
   let storeMethod = args.pop() as unknown as (
-    action: ActionType<Creators[number]>
+    action: ActionType<Creators[number]>,
   ) => unknown;
 
   if (isActionCreator(storeMethod)) {
@@ -51,7 +51,7 @@ export function mapAction<Creators extends readonly ActionCreator[]>(
   }
 
   const types = (args as unknown as Creators).map(
-    (creator) => creator.type
+    (creator) => creator.type,
   ) as unknown as ExtractActionTypes<Creators>;
 
   return {
@@ -71,8 +71,8 @@ export function createReduxState<StoreName extends string, STORE extends Store>(
   storeName: StoreName,
   signalStore: STORE,
   withActionMappers: (
-    store: InstanceType<STORE>
-  ) => MapperTypes<ActionCreator[]>[]
+    store: InstanceType<STORE>,
+  ) => MapperTypes<ActionCreator[]>[],
 ): CreateReduxState<StoreName, STORE> {
   const isRootProvider =
     (signalStore as ServiceWithDecorator)?.ɵprov?.providedIn === 'root';
@@ -84,7 +84,7 @@ export function createReduxState<StoreName extends string, STORE extends Store>(
           const initializerFn = (
             (
               signalReduxStore = inject(SignalReduxStore),
-              store = inject(signalStore)
+              store = inject(signalStore),
             ) =>
             () => {
               if (connectReduxDevtools) {

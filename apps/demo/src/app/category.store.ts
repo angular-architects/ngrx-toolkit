@@ -1,6 +1,6 @@
+import { withDevtools } from '@angular-architects/ngrx-toolkit';
 import { patchState, signalStore, withHooks } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
-import { withDevtools } from '@angular-architects/ngrx-toolkit';
 
 export interface Category {
   id: number;
@@ -18,8 +18,8 @@ export const CategoryStore = signalStore(
         setAllEntities([
           { id: 1, name: 'Important' },
           { id: 2, name: 'Nice to Have' },
-        ])
+        ]),
       );
     },
-  })
+  }),
 );

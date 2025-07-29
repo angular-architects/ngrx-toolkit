@@ -28,7 +28,7 @@ export type DevtoolsFeature = {
 } & Partial<DevtoolsOptions>;
 
 export function createDevtoolsFeature(
-  options: DevtoolsOptions
+  options: DevtoolsOptions,
 ): DevtoolsFeature {
   return {
     [DEVTOOLS_FEATURE]: true,

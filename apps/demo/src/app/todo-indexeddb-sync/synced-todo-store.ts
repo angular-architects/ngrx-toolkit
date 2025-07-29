@@ -19,7 +19,7 @@ export const SyncedTodoStore = signalStore(
     {
       key: 'todos-indexeddb',
     },
-    withIndexedDB()
+    withIndexedDB(),
   ),
   withMethods((store, todoService = inject(TodoService)) => {
     let currentId = 0;
@@ -37,7 +37,7 @@ export const SyncedTodoStore = signalStore(
         const todo = store.entityMap()[id];
         patchState(
           store,
-          updateEntity({ id, changes: { finished: !todo.finished } })
+          updateEntity({ id, changes: { finished: !todo.finished } }),
         );
       },
 
@@ -50,5 +50,5 @@ export const SyncedTodoStore = signalStore(
         todos.forEach((todo) => this.add(todo));
       },
     };
-  })
+  }),
 );

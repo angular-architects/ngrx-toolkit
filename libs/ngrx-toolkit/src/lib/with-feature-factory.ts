@@ -12,7 +12,7 @@ type StoreForFactory<Input extends SignalStoreFeatureResult> = StateSignals<
 
 /**
  * @deprecated Use `import { withFeature } from '@ngrx/signals'` instead, starting with `ngrx/signals` 19.1: https://ngrx.io/guide/signals/signal-store/custom-store-features#connecting-a-custom-feature-with-the-store
- * 
+ *
  * Allows to pass properties, methods, or signals from a SignalStore
  * to a feature.
  *
@@ -36,11 +36,11 @@ type StoreForFactory<Input extends SignalStoreFeatureResult> = StateSignals<
  */
 export function withFeatureFactory<
   Input extends SignalStoreFeatureResult,
-  Output extends SignalStoreFeatureResult
+  Output extends SignalStoreFeatureResult,
 >(
   factoryFn: (
-    store: StoreForFactory<Input>
-  ) => SignalStoreFeature<Input, Output>
+    store: StoreForFactory<Input>,
+  ) => SignalStoreFeature<Input, Output>,
 ): SignalStoreFeature<Input, Output> {
   return (store) => {
     const storeForFactory = {

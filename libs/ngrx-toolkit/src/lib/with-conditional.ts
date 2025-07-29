@@ -51,13 +51,13 @@ import {
  */
 export function withConditional<
   Input extends SignalStoreFeatureResult,
-  Output extends SignalStoreFeatureResult
+  Output extends SignalStoreFeatureResult,
 >(
   condition: (
-    store: StateSignals<Input['state']> & Input['props'] & Input['methods']
+    store: StateSignals<Input['state']> & Input['props'] & Input['methods'],
   ) => boolean,
   featureIfTrue: SignalStoreFeature<NoInfer<Input>, Output>,
-  featureIfFalse: SignalStoreFeature<NoInfer<Input>, NoInfer<Output>>
+  featureIfFalse: SignalStoreFeature<NoInfer<Input>, NoInfer<Output>>,
 ): SignalStoreFeature<Input, Output> {
   return (store) => {
     const conditionStore = {

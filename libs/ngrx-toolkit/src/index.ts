@@ -2,8 +2,8 @@ export { withDisabledNameIndices } from './lib/devtools/features/with-disabled-n
 export { withGlitchTracking } from './lib/devtools/features/with-glitch-tracking';
 export { withMapper } from './lib/devtools/features/with-mapper';
 export {
-  provideDevtoolsConfig,
   ReduxDevtoolsConfig,
+  provideDevtoolsConfig,
 } from './lib/devtools/provide-devtools-config';
 export { renameDevtoolsName } from './lib/devtools/rename-devtools-name';
 export { patchState, updateState } from './lib/devtools/update-state';

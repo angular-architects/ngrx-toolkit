@@ -1,13 +1,14 @@
+import { Signal, effect, isSignal, signal, untracked } from '@angular/core';
 import {
+  EmptyFeatureResult,
   SignalStoreFeature,
+  SignalStoreFeatureResult,
   patchState,
   signalStoreFeature,
   withComputed,
   withHooks,
   withMethods,
-  EmptyFeatureResult, SignalStoreFeatureResult
 } from '@ngrx/signals';
-import { Signal, effect, signal, untracked, isSignal } from '@angular/core';
 import { capitalize } from './with-data-service';
 
 export type StackItem = Record<string, unknown>;
@@ -16,7 +17,7 @@ export type NormalizedUndoRedoOptions = {
   maxStackSize: number;
   collections?: string[];
   keys: string[];
-  skip: number,
+  skip: number;
 };
 
 const defaultOptions: NormalizedUndoRedoOptions = {
@@ -41,29 +42,35 @@ type NonNever<T> = T extends never ? never : T;
 
 type ExtractEntityCollection<T> = T extends `${infer U}Entities` ? U : never;
 
-type ExtractEntityCollections<Store extends SignalStoreFeatureResult> = NonNever<{
-  [K in keyof Store['props']]: ExtractEntityCollection<K>;
-}[keyof Store['props']]>;
+type ExtractEntityCollections<Store extends SignalStoreFeatureResult> =
+  NonNever<
+    {
+      [K in keyof Store['props']]: ExtractEntityCollection<K>;
+    }[keyof Store['props']]
+  >;
 
-type OptionsForState<Store extends SignalStoreFeatureResult> = Partial<Omit<NormalizedUndoRedoOptions, 'collections' | 'keys'>> & {
+type OptionsForState<Store extends SignalStoreFeatureResult> = Partial<
+  Omit<NormalizedUndoRedoOptions, 'collections' | 'keys'>
+> & {
   collections?: ExtractEntityCollections<Store>[];
   keys?: (keyof Store['state'])[];
 };
 
-export function withUndoRedo<
-  Input extends EmptyFeatureResult>(options?: OptionsForState<Input>): SignalStoreFeature<
+export function withUndoRedo<Input extends EmptyFeatureResult>(
+  options?: OptionsForState<Input>,
+): SignalStoreFeature<
   Input,
   EmptyFeatureResult & {
-  props: {
-    canUndo: Signal<boolean>;
-    canRedo: Signal<boolean>;
-  };
-  methods: {
-    undo: () => void;
-    redo: () => void;
-    clearStack: () => void;
-  };
-}
+    props: {
+      canUndo: Signal<boolean>;
+      canRedo: Signal<boolean>;
+    };
+    methods: {
+      undo: () => void;
+      redo: () => void;
+      clearStack: () => void;
+    };
+  }
 > {
   let previous: StackItem | null = null;
   let skipOnce = false;
@@ -138,7 +145,9 @@ export function withUndoRedo<
       onInit(store) {
         effect(() => {
           const cand = keys.reduce((acc, key) => {
-            const s = (store as Record<string | keyof Input['state'], unknown>)[key];
+            const s = (store as Record<string | keyof Input['state'], unknown>)[
+              key
+            ];
             if (s && isSignal(s)) {
               return {
                 ...acc,
@@ -185,6 +194,6 @@ export function withUndoRedo<
           untracked(() => updateInternal());
         });
       },
-    })
+    }),
   );
 }

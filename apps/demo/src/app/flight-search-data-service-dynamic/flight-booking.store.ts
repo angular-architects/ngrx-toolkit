@@ -2,12 +2,12 @@ import { FlightService } from '../shared/flight.service';
 
 import { signalStore, type } from '@ngrx/signals';
 
-import { withEntities } from '@ngrx/signals/entities';
 import {
   withCallState,
   withDataService,
   withUndoRedo,
 } from '@angular-architects/ngrx-toolkit';
+import { withEntities } from '@ngrx/signals/entities';
 import { Flight } from '../shared/flight';
 
 export const FlightBookingStore = signalStore(
@@ -26,5 +26,5 @@ export const FlightBookingStore = signalStore(
   }),
   withUndoRedo({
     collections: ['flight'],
-  })
+  }),
 );

@@ -1,3 +1,5 @@
+import { effect } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import {
   getState,
   patchState,
@@ -6,8 +8,6 @@ import {
   withState,
 } from '@ngrx/signals';
 import { setResetState, withReset } from './with-reset';
-import { TestBed } from '@angular/core/testing';
-import { effect } from '@angular/core';
 
 describe('withReset', () => {
   const setup = () => {
@@ -29,7 +29,7 @@ describe('withReset', () => {
         changeAddress(city: string, zip: string) {
           patchState(store, { address: { city, zip } });
         },
-      }))
+      })),
     );
 
     const store = TestBed.configureTestingModule({
@@ -106,7 +106,7 @@ describe('withReset', () => {
     const Store = signalStore({ providedIn: 'root' }, withState({}));
     const store = TestBed.inject(Store);
     expect(() => setResetState(store, {})).toThrowError(
-      'Cannot set reset state, since store is not configured with withReset()'
+      'Cannot set reset state, since store is not configured with withReset()',
     );
   });
 });

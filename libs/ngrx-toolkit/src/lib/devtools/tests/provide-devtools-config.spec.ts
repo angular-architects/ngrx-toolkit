@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { provideDevtoolsConfig } from '../provide-devtools-config';
 import { DevtoolsSyncer } from '../internal/devtools-syncer.service';
+import { provideDevtoolsConfig } from '../provide-devtools-config';
 import { setupExtensions } from './helpers.spec';
 
 describe('provideDevtoolsConfig', () => {

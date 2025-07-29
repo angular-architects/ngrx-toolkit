@@ -1,8 +1,8 @@
 import { JsonPipe, NgForOf, NgIf } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { FlightCardComponent } from '../shared/flight-card.component';
 import { RouterLink } from '@angular/router';
+import { FlightCardComponent } from '../shared/flight-card.component';
 import { FlightBookingStore } from './flight-booking.store';
 
 @Component({

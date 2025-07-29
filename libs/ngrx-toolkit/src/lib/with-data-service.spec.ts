@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { Observable, firstValueFrom, of, delay } from 'rxjs';
 import { signalStore, type } from '@ngrx/signals';
-import { withEntities } from '@ngrx/signals/entities';
-import { EntityId } from '@ngrx/signals/entities';
+import { EntityId, withEntities } from '@ngrx/signals/entities';
+import { delay, firstValueFrom, Observable, of } from 'rxjs';
 import { withCallState } from './with-call-state';
 import { DataService, withDataService } from './with-data-service';
 
@@ -231,7 +230,7 @@ describe('withDataService', () => {
 
       expect(store.selectedFlightEntities().length).toBe(1);
       expect(store.selectedFlightEntities()).toContainEqual(
-        createFlight({ id: 3 })
+        createFlight({ id: 3 }),
       );
     });
   }));
@@ -395,7 +394,7 @@ describe('withDataService', () => {
         dataServiceType: MockFlightService,
         filter: { from: 'Paris', to: 'New York' },
         collection: 'flight',
-      })
+      }),
     );
   });
 
@@ -524,7 +523,7 @@ const Store = signalStore(
   withDataService({
     dataServiceType: MockFlightService,
     filter: { from: 'Paris', to: 'New York' },
-  })
+  }),
 );
 const StoreWithNamedCollection = signalStore(
   withCallState({
@@ -538,7 +537,7 @@ const StoreWithNamedCollection = signalStore(
     dataServiceType: MockFlightService,
     filter: { from: 'Paris', to: 'New York' },
     collection: 'flight',
-  })
+  }),
 );
 
 const StoreForLoading = signalStore(
@@ -547,7 +546,7 @@ const StoreForLoading = signalStore(
   withDataService({
     dataServiceType: MockFlightServiceForLoading,
     filter: { from: 'Paris', to: 'New York' },
-  })
+  }),
 );
 const StoreWithNamedCollectionForLoading = signalStore(
   withCallState({
@@ -561,5 +560,5 @@ const StoreWithNamedCollectionForLoading = signalStore(
     dataServiceType: MockFlightServiceForLoading,
     filter: { from: 'Paris', to: 'New York' },
     collection: 'flight',
-  })
+  }),
 );

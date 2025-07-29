@@ -11,7 +11,7 @@ export type Flight = {
 
 export function setupExtensions(
   isPlatformBrowser = true,
-  isExtensionAvailable = true
+  isExtensionAvailable = true,
 ) {
   const sendSpy = jest.fn();
   const connection = {

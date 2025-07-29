@@ -29,7 +29,7 @@ const withUser = signalStoreFeature(
     onInit() {
       // user loading logic
     },
-  }))
+  })),
 );
 
 function withFakeUser() {
@@ -40,6 +40,6 @@ signalStore(
   withMethods(() => ({
     useRealUser: () => true,
   })),
-  withConditional((store) => store.useRealUser(), withUser, withFakeUser)
+  withConditional((store) => store.useRealUser(), withUser, withFakeUser),
 );
 ```

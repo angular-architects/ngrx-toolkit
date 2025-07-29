@@ -26,7 +26,7 @@ const Store = signalStore(
     changeUserName(name: string) {
       patchState(store, (value) => ({ user: { ...value.user, name } }));
     },
-  }))
+  })),
 );
 
 const store = new Store();

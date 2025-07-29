@@ -14,7 +14,7 @@ The simplest way to use `withCallState` is without any configuration:
 
 ```typescript
 export const TodosStore = signalStore(
-  withCallState()
+  withCallState(),
   // ... other features
 );
 ```
@@ -57,7 +57,7 @@ const store = signalStore(
         patchState(store, setError(error));
       }
     },
-  }))
+  })),
 );
 ```
 
@@ -67,7 +67,7 @@ You can track state for a specific collection by providing a collection name:
 
 ```typescript
 export const TodosStore = signalStore(
-  withCallState({ collection: 'todos' })
+  withCallState({ collection: 'todos' }),
   // ... other features
 );
 ```
@@ -91,7 +91,7 @@ const store = signalStore(
         patchState(store, setError(error, 'todos'));
       }
     },
-  }))
+  })),
 );
 ```
 
@@ -101,7 +101,7 @@ For managing multiple async operations, use the collections configuration:
 
 ```typescript
 export const TodosStore = signalStore(
-  withCallState({ collections: ['todos', 'categories'] })
+  withCallState({ collections: ['todos', 'categories'] }),
   // ... other features
 );
 ```
@@ -119,7 +119,7 @@ const store = signalStore(
       patchState(store, setLoading('todos'), setLoading('users'));
       // ... load data for both collections
     },
-  }))
+  })),
 );
 ```
 
@@ -160,11 +160,13 @@ Access the computed signals in your templates or component code:
 @Component({
   template: `
     @if (store.loading()) {
-    <div>Loading...</div>
-    } @if (store.error()) {
-    <div>Error: {{ store.error() }}</div>
-    } @if (store.loaded()) {
-    <div>Content loaded!</div>
+      <div>Loading...</div>
+    }
+    @if (store.error()) {
+      <div>Error: {{ store.error() }}</div>
+    }
+    @if (store.loaded()) {
+      <div>Content loaded!</div>
     }
   `,
 })

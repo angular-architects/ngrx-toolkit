@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, ViewChild, inject } from '@angular/core';
-import { RouterModule } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
-import { SimpleFlightBookingStore } from './flight-booking-simple.store';
+import { RouterModule } from '@angular/router';
 import { Flight } from '../shared/flight';
+import { SimpleFlightBookingStore } from './flight-booking-simple.store';
 
 @Component({
   imports: [CommonModule, RouterModule, FormsModule],
@@ -11,7 +11,6 @@ import { Flight } from '../shared/flight';
   templateUrl: './flight-edit-simple.component.html',
 })
 export class FlightEditSimpleComponent implements OnInit {
-
   @ViewChild(NgForm)
   private form!: NgForm;
 
@@ -32,8 +31,7 @@ export class FlightEditSimpleComponent implements OnInit {
     const flight = this.form.value as Flight;
     if (flight.id) {
       await this.store.update(flight);
-    }
-    else {
+    } else {
       await this.store.create(flight);
     }
   }
@@ -43,7 +41,6 @@ export class FlightEditSimpleComponent implements OnInit {
   }
 
   async deleteFlight() {
-    await this.store.delete(this.form.value)
+    await this.store.delete(this.form.value);
   }
-
 }

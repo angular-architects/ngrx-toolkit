@@ -1,12 +1,12 @@
+import { SelectionModel } from '@angular/cdk/collections';
 import { Component, effect, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { SelectionModel } from '@angular/cdk/collections';
-import { TodoStore } from './todo-store';
-import { TodoDetailComponent } from './todo-detail.component';
-import { FormsModule } from '@angular/forms';
 import { Todo } from '../shared/todo.service';
+import { TodoDetailComponent } from './todo-detail.component';
+import { TodoStore } from './todo-store';
 
 @Component({
   selector: 'demo-todo',
@@ -51,19 +51,20 @@ import { Todo } from '../shared/todo.service';
 
     <div class="details">
       @for (todo of todoStore.selectedTodos(); track todo) {
-      <demo-todo-detail [todo]="todo"></demo-todo-detail>
+        <demo-todo-detail [todo]="todo"></demo-todo-detail>
       }
     </div>
   `,
-  styles: `.actions {
-    display: flex;
-    align-items: center;
-  }
+  styles: `
+    .actions {
+      display: flex;
+      align-items: center;
+    }
 
-  .details {
-    margin: 20px;
-    display: flex;
-  }
+    .details {
+      margin: 20px;
+      display: flex;
+    }
   `,
   imports: [
     MatCheckboxModule,

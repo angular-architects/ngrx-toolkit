@@ -1,8 +1,8 @@
-import { Component, inject } from '@angular/core';
-import { patchState, signalStore, withMethods } from '@ngrx/signals';
 import { withImmutableState } from '@angular-architects/ngrx-toolkit';
-import { MatButton } from '@angular/material/button';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
+import { patchState, signalStore, withMethods } from '@ngrx/signals';
 
 const initialState = { user: { id: 1, name: 'Konrad' } };
 
@@ -16,7 +16,7 @@ const UserStore = signalStore(
         return state;
       });
     },
-  }))
+  })),
 );
 
 @Component({

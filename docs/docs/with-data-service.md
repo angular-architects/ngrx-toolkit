@@ -21,7 +21,7 @@ export const SimpleFlightBookingStore = signalStore(
     dataServiceType: FlightService,
     filter: { from: 'Paris', to: 'New York' },
   }),
-  withUndoRedo()
+  withUndoRedo(),
 );
 ```
 
@@ -110,7 +110,7 @@ export const FlightBookingStore = signalStore(
   }),
   withUndoRedo({
     collections: ['flight'],
-  })
+  }),
 );
 ```
 

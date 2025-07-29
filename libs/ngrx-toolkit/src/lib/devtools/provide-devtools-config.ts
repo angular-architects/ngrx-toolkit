@@ -4,7 +4,7 @@ import { InjectionToken, ValueProvider } from '@angular/core';
  * Provides the configuration options for connecting to the Redux DevTools Extension.
  */
 export function provideDevtoolsConfig(
-  config: ReduxDevtoolsConfig
+  config: ReduxDevtoolsConfig,
 ): ValueProvider {
   return {
     provide: REDUX_DEVTOOLS_CONFIG,
@@ -16,7 +16,7 @@ export function provideDevtoolsConfig(
  * Injection token for the configuration options for connecting to the Redux DevTools Extension.
  */
 export const REDUX_DEVTOOLS_CONFIG = new InjectionToken<ReduxDevtoolsConfig>(
-  'ReduxDevtoolsConfig'
+  'ReduxDevtoolsConfig',
 );
 
 /**

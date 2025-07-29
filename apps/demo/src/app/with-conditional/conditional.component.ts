@@ -1,4 +1,11 @@
-import { Component, signal, inject, untracked, effect } from '@angular/core';
+import { withConditional } from '@angular-architects/ngrx-toolkit';
+import { Component, effect, inject, signal, untracked } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
+import {
+  MatButtonToggle,
+  MatButtonToggleGroup,
+} from '@angular/material/button-toggle';
 import {
   patchState,
   signalStore,
@@ -7,13 +14,6 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import { FormsModule } from '@angular/forms';
-import {
-  MatButtonToggle,
-  MatButtonToggleGroup,
-} from '@angular/material/button-toggle';
-import { withConditional } from '@angular-architects/ngrx-toolkit';
-import { MatButton } from '@angular/material/button';
 
 const withUser = signalStoreFeature(
   withState({ id: 0, name: '' }),
@@ -21,11 +21,11 @@ const withUser = signalStoreFeature(
     onInit() {
       patchState(store, { id: 1, name: 'Konrad' });
     },
-  }))
+  })),
 );
 
 const withFakeUser = signalStoreFeature(
-  withState({ id: 0, name: 'Tommy Fake' })
+  withState({ id: 0, name: 'Tommy Fake' }),
 );
 
 const UserServiceStore = signalStore(
@@ -35,15 +35,15 @@ const UserServiceStore = signalStore(
     setImplementation(implementation: 'real' | 'fake') {
       patchState(store, { implementation });
     },
-  }))
+  })),
 );
 
 const UserStore = signalStore(
   withConditional(
     () => inject(UserServiceStore).implementation() === 'real',
     withUser,
-    withFakeUser
-  )
+    withFakeUser,
+  ),
 );
 
 @Component({
@@ -79,7 +79,7 @@ class ConditionalUserComponent {
       </button>
     </div>
     @if (showUserComponent()) {
-    <demo-conditional-user />
+      <demo-conditional-user />
     }
   `,
   imports: [

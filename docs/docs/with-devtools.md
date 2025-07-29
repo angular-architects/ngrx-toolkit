@@ -16,7 +16,7 @@ import { withDevtools } from '@angular-architects/ngrx-toolkit';
 export const FlightStore = signalStore(
   { providedIn: 'root' },
   withDevtools('flights'), // <-- add this
-  withState({ flights: [] as Flight[] })
+  withState({ flights: [] as Flight[] }),
   // ...
 );
 ```
@@ -103,7 +103,7 @@ const Store = signalStore(
   withDevtools('counter', withGlitchTracking()),
   withMethods((store) => ({
     increase: () => patchState(store, (value) => ({ count: value.count + 1 })),
-  }))
+  })),
 );
 
 // would show up in the DevTools with value 0
@@ -160,8 +160,8 @@ const Store = signalStore(
   withState(initialState),
   withDevtools(
     'user',
-    withMapper((state) => ({ ...state, enteredPassword: '***' }))
-  )
+    withMapper((state) => ({ ...state, enteredPassword: '***' })),
+  ),
 );
 ```
 

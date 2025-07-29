@@ -25,7 +25,7 @@ const SyncStore = signalStore(
     parse: (stateString: string) => State, // custom parsing from storage - `JSON.parse` by default
     stringify: (state: User) => string, // custom stringification - `JSON.stringify` by default
     storage: () => sessionstorage, // factory to select storage to sync with
-  })
+  }),
 );
 ```
 

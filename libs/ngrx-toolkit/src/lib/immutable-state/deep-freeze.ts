@@ -14,7 +14,7 @@ export function deepFreeze<T extends Record<string | symbol, unknown>>(
   // if empty all properties will be frozen
   propertyNamesToBeFrozen: (string | symbol)[],
   // also means that we are on the first level
-  isRoot = true
+  isRoot = true,
 ): void {
   const runPropertyNameCheck = propertyNamesToBeFrozen.length > 0;
   for (const key of Reflect.ownKeys(target)) {
@@ -37,7 +37,7 @@ export function deepFreeze<T extends Record<string | symbol, unknown>>(
 }
 
 function isRecordLike(
-  target: unknown
+  target: unknown,
 ): target is Record<string | symbol, unknown> {
   return typeof target === 'object' && target !== null;
 }

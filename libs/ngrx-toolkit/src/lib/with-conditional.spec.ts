@@ -1,3 +1,5 @@
+import { inject, InjectionToken } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import {
   getState,
   patchState,
@@ -7,10 +9,8 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import { emptyFeature, withConditional } from './with-conditional';
-import { inject, InjectionToken } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
 import { withDevtools } from './devtools/with-devtools';
+import { emptyFeature, withConditional } from './with-conditional';
 
 describe('withConditional', () => {
   const withUser = signalStoreFeature(
@@ -19,11 +19,11 @@ describe('withConditional', () => {
       onInit() {
         patchState(store, { id: 1, name: 'Konrad' });
       },
-    }))
+    })),
   );
 
   const withFakeUser = signalStoreFeature(
-    withState({ id: 0, name: 'Tommy Fake' })
+    withState({ id: 0, name: 'Tommy Fake' }),
   );
 
   for (const isReal of [true, false]) {
@@ -34,7 +34,7 @@ describe('withConditional', () => {
       });
       const UserStore = signalStore(
         { providedIn: 'root' },
-        withConditional(() => inject(REAL_USER_TOKEN), withUser, withFakeUser)
+        withConditional(() => inject(REAL_USER_TOKEN), withUser, withFakeUser),
       );
       const userStore = TestBed.inject(UserStore);
 
@@ -52,7 +52,7 @@ describe('withConditional', () => {
       withMethods(() => ({
         useRealUser: () => true,
       })),
-      withConditional((store) => store.useRealUser(), withUser, withFakeUser)
+      withConditional((store) => store.useRealUser(), withUser, withFakeUser),
     );
     const userStore = TestBed.inject(UserStore);
 
@@ -62,12 +62,12 @@ describe('withConditional', () => {
   it('should be used inside a signalStoreFeature', () => {
     const withConditionalUser = (activate: boolean) =>
       signalStoreFeature(
-        withConditional(() => activate, withUser, withFakeUser)
+        withConditional(() => activate, withUser, withFakeUser),
       );
 
     const UserStore = signalStore(
       { providedIn: 'root' },
-      withConditionalUser(true)
+      withConditionalUser(true),
     );
     const userStore = TestBed.inject(UserStore);
 
@@ -81,11 +81,11 @@ describe('withConditional', () => {
         onInit() {
           patchState(store, { id: 1, name: 'Konrad' });
         },
-      }))
+      })),
     );
 
     const withFakeUser = signalStoreFeature(
-      withState({ id: 0, firstname: 'Tommy Fake' })
+      withState({ id: 0, firstname: 'Tommy Fake' }),
     );
 
     // @ts-expect-error withFakeUser has a different state shape
@@ -97,8 +97,8 @@ describe('withConditional', () => {
       withConditional(
         () => true,
         withDevtools('dummy'),
-        signalStoreFeature(withState({}))
-      )
+        signalStoreFeature(withState({})),
+      ),
     );
   });
 
@@ -107,8 +107,8 @@ describe('withConditional', () => {
       withConditional(
         () => true,
         signalStoreFeature(withState({})),
-        emptyFeature
-      )
+        emptyFeature,
+      ),
     );
   });
 
@@ -118,8 +118,8 @@ describe('withConditional', () => {
         () => true,
         // @ts-expect-error feature is not empty
         () => signalStoreFeature(withState({ x: 1 })),
-        emptyFeature
-      )
+        emptyFeature,
+      ),
     );
   });
 });

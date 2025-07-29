@@ -1,3 +1,4 @@
+import { reduxMethod } from '@angular-architects/ngrx-toolkit/redux-connector';
 import { computed, inject } from '@angular/core';
 import {
   patchState,
@@ -12,7 +13,6 @@ import {
   updateEntity,
   withEntities,
 } from '@ngrx/signals/entities';
-import { reduxMethod } from '@angular-architects/ngrx-toolkit/redux-connector';
 import { from, map, pipe, switchMap } from 'rxjs';
 import { Flight } from '../../shared/flight';
 import { FlightFilter, FlightService } from '../../shared/flight.service';
@@ -25,7 +25,7 @@ export const FlightStore = signalStore(
   // Selectors
   withComputed(({ flightEntities, hideEntities }) => ({
     filteredFlights: computed(() =>
-      flightEntities().filter((flight) => !hideEntities().includes(flight.id))
+      flightEntities().filter((flight) => !hideEntities().includes(flight.id)),
     ),
     flightCount: computed(() => flightEntities().length),
   })),
@@ -34,15 +34,15 @@ export const FlightStore = signalStore(
     setFlights: (state: { flights: Flight[] }) =>
       patchState(
         store,
-        setAllEntities(state.flights, { collection: 'flight' })
+        setAllEntities(state.flights, { collection: 'flight' }),
       ),
     updateFlight: (state: { flight: Flight }) =>
       patchState(
         store,
         updateEntity(
           { id: state.flight.id, changes: state.flight },
-          { collection: 'flight' }
-        )
+          { collection: 'flight' },
+        ),
       ),
     clearFlights: () =>
       patchState(store, removeAllEntities({ collection: 'flight' })),
@@ -52,11 +52,11 @@ export const FlightStore = signalStore(
     loadFlights: reduxMethod<FlightFilter, { flights: Flight[] }>(
       pipe(
         switchMap((filter) =>
-          from(flightService.load({ from: filter.from, to: filter.to }))
+          from(flightService.load({ from: filter.from, to: filter.to })),
         ),
-        map((flights) => ({ flights }))
+        map((flights) => ({ flights })),
       ),
-      store.setFlights
+      store.setFlights,
     ),
-  }))
+  })),
 );

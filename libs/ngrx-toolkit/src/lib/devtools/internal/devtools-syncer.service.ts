@@ -1,11 +1,11 @@
-import { inject, Injectable, OnDestroy, PLATFORM_ID } from '@angular/core';
-import { currentActionNames } from './current-action-names';
 import { isPlatformBrowser } from '@angular/common';
+import { inject, Injectable, OnDestroy, PLATFORM_ID } from '@angular/core';
 import { StateSource } from '@ngrx/signals';
-import { DevtoolsInnerOptions } from './devtools-feature';
 import { throwIfNull } from '../../shared/throw-if-null';
-import { Connection, StoreRegistry, Tracker } from './models';
 import { REDUX_DEVTOOLS_CONFIG } from '../provide-devtools-config';
+import { currentActionNames } from './current-action-names';
+import { DevtoolsInnerOptions } from './devtools-feature';
+import { Connection, StoreRegistry, Tracker } from './models';
 
 const dummyConnection: Connection = {
   send: () => void true,
@@ -76,7 +76,7 @@ export class DevtoolsSyncer implements OnDestroy {
         acc[name] = options.map(store);
         return acc;
       },
-      {} as Record<string, object>
+      {} as Record<string, object>,
     );
     this.#currentState = {
       ...this.#currentState,
@@ -106,7 +106,7 @@ export class DevtoolsSyncer implements OnDestroy {
     id: string,
     name: string,
     store: StateSource<object>,
-    options: DevtoolsInnerOptions
+    options: DevtoolsInnerOptions,
   ) {
     let storeName = name;
     const names = Object.values(this.#stores).map((store) => store.name);
@@ -144,7 +144,7 @@ Enable automatic indexing via withDevTools('${storeName}', { indexNames: true })
         }
         return newStore;
       },
-      {} as StoreRegistry
+      {} as StoreRegistry,
     );
 
     this.#currentState = Object.entries(this.#currentState).reduce(
@@ -154,7 +154,7 @@ Enable automatic indexing via withDevTools('${storeName}', { indexNames: true })
         }
         return newState;
       },
-      {} as Record<string, object>
+      {} as Record<string, object>,
     );
 
     for (const tracker of this.#trackers) {
@@ -165,11 +165,11 @@ Enable automatic indexing via withDevTools('${storeName}', { indexNames: true })
   renameStore(oldName: string, newName: string) {
     const storeNames = Object.values(this.#stores).map((store) => store.name);
     const id = throwIfNull(
-      Object.keys(this.#stores).find((id) => this.#stores[id].name === oldName)
+      Object.keys(this.#stores).find((id) => this.#stores[id].name === oldName),
     );
     if (storeNames.includes(newName)) {
       throw new Error(
-        `NgRx Toolkit/DevTools: cannot rename from ${oldName} to ${newName}. ${newName} is already assigned to another SignalStore instance.`
+        `NgRx Toolkit/DevTools: cannot rename from ${oldName} to ${newName}. ${newName} is already assigned to another SignalStore instance.`,
       );
     }
 
@@ -182,7 +182,7 @@ Enable automatic indexing via withDevTools('${storeName}', { indexNames: true })
         }
         return newStore;
       },
-      {} as StoreRegistry
+      {} as StoreRegistry,
     );
 
     // we don't rename in #currentState but wait for tracker to notify
@@ -194,7 +194,7 @@ Enable automatic indexing via withDevTools('${storeName}', { indexNames: true })
         }
         return newState;
       },
-      {} as Record<string, object>
+      {} as Record<string, object>,
     );
 
     this.#trackers.forEach((tracker) => tracker.notifyRenamedStore(id));
