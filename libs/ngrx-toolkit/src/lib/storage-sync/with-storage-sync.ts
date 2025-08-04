@@ -136,9 +136,9 @@ export function withStorageSync<Input extends SignalStoreFeatureResult>(
   }
 }
 
-function createSyncStorageSync<Input extends SignalStoreFeatureResult>(
-  factory: SyncStorageStrategy<Input['state']>,
-  config: Required<SyncConfig<Input['state']>>,
+function createSyncStorageSync(
+  factory: SyncStorageStrategy<object>,
+  config: Required<SyncConfig<object>>,
 ) {
   return signalStoreFeature(
     withMethods((store, platformId = inject(PLATFORM_ID)) => {
@@ -159,9 +159,9 @@ function createSyncStorageSync<Input extends SignalStoreFeatureResult>(
   ) satisfies SignalStoreFeature<EmptyFeatureResult, SyncFeatureResult>;
 }
 
-function createAsyncStorageSync<Input extends SignalStoreFeatureResult>(
-  factory: AsyncStorageStrategy<Input['state']>,
-  config: Required<SyncConfig<Input['state']>>,
+function createAsyncStorageSync(
+  factory: AsyncStorageStrategy<object>,
+  config: Required<SyncConfig<object>>,
 ) {
   return signalStoreFeature(
     withProps(() => {
