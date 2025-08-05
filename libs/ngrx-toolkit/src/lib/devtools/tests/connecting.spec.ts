@@ -19,7 +19,7 @@ describe('connect & send', () => {
   it('should not throw if it runs on the server', () => {
     setupExtensions(true, false);
     const Store = signalStore({ providedIn: 'root' }, withDevtools('flight'));
-    expect(() => TestBed.inject(Store)).not.toThrowError();
+    expect(() => TestBed.inject(Store)).not.toThrow();
   });
 
   it('should only send when store is initialized', () => {

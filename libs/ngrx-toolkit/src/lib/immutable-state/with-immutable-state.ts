@@ -105,9 +105,8 @@ export function withImmutableState<State extends object>(
          * ```
          */
 
-        Object.freeze(immutableState);
         watchState(store, (state) => {
-          deepFreeze(state, stateKeys);
+          deepFreeze(state as Record<string | symbol, unknown>, stateKeys);
         });
       },
     })),

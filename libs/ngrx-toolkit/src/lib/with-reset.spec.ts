@@ -105,7 +105,7 @@ describe('withReset', () => {
   it('should throw on setResetState if store is not configured with withReset()', () => {
     const Store = signalStore({ providedIn: 'root' }, withState({}));
     const store = TestBed.inject(Store);
-    expect(() => setResetState(store, {})).toThrowError(
+    expect(() => setResetState(store, {})).toThrow(
       'Cannot set reset state, since store is not configured with withReset()',
     );
   });

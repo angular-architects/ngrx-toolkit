@@ -30,7 +30,7 @@ describe('withDevtools / renaming', () => {
 
     TestBed.flushEffects();
 
-    expect(sendSpy).lastCalledWith(
+    expect(sendSpy).toHaveBeenLastCalledWith(
       { type: 'Store Update' },
       {
         flights: { airline: 'Lufthansa' },
