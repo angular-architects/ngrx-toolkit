@@ -14,7 +14,6 @@ import {
   withComputed,
   withState,
 } from '@ngrx/signals';
-import { MethodsDictionary } from '@ngrx/signals/src/signal-store-models';
 import { capitalize } from './with-data-service';
 
 // This is a virtual page which is can be used to create a pagination control
@@ -90,19 +89,17 @@ export function withPagination<E, Collection extends string>(options: {
   collection: Collection;
 }): SignalStoreFeature<
   EmptyFeatureResult,
-  {
+  EmptyFeatureResult & {
     state: NamedPaginationServiceState<E, Collection>;
     props: NamedPaginationServiceSignals<E, Collection>;
-    methods: MethodsDictionary;
   }
 >;
 
 export function withPagination<E>(): SignalStoreFeature<
   EmptyFeatureResult,
-  {
+  EmptyFeatureResult & {
     state: PaginationServiceState<E>;
     props: PaginationServiceSignals<E>;
-    methods: MethodsDictionary;
   }
 >;
 
