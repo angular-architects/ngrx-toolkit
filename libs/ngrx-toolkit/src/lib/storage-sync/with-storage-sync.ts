@@ -217,9 +217,6 @@ function createAsyncStorageSync(
                 return;
               }
 
-              console.log(initialState);
-              console.log(getState(store));
-
               console.warn(
                 `Writing to Store (${config.key}) happened before the state was initially read from storage.`,
                 'Please ensure that the store is not in syncing state via `store.whenSynced()` before writing to the state.',

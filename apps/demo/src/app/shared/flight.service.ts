@@ -1,8 +1,8 @@
 import { DataService } from '@angular-architects/ngrx-toolkit';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { EntityId } from '@ngrx/signals/entities';
-import { Observable, firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { Flight } from './flight';
 
 export type FlightFilter = {
@@ -16,7 +16,7 @@ export type FlightFilter = {
 export class FlightService implements DataService<Flight, FlightFilter> {
   baseUrl = `https://demo.angulararchitects.io/api`;
 
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   loadById(id: EntityId): Promise<Flight> {
     return firstValueFrom(this.findById('' + id));

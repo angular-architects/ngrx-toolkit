@@ -128,10 +128,11 @@ describe('withStorageSync (sync storage)', () => {
 
         const Store = signalStore(
           { protectedState: false },
+          withState(initialState),
           withStorageSync({ key, autoSync: false }),
         );
         const store = new Store();
-        expect(getState(store)).toEqual({});
+        expect(getState(store)).toEqual(initialState);
 
         patchState(store, { ...initialState });
         const storeItem = JSON.parse(localStorage.getItem(key) || '{}');
