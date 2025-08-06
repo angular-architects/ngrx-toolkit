@@ -205,14 +205,20 @@ function createAsyncStorageSync(
           return;
         }
 
-        const initialState = getState(store);
+        const initialState = JSON.stringify(getState(store));
         if (config.autoSync) {
           let startWatching = false;
           watchState(store, () => {
             if (!startWatching) {
-              if (getState(store) === initialState) {
+              const currentState = JSON.stringify(getState(store));
+
+              // Necessary because getState returns always a new object
+              if (currentState === initialState) {
                 return;
               }
+
+              console.log(initialState);
+              console.log(getState(store));
 
               console.warn(
                 `Writing to Store (${config.key}) happened before the state was initially read from storage.`,
