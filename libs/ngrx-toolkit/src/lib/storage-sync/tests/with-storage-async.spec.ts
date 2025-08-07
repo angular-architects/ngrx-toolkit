@@ -262,12 +262,6 @@ describe('withStorageSync (async storage)', () => {
       await waitForSyncStable(store);
 
       expect(warnings).toEqual([]);
-      // patchState(store, { name: 'Lufthansa', age: 27 });
-      // expect(warnings).toEqual([
-      //   'Writing to Store (flights) happened before the state was initially read from storage.',
-      //   'Please ensure that the store is not in syncing state via `store.whenSynced()` before writing to the state.',
-      //   'Alternatively, you can disable autoSync by passing `autoSync: false` in the config.',
-      // ]);
     });
 
     it('warns when reading happens during a write', async () => {
