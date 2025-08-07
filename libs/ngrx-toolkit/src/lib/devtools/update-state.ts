@@ -1,5 +1,8 @@
-import { patchState as originalPatchState } from '@ngrx/signals';
-import { PartialStateUpdater, WritableStateSource } from '@ngrx/signals';
+import {
+  patchState as originalPatchState,
+  PartialStateUpdater,
+  WritableStateSource,
+} from '@ngrx/signals';
 import { Prettify } from '../shared/prettify';
 import { currentActionNames } from './internal/current-action-names';
 

@@ -1,3 +1,4 @@
+import { inject, InjectionToken } from '@angular/core';
 import {
   EmptyFeatureResult,
   SignalStoreFeature,
@@ -5,13 +6,12 @@ import {
   withHooks,
   withMethods,
 } from '@ngrx/signals';
-import { inject, InjectionToken } from '@angular/core';
-import { DevtoolsSyncer } from './internal/devtools-syncer.service';
+import { DefaultTracker } from './internal/default-tracker';
 import {
   DevtoolsFeature,
   DevtoolsInnerOptions,
 } from './internal/devtools-feature';
-import { DefaultTracker } from './internal/default-tracker';
+import { DevtoolsSyncer } from './internal/devtools-syncer.service';
 import { ReduxDevtoolsExtension } from './internal/models';
 
 declare global {
@@ -25,7 +25,7 @@ export const uniqueDevtoolsId = '___uniqueDevtoolsId';
 
 const EXISTING_NAMES = new InjectionToken(
   'Array contain existing names for the signal stores',
-  { factory: () => [] as string[], providedIn: 'root' }
+  { factory: () => [] as string[], providedIn: 'root' },
 );
 
 /**
@@ -66,7 +66,7 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
             indexNames: !features.some((f) => f.indexNames === false),
             map: features.find((f) => f.map)?.map ?? ((state) => state),
             tracker: inject(
-              features.find((f) => f.tracker)?.tracker || DefaultTracker
+              features.find((f) => f.tracker)?.tracker || DefaultTracker,
             ),
           };
 
@@ -76,6 +76,6 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
           syncer.removeStore(id);
         },
       };
-    })
+    }),
   ) as SignalStoreFeature<EmptyFeatureResult, EmptyFeatureResult>;
 }

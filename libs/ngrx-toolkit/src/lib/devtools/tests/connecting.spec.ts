@@ -1,7 +1,7 @@
+import { TestBed } from '@angular/core/testing';
 import { signalStore } from '@ngrx/signals';
 import { withDevtools } from '../with-devtools';
 import { setupExtensions } from './helpers.spec';
-import { TestBed } from '@angular/core/testing';
 
 describe('connect & send', () => {
   it('should connect', () => {

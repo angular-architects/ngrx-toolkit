@@ -1,5 +1,5 @@
-import { test, expect } from '@playwright/test';
 import { Action } from '@ngrx/store';
+import { expect, test } from '@playwright/test';
 
 test.describe('DevTools', () => {
   test('DevTools do not throw an error when not available', async ({
@@ -10,7 +10,7 @@ test.describe('DevTools', () => {
     page.on('pageerror', (error) => errors.push(error));
     await page.getByRole('link', { name: 'DevTools' }).click();
     await expect(
-      page.getByRole('row', { name: 'Go for a walk' })
+      page.getByRole('row', { name: 'Go for a walk' }),
     ).toBeVisible();
   });
 
@@ -41,7 +41,7 @@ test.describe('DevTools', () => {
       .click();
 
     await expect(
-      page.getByRole('region', { name: 'Go for a walk' })
+      page.getByRole('region', { name: 'Go for a walk' }),
     ).toBeVisible();
     await expect(page.getByRole('region', { name: 'Exercise' })).toBeVisible();
 
@@ -55,7 +55,7 @@ test.describe('DevTools', () => {
       .click();
 
     await expect(
-      page.getByRole('region', { name: 'Go for a walk' })
+      page.getByRole('region', { name: 'Go for a walk' }),
     ).toBeHidden();
     await expect(page.getByRole('region', { name: 'Exercise' })).toBeHidden();
 

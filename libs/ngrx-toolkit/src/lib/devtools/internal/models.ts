@@ -1,6 +1,6 @@
 import { StateSource } from '@ngrx/signals';
-import { DevtoolsInnerOptions } from './devtools-feature';
 import { ReduxDevtoolsConfig } from '../provide-devtools-config';
+import { DevtoolsInnerOptions } from './devtools-feature';
 
 export type Action = { type: string };
 export type Connection = {

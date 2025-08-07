@@ -14,6 +14,7 @@ import { withRedux } from '@angular-architects/ngrx-toolkit';
 It can be combined with any other extension of the Signal Store.
 
 :::warning
+
 ## Deprecation
 
 Please note, `@ngrx/signals/events` [was released as experimental in `@ngrx/signals/` v19.2](https://dev.to/ngrx/announcing-events-plugin-for-ngrx-signalstore-a-modern-take-on-flux-architecture-4dhn).
@@ -52,13 +53,13 @@ export const FlightStore = signalStore(
           switchMap(({ from, to }) =>
             httpClient.get<Flight[]>('https://demo.angulararchitects.io/api/flight', {
               params: new HttpParams().set('from', from).set('to', to),
-            })
+            }),
           ),
-          tap((flights) => actions.loaded({ flights }))
+          tap((flights) => actions.loaded({ flights })),
         ),
       };
     },
-  })
+  }),
 );
 ```
 
@@ -125,7 +126,7 @@ signalStore(
     actions,
     effects,
     reducer,
-  })
+  }),
 );
 ```
 

@@ -1,3 +1,5 @@
+import { updateState, withDevtools } from '@angular-architects/ngrx-toolkit';
+import { computed, inject } from '@angular/core';
 import {
   signalStore,
   withComputed,
@@ -11,9 +13,7 @@ import {
   updateEntity,
   withEntities,
 } from '@ngrx/signals/entities';
-import { updateState, withDevtools } from '@angular-architects/ngrx-toolkit';
-import { computed, inject } from '@angular/core';
-import { Todo, AddTodo, TodoService } from '../shared/todo.service';
+import { AddTodo, Todo, TodoService } from '../shared/todo.service';
 
 export const TodoStore = signalStore(
   { providedIn: 'root' },
@@ -38,7 +38,7 @@ export const TodoStore = signalStore(
         updateState(
           store,
           'toggle todo',
-          updateEntity({ id, changes: { finished: !todo.finished } })
+          updateEntity({ id, changes: { finished: !todo.finished } }),
         );
       },
       toggleSelectTodo(id: number) {
@@ -46,7 +46,7 @@ export const TodoStore = signalStore(
           if (selectedIds.includes(id)) {
             return {
               selectedIds: selectedIds.filter(
-                (selectedId) => selectedId !== id
+                (selectedId) => selectedId !== id,
               ),
             };
           }
@@ -59,7 +59,7 @@ export const TodoStore = signalStore(
   }),
   withComputed((state) => ({
     selectedTodos: computed(() =>
-      state.selectedIds().map((id) => state.entityMap()[id])
+      state.selectedIds().map((id) => state.entityMap()[id]),
     ),
   })),
   withHooks({
@@ -67,5 +67,5 @@ export const TodoStore = signalStore(
       const todos = todoService.getData();
       todos.forEach((todo) => store.add(todo));
     },
-  })
+  }),
 );

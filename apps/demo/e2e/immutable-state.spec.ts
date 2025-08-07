@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test.describe('immutable state', () => {
   test.beforeEach(async ({ page }) => {
@@ -11,7 +11,7 @@ test.describe('immutable state', () => {
       const errorInConsole = page.waitForEvent('console');
       await page.getByRole('button', { name: position }).click();
       expect((await errorInConsole).text()).toContain(
-        `Cannot assign to read only property 'id'`
+        `Cannot assign to read only property 'id'`,
       );
     });
   }
@@ -21,7 +21,7 @@ test.describe('immutable state', () => {
     await page.getByRole('textbox').focus();
     await page.keyboard.press('Space');
     expect((await errorInConsole).text()).toContain(
-      `Cannot assign to read only property 'name'`
+      `Cannot assign to read only property 'name'`,
     );
   });
 });

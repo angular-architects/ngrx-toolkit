@@ -1,8 +1,8 @@
+import { DataService } from '@angular-architects/ngrx-toolkit';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, firstValueFrom } from 'rxjs';
 import { EntityId } from '@ngrx/signals/entities';
-import { DataService } from '@angular-architects/ngrx-toolkit';
+import { Observable, firstValueFrom } from 'rxjs';
 import { Flight } from './flight';
 
 export type FlightFilter = {

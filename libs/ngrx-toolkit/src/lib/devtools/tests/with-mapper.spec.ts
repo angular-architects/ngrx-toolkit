@@ -1,8 +1,8 @@
-import { setupExtensions } from './helpers.spec';
 import { TestBed } from '@angular/core/testing';
 import { signalStore, withState } from '@ngrx/signals';
 import { withMapper } from '../features/with-mapper';
 import { withDevtools } from '../with-devtools';
+import { setupExtensions } from './helpers.spec';
 
 function domRemover(state: Record<string, unknown>) {
   return Object.keys(state).reduce((acc, key) => {
@@ -26,14 +26,14 @@ describe('with-mapper', () => {
         name: 'Car',
         carElement: document.createElement('div'),
       }),
-      withDevtools('shop', withMapper(domRemover))
+      withDevtools('shop', withMapper(domRemover)),
     );
 
     TestBed.inject(Store);
     TestBed.flushEffects();
     expect(sendSpy).toHaveBeenCalledWith(
       { type: 'Store Update' },
-      { shop: { name: 'Car' } }
+      { shop: { name: 'Car' } },
     );
   });
 
@@ -54,16 +54,16 @@ describe('with-mapper', () => {
             } else {
               return { ...acc, [key]: state[key] };
             }
-          }, {})
-        )
-      )
+          }, {}),
+        ),
+      ),
     );
 
     TestBed.inject(Store);
     TestBed.flushEffects();
     expect(sendSpy).toHaveBeenCalledWith(
       { type: 'Store Update' },
-      { shop: { name: 'Car' } }
+      { shop: { name: 'Car' } },
     );
   });
 });

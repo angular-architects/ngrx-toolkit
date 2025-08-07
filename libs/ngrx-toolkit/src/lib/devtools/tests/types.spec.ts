@@ -6,7 +6,7 @@ it('should compile when signalStore is extended from', () => {
   class CounterStore extends signalStore(
     { protectedState: false },
     withState({ count: 0 }),
-    withDevtools('counter-store')
+    withDevtools('counter-store'),
   ) {
     readonly myReadonlyProp = 42;
 

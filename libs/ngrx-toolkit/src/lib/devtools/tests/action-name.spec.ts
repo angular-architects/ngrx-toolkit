@@ -1,8 +1,8 @@
-import { setupExtensions } from './helpers.spec';
 import { TestBed } from '@angular/core/testing';
 import { signalStore, withMethods, withState } from '@ngrx/signals';
-import { withDevtools } from '../with-devtools';
 import { updateState } from '../update-state';
+import { withDevtools } from '../with-devtools';
+import { setupExtensions } from './helpers.spec';
 
 describe('updateState', () => {
   it('should show the name of the action', () => {
@@ -11,13 +11,13 @@ describe('updateState', () => {
       signalStore(
         { providedIn: 'root' },
         withDevtools('shop'),
-        withState({ name: 'Car' })
-      )
+        withState({ name: 'Car' }),
+      ),
     );
     TestBed.flushEffects();
     expect(sendSpy).toHaveBeenCalledWith(
       { type: 'Store Update' },
-      { shop: { name: 'Car' } }
+      { shop: { name: 'Car' } },
     );
   });
 
@@ -32,7 +32,7 @@ describe('updateState', () => {
         setName(name: string) {
           updateState(store, 'Set Name', { name });
         },
-      }))
+      })),
     );
     const store = TestBed.inject(Store);
     TestBed.flushEffects();
@@ -42,7 +42,7 @@ describe('updateState', () => {
 
     expect(sendSpy).lastCalledWith(
       { type: 'Set Name' },
-      { shop: { name: 'i4' } }
+      { shop: { name: 'i4' } },
     );
   });
 });

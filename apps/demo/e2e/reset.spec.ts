@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test('has title', async ({ page }) => {
   await page.goto('');
@@ -13,18 +13,18 @@ test('has title', async ({ page }) => {
     .click();
 
   await expect(
-    page.getByRole('row', { name: 'Go for a walk' }).getByRole('checkbox')
+    page.getByRole('row', { name: 'Go for a walk' }).getByRole('checkbox'),
   ).toBeChecked();
   await expect(
-    page.getByRole('row', { name: 'Exercise' }).getByRole('checkbox')
+    page.getByRole('row', { name: 'Exercise' }).getByRole('checkbox'),
   ).toBeChecked();
 
   await page.getByRole('button', { name: 'Reset State' }).click();
 
   await expect(
-    page.getByRole('row', { name: 'Go for a walk' }).getByRole('checkbox')
+    page.getByRole('row', { name: 'Go for a walk' }).getByRole('checkbox'),
   ).not.toBeChecked();
   await expect(
-    page.getByRole('row', { name: 'Exercise' }).getByRole('checkbox')
+    page.getByRole('row', { name: 'Exercise' }).getByRole('checkbox'),
   ).not.toBeChecked();
 });

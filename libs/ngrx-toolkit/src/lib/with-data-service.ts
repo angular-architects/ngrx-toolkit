@@ -135,7 +135,7 @@ const selectEntityId = <E extends Entity>(
 export type NamedDataServiceState<
   E extends Entity,
   F extends Filter,
-  Collection extends string
+  Collection extends string,
 > = {
   [K in Collection as `${K}Filter`]: F;
 } & {
@@ -156,7 +156,7 @@ export type DataServiceComputed<E extends Entity> = {
 
 export type NamedDataServiceComputed<
   E extends Entity,
-  Collection extends string
+  Collection extends string,
 > = {
   [K in Collection as `selected${Capitalize<K>}Entities`]: Signal<E[]>;
 };
@@ -164,13 +164,13 @@ export type NamedDataServiceComputed<
 export type NamedDataServiceMethods<
   E extends Entity,
   F extends Filter,
-  Collection extends string
+  Collection extends string,
 > = {
   [K in Collection as `update${Capitalize<K>}Filter`]: (filter: F) => void;
 } & {
   [K in Collection as `updateSelected${Capitalize<K>}Entities`]: (
     id: EntityId,
-    selected: boolean
+    selected: boolean,
   ) => void;
 } & {
   [K in Collection as `load${Capitalize<K>}Entities`]: () => Promise<void>;
@@ -178,7 +178,7 @@ export type NamedDataServiceMethods<
   [K in Collection as `setCurrent${Capitalize<K>}`]: (entity: E) => void;
 } & {
   [K in Collection as `load${Capitalize<K>}ById`]: (
-    id: EntityId
+    id: EntityId,
   ) => Promise<void>;
 } & {
   [K in Collection as `create${Capitalize<K>}`]: (entity: E) => Promise<void>;
@@ -186,7 +186,7 @@ export type NamedDataServiceMethods<
   [K in Collection as `update${Capitalize<K>}`]: (entity: E) => Promise<void>;
 } & {
   [K in Collection as `updateAll${Capitalize<K>}`]: (
-    entity: E[]
+    entity: E[],
   ) => Promise<void>;
 } & {
   [K in Collection as `delete${Capitalize<K>}`]: (entity: E) => Promise<void>;
@@ -208,7 +208,7 @@ export type DataServiceMethods<E extends Entity, F extends Filter> = {
 export function withDataService<
   E extends Entity,
   F extends Filter,
-  Collection extends string
+  Collection extends string,
 >(options: {
   dataServiceType: ProviderToken<DataService<E, F>>;
   filter: F;
@@ -240,7 +240,7 @@ export function withDataService<E extends Entity, F extends Filter>(options: {
 export function withDataService<
   E extends Entity,
   F extends Filter,
-  Collection extends string
+  Collection extends string,
 >(options: {
   dataServiceType: ProviderToken<DataService<E, F>>;
   filter: F;
@@ -386,7 +386,7 @@ SignalStoreFeature<any, any> {
 
               patchState(
                 store,
-                prefix ? updater(prefix) : updateEntity(updateArg)
+                prefix ? updater(prefix) : updateEntity(updateArg),
               );
               (() =>
                 store[callStateKey] && patchState(store, setLoaded(prefix)))();
@@ -444,7 +444,7 @@ SignalStoreFeature<any, any> {
             }
           },
         };
-      }
-    )
+      },
+    ),
   );
 }

@@ -1,4 +1,7 @@
+import { withFeatureFactory } from '@angular-architects/ngrx-toolkit';
 import { Component, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
 import {
   patchState,
   signalStore,
@@ -6,10 +9,7 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import { MatButton } from '@angular/material/button';
-import { FormsModule } from '@angular/forms';
 import { lastValueFrom, of } from 'rxjs';
-import { withFeatureFactory } from '@angular-architects/ngrx-toolkit';
 
 type User = {
   id: number;
@@ -27,7 +27,7 @@ function withMyEntity<Entity>(loadMethod: (id: number) => Promise<Entity>) {
         const entity = await loadMethod(1);
         patchState(store, { entity, currentId: id });
       },
-    }))
+    })),
   );
 }
 
@@ -41,7 +41,7 @@ const UserStore = signalStore(
   withFeatureFactory((store) => {
     const loader = (id: number) => lastValueFrom(store.findById(id));
     return withMyEntity<User>(loader);
-  })
+  }),
 );
 
 @Component({

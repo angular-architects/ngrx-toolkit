@@ -19,7 +19,7 @@ const SyncStore = signalStore(
     collections: ['flight'], // entity collections to keep track of - unnamed collection is tracked by default
     keys: ['test'], // non-entity based keys to track - `[]` by default
     skip: 0, // number of initial state changes to skip - `0` by default
-  })
+  }),
 );
 ```
 

@@ -21,7 +21,7 @@ export type IncludePropType<
         ? IncludePropType<T[K], V>
         : T[K]
       : never;
-  }
+  },
 > = Prettify<
   Pick<
     WithNevers,
@@ -29,8 +29,8 @@ export type IncludePropType<
       [K in keyof WithNevers]: WithNevers[K] extends never
         ? never
         : K extends string
-        ? K
-        : never;
+          ? K
+          : never;
     }[keyof WithNevers]
   >
 >;
@@ -41,7 +41,7 @@ export type Store = Type<
 
 export type CreateReduxState<StoreName extends string, STORE extends Store> = {
   [K in StoreName as `provide${Capitalize<K>}Store`]: (
-    connectReduxDevtools?: boolean
+    connectReduxDevtools?: boolean,
   ) => EnvironmentProviders;
 } & {
   [K in StoreName as `inject${Capitalize<K>}Store`]: () => InjectableReduxSlice<STORE>;
@@ -53,7 +53,7 @@ export type Selectors<STORE extends Store> = IncludePropType<
 >;
 export type Dispatch = {
   dispatch: (
-    input: Action | Observable<Action> | Signal<Action>
+    input: Action | Observable<Action> | Signal<Action>,
   ) => Unsubscribable;
 };
 export type InjectableReduxSlice<STORE extends Store> = Selectors<STORE> &
@@ -71,7 +71,7 @@ export interface ActionMethod<T, V extends Action = Action> {
 
 export interface StoreMethod<
   Creators extends readonly ActionCreator[],
-  ResultState = unknown
+  ResultState = unknown,
 > {
   (action: ActionType<Creators[number]>): ResultState;
 }

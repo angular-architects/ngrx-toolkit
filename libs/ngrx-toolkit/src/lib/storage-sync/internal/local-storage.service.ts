@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { NOOP, StorageService, WithStorageSyncFeatureResult } from './models';
+import {} from './models';
 
 @Injectable({
   providedIn: 'root',
 })
-export class LocalStorageService implements StorageService {
+export class LocalStorageService {
   getItem(key: string): string | null {
     return localStorage.getItem(key);
   }
@@ -15,14 +15,5 @@ export class LocalStorageService implements StorageService {
 
   clear(key: string): void {
     return localStorage.removeItem(key);
-  }
-
-  /** return stub */
-  getStub(): Pick<WithStorageSyncFeatureResult, 'methods'>['methods'] {
-    return {
-      clearStorage: NOOP,
-      readFromStorage: NOOP,
-      writeToStorage: NOOP,
-    };
   }
 }

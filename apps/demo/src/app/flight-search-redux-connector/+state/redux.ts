@@ -1,10 +1,10 @@
-import { ticketActions } from './actions';
-import { FlightStore } from './store';
 import {
   createReduxState,
-  withActionMappers,
   mapAction,
+  withActionMappers,
 } from '@angular-architects/ngrx-toolkit/redux-connector';
+import { ticketActions } from './actions';
+import { FlightStore } from './store';
 
 export const { provideFlightStore, injectFlightStore } =
   /**
@@ -20,14 +20,14 @@ export const { provideFlightStore, injectFlightStore } =
       mapAction(
         ticketActions.flightsLoad,
         store.loadFlights,
-        ticketActions.flightsLoaded
+        ticketActions.flightsLoaded,
       ),
       mapAction(
         ticketActions.flightsLoaded,
         ticketActions.flightsLoadedByPassenger,
-        store.setFlights
+        store.setFlights,
       ),
       mapAction(ticketActions.flightUpdate, store.updateFlight),
-      mapAction(ticketActions.flightsClear, store.clearFlights)
-    )
+      mapAction(ticketActions.flightsClear, store.clearFlights),
+    ),
   );

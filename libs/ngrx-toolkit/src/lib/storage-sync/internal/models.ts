@@ -1,46 +1,49 @@
-import { EmptyFeatureResult } from '@ngrx/signals';
-import { Type } from '@angular/core';
+import { Signal, WritableSignal } from '@angular/core';
+import { EmptyFeatureResult, WritableStateSource } from '@ngrx/signals';
+import { SyncConfig } from '../with-storage-sync';
 
-export interface StorageService {
-  clear(key: string): void;
+export type SyncMethods = {
+  clearStorage(): void;
+  readFromStorage(): void;
+  writeToStorage(): void;
+};
 
-  getItem(key: string): string | null;
+export type SyncFeatureResult = EmptyFeatureResult & {
+  methods: SyncMethods;
+};
 
-  setItem(key: string, data: string): void;
+export type SyncStoreForFactory<State extends object> =
+  WritableStateSource<State>;
 
-  getStub(): Pick<WithStorageSyncFeatureResult, 'methods'>['methods'];
-}
+export type SyncStorageStrategy<State extends object> = ((
+  config: Required<SyncConfig<State>>,
+  store: SyncStoreForFactory<State>,
+  useStubs: boolean,
+) => SyncMethods) & { type: 'sync' };
 
-export interface IndexeddbService {
-  clear(key: string): Promise<void>;
+export type AsyncMethods = {
+  clearStorage(): Promise<void>;
+  readFromStorage(): Promise<void>;
+  writeToStorage(): Promise<void>;
+};
 
-  getItem(key: string): Promise<string | null>;
+export const SYNC_STATUS = Symbol('SYNC_STATUS');
+export type SyncStatus = 'idle' | 'syncing' | 'synced';
 
-  setItem(key: string, data: string): Promise<void>;
-
-  getStub(): Pick<WithIndexeddbSyncFeatureResult, 'methods'>['methods'];
-}
-
-export type StorageServiceFactory =
-  | Type<IndexeddbService>
-  | Type<StorageService>;
-
-export type WithIndexeddbSyncFeatureResult = EmptyFeatureResult & {
-  methods: {
-    clearStorage(): Promise<void>;
-    readFromStorage(): Promise<void>;
-    writeToStorage(): Promise<void>;
+export type AsyncFeatureResult = EmptyFeatureResult & {
+  methods: AsyncMethods;
+  props: {
+    isSynced: Signal<boolean>;
+    whenSynced: () => Promise<void>;
+    [SYNC_STATUS]: WritableSignal<SyncStatus>;
   };
 };
 
-export type WithStorageSyncFeatureResult = EmptyFeatureResult & {
-  methods: {
-    clearStorage(): void;
-    readFromStorage(): void;
-    writeToStorage(): void;
-  };
-};
+export type AsyncStoreForFactory<State extends object> =
+  WritableStateSource<State> & AsyncFeatureResult['props'];
 
-export const NOOP = () => void true;
-
-export const PROMISE_NOOP = () => Promise.resolve();
+export type AsyncStorageStrategy<State extends object> = ((
+  config: Required<SyncConfig<State>>,
+  store: AsyncStoreForFactory<State>,
+  useStubs: boolean,
+) => AsyncMethods) & { type: 'async' };
