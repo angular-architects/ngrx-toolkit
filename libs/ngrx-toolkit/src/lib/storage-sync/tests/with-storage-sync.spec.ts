@@ -46,10 +46,11 @@ describe('withStorageSync (sync storage)', () => {
 
       const Store = signalStore(
         { protectedState: false },
+        withState(initialState),
         withStorageSync({ key, autoSync: false }),
       );
       const store = new Store();
-      expect(getState(store)).toEqual({});
+      expect(getState(store)).toEqual(initialState);
 
       store.readFromStorage();
       expect(getState(store)).toEqual({
@@ -92,6 +93,7 @@ describe('withStorageSync (sync storage)', () => {
 
         const Store = signalStore(
           { protectedState: false },
+          withState(initialState),
           withStorageSync(key),
         );
         const store = new Store();
@@ -126,10 +128,11 @@ describe('withStorageSync (sync storage)', () => {
 
         const Store = signalStore(
           { protectedState: false },
+          withState(initialState),
           withStorageSync({ key, autoSync: false }),
         );
         const store = new Store();
-        expect(getState(store)).toEqual({});
+        expect(getState(store)).toEqual(initialState);
 
         patchState(store, { ...initialState });
         const storeItem = JSON.parse(localStorage.getItem(key) || '{}');
@@ -146,16 +149,17 @@ describe('withStorageSync (sync storage)', () => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
           { protectedState: false },
+          withState(initialState),
           withStorageSync(key),
         );
         const store = new Store();
 
-        patchState(store, { ...initialState });
-        TestBed.flushEffects();
+        patchState(store, { foo: 'baz', age: 25 });
 
         const storeItem = JSON.parse(localStorage.getItem(key) || '{}');
         expect(storeItem).toEqual({
-          ...initialState,
+          foo: 'baz',
+          age: 25,
         });
       });
     });
@@ -242,6 +246,7 @@ describe('withStorageSync (sync storage)', () => {
 
         const Store = signalStore(
           { protectedState: false },
+          withState(initialState),
           withStorageSync({ key, storage: () => sessionStorage }),
         );
         const store = new Store();

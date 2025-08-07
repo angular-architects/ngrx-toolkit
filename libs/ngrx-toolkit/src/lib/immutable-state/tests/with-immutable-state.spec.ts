@@ -60,7 +60,7 @@ describe('withImmutableState', () => {
         },
       ]) {
         describe(name, () => {
-          it(`throws ${protectionOn ? '' : 'not '}on a mutable change`, () => {
+          it(`throws not on a mutable change (primitive type)`, () => {
             const state = stateFactory();
 
             const patch = () =>
@@ -69,16 +69,28 @@ describe('withImmutableState', () => {
                 return state;
               });
 
+            expect(patch).not.toThrow();
+          });
+
+          it(`throws ${protectionOn ? '' : 'not '}on a mutable change (object type)`, () => {
+            const state = stateFactory();
+
+            const patch = () =>
+              patchState(state, (state) => {
+                state.user.firstName = 'Siegfried';
+                return state;
+              });
+
             if (protectionOn) {
-              expect(patch).toThrowError(
-                "Cannot assign to read only property 'ngrx' of object",
+              expect(patch).toThrow(
+                "Cannot assign to read only property 'firstName' of object",
               );
             } else {
-              expect(patch).not.toThrowError();
+              expect(patch).not.toThrow();
             }
           });
 
-          it(`throws ${
+          it(`does ${
             protectionOn ? '' : 'not '
           }on a nested mutable change`, () => {
             const state = stateFactory();
@@ -90,11 +102,11 @@ describe('withImmutableState', () => {
               });
 
             if (protectionOn) {
-              expect(patch).toThrowError(
+              expect(patch).toThrow(
                 "Cannot assign to read only property 'firstName' of object",
               );
             } else {
-              expect(patch).not.toThrowError();
+              expect(patch).not.toThrow();
             }
           });
 
@@ -107,28 +119,34 @@ describe('withImmutableState', () => {
                 state.user().firstName = 'mutable change 1';
               };
               if (protectionOn) {
-                expect(patch).toThrowError(
+                expect(patch).toThrow(
                   "Cannot assign to read only property 'firstName' of object",
                 );
               } else {
-                expect(patch).not.toThrowError();
+                expect(patch).not.toThrow();
               }
             });
 
-            it(`throws ${
-              protectionOn ? '' : 'not '
-            }when exposed state via getState is mutated`, () => {
+            it(`throws not when exposed state (primitive type) via getState is mutated`, () => {
               const state = stateFactory();
               const s = getState(state);
 
               const patch = () => (s.ngrx = 'mutable change 2');
+              expect(patch).not.toThrow();
+            });
+
+            it(`throws ${protectionOn ? '' : 'not '} when exposed state (object type) via getState is mutated`, () => {
+              const state = stateFactory();
+              const s = getState(state);
+
+              const patch = () => (s.user.firstName = 'Hans');
 
               if (protectionOn) {
-                expect(patch).toThrowError(
-                  "Cannot assign to read only property 'ngrx' of object",
+                expect(patch).toThrow(
+                  "Cannot assign to read only property 'firstName' of object",
                 );
               } else {
-                expect(patch).not.toThrowError();
+                expect(patch).not.toThrow();
               }
             });
 
@@ -142,11 +160,11 @@ describe('withImmutableState', () => {
                 s.user.firstName = 'mutable change 3';
               };
               if (protectionOn) {
-                expect(patch).toThrowError(
+                expect(patch).toThrow(
                   "Cannot assign to read only property 'firstName' of object",
                 );
               } else {
-                expect(patch).not.toThrowError();
+                expect(patch).not.toThrow();
               }
             });
 
@@ -161,11 +179,11 @@ describe('withImmutableState', () => {
               };
 
               if (protectionOn) {
-                expect(patch).toThrowError(
+                expect(patch).toThrow(
                   "Cannot assign to read only property 'code' of object",
                 );
               } else {
-                expect(patch).not.toThrowError();
+                expect(patch).not.toThrow();
               }
             });
 
@@ -180,11 +198,11 @@ describe('withImmutableState', () => {
               };
 
               if (protectionOn) {
-                expect(patch).toThrowError(
+                expect(patch).toThrow(
                   "Cannot assign to read only property 'Symbol(secret)' of object",
                 );
               } else {
-                expect(patch).not.toThrowError();
+                expect(patch).not.toThrow();
               }
             });
           });
@@ -219,9 +237,9 @@ describe('withImmutableState', () => {
                 const state = getState(store);
 
                 if (protectionOn) {
-                  expect(() => mutationFn(state)).toThrowError();
+                  expect(() => mutationFn(state)).toThrow();
                 } else {
-                  expect(() => mutationFn(state)).not.toThrowError();
+                  expect(() => mutationFn(state)).not.toThrow();
                 }
               });
             }
@@ -229,8 +247,10 @@ describe('withImmutableState', () => {
 
           it('should be possible to mix both mutable and immutable state', () => {
             const immutableState = {
-              id: 1,
-              name: 'John',
+              user: {
+                id: 1,
+                name: 'John',
+              },
             };
 
             const mutableState = {
@@ -245,13 +265,11 @@ describe('withImmutableState', () => {
             TestBed.inject(TestStore);
 
             if (protectionOn) {
-              expect(() => (immutableState.name = 'Jane')).toThrow();
+              expect(() => (immutableState.user.name = 'Jane')).toThrow();
             } else {
-              expect(() => (immutableState.name = 'Jane')).not.toThrow();
+              expect(() => (immutableState.user.name = 'Jane')).not.toThrow();
             }
-            expect(
-              () => (mutableState.address = 'Glastonbury'),
-            ).not.toThrowError();
+            expect(() => (mutableState.address = 'Glastonbury')).not.toThrow();
           });
         });
       }

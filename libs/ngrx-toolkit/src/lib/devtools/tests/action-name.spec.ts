@@ -40,7 +40,7 @@ describe('updateState', () => {
     store.setName('i4');
     TestBed.flushEffects();
 
-    expect(sendSpy).lastCalledWith(
+    expect(sendSpy).toHaveBeenLastCalledWith(
       { type: 'Set Name' },
       { shop: { name: 'i4' } },
     );
