@@ -18,9 +18,9 @@ import { isDevMode } from './is-dev-mode';
  * That means, we cannot freeze root properties, which are of a
  * primitive data type.
  *
- * This is a breaking change to v19, where the state was on Signal
- * in total. We had the possibility to freeze that Signal's
- * object and could therefore provide immutability also for
+ * This is a breaking change, because in v19 the state was a Signal.
+ * We had the possibility to freeze that Signal's
+ * object and could therefore provide immutability for
  * root properties of primitive data types.
  *
  * For example:
