@@ -2,7 +2,10 @@ import { patchState, signalStore, type } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 import {
   createPageArray,
+  firstPage,
   gotoPage,
+  nextPage,
+  previousPage,
   setPageSize,
   withPagination,
 } from './with-pagination';
@@ -51,7 +54,49 @@ describe('withPagination', () => {
     expect(store.booksPageCount()).toBe(6);
   });
 
-  it('should react on enitiy changes', () => {
+  it('should navigate through pages', () => {
+    const Store = signalStore(
+      { protectedState: false },
+      withEntities({ entity: type<Book>() }),
+      withPagination(),
+    );
+
+    const store = new Store();
+
+    patchState(store, setAllEntities(generateBooks(55)));
+    expect(store.currentPage()).toBe(0);
+
+    patchState(store, nextPage());
+    expect(store.currentPage()).toBe(1);
+
+    patchState(store, previousPage());
+    expect(store.currentPage()).toBe(0);
+
+    patchState(store, nextPage());
+    patchState(store, nextPage());
+    expect(store.currentPage()).toBe(2);
+
+    patchState(store, firstPage());
+    expect(store.currentPage()).toBe(0);
+  });
+
+  it('should set page size', () => {
+    const Store = signalStore(
+      { protectedState: false },
+      withEntities({ entity: type<Book>() }),
+      withPagination(),
+    );
+
+    const store = new Store();
+
+    patchState(store, setAllEntities(generateBooks(50)), setPageSize(10));
+    expect(store.pageCount()).toBe(5);
+
+    patchState(store, setPageSize(5));
+    expect(store.pageCount()).toBe(10);
+  });
+
+  it('should react on entity changes', () => {
     const Store = signalStore(
       { protectedState: false },
       withEntities({ entity: type<Book>() }),

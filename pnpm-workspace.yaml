@@ -1,0 +1,4 @@
+onlyBuiltDependencies:
+  - lmdb
+  - nx
+  - unrs-resolver

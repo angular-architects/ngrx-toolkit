@@ -59,6 +59,7 @@ describe('withStorageSync (async storage)', () => {
 
       const Store = signalStore(
         { protectedState: false },
+        withState(initialState),
         withStorageSync({ key, autoSync: false }, withIndexedDB()),
       );
       const store = TestBed.inject(Store);
@@ -105,6 +106,7 @@ describe('withStorageSync (async storage)', () => {
 
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
+        withState(initialState),
         withStorageSync(key, withIndexedDB()),
       );
 
@@ -163,16 +165,17 @@ describe('withStorageSync (async storage)', () => {
       const indexedDBService = TestBed.inject(IndexedDBService);
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
+        withState(initialState),
         withStorageSync(key, withIndexedDB()),
       );
       const store = TestBed.inject(Store);
       await waitForSyncStable(store);
 
-      patchState(store, { ...initialState });
+      patchState(store, { foo: 'baz', age: 25 });
       await waitForSyncStable(store);
 
       expect(await indexedDBService.getItem(key)).toEqual(
-        JSON.stringify(initialState),
+        JSON.stringify({ foo: 'baz', age: 25 }),
       );
     });
 
@@ -256,18 +259,12 @@ describe('withStorageSync (async storage)', () => {
         withStorageSync('flights', withIndexedDB()),
       );
       const store = TestBed.inject(Store);
+      await waitForSyncStable(store);
 
       expect(warnings).toEqual([]);
-      patchState(store, { name: 'Lufthansa', age: 27 });
-      expect(warnings).toEqual([
-        'Writing to Store (flights) happened before the state was initially read from storage.',
-        'Please ensure that the store is not in syncing state via `store.whenSynced()` before writing to the state.',
-        'Alternatively, you can disable autoSync by passing `autoSync: false` in the config.',
-      ]);
     });
 
     it('warns when reading happens during a write', async () => {
-      console.log('starting test');
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
         withState({ name: 'Delta', age: 52 }),

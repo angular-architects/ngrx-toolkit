@@ -77,6 +77,20 @@ export type PaginationServiceSignals<E> = {
   hasPreviousPage: Signal<boolean>;
 };
 
+type PageState<Collection extends string | undefined> =
+  Collection extends string
+    ? {
+        [K in Collection as `${Lowercase<K>}CurrentPage`]: number;
+      }
+    : { currentPage: number };
+
+type PageSizeState<Collection extends string | undefined> =
+  Collection extends string
+    ? {
+        [K in Collection as `${Lowercase<K>}PageSize`]: number;
+      }
+    : { pageSize: number };
+
 export type SetPaginationState<
   E,
   Collection extends string | undefined,
@@ -177,60 +191,66 @@ export function withPagination<E, Collection extends string>(options?: {
   );
 }
 
-export function gotoPage<E, Collection extends string>(
+export function gotoPage<Collection extends string>(
   page: number,
   options?: {
     collection: Collection;
   },
-): Partial<SetPaginationState<E, Collection>> {
+): PageState<Collection> {
   const { pageKey } = createPaginationKeys<Collection>(options);
 
   return {
     [pageKey]: page,
-  } as Partial<SetPaginationState<E, Collection>>;
+  } as PageState<Collection>;
 }
 
-export function setPageSize<E, Collection extends string>(
+export function setPageSize<Collection extends string>(
   pageSize: number,
   options?: {
     collection: Collection;
   },
-): Partial<SetPaginationState<E, Collection>> {
+) {
   const { pageSizeKey } = createPaginationKeys<Collection>(options);
 
   return {
     [pageSizeKey]: pageSize,
-  } as Partial<SetPaginationState<E, Collection>>;
+  } as PageSizeState<Collection>;
 }
 
-export function nextPage<E, Collection extends string>(options?: {
+type SetPageState<Collection extends string | undefined> = (
+  state: PageState<Collection>,
+) => PageState<Collection>;
+
+export function nextPage<Collection extends string>(options?: {
   collection: Collection;
-}): Partial<SetPaginationState<E, Collection>> {
+}): SetPageState<Collection> {
   const { pageKey } = createPaginationKeys<Collection>(options);
 
-  return {
-    [pageKey]: (currentPage: number) => currentPage + 1,
-  } as Partial<SetPaginationState<E, Collection>>;
+  return (state: { [pageKey]: number }) => {
+    const currentPage = state[pageKey];
+
+    return { [pageKey]: currentPage + 1 } as PageState<Collection>;
+  };
 }
 
-export function previousPage<E, Collection extends string>(options?: {
+export function previousPage<Collection extends string>(options?: {
   collection: Collection;
-}): Partial<SetPaginationState<E, Collection>> {
+}): SetPageState<Collection> {
   const { pageKey } = createPaginationKeys<Collection>(options);
 
-  return {
-    [pageKey]: (currentPage: number) => Math.max(currentPage - 1, 1),
-  } as Partial<SetPaginationState<E, Collection>>;
+  return (state: { [pageKey]: number }) => {
+    const currentPage = state[pageKey];
+
+    return { [pageKey]: currentPage - 1 } as PageState<Collection>;
+  };
 }
 
-export function firstPage<E, Collection extends string>(options?: {
+export function firstPage<Collection extends string>(options?: {
   collection: Collection;
-}): Partial<SetPaginationState<E, Collection>> {
+}) {
   const { pageKey } = createPaginationKeys<Collection>(options);
 
-  return {
-    [pageKey]: 1,
-  } as Partial<SetPaginationState<E, Collection>>;
+  return { [pageKey]: 0 } as PageState<Collection>;
 }
 
 export function setMaxPageNavigationArrayItems<E, Collection extends string>(

@@ -1,5 +1,6 @@
 import {
   EmptyFeatureResult,
+  getState,
   signalStoreFeature,
   SignalStoreFeature,
   SignalStoreFeatureResult,
@@ -11,42 +12,54 @@ import { deepFreeze } from './deep-freeze';
 import { isDevMode } from './is-dev-mode';
 
 /**
- * The implementation of this feature is a little bit tricky.
+ * Starting from v20, the root properties of the state object
+ * are all of type `WritableSignal`.
  *
- * `signalStore` does a shallow clone in the initial phase, in order to
- * merge all different states together.
+ * That means, we cannot freeze root properties, which are of a
+ * primitive data type.
  *
- * Shallow cloning also happens in `patchState`.
- *
- * With shallow cloning, the root state object is replaced, which means,
- * the freezing only stays for its nested properties but not for
- * the primitive and immediate properties.
+ * This is a breaking change, because in v19 the state was a Signal.
+ * We had the possibility to freeze that Signal's
+ * object and could therefore provide immutability for
+ * root properties of primitive data types.
  *
  * For example:
  *
  * ```ts
  * const state = {
- *   id: 1,
+ *   id: 1, // was frozen in v19, but not in >= v20
  *   address: {
  *     street: 'Main St',
  *     city: 'Springfield',
  *   }
  * }
  * ```
- *
- * Running `Object.freeze` on `state` will freeze the `address` object, and
- * the `id`. But since `state` is shallow cloned, the "frozing" state of the
- * `id` is lost. `address`, being an object, is still frozen.
- *
- * To overcome that, we run `watchState` and run `deepFreeze`
- * on every change.
  */
 
 /**
  * Prevents mutation of the state.
  *
- * This is done by deeply applying `Object.freeze`. Any mutable change within
+ * This is done by applying `Object.freeze` to each root
+ * property of the state. Any mutable change within
  * or outside the `SignalStore` will throw an error.
+ *
+ * Root properties of the state having a primitive data type
+ * are not supported.
+ *
+ *  * For example:
+ *
+ * ```ts
+ * const state = {
+ *   // ⛔️ are not frozen -> mutable changes possible
+ *   id: 1,
+ *
+ *   // ✅ are frozen -> mutable changes throw
+ *   address: {
+ *     street: 'Main St',
+ *     city: 'Springfield',
+ *   }
+ * }
+ * ```
  *
  * @param state the state object
  * @param options enable protection in production (default: false)
@@ -61,8 +74,27 @@ export function withImmutableState<State extends object>(
 /**
  * Prevents mutation of the state.
  *
- * This is done by deeply applying `Object.freeze`. Any mutable change within
+ * This is done by applying `Object.freeze` to each root
+ * property of the state. Any mutable change within
  * or outside the `SignalStore` will throw an error.
+ *
+ * Root properties of the state having a primitive data type
+ * are not supported.
+ *
+ *  * For example:
+ *
+ * ```ts
+ * const state = {
+ *   // ⛔️ are not frozen -> mutable changes possible
+ *   id: 1,
+ *
+ *   // ✅ are frozen -> mutable changes throw
+ *   address: {
+ *     street: 'Main St',
+ *     city: 'Springfield',
+ *   }
+ * }
+ * ```
  *
  * @param stateFactory a function returning the state object
  * @param options enable protection in production (default: false)
@@ -98,16 +130,19 @@ export function withImmutableState<State extends object>(
          * of potential mutations outside the SignalStore
          *
          * ```ts
-         * const initialState = {id: 1};
+         * const initialState = {user: {id: 1}};
          * signalStore(withImmutableState(initialState));
          *
-         * initialState.id = 2; // must throw immutability
+         * initialState.user.id = 2; // must throw immutability
          * ```
          */
+        deepFreeze(
+          getState(store) as Record<string | symbol, unknown>,
+          stateKeys,
+        );
 
-        Object.freeze(immutableState);
         watchState(store, (state) => {
-          deepFreeze(state, stateKeys);
+          deepFreeze(state as Record<string | symbol, unknown>, stateKeys);
         });
       },
     })),

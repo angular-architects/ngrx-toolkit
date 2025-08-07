@@ -136,9 +136,9 @@ export function withStorageSync<Input extends SignalStoreFeatureResult>(
   }
 }
 
-function createSyncStorageSync<Input extends SignalStoreFeatureResult>(
-  factory: SyncStorageStrategy<Input['state']>,
-  config: Required<SyncConfig<Input['state']>>,
+function createSyncStorageSync(
+  factory: SyncStorageStrategy<object>,
+  config: Required<SyncConfig<object>>,
 ) {
   return signalStoreFeature(
     withMethods((store, platformId = inject(PLATFORM_ID)) => {
@@ -159,9 +159,9 @@ function createSyncStorageSync<Input extends SignalStoreFeatureResult>(
   ) satisfies SignalStoreFeature<EmptyFeatureResult, SyncFeatureResult>;
 }
 
-function createAsyncStorageSync<Input extends SignalStoreFeatureResult>(
-  factory: AsyncStorageStrategy<Input['state']>,
-  config: Required<SyncConfig<Input['state']>>,
+function createAsyncStorageSync(
+  factory: AsyncStorageStrategy<object>,
+  config: Required<SyncConfig<object>>,
 ) {
   return signalStoreFeature(
     withProps(() => {
@@ -205,12 +205,15 @@ function createAsyncStorageSync<Input extends SignalStoreFeatureResult>(
           return;
         }
 
-        const initialState = getState(store);
+        const initialState = JSON.stringify(getState(store));
         if (config.autoSync) {
           let startWatching = false;
           watchState(store, () => {
             if (!startWatching) {
-              if (getState(store) === initialState) {
+              const currentState = JSON.stringify(getState(store));
+
+              // Necessary because getState returns always a new object
+              if (currentState === initialState) {
                 return;
               }
 
