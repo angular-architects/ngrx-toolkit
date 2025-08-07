@@ -34,13 +34,13 @@ export const FlightBookingStore = signalStore(
     setFlightPageSize: (size: number) => {
       patchState(
         store,
-        setPageSize<Flight, 'flight'>(size, { collection: collectionName })
+        setPageSize<Flight, 'flight'>(size, { collection: collectionName }),
       );
     },
     gotoFlightPage: (page: number) => {
       patchState(
         store,
-        gotoPage<Flight, 'flight'>(page, { collection: collectionName })
+        gotoPage<Flight, 'flight'>(page, { collection: collectionName }),
       );
     },
   })),
