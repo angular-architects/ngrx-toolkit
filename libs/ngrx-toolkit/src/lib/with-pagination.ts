@@ -84,6 +84,13 @@ type PageState<Collection extends string | undefined> =
       }
     : { currentPage: number };
 
+type PageSizeState<Collection extends string | undefined> =
+  Collection extends string
+    ? {
+        [K in Collection as `${Lowercase<K>}PageSize`]: number;
+      }
+    : { pageSize: number };
+
 export type SetPaginationState<
   E,
   Collection extends string | undefined,
@@ -197,17 +204,17 @@ export function gotoPage<Collection extends string>(
   } as PageState<Collection>;
 }
 
-export function setPageSize<E, Collection extends string>(
+export function setPageSize<Collection extends string>(
   pageSize: number,
   options?: {
     collection: Collection;
   },
-): Partial<SetPaginationState<E, Collection>> {
+) {
   const { pageSizeKey } = createPaginationKeys<Collection>(options);
 
   return {
     [pageSizeKey]: pageSize,
-  } as Partial<SetPaginationState<E, Collection>>;
+  } as PageSizeState<Collection>;
 }
 
 type SetPageState<Collection extends string | undefined> = (

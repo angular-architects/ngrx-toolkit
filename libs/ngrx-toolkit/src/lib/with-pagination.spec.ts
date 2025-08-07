@@ -80,6 +80,22 @@ describe('withPagination', () => {
     expect(store.currentPage()).toBe(0);
   });
 
+  it('should set page size', () => {
+    const Store = signalStore(
+      { protectedState: false },
+      withEntities({ entity: type<Book>() }),
+      withPagination(),
+    );
+
+    const store = new Store();
+
+    patchState(store, setAllEntities(generateBooks(50)), setPageSize(10));
+    expect(store.pageCount()).toBe(5);
+
+    patchState(store, setPageSize(5));
+    expect(store.pageCount()).toBe(10);
+  });
+
   it('should react on entity changes', () => {
     const Store = signalStore(
       { protectedState: false },
