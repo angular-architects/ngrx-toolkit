@@ -19,11 +19,6 @@ const teamMembers: TeamMember[] = [
     description: 'Google Developer Expert (GDE) and a trusted collaborator on the NgRx team. Trainer and consultant in the Angular Architects expert network and runs ng-news, a weekly Angular newsletter.'
   },
   { 
-    name: 'Michael Egger-Zickes', 
-    image: '/img/team/michael-egger-zickes.jpg',
-    description: 'Software architect, trainer, and consultant specializing in Angular for business applications. Oversees large Angular projects in both public sector and private industry. Guest lecturer at FH CAMPUS 02 University of Applied Sciences in Graz. Holds a degree in Business Informatics with years of experience in software development and business process automation.'
-  },
-  { 
     name: 'Michael Small', 
     image: '/img/team/michael-small.jpg',
     description: 'Angular nerd. Answers questions on both of the Angular subreddits. Dabbling in open source discussions and contributions. Looking to get more involved in the community than before.'
