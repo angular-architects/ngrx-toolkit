@@ -89,6 +89,12 @@ const config: Config = {
           position: 'left',
         },
         {
+          type: 'docSidebar',
+          sidebarId: 'teamSidebar',
+          position: 'left',
+          label: 'Team',
+        },
+        {
           href: 'https://github.com/angular-architects/ngrx-toolkit',
           label: 'GitHub',
           position: 'right',

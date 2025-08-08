@@ -34,6 +34,7 @@ const sidebars: SidebarsConfig = {
       items: ['create-redux-state'],
     },
   ],
+  teamSidebar: ['team'],
 
   // But you can create a sidebar manually
   /*
