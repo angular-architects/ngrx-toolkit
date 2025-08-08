@@ -42,7 +42,6 @@ describe('withPagination', () => {
     );
 
     const store = new Store();
-
     patchState(
       store,
       setAllEntities(generateBooks(55), { collection: 'books' }),
