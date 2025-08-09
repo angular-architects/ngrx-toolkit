@@ -1,3 +1,6 @@
+packages:
+  - 'docs'
+
 onlyBuiltDependencies:
   - lmdb
   - nx
