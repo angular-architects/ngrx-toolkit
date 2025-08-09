@@ -27,20 +27,33 @@ export type AsyncMethods = {
   writeToStorage(): Promise<void>;
 };
 
+/**
+ * AsyncFeatureResult is used as the public interface that users interact with
+ * when calling `withIndexedDB`. It intentionally omits the internal SYNC_STATUS
+ * property to avoid TypeScript error TS4058 (return type of public method
+ * includes private type).
+ *
+ * For internal implementation, we use AsyncStoreForFactory which includes
+ * the SYNC_STATUS property needed for state management.
+ */
 export const SYNC_STATUS = Symbol('SYNC_STATUS');
 export type SyncStatus = 'idle' | 'syncing' | 'synced';
+
+// Keeping it internal avoids TS4058 error
+export type InternalAsyncProps = AsyncFeatureResult['props'] & {
+  [SYNC_STATUS]: WritableSignal<SyncStatus>;
+};
 
 export type AsyncFeatureResult = EmptyFeatureResult & {
   methods: AsyncMethods;
   props: {
     isSynced: Signal<boolean>;
     whenSynced: () => Promise<void>;
-    [SYNC_STATUS]: WritableSignal<SyncStatus>;
   };
 };
 
 export type AsyncStoreForFactory<State extends object> =
-  WritableStateSource<State> & AsyncFeatureResult['props'];
+  WritableStateSource<State> & InternalAsyncProps;
 
 export type AsyncStorageStrategy<State extends object> = ((
   config: Required<SyncConfig<State>>,
