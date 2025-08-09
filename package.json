@@ -7,7 +7,7 @@
     "lint:all": "nx run-many --targets=lint",
     "test:all": "nx run-many --targets=test",
     "test:e2e": "nx e2e demo",
-    "build:all": "nx run-many --targets=build",
+    "build:all": "nx run-many --targets=build --skip-nx-cache",
     "verify:all": "nx run-many --targets=lint,test,build",
     "prepare": "husky",
     "format:check": "prettier --check ./**/*.{js,ts,json,html,scss,md}"
