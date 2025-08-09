@@ -1,10 +1,11 @@
-import { Signal, effect, isSignal, signal, untracked } from '@angular/core';
+import { Signal, isSignal, signal, untracked } from '@angular/core';
 import {
   EmptyFeatureResult,
   SignalStoreFeature,
   SignalStoreFeatureResult,
   patchState,
   signalStoreFeature,
+  watchState,
   withComputed,
   withHooks,
   withMethods,
@@ -143,7 +144,7 @@ export function withUndoRedo<Input extends EmptyFeatureResult>(
     })),
     withHooks({
       onInit(store) {
-        effect(() => {
+        watchState(store, () => {
           const cand = keys.reduce((acc, key) => {
             const s = (store as Record<string | keyof Input['state'], unknown>)[
               key
