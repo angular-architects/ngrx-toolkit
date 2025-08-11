@@ -26,6 +26,7 @@ const sidebars: SidebarsConfig = {
     'with-feature-factory',
     'with-conditional',
     'with-call-state',
+    'with-connect',
   ],
   reduxConnectorSidebar: [
     {
