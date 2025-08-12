@@ -1,3 +1,4 @@
+<h2>Flight Search (<code>withRedux</code>)</h2>
 <form (ngSubmit)="search()">
   <div>
     <mat-form-field>
@@ -13,7 +14,7 @@
     </mat-form-field>
   </div>
 
-  <button mat-raised-button>Search</button>
+  <button mat-raised-button type="submit">Search</button>
 </form>
 
 <mat-table [dataSource]="dataSource">

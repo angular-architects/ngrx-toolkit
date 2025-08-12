@@ -11,6 +11,8 @@ import { TodoStore } from './todo-store';
 @Component({
   selector: 'demo-todo',
   template: `
+    <h2>Todo List (DevTools)</h2>
+
     <mat-table [dataSource]="dataSource" class="mat-elevation-z8">
       <!-- Checkbox Column -->
       <ng-container matColumnDef="finished">
@@ -51,7 +53,7 @@ import { TodoStore } from './todo-store';
 
     <div class="details">
       @for (todo of todoStore.selectedTodos(); track todo) {
-        <demo-todo-detail [todo]="todo"></demo-todo-detail>
+        <demo-todo-detail [todo]="todo" />
       }
     </div>
   `,
@@ -77,7 +79,7 @@ import { TodoStore } from './todo-store';
 export class TodoComponent {
   todoStore = inject(TodoStore);
 
-  displayedColumns: string[] = ['finished', 'name', 'deadline'];
+  displayedColumns = ['finished', 'name', 'deadline'] as const;
   dataSource = new MatTableDataSource<Todo>([]);
   selection = new SelectionModel<Todo>(true, []);
 
