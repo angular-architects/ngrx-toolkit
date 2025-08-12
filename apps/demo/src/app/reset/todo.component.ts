@@ -9,11 +9,13 @@ import { TodoStore } from './todo-store';
 
 @Component({
   template: `
-    <div class="button">
-      <button mat-raised-button (click)="resetState()">Reset State</button>
-    </div>
+    <h2><code>withReset</code> Todo List</h2>
 
-    <div>
+    <button mat-raised-button (click)="resetState()" type="button">
+      Reset State
+    </button>
+
+    <section>
       <mat-table [dataSource]="dataSource" class="mat-elevation-z8">
         <!-- Checkbox Column -->
         <ng-container matColumnDef="finished">
@@ -40,10 +42,10 @@ import { TodoStore } from './todo-store';
           (click)="selection.toggle(row)"
         ></mat-row>
       </mat-table>
-    </div>
+    </section>
   `,
   styles: `
-    .button {
+    button {
       margin-bottom: 1em;
     }
   `,
