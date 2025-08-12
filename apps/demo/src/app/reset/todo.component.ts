@@ -4,7 +4,8 @@ import { MatButton } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { Todo, TodoStore } from './todo-store';
+import { Todo } from '../shared/todo.service';
+import { TodoStore } from './todo-store';
 
 @Component({
   template: `
