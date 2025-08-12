@@ -1,4 +1,4 @@
-<h1 class="title">Flight Edit (Simple)</h1>
+<h2 class="title">Flight Edit (Simple)</h2>
 
 @if (loading()) {
   <div class="status">One moment please ...</div>
@@ -7,18 +7,35 @@
   <h2 class="error">Error: {{ error() }}</h2>
 }
 @if (current()) {
+  <!-- TODO - button types & form action (unsure if new vs save can both be submit) -->
   <form>
-    <div>
-      <input [ngModel]="current().id" name="id" />
-      <input [ngModel]="current().from" name="from" />
-      <input [ngModel]="current().to" name="to" />
-      <input [ngModel]="current().date" name="date" />
-      <input [ngModel]="current().delayed" name="delayed" type="checkbox" />
+    <div id="fields">
+      <mat-form-field>
+        <mat-label>ID:</mat-label>
+        <input [ngModel]="current().id" name="id" matInput />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>From:</mat-label>
+        <input [ngModel]="current().from" name="from" matInput />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>To:</mat-label>
+        <input [ngModel]="current().to" name="to" matInput />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Date:</mat-label>
+        <input [ngModel]="current().date" name="date" matInput />
+      </mat-form-field>
+      <mat-checkbox [ngModel]="current().delayed" name="delayed">
+        Delayed
+      </mat-checkbox>
     </div>
-    <div>
-      <button (click)="createNew()">New</button>
-      <button (click)="save()">Save</button>
-      <button (click)="deleteFlight()">Delete</button>
+    <div id="buttons">
+      <button (click)="createNew()" mat-raised-button type="button">New</button>
+      <button (click)="save()" mat-raised-button type="button">Save</button>
+      <button (click)="deleteFlight()" mat-raised-button type="button">
+        Delete
+      </button>
     </div>
   </form>
 }

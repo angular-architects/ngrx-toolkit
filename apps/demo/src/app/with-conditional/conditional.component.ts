@@ -62,7 +62,7 @@ class ConditionalUserComponent {
 @Component({
   template: `
     <h2>
-      <pre>withConditional</pre>
+      <code>withConditional</code>
     </h2>
 
     <mat-button-toggle-group
@@ -74,7 +74,7 @@ class ConditionalUserComponent {
     </mat-button-toggle-group>
 
     <div>
-      <button mat-raised-button (click)="toggleUserComponent()">
+      <button mat-raised-button (click)="toggleUserComponent()" type="button">
         Toggle User Component
       </button>
     </div>
@@ -91,12 +91,13 @@ class ConditionalUserComponent {
   ],
 })
 export class ConditionalSettingComponent {
+  userService = inject(UserServiceStore);
+
   showUserComponent = signal(false);
 
   toggleUserComponent() {
     this.showUserComponent.update((show) => !show);
   }
-  userService = inject(UserServiceStore);
   protected readonly userFeature = signal<'real' | 'fake'>('real');
 
   effRef = effect(() => {
