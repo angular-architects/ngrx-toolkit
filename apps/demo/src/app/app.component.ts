@@ -29,11 +29,11 @@ import { RouterLink, RouterOutlet } from '@angular/router';
     MatDrawerContent,
   ],
   styles: `
-    .container {
-      display: inline;
-    }
     .content {
       margin: 4em;
+    }
+    mat-drawer-container {
+      height: 100%;
     }
   `,
 })
