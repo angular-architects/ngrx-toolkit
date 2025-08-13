@@ -16,7 +16,7 @@ import { SyncedTodoStore } from './synced-todo-store';
 export class TodoIndexeddbSyncComponent {
   todoStore = inject(SyncedTodoStore);
 
-  displayedColumns: string[] = ['finished', 'name', 'description', 'deadline'];
+  displayedColumns = ['finished', 'name', 'description', 'deadline'] as const;
   dataSource = new MatTableDataSource<Todo>([]);
   selection = new SelectionModel<Todo>(true, []);
 
