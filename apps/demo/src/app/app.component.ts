@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,7 +21,6 @@ import { RouterLink, RouterOutlet } from '@angular/router';
     MatListModule,
     RouterLink,
     RouterOutlet,
-    CommonModule,
     MatToolbarModule,
     MatDrawer,
     MatDrawerContainer,
