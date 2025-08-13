@@ -53,7 +53,7 @@ import { TodoStore } from './todo-store';
 export class TodoComponent {
   todoStore = inject(TodoStore);
 
-  displayedColumns: string[] = ['finished', 'name'];
+  displayedColumns = ['finished', 'name'] as const;
   dataSource = new MatTableDataSource<Todo>([]);
   selection = new SelectionModel<Todo>(true, []);
 
