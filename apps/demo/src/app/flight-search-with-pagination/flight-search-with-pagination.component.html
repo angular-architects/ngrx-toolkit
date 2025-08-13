@@ -49,11 +49,11 @@
     }}</mat-cell>
   </ng-container>
 
-  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-header-row *matHeaderRowDef="displayedColumns" />
   <mat-row
     *matRowDef="let row; columns: displayedColumns"
     (click)="selection.toggle(row)"
-  ></mat-row>
+  />
 </mat-table>
 <mat-paginator
   [length]="flightStore.flightTotalCount()"
@@ -63,5 +63,4 @@
   [pageSizeOptions]="[5, 10, 25]"
   (page)="handlePageEvent($event)"
   aria-label="Select page"
->
-</mat-paginator>
+/>
