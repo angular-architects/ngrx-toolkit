@@ -2,27 +2,29 @@
 
 <form #form="ngForm">
   <div class="form-group">
-    <label
-      >From:
+    <mat-form-field>
+      <mat-label>From</mat-label>
       <input
         name="from"
         [ngModel]="localState.filter.from()"
         (ngModelChange)="patchFilter({ from: $event })"
         class="form-control"
+        matInput
       />
-    </label>
+    </mat-form-field>
   </div>
 
   <div class="form-group">
-    <label
-      >To:
+    <mat-form-field>
+      <mat-label>To</mat-label>
       <input
         name="to"
         [ngModel]="localState.filter.to()"
         (ngModelChange)="patchFilter({ to: $event })"
         class="form-control"
+        matInput
       />
-    </label>
+    </mat-form-field>
   </div>
 
   <div class="form-group">
@@ -30,12 +32,21 @@
       (click)="search()"
       [disabled]="!localState.filter.from() || !localState.filter.to()"
       class="btn btn-default"
+      type="button"
+      mat-raised-button
     >
       Search
     </button>
 
     @if (flights().length) {
-      <button (click)="reset()" class="btn btn-default">Reset</button>
+      <button
+        (click)="reset()"
+        class="btn btn-default"
+        type="reset"
+        mat-raised-button
+      >
+        Reset
+      </button>
     }
   </div>
 </form>
@@ -47,8 +58,7 @@
         [item]="flight"
         [selected]="localState.basket()[flight.id]"
         (selectedChange)="select(flight.id, $event)"
-      >
-      </demo-flight-card>
+      />
     </div>
   }
 </div>

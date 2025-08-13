@@ -1,7 +1,8 @@
-import { JsonPipe, NgForOf, NgIf } from '@angular/common';
+import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import { RouterLink } from '@angular/router';
@@ -10,8 +11,6 @@ import { SimpleFlightBookingStore } from './flight-booking-simple.store';
 
 @Component({
   imports: [
-    NgIf,
-    NgForOf,
     JsonPipe,
     FormsModule,
     FlightCardComponent,
@@ -19,6 +18,7 @@ import { SimpleFlightBookingStore } from './flight-booking-simple.store';
     MatInputModule,
     MatButtonModule,
     RouterLink,
+    MatFormFieldModule,
   ],
   selector: 'demo-flight-search',
   templateUrl: './flight-search-simple.component.html',

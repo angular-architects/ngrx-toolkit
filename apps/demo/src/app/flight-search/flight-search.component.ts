@@ -23,7 +23,7 @@ export class FlightSearchComponent {
   searchParams: { from: string; to: string } = { from: 'Paris', to: 'London' };
   flightStore = inject(FlightStore);
 
-  displayedColumns: string[] = ['from', 'to', 'date'];
+  displayedColumns = ['from', 'to', 'date'] as const;
   dataSource = new MatTableDataSource<Flight>([]);
   selection = new SelectionModel<Flight>(true, []);
 

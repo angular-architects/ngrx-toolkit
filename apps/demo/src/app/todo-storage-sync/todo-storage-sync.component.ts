@@ -11,12 +11,11 @@ import { SyncedTodoStore } from './synced-todo-store';
   selector: 'demo-todo-storage-sync',
   imports: [MatCheckboxModule, MatIconModule, MatTableModule, MatButton],
   templateUrl: './todo-storage-sync.component.html',
-  styleUrl: './todo-storage-sync.component.scss',
 })
 export class TodoStorageSyncComponent {
   todoStore = inject(SyncedTodoStore);
 
-  displayedColumns: string[] = ['finished', 'name', 'description', 'deadline'];
+  displayedColumns = ['finished', 'name', 'description', 'deadline'] as const;
   dataSource = new MatTableDataSource<Todo>([]);
   selection = new SelectionModel<Todo>(true, []);
 
