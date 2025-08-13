@@ -11,7 +11,6 @@ import { SyncedTodoStore } from './synced-todo-store';
   selector: 'demo-todo-indexeddb-sync',
   imports: [MatCheckboxModule, MatIconModule, MatTableModule, MatButton],
   templateUrl: './todo-indexeddb-sync.component.html',
-  styleUrl: './todo-indexeddb-sync.component.scss',
   standalone: true,
 })
 export class TodoIndexeddbSyncComponent {
