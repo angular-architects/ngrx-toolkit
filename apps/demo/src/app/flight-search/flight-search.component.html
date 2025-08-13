@@ -38,9 +38,9 @@
     }}</mat-cell>
   </ng-container>
 
-  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-header-row *matHeaderRowDef="displayedColumns" />
   <mat-row
     *matRowDef="let row; columns: displayedColumns"
     (click)="selection.toggle(row)"
-  ></mat-row>
+  />
 </mat-table>

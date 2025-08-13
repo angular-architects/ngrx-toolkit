@@ -19,14 +19,13 @@ import { TodoStore } from './todo-store';
       <mat-table [dataSource]="dataSource" class="mat-elevation-z8">
         <!-- Checkbox Column -->
         <ng-container matColumnDef="finished">
-          <mat-header-cell *matHeaderCellDef></mat-header-cell>
+          <mat-header-cell *matHeaderCellDef />
           <mat-cell *matCellDef="let row" class="actions">
             <mat-checkbox
               (click)="$event.stopPropagation()"
               (change)="toggleFinished(row)"
               [checked]="row.finished"
-            >
-            </mat-checkbox>
+            />
           </mat-cell>
         </ng-container>
 
@@ -36,11 +35,11 @@ import { TodoStore } from './todo-store';
           <mat-cell *matCellDef="let element">{{ element.name }}</mat-cell>
         </ng-container>
 
-        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-header-row *matHeaderRowDef="displayedColumns" />
         <mat-row
           *matRowDef="let row; columns: displayedColumns"
           (click)="selection.toggle(row)"
-        ></mat-row>
+        />
       </mat-table>
     </section>
   `,
