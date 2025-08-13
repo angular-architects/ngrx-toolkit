@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, inject, input } from '@angular/core';
+import { Component, OnInit, inject, input, viewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Flight } from '../shared/flight';
@@ -10,8 +10,7 @@ import { FlightBookingStore } from './flight-booking.store';
   templateUrl: './flight-edit.component.html',
 })
 export class FlightEditDynamicComponent implements OnInit {
-  @ViewChild(NgForm)
-  private form!: NgForm;
+  private readonly form = viewChild.required(NgForm);
 
   private store = inject(FlightBookingStore);
 
@@ -26,7 +25,7 @@ export class FlightEditDynamicComponent implements OnInit {
   }
 
   async save() {
-    const flight = this.form.value as Flight;
+    const flight = this.form().value as Flight;
     if (flight.id) {
       await this.store.updateFlight(flight);
     } else {
@@ -39,6 +38,6 @@ export class FlightEditDynamicComponent implements OnInit {
   }
 
   async deleteFlight() {
-    await this.store.deleteFlight(this.form.value);
+    await this.store.deleteFlight(this.form().value);
   }
 }
