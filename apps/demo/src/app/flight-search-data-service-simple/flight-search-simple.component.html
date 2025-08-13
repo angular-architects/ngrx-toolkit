@@ -15,12 +15,9 @@
     </mat-form-field>
   </div>
 
-  <div
-    class="alert alert-warning"
-    *ngIf="form?.controls?.['from']?.hasError('appCity')"
-  >
-    Invalid city!
-  </div>
+  @if (form?.controls?.['from']?.hasError('appCity')) {
+    <div class="alert alert-warning">Invalid city!</div>
+  }
 
   <div class="form-group">
     <mat-form-field>
