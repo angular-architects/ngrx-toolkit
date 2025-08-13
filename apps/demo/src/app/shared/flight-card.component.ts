@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -10,7 +10,7 @@ import { initFlight } from './flight';
 
 @Component({
   selector: 'demo-flight-card',
-  imports: [CommonModule, RouterModule],
+  imports: [RouterModule, DatePipe],
   templateUrl: './flight-card.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
