@@ -3,8 +3,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
-  Input,
   Output,
+  input,
+  model,
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { initFlight } from './flight';
@@ -16,17 +17,17 @@ import { initFlight } from './flight';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FlightCardComponent {
-  @Input() item = initFlight;
-  @Input() selected: boolean | undefined;
+  readonly item = input(initFlight);
+  selected = model.required<boolean>();
   @Output() selectedChange = new EventEmitter<boolean>();
 
   select() {
-    this.selected = true;
+    this.selected.set(true);
     this.selectedChange.next(true);
   }
 
   deselect() {
-    this.selected = false;
+    this.selected.set(false);
     this.selectedChange.next(false);
   }
 }

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, inject, input } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Flight } from '../shared/flight';
@@ -19,11 +19,10 @@ export class FlightEditDynamicComponent implements OnInit {
   loading = this.store.flightLoading;
   error = this.store.flightError;
 
-  @Input({ required: true })
-  id = '';
+  readonly id = input.required<string>();
 
   ngOnInit(): void {
-    this.store.loadFlightById(this.id);
+    this.store.loadFlightById(this.id());
   }
 
   async save() {
