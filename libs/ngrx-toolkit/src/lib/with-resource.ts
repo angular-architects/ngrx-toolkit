@@ -175,7 +175,7 @@ function createUnnamedResource<ResourceValue>(
       error: resource.error,
       isLoading: resource.isLoading,
     })),
-    withMethods((store) => ({
+    withMethods(() => ({
       hasValue,
       _reload: () => resource.reload(),
     })),
@@ -213,7 +213,7 @@ function createNamedResource<Dictionary extends ResourceDictionary>(
         [`_${resourceName}Reload`]: () => dictionary[resourceName].reload(),
       };
     },
-    {} as Record<string, Function>,
+    {} as Record<string, () => boolean>,
   );
 
   return signalStoreFeature(
