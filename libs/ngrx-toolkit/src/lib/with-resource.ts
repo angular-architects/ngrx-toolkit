@@ -225,9 +225,10 @@ function createNamedResource<Dictionary extends ResourceDictionary>(
 
 function isResourceRef(value: unknown): value is ResourceRef<unknown> {
   return (
-    isSignal(value) &&
     value !== null &&
+    typeof value === 'object' &&
     'value' in value &&
+    isSignal(value.value) &&
     'status' in value &&
     'error' in value &&
     'isLoading' in value &&

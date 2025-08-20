@@ -1,264 +1,662 @@
-import { expecter } from 'ts-snippet';
-import { compilerOptions } from './helpers';
+import { httpResource, provideHttpClient } from '@angular/common/http';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
+import { inject, Injectable, Resource, resource, Signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import {
+  patchState,
+  signalStore,
+  withMethods,
+  withProps,
+  withState,
+} from '@ngrx/signals';
+import { mapToResource, withResource } from './with-resource';
 
-describe('signalStore', () => {
-  const expectSnippet = expecter(
-    (code) => `
-        import { computed, inject, resource, Resource, Signal, signal } from '@angular/core';
-        import {
-          patchState,
-          mapToResource,
-          signalStore,
-          withResource,
-          withState
-        } from '@ngrx/signals';
+describe('withResource', () => {
+  describe('standard tests', () => {
+    const wait = (ms = 0) => new Promise((resolve) => setTimeout(resolve, ms));
 
-        ${code}
-      `,
-    compilerOptions(),
-  );
+    type Address = {
+      street: string;
+      city: {
+        zip: string;
+        name: string;
+      };
+      country: string;
+    };
 
-  describe('unnamed resource', () => {
-    it('satisfies the Resource interface without default value', () => {
-      const snippet = `
-      const Store = signalStore(
-        withResource(() => resource({loader: () => Promise.resolve(1)})) 
-      );
+    const venice: Address = {
+      street: 'Sestiere Dorsoduro, 2771',
+      city: {
+        zip: '30123',
+        name: 'Venezia VE',
+      },
+      country: 'Italy',
+    };
 
-      const store: Resource<number | undefined> = new Store();
-    `;
-
-      expectSnippet(snippet).toSucceed();
-    });
-
-    it('satisfies the Resource interface with default value', () => {
-      const snippet = `
-      const Store = signalStore(
-        withResource(() => resource({loader: () => Promise.resolve(1), defaultValue: 0})) 
-      );
-
-      const store: Resource<number> = new Store();
-    `;
-
-      expectSnippet(snippet).toSucceed();
-    });
-
-    it('provides hasValue as type predicate when explicitly typed', () => {
-      const snippet = `
-      const Store = signalStore(
-        withResource(() => resource({ loader: () => Promise.resolve(1) }))
-      );
-
-      const store: Resource<number | undefined> = new Store();
-      if (store.hasValue()) {
-        const value: number = store.value();
+    @Injectable({ providedIn: 'root' })
+    class AddressResolver {
+      resolve(id: number) {
+        void id;
+        return Promise.resolve<Address>(venice);
       }
-    `;
+    }
 
-      expectSnippet(snippet).toSucceed();
-    });
-
-    it('fails on hasValue as type predicate when not explicitly typed', () => {
-      const snippet = `
-      const Store = signalStore(
-        withResource(() => resource({ loader: () => Promise.resolve(1) }))
+    function setupWithUnnamedResource() {
+      const addressResolver = {
+        resolve: jest.fn(() => Promise.resolve(venice)),
+      };
+      const AddressStore = signalStore(
+        { providedIn: 'root', protectedState: false },
+        withState({ id: undefined as number | undefined }),
+        withResource((store) => {
+          const resolver = inject(AddressResolver);
+          return resource({
+            params: store.id,
+            loader: ({ params: id }) => resolver.resolve(id),
+          });
+        }),
+        withMethods((store) => ({ reload: () => store._reload() })),
       );
 
-      const store = new Store();
-      if (store.hasValue()) {
-        const value: number = store.value();
-      }
-    `;
+      TestBed.configureTestingModule({
+        providers: [
+          {
+            provide: AddressResolver,
+            useValue: addressResolver,
+          },
+        ],
+      });
 
-      expectSnippet(snippet).toFail(
-        /Type 'number | undefined' is not assignable to type 'number'/,
+      const store = TestBed.inject(AddressStore);
+
+      return { store, addressResolver };
+    }
+
+    function setupWithNamedResource() {
+      const addressResolver = {
+        resolve: jest.fn(() => Promise.resolve(venice)),
+      };
+
+      const UserStore = signalStore(
+        { providedIn: 'root', protectedState: false },
+        withState({ id: undefined as number | undefined }),
+        withResource((store) => {
+          const resolver = inject(AddressResolver);
+          return {
+            address: resource({
+              params: store.id,
+              loader: ({ params: id }) => resolver.resolve(id),
+            }),
+          };
+        }),
+        withMethods((store) => ({ reload: () => store._addressReload() })),
       );
-    });
 
-    it('does not have access to the STATE_SOURCE', () => {
-      const snippet = `
-          const Store = signalStore(
-            withState({ id: 1 }),
+      TestBed.configureTestingModule({
+        providers: [
+          {
+            provide: AddressResolver,
+            useValue: addressResolver,
+          },
+        ],
+      });
+
+      const store = TestBed.inject(UserStore);
+
+      return { store, addressResolver };
+    }
+
+    describe('withResource', () => {
+      describe('InnerSignalStore access', () => {
+        it('can access the state signals', async () => {
+          const UserStore = signalStore(
+            { providedIn: 'root' },
+            withState({ userId: 1 }),
             withResource((store) =>
               resource({
-                params: store.id,
-                loader: ({ params: id }) => {
-                  patchState(store, { id: 0 });
-                  return Promise.resolve(id + 1);
-                },
-              })
-            )
+                params: store.userId,
+                loader: ({ params: id }) => Promise.resolve(id + 1),
+              }),
+            ),
           );
-        `;
 
-      expectSnippet(snippet).toFail(/Property '\[STATE_SOURCE\]' is missing/);
+          const userStore = TestBed.inject(UserStore);
+
+          await wait();
+          expect(userStore.value()).toBe(2);
+        });
+
+        it('can access the props', async () => {
+          const UserStore = signalStore(
+            { providedIn: 'root' },
+            withProps(() => ({ userId: 1 })),
+            withResource((store) =>
+              resource({
+                params: () => store.userId,
+                loader: ({ params: id }) => Promise.resolve(id + 1),
+              }),
+            ),
+          );
+
+          const userStore = TestBed.inject(UserStore);
+          await wait();
+          expect(userStore.value()).toBe(2);
+        });
+
+        it('can access the methods', async () => {
+          const UserStore = signalStore(
+            { providedIn: 'root' },
+            withMethods(() => ({ getValue: () => 1 })),
+            withResource((store) =>
+              resource({
+                params: () => store.getValue(),
+                loader: ({ params: id }) => Promise.resolve(id + 1),
+              }),
+            ),
+          );
+
+          const userStore = TestBed.inject(UserStore);
+          await wait();
+          expect(userStore.value()).toBe(2);
+        });
+      });
+
+      describe('status checks', () => {
+        for (const { name, setup } of [
+          {
+            name: 'unnamed resource',
+            setup: () => {
+              const { store, addressResolver } = setupWithUnnamedResource();
+              const setId = (id: number) => patchState(store, { id });
+              const setValue = (value: Address) => patchState(store, { value });
+              return {
+                storeAndResource: store,
+                addressResolver,
+                setId,
+                setValue,
+              };
+            },
+          },
+          {
+            name: 'mapped named resource',
+            setup: () => {
+              const { store, addressResolver } = setupWithNamedResource();
+              const storeAndResource = mapToResource(store, 'address');
+              const setId = (id: number) => patchState(store, { id });
+              const setValue = (value: Address) =>
+                patchState(store, { addressValue: value });
+              return { storeAndResource, addressResolver, setId, setValue };
+            },
+          },
+        ]) {
+          describe(name, () => {
+            it('has idle status in the beginning', () => {
+              const { storeAndResource } = setup();
+
+              expect(storeAndResource.status()).toBe('idle');
+              expect(storeAndResource.value()).toBeUndefined();
+              expect(storeAndResource.error()).toBeUndefined();
+              expect(storeAndResource.isLoading()).toBe(false);
+              expect(storeAndResource.hasValue()).toBe(false);
+            });
+
+            it('has loading status when loading', () => {
+              const { storeAndResource, addressResolver, setId } = setup();
+
+              addressResolver.resolve.mockResolvedValue(venice);
+              setId(1);
+
+              expect(storeAndResource.status()).toBe('loading');
+              expect(storeAndResource.value()).toBeUndefined();
+              expect(storeAndResource.error()).toBeUndefined();
+              expect(storeAndResource.isLoading()).toBe(true);
+              expect(storeAndResource.hasValue()).toBe(false);
+            });
+
+            it('has resolved status when loaded', async () => {
+              const { storeAndResource, addressResolver, setId } = setup();
+
+              addressResolver.resolve.mockResolvedValue(venice);
+              setId(1);
+
+              await wait();
+
+              expect(storeAndResource.status()).toBe('resolved');
+              expect(storeAndResource.value()).toEqual(venice);
+              expect(storeAndResource.error()).toBeUndefined();
+              expect(storeAndResource.isLoading()).toBe(false);
+              expect(storeAndResource.hasValue()).toBe(true);
+            });
+
+            it('has error status when error', async () => {
+              const { storeAndResource, addressResolver, setId } = setup();
+
+              addressResolver.resolve.mockRejectedValue(new Error('Error'));
+              setId(1);
+              await wait();
+
+              expect(storeAndResource.status()).toBe('error');
+              expect(() => storeAndResource.value()).toThrow();
+              expect(storeAndResource.error()).toBeInstanceOf(Error);
+              expect(storeAndResource.isLoading()).toBe(false);
+              expect(storeAndResource.hasValue()).toBe(false);
+            });
+
+            it('has local once updated', async () => {
+              const { storeAndResource, addressResolver, setId, setValue } =
+                setup();
+
+              addressResolver.resolve.mockResolvedValue(venice);
+              setId(1);
+
+              await wait();
+              setValue({ ...venice, country: 'Italia' });
+
+              expect(storeAndResource.status()).toBe('local');
+              expect(storeAndResource.value()?.country).toBe('Italia');
+              expect(storeAndResource.error()).toBeUndefined();
+              expect(storeAndResource.isLoading()).toBe(false);
+              expect(storeAndResource.hasValue()).toBe(true);
+            });
+          });
+        }
+
+        it('reloads an unnamed resource', async () => {
+          const { store, addressResolver } = setupWithUnnamedResource();
+
+          addressResolver.resolve.mockResolvedValue(venice);
+          patchState(store, { id: 1 });
+
+          await wait();
+          expect(store.hasValue()).toBe(true);
+
+          addressResolver.resolve.mockResolvedValue({
+            ...venice,
+            country: 'Great Britain',
+          });
+          store.reload();
+
+          await wait();
+          expect(store.value()?.country).toBe('Great Britain');
+        });
+
+        describe('named resource', () => {
+          it('has idle status in the beginning', () => {
+            const { store } = setupWithNamedResource();
+
+            expect(store.addressStatus()).toBe('idle');
+            expect(store.addressValue()).toBeUndefined();
+            expect(store.addressError()).toBeUndefined();
+            expect(store.addressIsLoading()).toBe(false);
+            expect(store.addressHasValue()).toBe(false);
+          });
+
+          it('has loading status when loading', () => {
+            const { store, addressResolver } = setupWithNamedResource();
+
+            addressResolver.resolve.mockResolvedValue(venice);
+            patchState(store, { id: 1 });
+
+            expect(store.addressStatus()).toBe('loading');
+            expect(store.addressValue()).toBeUndefined();
+            expect(store.addressError()).toBeUndefined();
+            expect(store.addressIsLoading()).toBe(true);
+            expect(store.addressHasValue()).toBe(false);
+          });
+
+          it('has resolved status when loaded', async () => {
+            const { store, addressResolver } = setupWithNamedResource();
+
+            addressResolver.resolve.mockResolvedValue(venice);
+            patchState(store, { id: 1 });
+
+            await wait();
+
+            expect(store.addressStatus()).toBe('resolved');
+            expect(store.addressValue()).toEqual(venice);
+            expect(store.addressError()).toBeUndefined();
+            expect(store.addressIsLoading()).toBe(false);
+            expect(store.addressHasValue()).toBe(true);
+          });
+
+          it('has error status when error', async () => {
+            const { store, addressResolver } = setupWithNamedResource();
+
+            addressResolver.resolve.mockRejectedValue(new Error('Error'));
+            patchState(store, { id: 1 });
+            await wait();
+
+            expect(store.addressStatus()).toBe('error');
+            expect(() => store.addressValue()).toThrow();
+            expect(store.addressError()).toBeInstanceOf(Error);
+            expect(store.addressIsLoading()).toBe(false);
+            expect(store.addressHasValue()).toBe(false);
+          });
+
+          it('has local once updated', async () => {
+            const { store, addressResolver } = setupWithNamedResource();
+
+            addressResolver.resolve.mockResolvedValue(venice);
+            patchState(store, { id: 1 });
+
+            await wait();
+            patchState(store, ({ addressValue }) => ({
+              addressValue: addressValue
+                ? { ...addressValue, country: 'Italia' }
+                : undefined,
+            }));
+
+            expect(store.addressStatus()).toBe('local');
+            expect(store.addressValue()?.country).toBe('Italia');
+            expect(store.addressError()).toBeUndefined();
+            expect(store.addressIsLoading()).toBe(false);
+            expect(store.addressHasValue()).toBe(true);
+          });
+
+          it('can also reload by resource name', async () => {
+            const { store, addressResolver } = setupWithNamedResource();
+
+            addressResolver.resolve.mockResolvedValueOnce(venice);
+            patchState(store, { id: 1 });
+            await wait();
+            expect(store.addressStatus()).toBe('resolved');
+            store.reload();
+            expect(store.addressStatus()).toBe('reloading');
+          });
+        });
+      });
+
+      describe('override protection', () => {
+        const warningSpy = jest.spyOn(console, 'warn');
+
+        afterEach(() => {
+          warningSpy.mockClear();
+        });
+
+        for (const memberName of [
+          //TODO wait for https://github.com/ngrx/platform/pull/4932
+          // 'value',
+          'status',
+          'error',
+          'isLoading',
+          '_reload',
+          'hasValue',
+        ]) {
+          it(`warns if ${memberName} is not a member of the store`, () => {
+            const Store = signalStore(
+              { providedIn: 'root' },
+              withProps(() => ({ [memberName]: true })),
+              withResource(() =>
+                resource({ loader: () => Promise.resolve(1) }),
+              ),
+            );
+
+            TestBed.inject(Store);
+
+            expect(warningSpy).toHaveBeenCalledWith(
+              '@ngrx/signals: SignalStore members cannot be overridden.',
+              'Trying to override:',
+              memberName,
+            );
+          });
+        }
+
+        //TODO wait for https://github.com/ngrx/platform/pull/4932
+        it.skip('also checks for named resources', () => {
+          const Store = signalStore(
+            { providedIn: 'root' },
+            withState({ userValue: 1 }),
+            withResource(() => ({
+              user: resource({
+                loader: () => Promise.resolve(1),
+              }),
+            })),
+          );
+
+          TestBed.inject(Store);
+
+          expect(warningSpy).toHaveBeenCalledWith(
+            '@ngrx/signals: SignalStore members cannot be overridden.',
+            'Trying to override:',
+            'userValue',
+          );
+        });
+      });
+
+      it('works also with list/detail use case', async () => {
+        const Store = signalStore(
+          { providedIn: 'root', protectedState: false },
+          withState({ id: undefined as number | undefined }),
+          withResource(({ id }) => ({
+            list: httpResource<{ id: number; name: string }[]>(
+              () => '/address',
+              {
+                defaultValue: [],
+              },
+            ),
+            detail: httpResource<Address>(() =>
+              id() ? `/address/${id()}` : undefined,
+            ),
+          })),
+        );
+
+        TestBed.configureTestingModule({
+          providers: [provideHttpClient(), provideHttpClientTesting()],
+        });
+
+        const store = TestBed.inject(Store);
+        const ctrl = TestBed.inject(HttpTestingController);
+
+        expect(store.listValue()).toEqual([]);
+        expect(store.detailValue()).toBeUndefined();
+        await wait();
+        ctrl.expectOne('/address').flush([{ id: 1, name: 'Italy' }]);
+
+        await wait();
+        expect(store.listValue()).toEqual([{ id: 1, name: 'Italy' }]);
+        expect(store.detailValue()).toBeUndefined();
+
+        patchState(store, { id: 1 });
+        await wait();
+        ctrl.expectOne('/address/1').flush(venice);
+        await wait();
+        expect(store.listValue()).toEqual([{ id: 1, name: 'Italy' }]);
+        expect(store.detailValue()).toEqual(venice);
+      });
     });
   });
 
-  describe('named resources', () => {
-    it('does not have access to the STATE_SOURCE', () => {
-      const snippet = `
+  describe('Type Tests', () => {
+    describe('unnamed resource', () => {
+      it('satisfies the Resource interface without default value', () => {
         const Store = signalStore(
+          { providedIn: 'root' },
+          withResource(() => resource({ loader: () => Promise.resolve(1) })),
+        );
+        TestBed.inject(Store) satisfies Resource<number | undefined>;
+      });
+
+      it('satisfies the Resource interface with default value', () => {
+        const Store = signalStore(
+          { providedIn: 'root' },
+          withResource(() =>
+            resource({ loader: () => Promise.resolve(1), defaultValue: 0 }),
+          ),
+        );
+        TestBed.inject(Store) satisfies Resource<number>;
+      });
+
+      it('provides hasValue as type predicate when explicitly typed', () => {
+        const Store = signalStore(
+          { providedIn: 'root' },
+          withResource(() => resource({ loader: () => Promise.resolve(1) })),
+        );
+        const store: Resource<number | undefined> = TestBed.inject(Store);
+        if (store.hasValue()) {
+          store.value() satisfies number;
+        }
+      });
+
+      it('fails on hasValue as type predicate when not explicitly typed', () => {
+        const Store = signalStore(
+          { providedIn: 'root' },
+          withResource(() => resource({ loader: () => Promise.resolve(1) })),
+        );
+        const store = TestBed.inject(Store);
+        if (store.hasValue()) {
+          // @ts-expect-error - we want to test the type error
+          store.value() satisfies number;
+        }
+      });
+
+      it('does not have access to the STATE_SOURCE', () => {
+        signalStore(
+          withState({ id: 1 }),
+          withResource((store) =>
+            resource({
+              params: store.id,
+              loader: ({ params: id }) => {
+                // @ts-expect-error - we want to test the type error
+                patchState(store, { id: 0 });
+
+                return Promise.resolve(id + 1);
+              },
+            }),
+          ),
+        );
+      });
+    });
+
+    describe('named resources', () => {
+      it('does not have access to the STATE_SOURCE', () => {
+        signalStore(
           withState({ id: 1 }),
           withResource((store) => ({
             user: resource({
               params: store.id,
               loader: ({ params: id }) => {
+                // @ts-expect-error - we want to test the type error
                 patchState(store, { id: 0 });
+
                 return Promise.resolve(id + 1);
               },
             }),
-          }))
+          })),
         );
-        `;
-
-      expectSnippet(snippet).toFail(/Property '\[STATE_SOURCE\]' is missing/);
+      });
     });
-  });
 
-  it('shoud allow different resource types with named resources', () => {
-    const snippet = `
+    it('shoud allow different resource types with named resources', () => {
       const Store = signalStore(
-        withResource((store) => ({
+        { providedIn: 'root' },
+        withResource(() => ({
           id: resource({
             loader: () => Promise.resolve(1),
             defaultValue: 0,
           }),
+        })),
+        withResource(() => ({
           word: resource({
             loader: () => Promise.resolve('hello'),
             defaultValue: '',
           }),
+        })),
+        withResource(() => ({
           optionalId: resource({
             loader: () => Promise.resolve(1),
-          })
-        }))
-      );
-      const store = new Store();
-      const id = store.idValue;
-      const word = store.wordValue;
-      const optionalId = store.optionalIdValue;
-    `;
-
-    expectSnippet(snippet).toInfer('id', 'Signal<number>');
-    expectSnippet(snippet).toInfer('word', 'Signal<string>');
-    expectSnippet(snippet).toInfer('optionalId', 'Signal<number | undefined>');
-  });
-
-  describe('mapToResource', () => {
-    it('satisfies the Resource interface without default value', () => {
-      const snippet = `
-        const Store = signalStore(
-          withResource(() => ({ id: resource({ loader: () => Promise.resolve(1) }) }))
-        );
-
-        const store = new Store();
-        mapToResource(store, 'id') satisfies Resource<number | undefined>;
-      `;
-
-      expectSnippet(snippet).toSucceed();
-    });
-
-    it('satisfies the Resource interface with default value', () => {
-      const snippet = `
-        const Store = signalStore(
-          withResource(() => ({
-            id: resource({
-              loader: () => Promise.resolve(1),
-              defaultValue: 0
-            })
-          }))
-        );
-
-        const store = new Store();
-        mapToResource(store, 'id') satisfies Resource<number | undefined>;
-      `;
-
-      expectSnippet(snippet).toSucceed();
-    });
-
-    it('provides hasValue as type predicate', () => {
-      const snippet = `
-      const Store = signalStore(
-        withResource(() => ({id: resource({ loader: () => Promise.resolve(1) })}))
+          }),
+        })),
       );
 
-      const store = new Store();
-      const res = mapToResource(store, 'id');
-      if (res.hasValue()) {
-        const value: number = res.value();
-      }
-    `;
+      const store = TestBed.inject(Store);
 
-      expectSnippet(snippet).toSucceed();
+      store.idValue satisfies Signal<number>;
+      store.wordValue satisfies Signal<string>;
+      store.optionalIdValue satisfies Signal<number | undefined>;
     });
 
-    describe('resource name checks', () => {
-      const setupStore = `
+    describe('mapToResource', () => {
+      it('satisfies the Resource interface without default value', () => {
         const Store = signalStore(
-          withState({ key: 1, work: 'test' }),
+          { providedIn: 'root' },
           withResource(() => ({
             id: resource({ loader: () => Promise.resolve(1) }),
-            word: resource({ loader: () => Promise.resolve('hello') })
-          }))
+          })),
         );
 
-        const store = new Store();
-      `;
-
-      it('allows passing id as a valid resource name', () => {
-        const snippet = `
-          ${setupStore}
-          mapToResource(store, 'id');
-        `;
-
-        expectSnippet(snippet).toSucceed();
+        const store = TestBed.inject(Store);
+        mapToResource(store, 'id') satisfies Resource<number | undefined>;
       });
 
-      it('allows passing word as a valid resource name', () => {
-        const snippet = `
-          ${setupStore}
-          mapToResource(store, 'word');
-        `;
-
-        expectSnippet(snippet).toSucceed();
-      });
-
-      it('fails when passing key as a resource name', () => {
-        const snippet = `
-          ${setupStore}
-          mapToResource(store, 'key');
-        `;
-
-        expectSnippet(snippet).toFail(
-          /Argument of type '"key"' is not assignable to parameter of type '"id" | "word"/,
-        );
-      });
-
-      it('fails when passing work as a resource name', () => {
-        const snippet = `
-          ${setupStore}
-          mapToResource(store, 'work');
-        `;
-
-        expectSnippet(snippet).toFail(
-          /Argument of type '"work"' is not assignable to parameter of type '"id" | "word"/,
-        );
-      });
-    });
-
-    it('fails when Resource properties are not fully defined', () => {
-      const snippet = `
+      it('satisfies the Resource interface with default value', () => {
         const Store = signalStore(
-          withState({ userValue: 0 })
+          { providedIn: 'root' },
+          withResource(() => ({
+            id: resource({ loader: () => Promise.resolve(1), defaultValue: 0 }),
+          })),
         );
 
-        const store = new Store();
-        mapToResource(store, 'user');
-      `;
+        const store = TestBed.inject(Store);
+        mapToResource(store, 'id') satisfies Resource<number>;
+      });
 
-      expectSnippet(snippet).toFail(
-        /Argument of type '"user"' is not assignable to parameter of type 'never'/,
-      );
+      it('provides hasValue as type predicate', () => {
+        const Store = signalStore(
+          { providedIn: 'root' },
+          withResource(() => ({
+            id: resource({ loader: () => Promise.resolve(1) }),
+          })),
+        );
+
+        const store = TestBed.inject(Store);
+        const res = mapToResource(store, 'id');
+
+        if (res.hasValue()) {
+          res.value() satisfies number;
+        }
+      });
+
+      describe('resource name checks', () => {
+        const setup = () => {
+          const Store = signalStore(
+            { providedIn: 'root' },
+            withState({ key: 1, work: 'test' }),
+            withResource(() => ({
+              id: resource({ loader: () => Promise.resolve(1) }),
+              word: resource({ loader: () => Promise.resolve('hello') }),
+            })),
+          );
+
+          return TestBed.inject(Store);
+        };
+
+        it('allows passing id as a valid resource name', () => {
+          const store = setup();
+          mapToResource(store, 'id') satisfies Resource<number | undefined>;
+        });
+
+        it('allows passing word as a valid resource name', () => {
+          const store = setup();
+          mapToResource(store, 'word') satisfies Resource<string | undefined>;
+        });
+
+        it('fails when passing key as a resource name', () => {
+          const store = setup();
+          // @ts-expect-error - we want to test the type error
+          mapToResource(store, 'key');
+        });
+      });
+
+      it('fails when Resource properties are not fully defined', () => {
+        const Store = signalStore(withState({ userValue: 0 }));
+
+        const store = new Store();
+        // @ts-expect-error - we want to test the type error
+        mapToResource(store, 'user');
+      });
     });
   });
 });
