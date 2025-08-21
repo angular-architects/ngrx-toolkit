@@ -61,4 +61,9 @@ export const lazyRoutes: Route[] = [
         (m) => m.ConditionalSettingComponent,
       ),
   },
+  {
+    path: 'connect',
+    loadComponent: () =>
+      import('./connect/connect.component').then((m) => m.ConnectComponent),
+  },
 ];
