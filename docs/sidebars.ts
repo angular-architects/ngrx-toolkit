@@ -16,16 +16,17 @@ const sidebars: SidebarsConfig = {
   // By default, Docusaurus generates a sidebar from the docs folder structure
   extensionSidebar: [
     'extensions',
-    'with-data-service',
     'with-devtools',
-    'with-redux',
+    'with-call-state',
+    'with-conditional',
+    'with-data-service',
+    'with-feature-factory',
+    'with-immutable-state',
+    'with-reset',
+    'with-resource',
     'with-storage-sync',
     'with-undo-redo',
-    'with-reset',
-    'with-immutable-state',
-    'with-feature-factory',
-    'with-conditional',
-    'with-call-state',
+    'with-redux',
   ],
   reduxConnectorSidebar: [
     {
