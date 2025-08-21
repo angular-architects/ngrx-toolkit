@@ -3,7 +3,6 @@ import {
   PartialStateUpdater,
   WritableStateSource,
 } from '@ngrx/signals';
-import { Prettify } from '../shared/prettify';
 import { currentActionNames } from './internal/current-action-names';
 
 type PatchFn = typeof originalPatchState extends (
@@ -31,7 +30,7 @@ export function updateState<State extends object>(
   stateSource: WritableStateSource<State>,
   action: string,
   ...updaters: Array<
-    Partial<Prettify<State>> | PartialStateUpdater<Prettify<State>>
+    Partial<NoInfer<State>> | PartialStateUpdater<NoInfer<State>>
   >
 ): void {
   currentActionNames.add(action);
