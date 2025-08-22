@@ -187,25 +187,25 @@ function createNamedResource<Dictionary extends ResourceDictionary>(
 ) {
   const keys = Object.keys(dictionary);
 
-  const state = keys.reduce(
+  const state: Record<string, WritableSignal<unknown>> = keys.reduce(
     (state, resourceName) => ({
       ...state,
       [`${resourceName}Value`]: dictionary[resourceName].value,
     }),
-    {} as Record<string, WritableSignal<unknown>>,
+    {},
   );
 
-  const props = keys.reduce(
+  const props: Record<string, Signal<unknown>> = keys.reduce(
     (props, resourceName) => ({
       ...props,
       [`${resourceName}Status`]: dictionary[resourceName].status,
       [`${resourceName}Error`]: dictionary[resourceName].error,
       [`${resourceName}IsLoading`]: dictionary[resourceName].isLoading,
     }),
-    {} as Record<string, Signal<unknown>>,
+    {},
   );
 
-  const methods = keys.reduce(
+  const methods: Record<string, () => boolean> = keys.reduce(
     (methods, resourceName) => {
       return {
         ...methods,
@@ -213,7 +213,7 @@ function createNamedResource<Dictionary extends ResourceDictionary>(
         [`_${resourceName}Reload`]: () => dictionary[resourceName].reload(),
       };
     },
-    {} as Record<string, () => boolean>,
+    {},
   );
 
   return signalStoreFeature(
