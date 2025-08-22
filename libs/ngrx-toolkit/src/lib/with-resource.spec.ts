@@ -4,6 +4,7 @@ import {
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { inject, Injectable, Resource, resource, Signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { TestBed } from '@angular/core/testing';
 import {
   patchState,
@@ -12,6 +13,7 @@ import {
   withProps,
   withState,
 } from '@ngrx/signals';
+import { of } from 'rxjs';
 import { mapToResource, withResource } from './with-resource';
 
 describe('withResource', () => {
@@ -119,6 +121,24 @@ describe('withResource', () => {
               resource({
                 params: store.userId,
                 loader: ({ params: id }) => Promise.resolve(id + 1),
+              }),
+            ),
+          );
+
+          const userStore = TestBed.inject(UserStore);
+
+          await wait();
+          expect(userStore.value()).toBe(2);
+        });
+
+        it('can accept an rxResource', async () => {
+          const UserStore = signalStore(
+            { providedIn: 'root' },
+            withState({ userId: 1 }),
+            withResource((store) =>
+              rxResource({
+                params: store.userId,
+                stream: ({ params: id }) => of(id + 1),
               }),
             ),
           );
