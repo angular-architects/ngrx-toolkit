@@ -3,14 +3,13 @@
 <mat-table [dataSource]="dataSource" class="mat-elevation-z8">
   <!-- Checkbox Column -->
   <ng-container matColumnDef="finished">
-    <mat-header-cell *matHeaderCellDef></mat-header-cell>
+    <mat-header-cell *matHeaderCellDef />
     <mat-cell *matCellDef="let row" class="actions">
       <mat-checkbox
         (change)="checkboxLabel(row)"
         (click)="$event.stopPropagation()"
         [checked]="row.finished"
-      >
-      </mat-checkbox>
+      />
       <mat-icon (click)="removeTodo(row)">delete</mat-icon>
     </mat-cell>
   </ng-container>
@@ -37,9 +36,9 @@
     </mat-cell>
   </ng-container>
 
-  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-header-row *matHeaderRowDef="displayedColumns" />
   <mat-row
     (click)="selection.toggle(row)"
     *matRowDef="let row; columns: displayedColumns"
-  ></mat-row>
+  />
 </mat-table>

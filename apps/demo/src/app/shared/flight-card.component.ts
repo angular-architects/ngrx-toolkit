@@ -1,32 +1,28 @@
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Input,
-  Output,
+  input,
+  model,
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { initFlight } from './flight';
 
 @Component({
   selector: 'demo-flight-card',
-  imports: [CommonModule, RouterModule],
+  imports: [RouterModule, DatePipe],
   templateUrl: './flight-card.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FlightCardComponent {
-  @Input() item = initFlight;
-  @Input() selected: boolean | undefined;
-  @Output() selectedChange = new EventEmitter<boolean>();
+  readonly item = input(initFlight);
+  selected = model.required<boolean>();
 
   select() {
-    this.selected = true;
-    this.selectedChange.next(true);
+    this.selected.set(true);
   }
 
   deselect() {
-    this.selected = false;
-    this.selectedChange.next(false);
+    this.selected.set(false);
   }
 }
