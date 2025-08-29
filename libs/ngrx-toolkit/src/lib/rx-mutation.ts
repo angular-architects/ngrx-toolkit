@@ -1,8 +1,9 @@
-import { Injector } from '@angular/core';
+import { Injector, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   catchError,
   concatMap,
+  finalize,
   Observable,
   ObservableInput,
   ObservedValueOf,
@@ -11,7 +12,8 @@ import {
   Subject,
   tap,
 } from 'rxjs';
-import { MutationResult } from './with-mutations';
+
+import { Mutation, MutationResult, MutationStatus } from './with-mutations';
 
 export type Func<P, R> = (params: P) => R;
 
@@ -29,27 +31,48 @@ export interface RxMutationOptions<P, R> {
 
 export function rxMutation<P, R>(
   options: RxMutationOptions<P, R>,
-): Func<P, Promise<MutationResult>> {
-  const mutationSubject = new Subject<P>();
+): Mutation<P> {
+  const inputSubject = new Subject<{
+    param: P;
+    resolve: (result: MutationResult) => void;
+  }>();
   const flatten = options.operator ?? concatMap;
 
   // TODO: Use injector
 
-  mutationSubject
+  const status = signal<MutationStatus>('idle');
+  const callCount = signal(0);
+  const errorSignal = signal<unknown>(undefined);
+
+  inputSubject
     .pipe(
-      flatten((param: P) =>
-        options.operation(param).pipe(
+      flatten((input) =>
+        options.operation(input.param).pipe(
           tap((result: R) => {
-            options.onSuccess?.(result, param);
-            // TODO: Decrease counter
+            options.onSuccess?.(result, input.param);
+            status.set('success');
+            input.resolve({
+              status: 'success',
+            });
           }),
           catchError((error: unknown) => {
-            const mutationError =
-              options.onError?.(error, param) ?? error ?? 'Mutation failed';
-            // TODO: Decrease counter
-            // TODO: Set mutationError
-            console.error('mutation error', mutationError);
+            options.onError?.(error, input.param);
+            const mutationError = error ?? 'Mutation failed';
+            errorSignal.set(mutationError);
+            status.set('error');
+            input.resolve({
+              status: 'error',
+              error: mutationError,
+            });
             return of(null);
+          }),
+          finalize(() => {
+            callCount.update((c) => c - 1);
+            if (status() === 'processing') {
+              input.resolve({
+                status: 'aborted',
+              });
+            }
           }),
         ),
       ),
@@ -57,15 +80,21 @@ export function rxMutation<P, R>(
     )
     .subscribe();
 
-  return (param: P) => {
+  const mutationFn = (param: P) => {
     return new Promise<MutationResult>((resolve) => {
-      // TODO: Increase Counter
-      mutationSubject.next(param);
-
-      // TODO: resolve promise when done
-      resolve({
-        status: 'success',
+      callCount.update((c) => c + 1);
+      status.set('processing');
+      inputSubject.next({
+        param,
+        resolve,
       });
     });
   };
+
+  const mutation = mutationFn as Mutation<P>;
+  mutation.status = status;
+  mutation.callCount = callCount;
+  mutation.error = errorSignal;
+
+  return mutation;
 }
