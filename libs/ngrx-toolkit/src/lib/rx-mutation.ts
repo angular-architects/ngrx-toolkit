@@ -1,4 +1,4 @@
-import { Injector, signal } from '@angular/core';
+import { DestroyRef, inject, Injector, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   catchError,
@@ -38,7 +38,7 @@ export function rxMutation<P, R>(
   }>();
   const flatten = options.operator ?? concatMap;
 
-  // TODO: Use injector
+  const destroyRef = options.injector?.get(DestroyRef) ?? inject(DestroyRef);
 
   const status = signal<MutationStatus>('idle');
   const callCount = signal(0);
@@ -76,7 +76,7 @@ export function rxMutation<P, R>(
           }),
         ),
       ),
-      takeUntilDestroyed(),
+      takeUntilDestroyed(destroyRef),
     )
     .subscribe();
 
