@@ -1,9 +1,4 @@
-import {
-  fakeAsync,
-  flushMicrotasks,
-  TestBed,
-  tick,
-} from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { patchState, signalStore, withState } from '@ngrx/signals';
 import {
   concatMap,
@@ -12,11 +7,26 @@ import {
   mergeMap,
   Observable,
   of,
+  Subject,
   switchMap,
   throwError,
 } from 'rxjs';
-import { rxMutation } from './rx-mutation';
+import { FlatteningOperator, rxMutation } from './rx-mutation';
 import { withMutations } from './with-mutations';
+
+type Param =
+  | number
+  | {
+      value: number | Observable<number>;
+      delay?: number;
+      fail?: boolean;
+    };
+
+type NormalizedParam = {
+  value: number | Observable<number>;
+  delay: number;
+  fail: boolean;
+};
 
 async function asyncTick(): Promise<void> {
   return new Promise((resolve) => {
@@ -37,540 +47,420 @@ function fail(_value: number, delayInMsec = 1000): Observable<number> {
   );
 }
 
-describe('mutation', () => {
+function createTestSetup(flatteningOperator: FlatteningOperator = concatMap) {
+  function normalizeParam(param: Param): NormalizedParam {
+    if (typeof param === 'number') {
+      return {
+        value: param,
+        delay: 1000,
+        fail: false,
+      };
+    }
+
+    return {
+      value: param.value,
+      delay: param.delay ?? 1000,
+      fail: param.fail ?? false,
+    };
+  }
+
+  type SuccessParams = { result: number; params: Param };
+  type ErrorParams = { error: unknown; params: Param };
+
+  let onSuccessCalls = 0;
+  let onErrorCalls = 0;
+
+  let lastOnSuccessParams: SuccessParams | undefined = undefined;
+  let lastOnErrorParams: ErrorParams | undefined = undefined;
+
+  return TestBed.runInInjectionContext(() => {
+    const Store = signalStore(
+      withState({ counter: 3 }),
+      withMutations((store) => ({
+        increment: rxMutation({
+          operation: (param: Param) => {
+            const normalized = normalizeParam(param);
+
+            if (normalized.value instanceof Observable) {
+              return normalized.value.pipe(
+                switchMap((value) => {
+                  if (normalized.fail) {
+                    return fail(value, normalized.delay);
+                  }
+                  return calcDouble(value, normalized.delay);
+                }),
+              );
+            }
+
+            if (normalized.fail) {
+              return fail(normalized.value, normalized.delay);
+            }
+            return calcDouble(normalized.value, normalized.delay);
+          },
+          operator: flatteningOperator,
+          onSuccess: (result, params) => {
+            lastOnSuccessParams = { result, params };
+            onSuccessCalls++;
+            patchState(store, (state) => ({
+              counter: state.counter + result,
+            }));
+          },
+          onError: (error, params) => {
+            lastOnErrorParams = { error, params };
+            onErrorCalls++;
+          },
+        }),
+      })),
+    );
+
+    const store = new Store();
+    return {
+      store,
+      onSuccessCalls: () => onSuccessCalls,
+      onErrorCalls: () => onErrorCalls,
+      lastOnSuccessParams: () => lastOnSuccessParams,
+      lastOnErrorParams: () => lastOnErrorParams,
+    };
+  });
+}
+
+describe('withMutations', () => {
   it('rxMutation should update the state', fakeAsync(() => {
-    TestBed.runInInjectionContext(() => {
-      const Store = signalStore(
-        withState({ counter: 3 }),
-        withMutations((store) => ({
-          increment: rxMutation({
-            operation: (value: number) => {
-              return calcDouble(value);
-            },
-            onSuccess: (result) => {
-              patchState(store, (state) => ({
-                counter: state.counter + result,
-              }));
-            },
-          }),
-        })),
-      );
-      const store = new Store();
+    const testSetup = createTestSetup();
+    const store = testSetup.store;
 
-      expect(store.incrementStatus()).toEqual('idle');
-      expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementStatus()).toEqual('idle');
+    expect(store.incrementProcessing()).toEqual(false);
 
-      store.increment(2);
-      expect(store.incrementStatus()).toEqual('processing');
-      expect(store.incrementProcessing()).toEqual(true);
+    store.increment(2);
+    expect(store.incrementStatus()).toEqual('processing');
+    expect(store.incrementProcessing()).toEqual(true);
 
-      tick(2000);
-      expect(store.incrementStatus()).toEqual('success');
-      expect(store.incrementProcessing()).toEqual(false);
-      expect(store.incrementError()).toEqual(undefined);
+    tick(2000);
+    expect(store.incrementStatus()).toEqual('success');
+    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementError()).toEqual(undefined);
 
-      expect(store.counter()).toEqual(7);
-    });
+    expect(store.counter()).toEqual(7);
   }));
 
   it('rxMutation sets error', fakeAsync(() => {
-    TestBed.runInInjectionContext(() => {
-      const Store = signalStore(
-        withState({ counter: 3 }),
-        withMutations((store) => ({
-          increment: rxMutation({
-            operation: (value: number) => {
-              return fail(value);
-            },
-            onSuccess: (result) => {
-              patchState(store, (state) => ({
-                counter: state.counter + result,
-              }));
-            },
-          }),
-        })),
-      );
-      const store = new Store();
+    const testSetup = createTestSetup();
+    const store = testSetup.store;
 
-      store.increment(2);
+    store.increment({ value: 2, fail: true });
 
-      tick(2000);
-      expect(store.incrementStatus()).toEqual('error');
-      expect(store.incrementProcessing()).toEqual(false);
-      expect(store.incrementError()).toEqual({
-        error: 'Test-Error',
-      });
-
-      expect(store.counter()).toEqual(3);
+    tick(2000);
+    expect(store.incrementStatus()).toEqual('error');
+    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementError()).toEqual({
+      error: 'Test-Error',
     });
+
+    expect(store.counter()).toEqual(3);
   }));
 
   it('rxMutation starts two concurrent operations using concatMap: the first one fails and the second one succeeds', fakeAsync(() => {
-    TestBed.runInInjectionContext(() => {
-      const Store = signalStore(
-        withState({ counter: 3 }),
-        withMutations((store) => ({
-          increment: rxMutation({
-            operation: (param: {
-              value: number;
-              delay: number;
-              fail: boolean;
-            }) => {
-              if (param.fail) {
-                return fail(param.value, param.delay);
-              }
-              return calcDouble(param.value, param.delay);
-            },
-            operator: concatMap,
-            onSuccess: (result) => {
-              patchState(store, (state) => ({
-                counter: state.counter + result,
-              }));
-            },
-          }),
-        })),
-      );
-      const store = new Store();
+    const testSetup = createTestSetup(concatMap);
+    const store = testSetup.store;
 
-      store.increment({ value: 1, delay: 100, fail: true });
-      store.increment({ value: 2, delay: 200, fail: false });
+    store.increment({ value: 1, delay: 100, fail: true });
+    store.increment({ value: 2, delay: 200, fail: false });
 
-      tick(100);
+    tick(100);
 
-      expect(store.incrementStatus()).toEqual('processing');
-      expect(store.incrementProcessing()).toEqual(true);
-      expect(store.incrementError()).toEqual({
-        error: 'Test-Error',
-      });
-
-      tick(200);
-
-      expect(store.incrementStatus()).toEqual('success');
-      expect(store.incrementProcessing()).toEqual(false);
-      expect(store.incrementError()).toEqual(undefined);
-
-      expect(store.counter()).toEqual(7);
+    expect(store.incrementStatus()).toEqual('processing');
+    expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementError()).toEqual({
+      error: 'Test-Error',
     });
+
+    tick(200);
+
+    expect(store.incrementStatus()).toEqual('success');
+    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementError()).toEqual(undefined);
+
+    expect(store.counter()).toEqual(7);
   }));
 
   it('rxMutation starts two concurrent operations using mergeMap: the first one fails and the second one succeeds', fakeAsync(() => {
-    TestBed.runInInjectionContext(() => {
-      const Store = signalStore(
-        withState({ counter: 3 }),
-        withMutations((store) => ({
-          increment: rxMutation({
-            operation: (param: {
-              value: number;
-              delay: number;
-              fail: boolean;
-            }) => {
-              if (param.fail) {
-                return fail(param.value, param.delay);
-              }
-              return calcDouble(param.value, param.delay);
-            },
-            operator: mergeMap,
-            onSuccess: (result) => {
-              patchState(store, (state) => ({
-                counter: state.counter + result,
-              }));
-            },
-          }),
-        })),
-      );
-      const store = new Store();
+    const testSetup = createTestSetup(mergeMap);
+    const store = testSetup.store;
 
-      store.increment({ value: 1, delay: 100, fail: true });
-      store.increment({ value: 2, delay: 200, fail: false });
+    store.increment({ value: 1, delay: 100, fail: true });
+    store.increment({ value: 2, delay: 200, fail: false });
 
-      tick(100);
+    tick(100);
 
-      expect(store.incrementStatus()).toEqual('processing');
-      expect(store.incrementProcessing()).toEqual(true);
-      expect(store.incrementError()).toEqual({
-        error: 'Test-Error',
-      });
-
-      tick(100);
-
-      expect(store.incrementStatus()).toEqual('success');
-      expect(store.incrementProcessing()).toEqual(false);
-      expect(store.incrementError()).toEqual(undefined);
-
-      expect(store.counter()).toEqual(7);
+    expect(store.incrementStatus()).toEqual('processing');
+    expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementError()).toEqual({
+      error: 'Test-Error',
     });
+
+    tick(100);
+
+    expect(store.incrementStatus()).toEqual('success');
+    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementError()).toEqual(undefined);
+
+    expect(store.counter()).toEqual(7);
   }));
 
   it('rxMutation deals with race conditions using switchMap', fakeAsync(() => {
-    let onSuccessCalls = 0;
-    let onErrorCalls = 0;
-    const lastOnSuccessParams = {
-      result: -1,
-      params: -1,
-    };
+    const testSetup = createTestSetup(switchMap);
+    const store = testSetup.store;
 
-    TestBed.runInInjectionContext(() => {
-      const Store = signalStore(
-        withState({ counter: 3 }),
-        withMutations((store) => ({
-          increment: rxMutation({
-            operation: (value: number) => {
-              return calcDouble(value);
-            },
-            operator: switchMap,
-            onSuccess: (result, params) => {
-              lastOnSuccessParams.params = params;
-              lastOnSuccessParams.result = result;
-              patchState(store, (state) => ({
-                counter: state.counter + result,
-              }));
-              onSuccessCalls++;
-            },
-            onError: (_result) => {
-              onErrorCalls++;
-            },
-          }),
-        })),
-      );
+    store.increment(1);
 
-      const store = new Store();
+    tick(500);
+    expect(store.incrementStatus()).toEqual('processing');
+    expect(store.incrementProcessing()).toEqual(true);
 
-      store.increment(1);
+    store.increment(2);
+    tick(1000);
 
-      tick(500);
-      expect(store.incrementStatus()).toEqual('processing');
-      expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementStatus()).toEqual('success');
+    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementError()).toEqual(undefined);
 
-      flushMicrotasks();
-
-      store.increment(2);
-      tick(1000);
-
-      expect(store.incrementStatus()).toEqual('success');
-      expect(store.incrementProcessing()).toEqual(false);
-      expect(store.incrementError()).toEqual(undefined);
-
-      expect(store.counter()).toEqual(7);
-      expect(onSuccessCalls).toEqual(1);
-      expect(onErrorCalls).toEqual(0);
-      expect(lastOnSuccessParams).toEqual({
-        params: 2,
-        result: 4,
-      });
+    expect(store.counter()).toEqual(7);
+    expect(testSetup.onSuccessCalls()).toEqual(1);
+    expect(testSetup.onErrorCalls()).toEqual(0);
+    expect(testSetup.lastOnSuccessParams()).toEqual({
+      params: 2,
+      result: 4,
     });
   }));
 
   it('rxMutation deals with race conditions using mergeMap', fakeAsync(() => {
-    let onSuccessCalls = 0;
-    let onErrorCalls = 0;
-    const lastOnSuccessParams = {
-      result: -1,
-      params: -1,
-    };
+    const testSetup = createTestSetup(mergeMap);
+    const store = testSetup.store;
 
-    TestBed.runInInjectionContext(() => {
-      const Store = signalStore(
-        withState({ counter: 3 }),
-        withMutations((store) => ({
-          increment: rxMutation({
-            operation: (value: number) => {
-              return calcDouble(value);
-            },
-            operator: mergeMap,
-            onSuccess: (result, params) => {
-              lastOnSuccessParams.params = params;
-              lastOnSuccessParams.result = result;
-              patchState(store, (state) => ({
-                counter: state.counter + result,
-              }));
-              onSuccessCalls++;
-            },
-            onError: (_result) => {
-              onErrorCalls++;
-            },
-          }),
-        })),
-      );
+    store.increment(1);
+    tick(500);
+    store.increment(2);
+    tick(500);
 
-      const store = new Store();
+    expect(store.incrementStatus()).toEqual('processing');
+    expect(store.incrementProcessing()).toEqual(true);
 
-      store.increment(1);
-      tick(500);
-      store.increment(2);
-      tick(500);
+    // expect(store.counter()).toEqual(7);
+    expect(testSetup.onSuccessCalls()).toEqual(1);
+    expect(testSetup.onErrorCalls()).toEqual(0);
+    expect(testSetup.lastOnSuccessParams()).toEqual({
+      params: 1,
+      result: 2,
+    });
 
-      expect(store.incrementStatus()).toEqual('processing');
-      expect(store.incrementProcessing()).toEqual(true);
+    tick(500);
 
-      // expect(store.counter()).toEqual(7);
-      expect(onSuccessCalls).toEqual(1);
-      expect(onErrorCalls).toEqual(0);
-      expect(lastOnSuccessParams).toEqual({
-        params: 1,
-        result: 2,
-      });
+    expect(store.incrementStatus()).toEqual('success');
+    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementError()).toEqual(undefined);
 
-      tick(500);
-
-      expect(store.incrementStatus()).toEqual('success');
-      expect(store.incrementProcessing()).toEqual(false);
-      expect(store.incrementError()).toEqual(undefined);
-
-      expect(store.counter()).toEqual(9);
-      expect(onSuccessCalls).toEqual(2);
-      expect(onErrorCalls).toEqual(0);
-      expect(lastOnSuccessParams).toEqual({
-        params: 2,
-        result: 4,
-      });
+    expect(store.counter()).toEqual(9);
+    expect(testSetup.onSuccessCalls()).toEqual(2);
+    expect(testSetup.onErrorCalls()).toEqual(0);
+    expect(testSetup.lastOnSuccessParams()).toEqual({
+      params: 2,
+      result: 4,
     });
   }));
 
   it('rxMutation deals with race conditions using concatMap', fakeAsync(() => {
-    let onSuccessCalls = 0;
-    let onErrorCalls = 0;
-    const lastOnSuccessParams = {
-      result: -1,
-      params: -1,
-    };
+    const testSetup = createTestSetup(concatMap);
+    const store = testSetup.store;
 
-    TestBed.runInInjectionContext(() => {
-      const Store = signalStore(
-        withState({ counter: 3 }),
-        withMutations((store) => ({
-          increment: rxMutation({
-            operation: (param: { value: number; delayInMsec: number }) => {
-              return calcDouble(param.value, param.delayInMsec);
-            },
-            operator: concatMap,
-            onSuccess: (result, params) => {
-              lastOnSuccessParams.params = params.value;
-              lastOnSuccessParams.result = result;
-              patchState(store, (state) => ({
-                counter: state.counter + result,
-              }));
-              onSuccessCalls++;
-            },
-            onError: (_result) => {
-              onErrorCalls++;
-            },
-          }),
-        })),
-      );
+    store.increment({ value: 1, delay: 1000 });
+    tick(500);
+    store.increment({ value: 2, delay: 100 });
+    tick(500);
 
-      const store = new Store();
+    expect(store.incrementStatus()).toEqual('processing');
+    expect(store.incrementProcessing()).toEqual(true);
 
-      store.increment({ value: 1, delayInMsec: 1000 });
-      tick(500);
-      store.increment({ value: 2, delayInMsec: 100 });
-      tick(500);
+    expect(store.counter()).toEqual(5);
+    expect(testSetup.onSuccessCalls()).toEqual(1);
+    expect(testSetup.onErrorCalls()).toEqual(0);
+    expect(testSetup.lastOnSuccessParams()).toEqual({
+      params: { value: 1, delay: 1000 },
+      result: 2,
+    });
 
-      expect(store.incrementStatus()).toEqual('processing');
-      expect(store.incrementProcessing()).toEqual(true);
+    tick(500);
 
-      // expect(store.counter()).toEqual(7);
-      expect(onSuccessCalls).toEqual(1);
-      expect(onErrorCalls).toEqual(0);
-      expect(lastOnSuccessParams).toEqual({
-        params: 1,
-        result: 2,
-      });
+    expect(store.incrementStatus()).toEqual('success');
+    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementError()).toEqual(undefined);
 
-      tick(500);
-
-      expect(store.incrementStatus()).toEqual('success');
-      expect(store.incrementProcessing()).toEqual(false);
-      expect(store.incrementError()).toEqual(undefined);
-
-      expect(store.counter()).toEqual(9);
-      expect(onSuccessCalls).toEqual(2);
-      expect(onErrorCalls).toEqual(0);
-      expect(lastOnSuccessParams).toEqual({
-        params: 2,
-        result: 4,
-      });
+    expect(store.counter()).toEqual(9);
+    expect(testSetup.onSuccessCalls()).toEqual(2);
+    expect(testSetup.onErrorCalls()).toEqual(0);
+    expect(testSetup.lastOnSuccessParams()).toEqual({
+      params: { value: 2, delay: 100 },
+      result: 4,
     });
   }));
 
   it('rxMutation deals with race conditions using mergeMap and two tasks with different delays', fakeAsync(() => {
-    let onSuccessCalls = 0;
-    let onErrorCalls = 0;
-    const lastOnSuccessParams = {
-      result: -1,
-      params: -1,
-    };
+    const testSetup = createTestSetup(mergeMap);
+    const store = testSetup.store;
 
-    TestBed.runInInjectionContext(() => {
-      const Store = signalStore(
-        withState({ counter: 3 }),
-        withMutations((store) => ({
-          increment: rxMutation({
-            operation: (param: { value: number; delayInMsec: number }) => {
-              return calcDouble(param.value, param.delayInMsec);
-            },
-            operator: mergeMap,
-            onSuccess: (result, params) => {
-              lastOnSuccessParams.params = params.value;
-              lastOnSuccessParams.result = result;
-              patchState(store, (state) => ({
-                counter: state.counter + result,
-              }));
-              onSuccessCalls++;
-            },
-            onError: (_result) => {
-              onErrorCalls++;
-            },
-          }),
-        })),
-      );
+    store.increment({ value: 1, delay: 1000 });
+    tick(500);
 
-      const store = new Store();
+    expect(store.incrementStatus()).toEqual('processing');
+    expect(store.incrementProcessing()).toEqual(true);
 
-      store.increment({ value: 1, delayInMsec: 1000 });
-      tick(500);
+    store.increment({ value: 2, delay: 100 });
+    tick(500);
 
-      expect(store.incrementStatus()).toEqual('processing');
-      expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementStatus()).toEqual('success');
+    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementError()).toEqual(undefined);
 
-      store.increment({ value: 2, delayInMsec: 100 });
-      tick(500);
-
-      expect(store.incrementStatus()).toEqual('success');
-      expect(store.incrementProcessing()).toEqual(false);
-      expect(store.incrementError()).toEqual(undefined);
-
-      expect(store.counter()).toEqual(9);
-      expect(onSuccessCalls).toEqual(2);
-      expect(onErrorCalls).toEqual(0);
-      expect(lastOnSuccessParams).toEqual({
-        params: 1,
-        result: 2,
-      });
+    expect(store.counter()).toEqual(9);
+    expect(testSetup.onSuccessCalls()).toEqual(2);
+    expect(testSetup.onErrorCalls()).toEqual(0);
+    expect(testSetup.lastOnSuccessParams()).toEqual({
+      params: { value: 1, delay: 1000 },
+      result: 2,
     });
   }));
 
   it('rxMutation deals with race conditions using exhaustMap', fakeAsync(() => {
-    let onSuccessCalls = 0;
-    let onErrorCalls = 0;
-    const lastOnSuccessParams = {
-      result: -1,
-      params: -1,
-    };
+    const testSetup = createTestSetup(exhaustMap);
+    const store = testSetup.store;
 
-    TestBed.runInInjectionContext(() => {
-      const Store = signalStore(
-        withState({ counter: 3 }),
-        withMutations((store) => ({
-          increment: rxMutation({
-            operation: (param: { value: number; delayInMsec: number }) => {
-              return calcDouble(param.value, param.delayInMsec);
-            },
-            operator: exhaustMap,
-            onSuccess: (result, params) => {
-              lastOnSuccessParams.params = params.value;
-              lastOnSuccessParams.result = result;
-              patchState(store, (state) => ({
-                counter: state.counter + result,
-              }));
-              onSuccessCalls++;
-            },
-            onError: (_result) => {
-              onErrorCalls++;
-            },
-          }),
-        })),
-      );
+    store.increment({ value: 1, delay: 1000 });
+    tick(500);
 
-      const store = new Store();
+    expect(store.incrementStatus()).toEqual('processing');
+    expect(store.incrementProcessing()).toEqual(true);
 
-      store.increment({ value: 1, delayInMsec: 1000 });
-      tick(500);
+    store.increment({ value: 2, delay: 100 });
+    tick(500);
 
-      expect(store.incrementStatus()).toEqual('processing');
-      expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementStatus()).toEqual('success');
+    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementError()).toEqual(undefined);
 
-      store.increment({ value: 2, delayInMsec: 100 });
-      tick(500);
+    expect(store.counter()).toEqual(5);
+    expect(testSetup.onSuccessCalls()).toEqual(1);
+    expect(testSetup.onErrorCalls()).toEqual(0);
+    expect(testSetup.lastOnSuccessParams()).toEqual({
+      params: { value: 1, delay: 1000 },
+      result: 2,
+    });
 
-      expect(store.incrementStatus()).toEqual('success');
-      expect(store.incrementProcessing()).toEqual(false);
-      expect(store.incrementError()).toEqual(undefined);
+    tick(500);
 
-      expect(store.counter()).toEqual(5);
-      expect(onSuccessCalls).toEqual(1);
-      expect(onErrorCalls).toEqual(0);
-      expect(lastOnSuccessParams).toEqual({
-        params: 1,
-        result: 2,
-      });
+    expect(store.incrementStatus()).toEqual('success');
+    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementError()).toEqual(undefined);
 
-      tick(500);
-
-      expect(store.incrementStatus()).toEqual('success');
-      expect(store.incrementProcessing()).toEqual(false);
-      expect(store.incrementError()).toEqual(undefined);
-
-      expect(store.counter()).toEqual(5);
-      expect(onSuccessCalls).toEqual(1);
-      expect(onErrorCalls).toEqual(0);
-      expect(lastOnSuccessParams).toEqual({
-        params: 1,
-        result: 2,
-      });
+    expect(store.counter()).toEqual(5);
+    expect(testSetup.onSuccessCalls()).toEqual(1);
+    expect(testSetup.onErrorCalls()).toEqual(0);
+    expect(testSetup.lastOnSuccessParams()).toEqual({
+      params: { value: 1, delay: 1000 },
+      result: 2,
     });
   }));
 
   it('rxMutation informs about failed operation', async () => {
-    await TestBed.runInInjectionContext(async () => {
-      const Store = signalStore(
-        withState({ counter: 3 }),
-        withMutations((store) => ({
-          increment: rxMutation({
-            operation: (param: {
-              value: number;
-              delay: number;
-              fail: boolean;
-            }) => {
-              if (param.fail) {
-                return fail(param.value, param.delay);
-              }
-              return calcDouble(param.value, param.delay);
-            },
-            operator: switchMap,
-            onSuccess: (result) => {
-              patchState(store, (state) => ({
-                counter: state.counter + result,
-              }));
-            },
-          }),
-        })),
-      );
-      const store = new Store();
+    const testSetup = createTestSetup(switchMap);
+    const store = testSetup.store;
 
-      const p1 = store.increment({ value: 1, delay: 1000, fail: false });
-      const p2 = store.increment({ value: 2, delay: 1500, fail: true });
+    const p1 = store.increment({ value: 1, delay: 1, fail: false });
+    const p2 = store.increment({ value: 2, delay: 2, fail: true });
 
-      expect(store.incrementStatus()).toEqual('processing');
-      expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementStatus()).toEqual('processing');
+    expect(store.incrementProcessing()).toEqual(true);
 
-      await asyncTick();
+    await asyncTick();
 
-      const result1 = await p1;
-      const result2 = await p2;
+    const result1 = await p1;
+    const result2 = await p2;
 
-      expect(result1.status).toEqual('aborted');
-      expect(result2).toEqual({
-        status: 'error',
-        error: {
-          error: 'Test-Error',
-        },
-      });
-
-      expect(store.incrementProcessing()).toEqual(false);
-      expect(store.incrementStatus()).toEqual('error');
-      expect(store.incrementError()).toEqual({
+    expect(result1.status).toEqual('aborted');
+    expect(result2).toEqual({
+      status: 'error',
+      error: {
         error: 'Test-Error',
-      });
+      },
     });
+
+    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementStatus()).toEqual('error');
+    expect(store.incrementError()).toEqual({
+      error: 'Test-Error',
+    });
+  });
+
+  it('rxMutation informs about successful operation', async () => {
+    const testSetup = createTestSetup(switchMap);
+    const store = testSetup.store;
+
+    const p1 = store.increment({ value: 1, delay: 1, fail: false });
+    const p2 = store.increment({ value: 2, delay: 2, fail: false });
+
+    expect(store.incrementStatus()).toEqual('processing');
+    expect(store.incrementProcessing()).toEqual(true);
+
+    await asyncTick();
+
+    const result1 = await p1;
+    const result2 = await p2;
+
+    expect(result1.status).toEqual('aborted');
+    expect(result2).toEqual({
+      status: 'success',
+      value: 4,
+    });
+
+    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementStatus()).toEqual('success');
+    expect(store.incrementError()).toBeUndefined();
+  });
+
+  it('rxMutation returns calls success handler per value in the stream', async () => {
+    const testSetup = createTestSetup(switchMap);
+    const store = testSetup.store;
+
+    const input$ = new Subject<number>();
+    const resultPromise = store.increment({
+      value: input$,
+      delay: 1,
+      fail: false,
+    });
+
+    expect(store.incrementStatus()).toEqual('processing');
+    expect(store.incrementProcessing()).toEqual(true);
+
+    input$.next(1);
+    input$.next(2);
+    input$.next(3);
+    input$.complete();
+
+    await asyncTick();
+
+    const result = await resultPromise;
+
+    expect(result).toEqual({
+      status: 'success',
+      value: 6,
+    });
+
+    expect(store.counter()).toEqual(9);
+    expect(testSetup.lastOnSuccessParams()).toMatchObject({
+      result: 6,
+    });
+
+    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementStatus()).toEqual('success');
+    expect(store.incrementError()).toBeUndefined();
   });
 });
