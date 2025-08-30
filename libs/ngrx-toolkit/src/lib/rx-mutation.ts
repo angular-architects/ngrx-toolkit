@@ -1,4 +1,10 @@
-import { DestroyRef, inject, Injector, signal } from '@angular/core';
+import {
+  DestroyRef,
+  inject,
+  Injector,
+  signal,
+  WritableSignal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   catchError,
@@ -10,6 +16,7 @@ import {
   of,
   OperatorFunction,
   Subject,
+  switchMap,
   tap,
 } from 'rxjs';
 
@@ -44,67 +51,69 @@ export function rxMutation<P, R>(
   const callCount = signal(0);
   const errorSignal = signal<unknown>(undefined);
 
-  let internalStatus = status();
+  const initialTempStatus: MutationStatus = 'idle';
+  let tempStatus: MutationStatus = initialTempStatus;
 
   inputSubject
     .pipe(
-      flatten((input) =>
-        options.operation(input.param).pipe(
-          tap((result: R) => {
-            options.onSuccess?.(result, input.param);
-            internalStatus = 'success';
+      flatten((input) => {
+        return of(null).pipe(
+          tap(() => {
+            callCount.update((c) => c + 1);
+            status.set('processing');
+            errorSignal.set(undefined);
           }),
-          catchError((error: unknown) => {
-            options.onError?.(error, input.param);
-            const mutationError = error ?? 'Mutation failed';
-            errorSignal.set(mutationError);
-            internalStatus = 'error';
+          switchMap(() =>
+            options.operation(input.param).pipe(
+              tap((result: R) => {
+                options.onSuccess?.(result, input.param);
+                tempStatus = 'success';
+              }),
+              catchError((error: unknown) => {
+                options.onError?.(error, input.param);
+                const mutationError = error ?? 'Mutation failed';
+                errorSignal.set(mutationError);
+                tempStatus = 'error';
+                return of(null);
+              }),
+              finalize(() => {
+                callCount.update((c) => c - 1);
 
-            return of(null);
-          }),
-          finalize(() => {
-            callCount.update((c) => c - 1);
+                if (tempStatus === 'success') {
+                  errorSignal.set(undefined);
+                  input.resolve({
+                    status: 'success',
+                    error: undefined,
+                  });
+                } else if (tempStatus === 'error') {
+                  input.resolve({
+                    status: 'error',
+                    error: errorSignal(),
+                  });
+                } else {
+                  input.resolve({
+                    status: 'aborted',
+                  });
+                }
 
-            if (callCount() > 0) {
-              // Another call took over (e.g. because of using switchMap)
-              input.resolve({
-                status: 'aborted',
-              });
-            } else if (internalStatus === 'processing') {
-              // Completion without emitting a value
-              input.resolve({
-                status: 'aborted',
-              });
-            } else if (
-              internalStatus === 'error' ||
-              internalStatus === 'success'
-            ) {
-              status.set(internalStatus);
-              input.resolve({
-                status: internalStatus,
-                error: internalStatus === 'error' ? errorSignal() : undefined,
-              });
-            } else {
-              throw new Error('Unexpected mutation status ' + internalStatus);
-            }
-          }),
-        ),
-      ),
+                finishSpecificCall(tempStatus, errorSignal, input);
+
+                if (callCount() === 0) {
+                  finishOverlappingCalls(tempStatus, status);
+                }
+
+                tempStatus = initialTempStatus;
+              }),
+            ),
+          ),
+        );
+      }),
       takeUntilDestroyed(destroyRef),
     )
     .subscribe();
 
   const mutationFn = (param: P) => {
     return new Promise<MutationResult>((resolve) => {
-      // TODO: Do we find a better way for solving this?
-      if (options.operator?.name === 'exhaustMap' && callCount() > 0) {
-        resolve({ status: 'aborted' });
-        return;
-      }
-
-      callCount.update((c) => c + 1);
-      status.set('processing');
-      errorSignal.set(undefined);
       inputSubject.next({
         param,
         resolve,
@@ -118,4 +127,35 @@ export function rxMutation<P, R>(
   mutation.error = errorSignal;
 
   return mutation;
+}
+function finishOverlappingCalls(
+  tempStatus: string,
+  status: WritableSignal<MutationStatus>,
+): void {
+  if (tempStatus === 'success' || tempStatus === 'error') {
+    status.set(tempStatus);
+  }
+}
+
+function finishSpecificCall<P>(
+  tempStatus: string,
+  errorSignal: WritableSignal<unknown>,
+  input: { param: P; resolve: (result: MutationResult) => void },
+): void {
+  if (tempStatus === 'success') {
+    errorSignal.set(undefined);
+    input.resolve({
+      status: 'success',
+      error: undefined,
+    });
+  } else if (tempStatus === 'error') {
+    input.resolve({
+      status: 'error',
+      error: errorSignal(),
+    });
+  } else {
+    input.resolve({
+      status: 'aborted',
+    });
+  }
 }
