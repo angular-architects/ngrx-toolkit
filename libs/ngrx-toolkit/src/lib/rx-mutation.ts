@@ -1,22 +1,16 @@
-import {
-  DestroyRef,
-  inject,
-  Injector,
-  signal,
-  WritableSignal,
-} from '@angular/core';
+import { computed, DestroyRef, inject, Injector, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   catchError,
   concatMap,
+  defer,
+  EMPTY,
   finalize,
   Observable,
   ObservableInput,
   ObservedValueOf,
-  of,
   OperatorFunction,
   Subject,
-  switchMap,
   tap,
 } from 'rxjs';
 
@@ -47,67 +41,70 @@ export function rxMutation<P, R>(
 
   const destroyRef = options.injector?.get(DestroyRef) ?? inject(DestroyRef);
 
-  const status = signal<MutationStatus>('idle');
   const callCount = signal(0);
   const errorSignal = signal<unknown>(undefined);
+  const idle = signal(true);
+
+  const status = computed<MutationStatus>(() => {
+    if (idle()) {
+      return 'idle';
+    }
+    if (callCount() > 0) {
+      return 'processing';
+    }
+    if (errorSignal()) {
+      return 'error';
+    }
+    return 'success';
+  });
 
   const initialTempStatus: MutationStatus = 'idle';
   let tempStatus: MutationStatus = initialTempStatus;
 
   inputSubject
     .pipe(
-      flatten((input) => {
-        return of(null).pipe(
-          tap(() => {
-            callCount.update((c) => c + 1);
-            status.set('processing');
-            errorSignal.set(undefined);
-          }),
-          switchMap(() =>
-            options.operation(input.param).pipe(
-              tap((result: R) => {
-                options.onSuccess?.(result, input.param);
-                tempStatus = 'success';
-              }),
-              catchError((error: unknown) => {
-                options.onError?.(error, input.param);
-                const mutationError = error ?? 'Mutation failed';
-                errorSignal.set(mutationError);
-                tempStatus = 'error';
-                return of(null);
-              }),
-              finalize(() => {
-                callCount.update((c) => c - 1);
+      flatten((input) =>
+        defer(() => {
+          callCount.update((c) => c + 1);
+          errorSignal.set(undefined);
+          idle.set(false);
+          return options.operation(input.param).pipe(
+            tap((result: R) => {
+              options.onSuccess?.(result, input.param);
+              tempStatus = 'success';
+            }),
+            catchError((error: unknown) => {
+              options.onError?.(error, input.param);
+              const mutationError = error ?? 'Mutation failed';
+              errorSignal.set(mutationError);
+              tempStatus = 'error';
+              return EMPTY;
+            }),
+            finalize(() => {
+              callCount.update((c) => c - 1);
 
-                if (tempStatus === 'success') {
-                  errorSignal.set(undefined);
-                  input.resolve({
-                    status: 'success',
-                    error: undefined,
-                  });
-                } else if (tempStatus === 'error') {
-                  input.resolve({
-                    status: 'error',
-                    error: errorSignal(),
-                  });
-                } else {
-                  input.resolve({
-                    status: 'aborted',
-                  });
-                }
+              if (tempStatus === 'success') {
+                errorSignal.set(undefined);
+                input.resolve({
+                  status: 'success',
+                  error: undefined,
+                });
+              } else if (tempStatus === 'error') {
+                input.resolve({
+                  status: 'error',
+                  error: errorSignal(),
+                });
+              } else {
+                input.resolve({
+                  status: 'aborted',
+                });
+              }
 
-                finishSpecificCall(tempStatus, errorSignal, input);
-
-                if (callCount() === 0) {
-                  finishOverlappingCalls(tempStatus, status);
-                }
-
-                tempStatus = initialTempStatus;
-              }),
-            ),
-          ),
-        );
-      }),
+              tempStatus = initialTempStatus;
+            }),
+          );
+        }),
+      ),
       takeUntilDestroyed(destroyRef),
     )
     .subscribe();
@@ -127,35 +124,4 @@ export function rxMutation<P, R>(
   mutation.error = errorSignal;
 
   return mutation;
-}
-function finishOverlappingCalls(
-  tempStatus: string,
-  status: WritableSignal<MutationStatus>,
-): void {
-  if (tempStatus === 'success' || tempStatus === 'error') {
-    status.set(tempStatus);
-  }
-}
-
-function finishSpecificCall<P>(
-  tempStatus: string,
-  errorSignal: WritableSignal<unknown>,
-  input: { param: P; resolve: (result: MutationResult) => void },
-): void {
-  if (tempStatus === 'success') {
-    errorSignal.set(undefined);
-    input.resolve({
-      status: 'success',
-      error: undefined,
-    });
-  } else if (tempStatus === 'error') {
-    input.resolve({
-      status: 'error',
-      error: errorSignal(),
-    });
-  } else {
-    input.resolve({
-      status: 'aborted',
-    });
-  }
 }
