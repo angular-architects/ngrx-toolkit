@@ -32,10 +32,10 @@ export interface RxMutationOptions<P, R> {
 
 export function rxMutation<P, R>(
   options: RxMutationOptions<P, R>,
-): Mutation<P> {
+): Mutation<P, R> {
   const inputSubject = new Subject<{
     param: P;
-    resolve: (result: MutationResult) => void;
+    resolve: (result: MutationResult<R>) => void;
   }>();
   const flatten = options.operator ?? concatMap;
 
@@ -58,8 +58,9 @@ export function rxMutation<P, R>(
     return 'success';
   });
 
-  const initialTempStatus: MutationStatus = 'idle';
-  let innerStatus: MutationStatus = initialTempStatus;
+  const initialInnerStatus: MutationStatus = 'idle';
+  let innerStatus: MutationStatus = initialInnerStatus;
+  let lastResult: R;
 
   inputSubject
     .pipe(
@@ -71,6 +72,7 @@ export function rxMutation<P, R>(
             tap((result: R) => {
               options.onSuccess?.(result, input.param);
               innerStatus = 'success';
+              lastResult = result;
             }),
             catchError((error: unknown) => {
               options.onError?.(error, input.param);
@@ -85,7 +87,7 @@ export function rxMutation<P, R>(
                 errorSignal.set(undefined);
                 input.resolve({
                   status: 'success',
-                  error: undefined,
+                  value: lastResult,
                 });
               } else if (innerStatus === 'error') {
                 input.resolve({
@@ -98,7 +100,7 @@ export function rxMutation<P, R>(
                 });
               }
 
-              innerStatus = initialTempStatus;
+              innerStatus = initialInnerStatus;
             }),
           );
         }),
@@ -108,7 +110,7 @@ export function rxMutation<P, R>(
     .subscribe();
 
   const mutationFn = (param: P) => {
-    return new Promise<MutationResult>((resolve) => {
+    return new Promise<MutationResult<R>>((resolve) => {
       inputSubject.next({
         param,
         resolve,
@@ -116,7 +118,7 @@ export function rxMutation<P, R>(
     });
   };
 
-  const mutation = mutationFn as Mutation<P>;
+  const mutation = mutationFn as Mutation<P, R>;
   mutation.status = status;
   mutation.callCount = callCount;
   mutation.error = errorSignal;

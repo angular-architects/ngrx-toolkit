@@ -22,7 +22,7 @@ async function asyncTick(): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve();
-    }, 1000);
+    }, 0);
   });
 }
 
@@ -31,7 +31,10 @@ function calcDouble(value: number, delayInMsec = 1000): Observable<number> {
 }
 
 function fail(_value: number, delayInMsec = 1000): Observable<number> {
-  return throwError(() => ({ error: 'Test-Error' })).pipe(delay(delayInMsec));
+  return of(null).pipe(
+    delay(delayInMsec),
+    switchMap(() => throwError(() => ({ error: 'Test-Error' }))),
+  );
 }
 
 describe('mutation', () => {
@@ -140,7 +143,7 @@ describe('mutation', () => {
         error: 'Test-Error',
       });
 
-      tick(100);
+      tick(200);
 
       expect(store.incrementStatus()).toEqual('success');
       expect(store.incrementProcessing()).toEqual(false);
@@ -517,14 +520,21 @@ describe('mutation', () => {
     });
   }));
 
-  it('rxMutation informs about aborted operations', async () => {
+  it('rxMutation informs about failed operation', async () => {
     await TestBed.runInInjectionContext(async () => {
       const Store = signalStore(
         withState({ counter: 3 }),
         withMutations((store) => ({
           increment: rxMutation({
-            operation: (value: number) => {
-              return calcDouble(value);
+            operation: (param: {
+              value: number;
+              delay: number;
+              fail: boolean;
+            }) => {
+              if (param.fail) {
+                return fail(param.value, param.delay);
+              }
+              return calcDouble(param.value, param.delay);
             },
             operator: switchMap,
             onSuccess: (result) => {
@@ -535,14 +545,13 @@ describe('mutation', () => {
           }),
         })),
       );
-
       const store = new Store();
 
-      const p1 = store.increment(1);
-      const p2 = store.increment(2);
+      const p1 = store.increment({ value: 1, delay: 1000, fail: false });
+      const p2 = store.increment({ value: 2, delay: 1500, fail: true });
 
-      expect(store.incrementProcessing()).toEqual(true);
       expect(store.incrementStatus()).toEqual('processing');
+      expect(store.incrementProcessing()).toEqual(true);
 
       await asyncTick();
 
@@ -550,9 +559,18 @@ describe('mutation', () => {
       const result2 = await p2;
 
       expect(result1.status).toEqual('aborted');
-      expect(result2.status).toEqual('success');
+      expect(result2).toEqual({
+        status: 'error',
+        error: {
+          error: 'Test-Error',
+        },
+      });
+
       expect(store.incrementProcessing()).toEqual(false);
-      expect(store.incrementStatus()).toEqual('success');
+      expect(store.incrementStatus()).toEqual('error');
+      expect(store.incrementError()).toEqual({
+        error: 'Test-Error',
+      });
     });
   });
 });

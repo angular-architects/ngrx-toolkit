@@ -11,20 +11,29 @@ import {
   WritableStateSource,
 } from '@ngrx/signals';
 
-export type Mutation<P> = {
-  (params: P): Promise<MutationResult>;
+export type Mutation<P, R> = {
+  (params: P): Promise<MutationResult<R>>;
   status: Signal<MutationStatus>;
   callCount: Signal<number>;
   error: Signal<unknown>;
 };
 
 // NamedMutationMethods below will infer the actual parameter and return types
-type MutationsDictionary = Record<string, Mutation<never>>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type MutationsDictionary = Record<string, Mutation<any, any>>;
 
-export type MutationResult = {
-  status: 'success' | 'aborted' | 'error';
-  error?: unknown;
-};
+export type MutationResult<T> =
+  | {
+      status: 'success';
+      value: T;
+    }
+  | {
+      status: 'error';
+      error: unknown;
+    }
+  | {
+      status: 'aborted';
+    };
 
 export type MutationStatus = 'idle' | 'processing' | 'error' | 'success';
 
@@ -41,8 +50,11 @@ type NamedMutationProps<T extends MutationsDictionary> = {
 };
 
 type NamedMutationMethods<T extends MutationsDictionary> = {
-  [Prop in keyof T as `${Prop & string}`]: T[Prop] extends Mutation<infer P>
-    ? Mutation<P>
+  [Prop in keyof T as `${Prop & string}`]: T[Prop] extends Mutation<
+    infer P,
+    infer R
+  >
+    ? Mutation<P, R>
     : never;
 };
 
