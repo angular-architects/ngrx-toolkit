@@ -1,0 +1,13 @@
+<h1>withMutations</h1>
+
+<div class="counter">{{ counter() }}</div>
+
+<ul>
+  <li>Processing: {{ processing() }}</li>
+  <li>Status: {{ status() }}</li>
+  <li>Error: {{ error() | json }}</li>
+</ul>
+
+<div>
+  <button (click)="increment()">Increment</button>
+</div>

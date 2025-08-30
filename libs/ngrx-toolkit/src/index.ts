@@ -41,3 +41,6 @@ export {
 } from './lib/storage-sync/with-storage-sync';
 export { emptyFeature, withConditional } from './lib/with-conditional';
 export { withFeatureFactory } from './lib/with-feature-factory';
+
+export * from './lib/rx-mutation';
+export * from './lib/with-mutations';
