@@ -30,6 +30,51 @@ export interface RxMutationOptions<P, R> {
   injector?: Injector;
 }
 
+/**
+ * Creates a mutation that leverages RxJS.
+ *
+ * For each mutation the following options can be defined:
+ * - `operation`: A function that defines the mutation logic. It returns an Observable.
+ * - `onSuccess`: A callback that is called when the mutation is successful.
+ * - `onError`: A callback that is called when the mutation fails.
+ * - `operator`: An optional RxJS flattening operator to use for dealing with overlapping requests. By default `concatMap` is used.
+ * - `injector`: An optional Angular injector to use for dependency injection.
+ *
+ * The `operation` is the only mandatory option.
+ *
+ * ```typescript
+ * export type Params = {
+ *   value: number;
+ * };
+ *
+ * export const CounterStore = signalStore(
+ *   { providedIn: 'root' },
+ *   withState({ counter: 0 }),
+ *   withMutations((store) => ({
+ *     increment: rxMutation({
+ *       operation: (params: Params) => {
+ *         return calcSum(store.counter(), params.value);
+ *       },
+ *       operator: concatMap,
+ *       onSuccess: (result) => {
+ *         console.log('result', result);
+ *         patchState(store, { counter: result });
+ *       },
+ *       onError: (error) => {
+ *         console.error('Error occurred:', error);
+ *       },
+ *     }),
+ *   })),
+ * );
+ *
+ * function calcSum(a: number, b: number): Observable<number> {
+ *   return of(a + b);
+ * }
+ * ```
+ *
+ * @param options
+ * @returns
+ */
 export function rxMutation<P, R>(
   options: RxMutationOptions<P, R>,
 ): Mutation<P, R> {
