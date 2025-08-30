@@ -11,6 +11,7 @@ It offers extensions like:
 - [DataService](./with-data-service): Builds on top of `withEntities` and adds the backend synchronization to it
 - [Immutable State Protection](./with-immutable-state): Protects the state from being mutated outside or inside the Store.
 - [~Redux~](./with-redux): Possibility to use the Redux Pattern. Deprecated in favor of NgRx's `@ngrx/signals/events` starting in 19.2
+- [Resource](./with-resource): Integrates Angular's Resource into SignalStore for async data operations
 - [Reset](./with-reset): Adds a `resetState` method to your store
 - [Call State](./with-call-state): Add call state management to your signal stores
 - [Storage Sync](./with-storage-sync): Synchronizes the Store with Web Storage

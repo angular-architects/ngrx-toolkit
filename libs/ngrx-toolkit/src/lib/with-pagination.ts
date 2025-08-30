@@ -226,7 +226,7 @@ export function nextPage<Collection extends string>(options?: {
 }): SetPageState<Collection> {
   const { pageKey } = createPaginationKeys<Collection>(options);
 
-  return (state: { [pageKey]: number }) => {
+  return (state: Record<string, number>) => {
     const currentPage = state[pageKey];
 
     return { [pageKey]: currentPage + 1 } as PageState<Collection>;
@@ -238,7 +238,7 @@ export function previousPage<Collection extends string>(options?: {
 }): SetPageState<Collection> {
   const { pageKey } = createPaginationKeys<Collection>(options);
 
-  return (state: { [pageKey]: number }) => {
+  return (state: Record<string, number>) => {
     const currentPage = state[pageKey];
 
     return { [pageKey]: currentPage - 1 } as PageState<Collection>;

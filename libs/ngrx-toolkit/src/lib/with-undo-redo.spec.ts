@@ -1,5 +1,5 @@
 import { computed, inject } from '@angular/core';
-import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import {
   patchState,
   signalStore,
@@ -73,7 +73,7 @@ describe('withUndoRedo', () => {
   });
 
   describe('undo and redo', () => {
-    it('restores previous state for regular store key', fakeAsync(() => {
+    it('restores previous state for regular store key', () => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
           withState(testState),
@@ -85,24 +85,22 @@ describe('withUndoRedo', () => {
         );
 
         const store = new Store();
-        tick(1);
 
         store.updateTest(newValue);
-        tick(1);
+
         expect(store.test()).toEqual(newValue);
         expect(store.canUndo()).toBe(true);
         expect(store.canRedo()).toBe(false);
 
         store.undo();
-        tick(1);
 
         expect(store.test()).toEqual('');
         expect(store.canUndo()).toBe(false);
         expect(store.canRedo()).toBe(true);
       });
-    }));
+    });
 
-    it('restores previous state for regular store key and respects skip', fakeAsync(() => {
+    it('restores previous state for regular store key and respects skip', () => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
           withState(testState),
@@ -114,30 +112,26 @@ describe('withUndoRedo', () => {
         );
 
         const store = new Store();
-        tick(1);
 
         store.updateTest(newValue);
-        tick(1);
+
         expect(store.test()).toEqual(newValue);
 
         store.updateTest(newerValue);
-        tick(1);
 
         store.undo();
-        tick(1);
 
         expect(store.test()).toEqual(newValue);
         expect(store.canUndo()).toBe(false);
 
         store.undo();
-        tick(1);
 
         // should not change
         expect(store.test()).toEqual(newValue);
       });
-    }));
+    });
 
-    it('undoes and redoes previous state for entity', fakeAsync(() => {
+    it('undoes and redoes previous state for entity', () => {
       const Store = signalStore(
         withEntities({ entity: type<{ id: string }>() }),
         withMethods((store) => ({
@@ -149,19 +143,19 @@ describe('withUndoRedo', () => {
       TestBed.configureTestingModule({ providers: [Store] });
       TestBed.runInInjectionContext(() => {
         const store = inject(Store);
-        tick(1);
+
         expect(store.entities()).toEqual([]);
         expect(store.canUndo()).toBe(false);
         expect(store.canRedo()).toBe(false);
 
         store.addEntity(newValue);
-        tick(1);
+
         expect(store.entities()).toEqual([{ id: newValue }]);
         expect(store.canUndo()).toBe(true);
         expect(store.canRedo()).toBe(false);
 
         store.addEntity(newerValue);
-        tick(1);
+
         expect(store.entities()).toEqual([
           { id: newValue },
           { id: newerValue },
@@ -182,7 +176,6 @@ describe('withUndoRedo', () => {
         expect(store.canRedo()).toBe(true);
 
         store.redo();
-        tick(1);
 
         expect(store.entities()).toEqual([{ id: newValue }]);
         expect(store.canUndo()).toBe(true);
@@ -190,13 +183,13 @@ describe('withUndoRedo', () => {
 
         // should return canRedo=false after a change
         store.addEntity('newest');
-        tick(1);
+
         expect(store.canUndo()).toBe(true);
         expect(store.canRedo()).toBe(false);
       });
-    }));
+    });
 
-    it('restores previous state for named entity', fakeAsync(() => {
+    it('restores previous state for named entity', () => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
           withEntities({
@@ -215,22 +208,20 @@ describe('withUndoRedo', () => {
         );
 
         const store = new Store();
-        tick(1);
 
         store.addEntity(newValue);
-        tick(1);
+
         expect(store.flightEntities()).toEqual([{ id: newValue }]);
         expect(store.canUndo()).toBe(true);
         expect(store.canRedo()).toBe(false);
 
         store.undo();
-        tick(1);
 
         expect(store.flightEntities()).toEqual([]);
         expect(store.canUndo()).toBe(false);
         expect(store.canRedo()).toBe(true);
       });
-    }));
+    });
 
     it('clears undo redo stack', () => {
       const Store = signalStore(
@@ -253,7 +244,7 @@ describe('withUndoRedo', () => {
       expect(store.canRedo()).toBe(false);
     });
 
-    it('cannot undo after clearing and setting a new value', fakeAsync(() => {
+    it('cannot undo after clearing and setting a new value', () => {
       const Store = signalStore(
         { providedIn: 'root' },
         withState(testState),
@@ -266,22 +257,18 @@ describe('withUndoRedo', () => {
       const store = TestBed.inject(Store);
 
       store.update('Alan');
-      tick(1);
 
       store.update('Gordon');
-      tick(1);
 
       store.clearStack();
-      tick(1);
 
       // After clearing the undo/redo stack, there is no previous item anymore.
       // The following update becomes the first value.
       // Since there is no other value before, it cannot be undone.
       store.update('Hugh');
-      tick(1);
 
       expect(store.canUndo()).toBe(false);
       expect(store.canRedo()).toBe(false);
-    }));
+    });
   });
 });

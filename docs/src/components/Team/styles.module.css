@@ -1,0 +1,93 @@
+.teamSection {
+  padding: 2rem 0;
+}
+
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.teamMember {
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 8px;
+  background: var(--ifm-card-background-color);
+  box-shadow: var(--ifm-global-shadow-lw);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  cursor: pointer;
+  position: relative;
+}
+
+.teamMember:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--ifm-global-shadow-md);
+}
+
+.teamMember.expanded {
+  box-shadow: var(--ifm-global-shadow-md);
+}
+
+.memberAvatar {
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.profileImage {
+  width: 120px;
+  height: 120px;
+  border-radius: 60px;
+  object-fit: cover;
+  margin: 0 auto;
+  display: block;
+}
+
+.memberName {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--ifm-heading-color);
+}
+
+.memberDescription {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  color: var(--ifm-color-emphasis-600);
+  line-height: 1.4;
+  text-align: center;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.expandIndicator {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--ifm-color-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.teamMember:hover .expandIndicator {
+  background: var(--ifm-color-primary-darker);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
