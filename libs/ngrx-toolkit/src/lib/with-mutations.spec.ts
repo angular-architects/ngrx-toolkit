@@ -102,45 +102,101 @@ describe('mutation', () => {
     });
   }));
 
-  // it('rxMutation throws error and subsequent one succeeds', fakeAsync(() => {
-  //   TestBed.runInInjectionContext(() => {
-  //     const Store = signalStore(
-  //       withState({ counter: 3 }),
-  //       withMutations((store) => ({
-  //         increment: rxMutation({
-  //           operation: (param: {
-  //             value: number;
-  //             delay: number;
-  //             fail: boolean;
-  //           }) => {
-  //             if (param.fail) {
-  //               return fail(param.value, param.delay);
-  //             }
-  //             return calcDouble(param.value, param.delay);
-  //           },
-  //           onSuccess: (result) => {
-  //             patchState(store, (state) => ({
-  //               counter: state.counter + result,
-  //             }));
-  //           },
-  //         }),
-  //       })),
-  //     );
-  //     const store = new Store();
+  it('rxMutation starts two concurrent operations using concatMap: the first one fails and the second one succeeds', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withState({ counter: 3 }),
+        withMutations((store) => ({
+          increment: rxMutation({
+            operation: (param: {
+              value: number;
+              delay: number;
+              fail: boolean;
+            }) => {
+              if (param.fail) {
+                return fail(param.value, param.delay);
+              }
+              return calcDouble(param.value, param.delay);
+            },
+            operator: concatMap,
+            onSuccess: (result) => {
+              patchState(store, (state) => ({
+                counter: state.counter + result,
+              }));
+            },
+          }),
+        })),
+      );
+      const store = new Store();
 
-  //     store.increment({ value: 1, delay: 100, fail: true });
-  //     store.increment({ value: 2, delay: 100, fail: false });
+      store.increment({ value: 1, delay: 100, fail: true });
+      store.increment({ value: 2, delay: 200, fail: false });
 
-  //     tick(100);
-  //     expect(store.incrementStatus()).toEqual('processing');
-  //     expect(store.incrementProcessing()).toEqual(false);
-  //     expect(store.incrementError()).toEqual({
-  //       error: 'Test-Error',
-  //     });
+      tick(100);
 
-  //     expect(store.counter()).toEqual(3);
-  //   });
-  // }));
+      expect(store.incrementStatus()).toEqual('processing');
+      expect(store.incrementProcessing()).toEqual(true);
+      expect(store.incrementError()).toEqual({
+        error: 'Test-Error',
+      });
+
+      tick(100);
+
+      expect(store.incrementStatus()).toEqual('success');
+      expect(store.incrementProcessing()).toEqual(false);
+      expect(store.incrementError()).toEqual(undefined);
+
+      expect(store.counter()).toEqual(7);
+    });
+  }));
+
+  it('rxMutation starts two concurrent operations using mergeMap: the first one fails and the second one succeeds', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withState({ counter: 3 }),
+        withMutations((store) => ({
+          increment: rxMutation({
+            operation: (param: {
+              value: number;
+              delay: number;
+              fail: boolean;
+            }) => {
+              if (param.fail) {
+                return fail(param.value, param.delay);
+              }
+              return calcDouble(param.value, param.delay);
+            },
+            operator: mergeMap,
+            onSuccess: (result) => {
+              patchState(store, (state) => ({
+                counter: state.counter + result,
+              }));
+            },
+          }),
+        })),
+      );
+      const store = new Store();
+
+      store.increment({ value: 1, delay: 100, fail: true });
+      store.increment({ value: 2, delay: 200, fail: false });
+
+      tick(100);
+
+      expect(store.incrementStatus()).toEqual('processing');
+      expect(store.incrementProcessing()).toEqual(true);
+      expect(store.incrementError()).toEqual({
+        error: 'Test-Error',
+      });
+
+      tick(100);
+
+      expect(store.incrementStatus()).toEqual('success');
+      expect(store.incrementProcessing()).toEqual(false);
+      expect(store.incrementError()).toEqual(undefined);
+
+      expect(store.counter()).toEqual(7);
+    });
+  }));
 
   it('rxMutation deals with race conditions using switchMap', fakeAsync(() => {
     let onSuccessCalls = 0;

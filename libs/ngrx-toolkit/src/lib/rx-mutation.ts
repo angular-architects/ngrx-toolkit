@@ -59,37 +59,35 @@ export function rxMutation<P, R>(
   });
 
   const initialTempStatus: MutationStatus = 'idle';
-  let tempStatus: MutationStatus = initialTempStatus;
+  let innerStatus: MutationStatus = initialTempStatus;
 
   inputSubject
     .pipe(
       flatten((input) =>
         defer(() => {
           callCount.update((c) => c + 1);
-          errorSignal.set(undefined);
           idle.set(false);
           return options.operation(input.param).pipe(
             tap((result: R) => {
               options.onSuccess?.(result, input.param);
-              tempStatus = 'success';
+              innerStatus = 'success';
             }),
             catchError((error: unknown) => {
               options.onError?.(error, input.param);
-              const mutationError = error ?? 'Mutation failed';
-              errorSignal.set(mutationError);
-              tempStatus = 'error';
+              errorSignal.set(error);
+              innerStatus = 'error';
               return EMPTY;
             }),
             finalize(() => {
               callCount.update((c) => c - 1);
 
-              if (tempStatus === 'success') {
+              if (innerStatus === 'success') {
                 errorSignal.set(undefined);
                 input.resolve({
                   status: 'success',
                   error: undefined,
                 });
-              } else if (tempStatus === 'error') {
+              } else if (innerStatus === 'error') {
                 input.resolve({
                   status: 'error',
                   error: errorSignal(),
@@ -100,7 +98,7 @@ export function rxMutation<P, R>(
                 });
               }
 
-              tempStatus = initialTempStatus;
+              innerStatus = initialTempStatus;
             }),
           );
         }),
