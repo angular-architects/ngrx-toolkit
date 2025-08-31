@@ -115,8 +115,8 @@ function createTestSetup(flatteningOperator = concatOp) {
   });
 }
 
-describe('withMutations', () => {
-  it('rxMutation should update the state', fakeAsync(() => {
+describe('withMutations with rxMutation', () => {
+  it('should update the state', fakeAsync(() => {
     const testSetup = createTestSetup();
     const store = testSetup.store;
 
@@ -135,7 +135,7 @@ describe('withMutations', () => {
     expect(store.counter()).toEqual(7);
   }));
 
-  it('rxMutation sets error', fakeAsync(() => {
+  it('sets error', fakeAsync(() => {
     const testSetup = createTestSetup();
     const store = testSetup.store;
 
@@ -151,7 +151,7 @@ describe('withMutations', () => {
     expect(store.counter()).toEqual(3);
   }));
 
-  it('rxMutation starts two concurrent operations using concatMap: the first one fails and the second one succeeds', fakeAsync(() => {
+  it('starts two concurrent operations using concatMap: the first one fails and the second one succeeds', fakeAsync(() => {
     const testSetup = createTestSetup(concatOp);
     const store = testSetup.store;
 
@@ -175,7 +175,7 @@ describe('withMutations', () => {
     expect(store.counter()).toEqual(7);
   }));
 
-  it('rxMutation starts two concurrent operations using mergeMap: the first one fails and the second one succeeds', fakeAsync(() => {
+  it('starts two concurrent operations using mergeMap: the first one fails and the second one succeeds', fakeAsync(() => {
     const testSetup = createTestSetup(mergeOp);
     const store = testSetup.store;
 
@@ -199,7 +199,7 @@ describe('withMutations', () => {
     expect(store.counter()).toEqual(7);
   }));
 
-  it('rxMutation deals with race conditions using switchMap', fakeAsync(() => {
+  it('deals with race conditions using switchMap', fakeAsync(() => {
     const testSetup = createTestSetup(switchOp);
     const store = testSetup.store;
 
@@ -225,7 +225,7 @@ describe('withMutations', () => {
     });
   }));
 
-  it('rxMutation deals with race conditions using mergeMap', fakeAsync(() => {
+  it('deals with race conditions using mergeMap', fakeAsync(() => {
     const testSetup = createTestSetup(mergeOp);
     const store = testSetup.store;
 
@@ -260,7 +260,33 @@ describe('withMutations', () => {
     });
   }));
 
-  it('rxMutation deals with race conditions using concatMap', fakeAsync(() => {
+  it('deals with race conditions using mergeMap where the 2nd task starts after and finishes before the 1st one', fakeAsync(() => {
+    const testSetup = createTestSetup(mergeOp);
+    const store = testSetup.store;
+
+    store.increment({ value: 1, delay: 1000 });
+    tick(500);
+
+    expect(store.incrementStatus()).toEqual('processing');
+    expect(store.incrementProcessing()).toEqual(true);
+
+    store.increment({ value: 2, delay: 100 });
+    tick(500);
+
+    expect(store.incrementStatus()).toEqual('success');
+    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementError()).toEqual(undefined);
+
+    expect(store.counter()).toEqual(9);
+    expect(testSetup.onSuccessCalls()).toEqual(2);
+    expect(testSetup.onErrorCalls()).toEqual(0);
+    expect(testSetup.lastOnSuccessParams()).toEqual({
+      params: { value: 1, delay: 1000 },
+      result: 2,
+    });
+  }));
+
+  it('deals with race conditions using concatMap', fakeAsync(() => {
     const testSetup = createTestSetup(concatOp);
     const store = testSetup.store;
 
@@ -295,33 +321,7 @@ describe('withMutations', () => {
     });
   }));
 
-  it('rxMutation deals with race conditions using mergeMap and two tasks with different delays', fakeAsync(() => {
-    const testSetup = createTestSetup(mergeOp);
-    const store = testSetup.store;
-
-    store.increment({ value: 1, delay: 1000 });
-    tick(500);
-
-    expect(store.incrementStatus()).toEqual('processing');
-    expect(store.incrementProcessing()).toEqual(true);
-
-    store.increment({ value: 2, delay: 100 });
-    tick(500);
-
-    expect(store.incrementStatus()).toEqual('success');
-    expect(store.incrementProcessing()).toEqual(false);
-    expect(store.incrementError()).toEqual(undefined);
-
-    expect(store.counter()).toEqual(9);
-    expect(testSetup.onSuccessCalls()).toEqual(2);
-    expect(testSetup.onErrorCalls()).toEqual(0);
-    expect(testSetup.lastOnSuccessParams()).toEqual({
-      params: { value: 1, delay: 1000 },
-      result: 2,
-    });
-  }));
-
-  it('rxMutation deals with race conditions using exhaustMap', fakeAsync(() => {
+  it('deals with race conditions using exhaustMap', fakeAsync(() => {
     const testSetup = createTestSetup(exhaustOp);
     const store = testSetup.store;
 
@@ -361,7 +361,7 @@ describe('withMutations', () => {
     });
   }));
 
-  it('rxMutation informs about failed operation via the returned promise', async () => {
+  it('informs about failed operation via the returned promise', async () => {
     const testSetup = createTestSetup(switchOp);
     const store = testSetup.store;
 
@@ -391,7 +391,30 @@ describe('withMutations', () => {
     });
   });
 
-  it('rxMutation informs about successful operation via the returned promise', async () => {
+  it('informs about successful operation via the returned promise', async () => {
+    const testSetup = createTestSetup();
+    const store = testSetup.store;
+
+    const resultPromise = store.increment({ value: 2, delay: 2, fail: false });
+
+    expect(store.incrementStatus()).toEqual('processing');
+    expect(store.incrementProcessing()).toEqual(true);
+
+    await asyncTick();
+
+    const result = await resultPromise;
+
+    expect(result).toEqual({
+      status: 'success',
+      value: 4,
+    });
+
+    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementStatus()).toEqual('success');
+    expect(store.incrementError()).toBeUndefined();
+  });
+
+  it('informs about aborted operation when using switchMap', async () => {
     const testSetup = createTestSetup(switchOp);
     const store = testSetup.store;
 
@@ -417,7 +440,7 @@ describe('withMutations', () => {
     expect(store.incrementError()).toBeUndefined();
   });
 
-  it('rxMutation informs about aborted operation when using exhaustMap', async () => {
+  it('informs about aborted operation when using exhaustMap', async () => {
     const testSetup = createTestSetup(exhaustOp);
     const store = testSetup.store;
 
@@ -444,7 +467,7 @@ describe('withMutations', () => {
     expect(store.incrementError()).toBeUndefined();
   });
 
-  it('rxMutation calls success handler per value in the stream and returns the final value via the promise', async () => {
+  it('calls success handler per value in the stream and returns the final value via the promise', async () => {
     const testSetup = createTestSetup(switchOp);
     const store = testSetup.store;
 
@@ -482,7 +505,7 @@ describe('withMutations', () => {
     expect(store.incrementError()).toBeUndefined();
   });
 
-  it('rxMutation informs about failed operation via the returned promise', async () => {
+  it('informs about failed operation via the returned promise', async () => {
     const testSetup = createTestSetup(switchOp);
     const store = testSetup.store;
 
