@@ -2,25 +2,18 @@ import { computed, DestroyRef, inject, Injector, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   catchError,
-  concatMap,
   defer,
   EMPTY,
   finalize,
   Observable,
-  ObservableInput,
-  ObservedValueOf,
-  OperatorFunction,
   Subject,
   tap,
 } from 'rxjs';
 
+import { concatOp, FlatteningOperator } from './flattening-operator';
 import { Mutation, MutationResult, MutationStatus } from './with-mutations';
 
 export type Func<P, R> = (params: P) => R;
-
-export type FlatteningOperator = <T, O extends ObservableInput<unknown>>(
-  project: (value: T, index: number) => O,
-) => OperatorFunction<T, ObservedValueOf<O>>;
 
 export interface RxMutationOptions<P, R> {
   operation: Func<P, Observable<R>>;
@@ -37,7 +30,7 @@ export interface RxMutationOptions<P, R> {
  * - `operation`: A function that defines the mutation logic. It returns an Observable.
  * - `onSuccess`: A callback that is called when the mutation is successful.
  * - `onError`: A callback that is called when the mutation fails.
- * - `operator`: An optional RxJS flattening operator to use for dealing with overlapping requests. By default `concatMap` is used.
+ * - `operator`: An optional wrapper of an RxJS flattening operator. By default `concat` sematics are used.
  * - `injector`: An optional Angular injector to use for dependency injection.
  *
  * The `operation` is the only mandatory option.
@@ -55,7 +48,7 @@ export interface RxMutationOptions<P, R> {
  *       operation: (params: Params) => {
  *         return calcSum(store.counter(), params.value);
  *       },
- *       operator: concatMap,
+ *       operator: concatOp,
  *       onSuccess: (result) => {
  *         console.log('result', result);
  *         patchState(store, { counter: result });
@@ -82,7 +75,7 @@ export function rxMutation<P, R>(
     param: P;
     resolve: (result: MutationResult<R>) => void;
   }>();
-  const flatten = options.operator ?? concatMap;
+  const flatteningOp = options.operator ?? concatOp;
 
   const destroyRef = options.injector?.get(DestroyRef) ?? inject(DestroyRef);
 
@@ -109,7 +102,7 @@ export function rxMutation<P, R>(
 
   inputSubject
     .pipe(
-      flatten((input) =>
+      flatteningOp.rxJsOperator((input) =>
         defer(() => {
           callCount.update((c) => c + 1);
           idle.set(false);
@@ -156,10 +149,16 @@ export function rxMutation<P, R>(
 
   const mutationFn = (param: P) => {
     return new Promise<MutationResult<R>>((resolve) => {
-      inputSubject.next({
-        param,
-        resolve,
-      });
+      if (callCount() > 0 && flatteningOp.exhaustSemantics) {
+        resolve({
+          status: 'aborted',
+        });
+      } else {
+        inputSubject.next({
+          param,
+          resolve,
+        });
+      }
     });
   };
 

@@ -1,6 +1,10 @@
-import { rxMutation, withMutations } from '@angular-architects/ngrx-toolkit';
+import {
+  concatOp,
+  rxMutation,
+  withMutations,
+} from '@angular-architects/ngrx-toolkit';
 import { patchState, signalStore, withState } from '@ngrx/signals';
-import { concatMap, delay, Observable } from 'rxjs';
+import { delay, Observable } from 'rxjs';
 
 export type Params = {
   value: number;
@@ -14,7 +18,7 @@ export const CounterStore = signalStore(
       operation: (params: Params) => {
         return calcSum(store.counter(), params.value);
       },
-      operator: concatMap,
+      operator: concatOp,
       onSuccess: (result) => {
         console.log('result', result);
         patchState(store, { counter: result });

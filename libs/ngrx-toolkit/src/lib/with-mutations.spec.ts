@@ -1,17 +1,8 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { patchState, signalStore, withState } from '@ngrx/signals';
-import {
-  concatMap,
-  delay,
-  exhaustMap,
-  mergeMap,
-  Observable,
-  of,
-  Subject,
-  switchMap,
-  throwError,
-} from 'rxjs';
-import { FlatteningOperator, rxMutation } from './rx-mutation';
+import { delay, Observable, of, Subject, switchMap, throwError } from 'rxjs';
+import { concatOp, exhaustOp, mergeOp, switchOp } from './flattening-operator';
+import { rxMutation } from './rx-mutation';
 import { withMutations } from './with-mutations';
 
 type Param =
@@ -47,7 +38,7 @@ function fail(_value: number, delayInMsec = 1000): Observable<number> {
   );
 }
 
-function createTestSetup(flatteningOperator: FlatteningOperator = concatMap) {
+function createTestSetup(flatteningOperator = concatOp) {
   function normalizeParam(param: Param): NormalizedParam {
     if (typeof param === 'number') {
       return {
@@ -161,7 +152,7 @@ describe('withMutations', () => {
   }));
 
   it('rxMutation starts two concurrent operations using concatMap: the first one fails and the second one succeeds', fakeAsync(() => {
-    const testSetup = createTestSetup(concatMap);
+    const testSetup = createTestSetup(concatOp);
     const store = testSetup.store;
 
     store.increment({ value: 1, delay: 100, fail: true });
@@ -185,7 +176,7 @@ describe('withMutations', () => {
   }));
 
   it('rxMutation starts two concurrent operations using mergeMap: the first one fails and the second one succeeds', fakeAsync(() => {
-    const testSetup = createTestSetup(mergeMap);
+    const testSetup = createTestSetup(mergeOp);
     const store = testSetup.store;
 
     store.increment({ value: 1, delay: 100, fail: true });
@@ -209,7 +200,7 @@ describe('withMutations', () => {
   }));
 
   it('rxMutation deals with race conditions using switchMap', fakeAsync(() => {
-    const testSetup = createTestSetup(switchMap);
+    const testSetup = createTestSetup(switchOp);
     const store = testSetup.store;
 
     store.increment(1);
@@ -235,7 +226,7 @@ describe('withMutations', () => {
   }));
 
   it('rxMutation deals with race conditions using mergeMap', fakeAsync(() => {
-    const testSetup = createTestSetup(mergeMap);
+    const testSetup = createTestSetup(mergeOp);
     const store = testSetup.store;
 
     store.increment(1);
@@ -270,7 +261,7 @@ describe('withMutations', () => {
   }));
 
   it('rxMutation deals with race conditions using concatMap', fakeAsync(() => {
-    const testSetup = createTestSetup(concatMap);
+    const testSetup = createTestSetup(concatOp);
     const store = testSetup.store;
 
     store.increment({ value: 1, delay: 1000 });
@@ -305,7 +296,7 @@ describe('withMutations', () => {
   }));
 
   it('rxMutation deals with race conditions using mergeMap and two tasks with different delays', fakeAsync(() => {
-    const testSetup = createTestSetup(mergeMap);
+    const testSetup = createTestSetup(mergeOp);
     const store = testSetup.store;
 
     store.increment({ value: 1, delay: 1000 });
@@ -331,7 +322,7 @@ describe('withMutations', () => {
   }));
 
   it('rxMutation deals with race conditions using exhaustMap', fakeAsync(() => {
-    const testSetup = createTestSetup(exhaustMap);
+    const testSetup = createTestSetup(exhaustOp);
     const store = testSetup.store;
 
     store.increment({ value: 1, delay: 1000 });
@@ -370,8 +361,8 @@ describe('withMutations', () => {
     });
   }));
 
-  it('rxMutation informs about failed operation', async () => {
-    const testSetup = createTestSetup(switchMap);
+  it('rxMutation informs about failed operation via the returned promise', async () => {
+    const testSetup = createTestSetup(switchOp);
     const store = testSetup.store;
 
     const p1 = store.increment({ value: 1, delay: 1, fail: false });
@@ -400,8 +391,8 @@ describe('withMutations', () => {
     });
   });
 
-  it('rxMutation informs about successful operation', async () => {
-    const testSetup = createTestSetup(switchMap);
+  it('rxMutation informs about successful operation via the returned promise', async () => {
+    const testSetup = createTestSetup(switchOp);
     const store = testSetup.store;
 
     const p1 = store.increment({ value: 1, delay: 1, fail: false });
@@ -426,8 +417,35 @@ describe('withMutations', () => {
     expect(store.incrementError()).toBeUndefined();
   });
 
-  it('rxMutation returns calls success handler per value in the stream', async () => {
-    const testSetup = createTestSetup(switchMap);
+  it('rxMutation informs about aborted operation when using exhaustMap', async () => {
+    const testSetup = createTestSetup(exhaustOp);
+    const store = testSetup.store;
+
+    const p1 = store.increment({ value: 1, delay: 1, fail: false });
+    const p2 = store.increment({ value: 2, delay: 1, fail: false });
+
+    expect(store.incrementStatus()).toEqual('processing');
+    expect(store.incrementProcessing()).toEqual(true);
+
+    await asyncTick();
+
+    const result1 = await p1;
+    const result2 = await p2;
+
+    expect(result1).toEqual({
+      status: 'success',
+      value: 2,
+    });
+
+    expect(result2.status).toEqual('aborted');
+
+    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementStatus()).toEqual('success');
+    expect(store.incrementError()).toBeUndefined();
+  });
+
+  it('rxMutation calls success handler per value in the stream and returns the final value via the promise', async () => {
+    const testSetup = createTestSetup(switchOp);
     const store = testSetup.store;
 
     const input$ = new Subject<number>();
@@ -462,5 +480,35 @@ describe('withMutations', () => {
     expect(store.incrementProcessing()).toEqual(false);
     expect(store.incrementStatus()).toEqual('success');
     expect(store.incrementError()).toBeUndefined();
+  });
+
+  it('rxMutation informs about failed operation via the returned promise', async () => {
+    const testSetup = createTestSetup(switchOp);
+    const store = testSetup.store;
+
+    const p1 = store.increment({ value: 1, delay: 1, fail: false });
+    const p2 = store.increment({ value: 2, delay: 2, fail: true });
+
+    expect(store.incrementStatus()).toEqual('processing');
+    expect(store.incrementProcessing()).toEqual(true);
+
+    await asyncTick();
+
+    const result1 = await p1;
+    const result2 = await p2;
+
+    expect(result1.status).toEqual('aborted');
+    expect(result2).toEqual({
+      status: 'error',
+      error: {
+        error: 'Test-Error',
+      },
+    });
+
+    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementStatus()).toEqual('error');
+    expect(store.incrementError()).toEqual({
+      error: 'Test-Error',
+    });
   });
 });
