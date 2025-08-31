@@ -49,6 +49,40 @@ describe('httpMutation', () => {
     expect(createUser.isPending()).toBe(false);
   });
 
+  it('should perform successful POST request using shorthand syntax', () => {
+    const createUser = TestBed.runInInjectionContext(() =>
+      httpMutation<CreateUserRequest, User>((userData) => ({
+        url: '/api/users',
+        method: 'POST',
+        body: userData,
+      })),
+    );
+
+    expect(createUser.status()).toBe('idle');
+    expect(createUser.isPending()).toBe(false);
+
+    const newUser = { name: 'John Doe', email: 'john@example.com' };
+    createUser(newUser);
+
+    expect(createUser.isPending()).toBe(true);
+    expect(createUser.status()).toBe('pending');
+
+    const req = httpTestingController.expectOne('/api/users');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(newUser);
+
+    const mockUser: User = {
+      id: 1,
+      name: 'John Doe',
+      email: 'john@example.com',
+    };
+    req.flush(mockUser);
+
+    expect(createUser.status()).toBe('success');
+    expect(createUser.isPending()).toBe(false);
+    expect(createUser.value()).toEqual(mockUser);
+  });
+
   it('should perform successful POST request', () => {
     const userSignal = signal<User | null>(null);
 

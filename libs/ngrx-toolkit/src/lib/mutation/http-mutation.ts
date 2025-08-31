@@ -100,9 +100,16 @@ export type HttpMutation<P, R> = Mutation<P, R> & {
  * @returns The HTTP mutation.
  */
 export function httpMutation<P, R>(
-  options: HttpMutationOptions<P, R>,
+  optionsOrRequest:
+    | HttpMutationOptions<P, R>
+    | ((param: P) => HttpMutationRequest),
 ): HttpMutation<P, R> {
   const httpClient = inject(HttpClient);
+
+  const options =
+    typeof optionsOrRequest === 'function'
+      ? { request: optionsOrRequest }
+      : optionsOrRequest;
 
   const uploadProgress = signal<HttpProgressEvent | undefined>(undefined);
   const downloadProgress = signal<HttpProgressEvent | undefined>(undefined);
