@@ -61,4 +61,11 @@ export const lazyRoutes: Route[] = [
         (m) => m.ConditionalSettingComponent,
       ),
   },
+  {
+    path: 'mutation',
+    loadComponent: () =>
+      import('./counter-mutation/counter-mutation').then(
+        (m) => m.CounterMutation,
+      ),
+  },
 ];
