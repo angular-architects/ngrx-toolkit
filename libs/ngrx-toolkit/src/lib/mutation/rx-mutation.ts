@@ -1,4 +1,4 @@
-import { computed, DestroyRef, inject, Injector, signal } from '@angular/core';
+import { computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   catchError,
@@ -11,17 +11,19 @@ import {
 } from 'rxjs';
 
 import { concatOp, FlatteningOperator } from '../flattening-operator';
-import { Mutation, MutationResult, MutationStatus } from './mutation';
+import {
+  Mutation,
+  MutationOptions,
+  MutationResult,
+  MutationStatus,
+} from './mutation';
 
 export type Func<P, R> = (params: P) => R;
 
-export interface RxMutationOptions<P, R> {
+export type RxMutationOptions<P, R> = MutationOptions<P, R> & {
   operation: Func<P, Observable<R>>;
-  onSuccess?: (result: R, params: P) => void;
-  onError?: (error: unknown, params: P) => void;
   operator?: FlatteningOperator;
-  injector?: Injector;
-}
+};
 
 /**
  * Creates a mutation that leverages RxJS.
