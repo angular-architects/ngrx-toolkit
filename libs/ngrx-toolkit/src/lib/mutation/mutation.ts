@@ -20,6 +20,7 @@ export type Mutation<P, R> = {
   status: Signal<MutationStatus>;
   value: Signal<R | undefined>;
   isPending: Signal<boolean>;
+  isFullfilled: Signal<boolean>;
   error: Signal<unknown>;
   hasValue(): this is Mutation<Exclude<P, undefined>, R>;
 };

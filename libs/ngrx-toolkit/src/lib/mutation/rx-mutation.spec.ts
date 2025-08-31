@@ -122,6 +122,7 @@ describe('rxMutation', () => {
     tick(2000);
     expect(increment.status()).toEqual('success');
     expect(increment.isPending()).toEqual(false);
+    expect(increment.isFullfilled()).toEqual(true);
     expect(increment.error()).toEqual(undefined);
 
     expect(testSetup.getCounter()).toEqual(7);
@@ -136,6 +137,7 @@ describe('rxMutation', () => {
     tick(2000);
     expect(increment.status()).toEqual('error');
     expect(increment.isPending()).toEqual(false);
+    expect(increment.isFullfilled()).toEqual(false);
     expect(increment.error()).toEqual({
       error: 'Test-Error',
     });
@@ -178,6 +180,8 @@ describe('rxMutation', () => {
 
     expect(increment.status()).toEqual('pending');
     expect(increment.isPending()).toEqual(true);
+    expect(increment.isFullfilled()).toEqual(false);
+
     expect(increment.error()).toEqual({
       error: 'Test-Error',
     });
@@ -186,6 +190,8 @@ describe('rxMutation', () => {
 
     expect(increment.status()).toEqual('success');
     expect(increment.isPending()).toEqual(false);
+    expect(increment.isFullfilled()).toEqual(true);
+
     expect(increment.error()).toEqual(undefined);
 
     expect(testSetup.getCounter()).toEqual(7);
@@ -207,10 +213,12 @@ describe('rxMutation', () => {
     expect(increment.status()).toEqual('success');
     expect(increment.isPending()).toEqual(false);
     expect(increment.error()).toEqual(undefined);
+    expect(increment.isFullfilled()).toEqual(true);
 
     expect(testSetup.getCounter()).toEqual(7);
     expect(testSetup.onSuccessCalls()).toEqual(1);
     expect(testSetup.onErrorCalls()).toEqual(0);
+
     expect(testSetup.lastOnSuccessParams()).toEqual({
       params: 2,
       result: 4,
@@ -228,6 +236,7 @@ describe('rxMutation', () => {
 
     expect(increment.status()).toEqual('pending');
     expect(increment.isPending()).toEqual(true);
+    expect(increment.isFullfilled()).toEqual(false);
 
     // expect(testSetup.getCounter()).toEqual(7);
     expect(testSetup.onSuccessCalls()).toEqual(1);
@@ -242,6 +251,7 @@ describe('rxMutation', () => {
     expect(increment.status()).toEqual('success');
     expect(increment.isPending()).toEqual(false);
     expect(increment.error()).toEqual(undefined);
+    expect(increment.isFullfilled()).toEqual(true);
 
     expect(testSetup.getCounter()).toEqual(9);
     expect(testSetup.onSuccessCalls()).toEqual(2);
@@ -261,6 +271,7 @@ describe('rxMutation', () => {
 
     expect(increment.status()).toEqual('pending');
     expect(increment.isPending()).toEqual(true);
+    expect(increment.isFullfilled()).toEqual(false);
 
     increment({ value: 2, delay: 100 });
     tick(500);
@@ -268,6 +279,7 @@ describe('rxMutation', () => {
     expect(increment.status()).toEqual('success');
     expect(increment.isPending()).toEqual(false);
     expect(increment.error()).toEqual(undefined);
+    expect(increment.isFullfilled()).toEqual(true);
 
     expect(testSetup.getCounter()).toEqual(9);
     expect(testSetup.onSuccessCalls()).toEqual(2);
@@ -289,6 +301,7 @@ describe('rxMutation', () => {
 
     expect(increment.status()).toEqual('pending');
     expect(increment.isPending()).toEqual(true);
+    expect(increment.isFullfilled()).toEqual(false);
 
     expect(testSetup.getCounter()).toEqual(5);
     expect(testSetup.onSuccessCalls()).toEqual(1);
@@ -303,6 +316,7 @@ describe('rxMutation', () => {
     expect(increment.status()).toEqual('success');
     expect(increment.isPending()).toEqual(false);
     expect(increment.error()).toEqual(undefined);
+    expect(increment.isFullfilled()).toEqual(true);
 
     expect(testSetup.getCounter()).toEqual(9);
     expect(testSetup.onSuccessCalls()).toEqual(2);
@@ -322,6 +336,7 @@ describe('rxMutation', () => {
 
     expect(increment.status()).toEqual('pending');
     expect(increment.isPending()).toEqual(true);
+    expect(increment.isFullfilled()).toEqual(false);
 
     increment({ value: 2, delay: 100 });
     tick(500);
@@ -329,6 +344,7 @@ describe('rxMutation', () => {
     expect(increment.status()).toEqual('success');
     expect(increment.isPending()).toEqual(false);
     expect(increment.error()).toEqual(undefined);
+    expect(increment.isFullfilled()).toEqual(true);
 
     expect(testSetup.getCounter()).toEqual(5);
     expect(testSetup.onSuccessCalls()).toEqual(1);
@@ -343,6 +359,7 @@ describe('rxMutation', () => {
     expect(increment.status()).toEqual('success');
     expect(increment.isPending()).toEqual(false);
     expect(increment.error()).toEqual(undefined);
+    expect(increment.isFullfilled()).toEqual(true);
 
     expect(testSetup.getCounter()).toEqual(5);
     expect(testSetup.onSuccessCalls()).toEqual(1);
@@ -362,6 +379,7 @@ describe('rxMutation', () => {
 
     expect(increment.status()).toEqual('pending');
     expect(increment.isPending()).toEqual(true);
+    expect(increment.isFullfilled()).toEqual(false);
 
     await asyncTick();
 
@@ -378,6 +396,8 @@ describe('rxMutation', () => {
 
     expect(increment.isPending()).toEqual(false);
     expect(increment.status()).toEqual('error');
+    expect(increment.isFullfilled()).toEqual(false);
+
     expect(increment.error()).toEqual({
       error: 'Test-Error',
     });
@@ -391,6 +411,7 @@ describe('rxMutation', () => {
 
     expect(increment.status()).toEqual('pending');
     expect(increment.isPending()).toEqual(true);
+    expect(increment.isFullfilled()).toEqual(false);
 
     await asyncTick();
 
@@ -402,6 +423,8 @@ describe('rxMutation', () => {
     });
 
     expect(increment.isPending()).toEqual(false);
+    expect(increment.isFullfilled()).toEqual(true);
+
     expect(increment.status()).toEqual('success');
     expect(increment.error()).toBeUndefined();
   });
@@ -415,6 +438,7 @@ describe('rxMutation', () => {
 
     expect(increment.status()).toEqual('pending');
     expect(increment.isPending()).toEqual(true);
+    expect(increment.isFullfilled()).toEqual(false);
 
     await asyncTick();
 
@@ -429,6 +453,8 @@ describe('rxMutation', () => {
 
     expect(increment.isPending()).toEqual(false);
     expect(increment.status()).toEqual('success');
+    expect(increment.isFullfilled()).toEqual(true);
+
     expect(increment.value()).toEqual(4);
     expect(increment.hasValue()).toEqual(true);
     expect(increment.error()).toBeUndefined();
@@ -443,6 +469,7 @@ describe('rxMutation', () => {
 
     expect(increment.status()).toEqual('pending');
     expect(increment.isPending()).toEqual(true);
+    expect(increment.isFullfilled()).toEqual(false);
 
     await asyncTick();
 
@@ -458,6 +485,7 @@ describe('rxMutation', () => {
 
     expect(increment.isPending()).toEqual(false);
     expect(increment.status()).toEqual('success');
+    expect(increment.isFullfilled()).toEqual(true);
     expect(increment.error()).toBeUndefined();
   });
 
@@ -474,6 +502,7 @@ describe('rxMutation', () => {
 
     expect(increment.status()).toEqual('pending');
     expect(increment.isPending()).toEqual(true);
+    expect(increment.isFullfilled()).toEqual(false);
 
     input$.next(1);
     input$.next(2);
@@ -496,6 +525,8 @@ describe('rxMutation', () => {
 
     expect(increment.isPending()).toEqual(false);
     expect(increment.status()).toEqual('success');
+    expect(increment.isFullfilled()).toEqual(true);
+
     expect(increment.error()).toBeUndefined();
   });
 
@@ -508,6 +539,7 @@ describe('rxMutation', () => {
 
     expect(increment.status()).toEqual('pending');
     expect(increment.isPending()).toEqual(true);
+    expect(increment.isFullfilled()).toEqual(false);
 
     await asyncTick();
 
@@ -525,8 +557,38 @@ describe('rxMutation', () => {
     expect(increment.isPending()).toEqual(false);
     expect(increment.hasValue()).toEqual(false);
     expect(increment.status()).toEqual('error');
+    expect(increment.isFullfilled()).toEqual(false);
     expect(increment.error()).toEqual({
       error: 'Test-Error',
     });
+  });
+
+  it('can be called using an operation function', async () => {
+    const increment = TestBed.runInInjectionContext(() =>
+      rxMutation((value: number) => {
+        return calcDouble(value).pipe(delay(1));
+      }),
+    );
+
+    const resultPromise = increment(2);
+
+    expect(increment.status()).toEqual('pending');
+    expect(increment.isPending()).toEqual(true);
+    expect(increment.isFullfilled()).toEqual(false);
+
+    await asyncTick();
+
+    const result = await resultPromise;
+
+    expect(result).toEqual({
+      status: 'success',
+      value: 4,
+    });
+
+    expect(increment.isPending()).toEqual(false);
+    expect(increment.isFullfilled()).toEqual(true);
+
+    expect(increment.status()).toEqual('success');
+    expect(increment.error()).toBeUndefined();
   });
 });

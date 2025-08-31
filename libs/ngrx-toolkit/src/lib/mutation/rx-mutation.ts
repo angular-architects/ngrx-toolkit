@@ -87,12 +87,18 @@ export interface RxMutationOptions<P, R> {
  * @returns
  */
 export function rxMutation<P, R>(
-  options: RxMutationOptions<P, R>,
+  optionsOrOperation: RxMutationOptions<P, R> | Func<P, Observable<R>>,
 ): Mutation<P, R> {
   const inputSubject = new Subject<{
     param: P;
     resolve: (result: MutationResult<R>) => void;
   }>();
+
+  const options =
+    typeof optionsOrOperation === 'function'
+      ? { operation: optionsOrOperation }
+      : optionsOrOperation;
+
   const flatteningOp = options.operator ?? concatOp;
 
   const destroyRef = options.injector?.get(DestroyRef) ?? inject(DestroyRef);
@@ -102,6 +108,9 @@ export function rxMutation<P, R>(
   const idle = signal(true);
   const isPending = computed(() => callCount() > 0);
   const value = signal<R | undefined>(undefined);
+  const isFullfilled = computed(
+    () => !idle() && !isPending() && !errorSignal(),
+  );
 
   const hasValue = function (
     this: Mutation<P, R>,
@@ -194,5 +203,6 @@ export function rxMutation<P, R>(
   mutation.error = errorSignal;
   mutation.value = value;
   mutation.hasValue = hasValue;
+  mutation.isFullfilled = isFullfilled;
   return mutation;
 }
