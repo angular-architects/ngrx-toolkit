@@ -10,8 +10,8 @@ import {
   tap,
 } from 'rxjs';
 
-import { concatOp, FlatteningOperator } from './flattening-operator';
-import { Mutation, MutationResult, MutationStatus } from './with-mutations';
+import { concatOp, FlatteningOperator } from '../flattening-operator';
+import { Mutation, MutationResult, MutationStatus } from './mutation';
 
 export type Func<P, R> = (params: P) => R;
 
@@ -35,33 +35,51 @@ export interface RxMutationOptions<P, R> {
  *
  * The `operation` is the only mandatory option.
  *
- * ```typescript
- * export type Params = {
- *   value: number;
- * };
+ * The returned mutation can be called as an async function and returns a Promise.
+ * This promise informs about whether the mutation was successful, failed, or aborted
+ * (due to switchMap or exhaustMap semantics).
  *
- * export const CounterStore = signalStore(
- *   { providedIn: 'root' },
- *   withState({ counter: 0 }),
- *   withMutations((store) => ({
- *     increment: rxMutation({
- *       operation: (params: Params) => {
- *         return calcSum(store.counter(), params.value);
- *       },
- *       operator: concatOp,
- *       onSuccess: (result) => {
- *         console.log('result', result);
- *         patchState(store, { counter: result });
- *       },
- *       onError: (error) => {
- *         console.error('Error occurred:', error);
- *       },
- *     }),
- *   })),
- * );
+ * The mutation also provides several Signals such as error, status or isPending (see below).
+ *
+ * Example usage without Store:
+ *
+ * ```typescript
+ * private counterSignal = signal(0);
+ *
+ * private increment = rxMutation({
+ *   operation: (params: Params) => {
+ *     return calcSum(this.counterSignal(), params.value);
+ *   },
+ *   operator: concatOp,
+ *   onSuccess: (result) => {
+ *     this.counterSignal.set(result);
+ *   },
+ *   onError: (error) => {
+ *     console.error('Error occurred:', error);
+ *   },
+ * });
+ *
+ * protected error = this.increment.error;
+ * protected isPending = this.increment.isPending;
+ * protected status = this.increment.status;
+ * protected value = this.increment.value;
+ * protected hasValue = this.increment.hasValue;
+ *
+ * async incrementCounter() {
+ *     const result = await this.increment({ value: 1 });
+ *     if (result.status === 'success') {
+ *       console.log('Success:', result.value);
+ *     }
+ *     if (result.status === 'error') {
+ *       console.log('Error:', result.error);
+ *     }
+ *     if (result.status === 'aborted') {
+ *       console.log('Operation aborted');
+ *     }
+ * }
  *
  * function calcSum(a: number, b: number): Observable<number> {
- *   return of(a + b);
+ *   return of(result).pipe(delay(500));
  * }
  * ```
  *
@@ -83,6 +101,13 @@ export function rxMutation<P, R>(
   const errorSignal = signal<unknown>(undefined);
   const idle = signal(true);
   const isPending = computed(() => callCount() > 0);
+  const value = signal<R | undefined>(undefined);
+
+  const hasValue = function (
+    this: Mutation<P, R>,
+  ): this is Mutation<Exclude<P, undefined>, R> {
+    return typeof value() !== 'undefined';
+  };
 
   const status = computed<MutationStatus>(() => {
     if (idle()) {
@@ -99,7 +124,6 @@ export function rxMutation<P, R>(
 
   const initialInnerStatus: MutationStatus = 'idle';
   let innerStatus: MutationStatus = initialInnerStatus;
-  let lastResult: R;
 
   inputSubject
     .pipe(
@@ -112,11 +136,12 @@ export function rxMutation<P, R>(
               options.onSuccess?.(result, input.param);
               innerStatus = 'success';
               errorSignal.set(undefined);
-              lastResult = result;
+              value.set(result);
             }),
             catchError((error: unknown) => {
               options.onError?.(error, input.param);
               errorSignal.set(error);
+              value.set(undefined);
               innerStatus = 'error';
               return EMPTY;
             }),
@@ -126,7 +151,7 @@ export function rxMutation<P, R>(
               if (innerStatus === 'success') {
                 input.resolve({
                   status: 'success',
-                  value: lastResult,
+                  value: value() as R,
                 });
               } else if (innerStatus === 'error') {
                 input.resolve({
@@ -167,6 +192,7 @@ export function rxMutation<P, R>(
   mutation.status = status;
   mutation.isPending = isPending;
   mutation.error = errorSignal;
-
+  mutation.value = value;
+  mutation.hasValue = hasValue;
   return mutation;
 }

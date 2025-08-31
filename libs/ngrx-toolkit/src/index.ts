@@ -42,7 +42,7 @@ export {
 export { emptyFeature, withConditional } from './lib/with-conditional';
 export { withFeatureFactory } from './lib/with-feature-factory';
 
-export * from './lib/rx-mutation';
+export * from './lib/mutation/rx-mutation';
 export * from './lib/with-mutations';
 export { mapToResource, withResource } from './lib/with-resource';
 
@@ -52,3 +52,5 @@ export {
   mergeOp,
   switchOp,
 } from './lib/flattening-operator';
+
+export { rxMutation } from './lib/mutation/rx-mutation';
