@@ -121,15 +121,15 @@ describe('withMutations with rxMutation', () => {
     const store = testSetup.store;
 
     expect(store.incrementStatus()).toEqual('idle');
-    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementIsPending()).toEqual(false);
 
     store.increment(2);
-    expect(store.incrementStatus()).toEqual('processing');
-    expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementStatus()).toEqual('pending');
+    expect(store.incrementIsPending()).toEqual(true);
 
     tick(2000);
     expect(store.incrementStatus()).toEqual('success');
-    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementIsPending()).toEqual(false);
     expect(store.incrementError()).toEqual(undefined);
 
     expect(store.counter()).toEqual(7);
@@ -143,7 +143,7 @@ describe('withMutations with rxMutation', () => {
 
     tick(2000);
     expect(store.incrementStatus()).toEqual('error');
-    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementIsPending()).toEqual(false);
     expect(store.incrementError()).toEqual({
       error: 'Test-Error',
     });
@@ -160,8 +160,8 @@ describe('withMutations with rxMutation', () => {
 
     tick(100);
 
-    expect(store.incrementStatus()).toEqual('processing');
-    expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementStatus()).toEqual('pending');
+    expect(store.incrementIsPending()).toEqual(true);
     expect(store.incrementError()).toEqual({
       error: 'Test-Error',
     });
@@ -169,7 +169,7 @@ describe('withMutations with rxMutation', () => {
     tick(200);
 
     expect(store.incrementStatus()).toEqual('success');
-    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementIsPending()).toEqual(false);
     expect(store.incrementError()).toEqual(undefined);
 
     expect(store.counter()).toEqual(7);
@@ -184,8 +184,8 @@ describe('withMutations with rxMutation', () => {
 
     tick(100);
 
-    expect(store.incrementStatus()).toEqual('processing');
-    expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementStatus()).toEqual('pending');
+    expect(store.incrementIsPending()).toEqual(true);
     expect(store.incrementError()).toEqual({
       error: 'Test-Error',
     });
@@ -193,7 +193,7 @@ describe('withMutations with rxMutation', () => {
     tick(100);
 
     expect(store.incrementStatus()).toEqual('success');
-    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementIsPending()).toEqual(false);
     expect(store.incrementError()).toEqual(undefined);
 
     expect(store.counter()).toEqual(7);
@@ -206,14 +206,14 @@ describe('withMutations with rxMutation', () => {
     store.increment(1);
 
     tick(500);
-    expect(store.incrementStatus()).toEqual('processing');
-    expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementStatus()).toEqual('pending');
+    expect(store.incrementIsPending()).toEqual(true);
 
     store.increment(2);
     tick(1000);
 
     expect(store.incrementStatus()).toEqual('success');
-    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementIsPending()).toEqual(false);
     expect(store.incrementError()).toEqual(undefined);
 
     expect(store.counter()).toEqual(7);
@@ -234,8 +234,8 @@ describe('withMutations with rxMutation', () => {
     store.increment(2);
     tick(500);
 
-    expect(store.incrementStatus()).toEqual('processing');
-    expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementStatus()).toEqual('pending');
+    expect(store.incrementIsPending()).toEqual(true);
 
     // expect(store.counter()).toEqual(7);
     expect(testSetup.onSuccessCalls()).toEqual(1);
@@ -248,7 +248,7 @@ describe('withMutations with rxMutation', () => {
     tick(500);
 
     expect(store.incrementStatus()).toEqual('success');
-    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementIsPending()).toEqual(false);
     expect(store.incrementError()).toEqual(undefined);
 
     expect(store.counter()).toEqual(9);
@@ -267,14 +267,14 @@ describe('withMutations with rxMutation', () => {
     store.increment({ value: 1, delay: 1000 });
     tick(500);
 
-    expect(store.incrementStatus()).toEqual('processing');
-    expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementStatus()).toEqual('pending');
+    expect(store.incrementIsPending()).toEqual(true);
 
     store.increment({ value: 2, delay: 100 });
     tick(500);
 
     expect(store.incrementStatus()).toEqual('success');
-    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementIsPending()).toEqual(false);
     expect(store.incrementError()).toEqual(undefined);
 
     expect(store.counter()).toEqual(9);
@@ -295,8 +295,8 @@ describe('withMutations with rxMutation', () => {
     store.increment({ value: 2, delay: 100 });
     tick(500);
 
-    expect(store.incrementStatus()).toEqual('processing');
-    expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementStatus()).toEqual('pending');
+    expect(store.incrementIsPending()).toEqual(true);
 
     expect(store.counter()).toEqual(5);
     expect(testSetup.onSuccessCalls()).toEqual(1);
@@ -309,7 +309,7 @@ describe('withMutations with rxMutation', () => {
     tick(500);
 
     expect(store.incrementStatus()).toEqual('success');
-    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementIsPending()).toEqual(false);
     expect(store.incrementError()).toEqual(undefined);
 
     expect(store.counter()).toEqual(9);
@@ -328,14 +328,14 @@ describe('withMutations with rxMutation', () => {
     store.increment({ value: 1, delay: 1000 });
     tick(500);
 
-    expect(store.incrementStatus()).toEqual('processing');
-    expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementStatus()).toEqual('pending');
+    expect(store.incrementIsPending()).toEqual(true);
 
     store.increment({ value: 2, delay: 100 });
     tick(500);
 
     expect(store.incrementStatus()).toEqual('success');
-    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementIsPending()).toEqual(false);
     expect(store.incrementError()).toEqual(undefined);
 
     expect(store.counter()).toEqual(5);
@@ -349,7 +349,7 @@ describe('withMutations with rxMutation', () => {
     tick(500);
 
     expect(store.incrementStatus()).toEqual('success');
-    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementIsPending()).toEqual(false);
     expect(store.incrementError()).toEqual(undefined);
 
     expect(store.counter()).toEqual(5);
@@ -368,8 +368,8 @@ describe('withMutations with rxMutation', () => {
     const p1 = store.increment({ value: 1, delay: 1, fail: false });
     const p2 = store.increment({ value: 2, delay: 2, fail: true });
 
-    expect(store.incrementStatus()).toEqual('processing');
-    expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementStatus()).toEqual('pending');
+    expect(store.incrementIsPending()).toEqual(true);
 
     await asyncTick();
 
@@ -384,7 +384,7 @@ describe('withMutations with rxMutation', () => {
       },
     });
 
-    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementIsPending()).toEqual(false);
     expect(store.incrementStatus()).toEqual('error');
     expect(store.incrementError()).toEqual({
       error: 'Test-Error',
@@ -397,8 +397,8 @@ describe('withMutations with rxMutation', () => {
 
     const resultPromise = store.increment({ value: 2, delay: 2, fail: false });
 
-    expect(store.incrementStatus()).toEqual('processing');
-    expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementStatus()).toEqual('pending');
+    expect(store.incrementIsPending()).toEqual(true);
 
     await asyncTick();
 
@@ -409,7 +409,7 @@ describe('withMutations with rxMutation', () => {
       value: 4,
     });
 
-    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementIsPending()).toEqual(false);
     expect(store.incrementStatus()).toEqual('success');
     expect(store.incrementError()).toBeUndefined();
   });
@@ -421,8 +421,8 @@ describe('withMutations with rxMutation', () => {
     const p1 = store.increment({ value: 1, delay: 1, fail: false });
     const p2 = store.increment({ value: 2, delay: 2, fail: false });
 
-    expect(store.incrementStatus()).toEqual('processing');
-    expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementStatus()).toEqual('pending');
+    expect(store.incrementIsPending()).toEqual(true);
 
     await asyncTick();
 
@@ -435,7 +435,7 @@ describe('withMutations with rxMutation', () => {
       value: 4,
     });
 
-    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementIsPending()).toEqual(false);
     expect(store.incrementStatus()).toEqual('success');
     expect(store.incrementError()).toBeUndefined();
   });
@@ -447,8 +447,8 @@ describe('withMutations with rxMutation', () => {
     const p1 = store.increment({ value: 1, delay: 1, fail: false });
     const p2 = store.increment({ value: 2, delay: 1, fail: false });
 
-    expect(store.incrementStatus()).toEqual('processing');
-    expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementStatus()).toEqual('pending');
+    expect(store.incrementIsPending()).toEqual(true);
 
     await asyncTick();
 
@@ -462,7 +462,7 @@ describe('withMutations with rxMutation', () => {
 
     expect(result2.status).toEqual('aborted');
 
-    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementIsPending()).toEqual(false);
     expect(store.incrementStatus()).toEqual('success');
     expect(store.incrementError()).toBeUndefined();
   });
@@ -478,8 +478,8 @@ describe('withMutations with rxMutation', () => {
       fail: false,
     });
 
-    expect(store.incrementStatus()).toEqual('processing');
-    expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementStatus()).toEqual('pending');
+    expect(store.incrementIsPending()).toEqual(true);
 
     input$.next(1);
     input$.next(2);
@@ -500,7 +500,7 @@ describe('withMutations with rxMutation', () => {
       result: 6,
     });
 
-    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementIsPending()).toEqual(false);
     expect(store.incrementStatus()).toEqual('success');
     expect(store.incrementError()).toBeUndefined();
   });
@@ -512,8 +512,8 @@ describe('withMutations with rxMutation', () => {
     const p1 = store.increment({ value: 1, delay: 1, fail: false });
     const p2 = store.increment({ value: 2, delay: 2, fail: true });
 
-    expect(store.incrementStatus()).toEqual('processing');
-    expect(store.incrementProcessing()).toEqual(true);
+    expect(store.incrementStatus()).toEqual('pending');
+    expect(store.incrementIsPending()).toEqual(true);
 
     await asyncTick();
 
@@ -528,7 +528,7 @@ describe('withMutations with rxMutation', () => {
       },
     });
 
-    expect(store.incrementProcessing()).toEqual(false);
+    expect(store.incrementIsPending()).toEqual(false);
     expect(store.incrementStatus()).toEqual('error');
     expect(store.incrementError()).toEqual({
       error: 'Test-Error',

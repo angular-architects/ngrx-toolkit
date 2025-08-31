@@ -13,7 +13,7 @@ export class CounterMutation {
 
   protected counter = this.store.counter;
   protected error = this.store.incrementError;
-  protected processing = this.store.incrementProcessing;
+  protected isPending = this.store.incrementIsPending;
   protected status = this.store.incrementStatus;
 
   increment() {

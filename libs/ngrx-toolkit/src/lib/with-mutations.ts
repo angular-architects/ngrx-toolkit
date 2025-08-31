@@ -1,4 +1,4 @@
-import { computed, Signal } from '@angular/core';
+import { Signal } from '@angular/core';
 import {
   EmptyFeatureResult,
   signalStoreFeature,
@@ -14,7 +14,7 @@ import {
 export type Mutation<P, R> = {
   (params: P): Promise<MutationResult<R>>;
   status: Signal<MutationStatus>;
-  callCount: Signal<number>;
+  isPending: Signal<boolean>;
   error: Signal<unknown>;
 };
 
@@ -35,14 +35,14 @@ export type MutationResult<T> =
       status: 'aborted';
     };
 
-export type MutationStatus = 'idle' | 'processing' | 'error' | 'success';
+export type MutationStatus = 'idle' | 'pending' | 'error' | 'success';
 
 // withMethods uses Record<string, Function> internally
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export type MethodsDictionary = Record<string, Function>;
 
 type NamedMutationProps<T extends MutationsDictionary> = {
-  [Prop in keyof T as `${Prop & string}Processing`]: Signal<boolean>;
+  [Prop in keyof T as `${Prop & string}IsPending`]: Signal<boolean>;
 } & {
   [Prop in keyof T as `${Prop & string}Status`]: Signal<MutationStatus>;
 } & {
@@ -88,7 +88,7 @@ export type NamedMutationResult<T extends MutationsDictionary> =
  * For the defined `increment` mutation, several the following properties and
  * methods are added to the store:
  * - `increment(params: Params): Promise<MutationResult<number>>`: The mutation method.
- * - `incrementProcessing`: A signal indicating if the mutation is in progress.
+ * - `incrementIsPending`: A signal indicating if the mutation is in progress.
  * - `incrementStatus`: A signal representing the current status of the mutation.
  * - `incrementError`: A signal containing any error that occurred during the mutation.
  *
@@ -155,9 +155,7 @@ function createMutationsFeature<Result extends MutationsDictionary>(
       keys.reduce(
         (acc, key) => ({
           ...acc,
-          [`${key}Processing`]: computed(() => {
-            return mutations[key].callCount() > 0;
-          }),
+          [`${key}IsPending`]: mutations[key].isPending,
           [`${key}Status`]: mutations[key].status,
           [`${key}Error`]: mutations[key].error,
         }),

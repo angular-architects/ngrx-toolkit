@@ -82,13 +82,14 @@ export function rxMutation<P, R>(
   const callCount = signal(0);
   const errorSignal = signal<unknown>(undefined);
   const idle = signal(true);
+  const isPending = computed(() => callCount() > 0);
 
   const status = computed<MutationStatus>(() => {
     if (idle()) {
       return 'idle';
     }
     if (callCount() > 0) {
-      return 'processing';
+      return 'pending';
     }
     if (errorSignal()) {
       return 'error';
@@ -110,6 +111,7 @@ export function rxMutation<P, R>(
             tap((result: R) => {
               options.onSuccess?.(result, input.param);
               innerStatus = 'success';
+              errorSignal.set(undefined);
               lastResult = result;
             }),
             catchError((error: unknown) => {
@@ -122,7 +124,6 @@ export function rxMutation<P, R>(
               callCount.update((c) => c - 1);
 
               if (innerStatus === 'success') {
-                errorSignal.set(undefined);
                 input.resolve({
                   status: 'success',
                   value: lastResult,
@@ -164,7 +165,7 @@ export function rxMutation<P, R>(
 
   const mutation = mutationFn as Mutation<P, R>;
   mutation.status = status;
-  mutation.callCount = callCount;
+  mutation.isPending = isPending;
   mutation.error = errorSignal;
 
   return mutation;
