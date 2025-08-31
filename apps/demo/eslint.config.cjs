@@ -31,7 +31,7 @@ module.exports = [
   },
   {
     files: ['**/*.ts', '**/*.js'],
-    // Override or add rules here
-    rules: {},
+    // Override or add rules here      
+    rules: {'@angular-eslint/component-class-suffix': 'off',},
   },
 ];
