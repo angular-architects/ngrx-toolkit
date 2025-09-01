@@ -16,7 +16,16 @@ export class CounterMutation {
   protected isPending = this.store.incrementIsPending;
   protected status = this.store.incrementStatus;
 
+  protected saveError = this.store.saveToServerError;
+  protected saveIsPending = this.store.saveToServerIsPending;
+  protected saveStatus = this.store.saveToServerStatus;
+  protected lastResponse = this.store.lastResponse;
+
   increment() {
     this.store.increment({ value: 1 });
+  }
+
+  saveToServer() {
+    this.store.saveToServer();
   }
 }

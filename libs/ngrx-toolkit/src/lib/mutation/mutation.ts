@@ -1,4 +1,4 @@
-import { Signal } from '@angular/core';
+import { Injector, Signal } from '@angular/core';
 
 export type MutationResult<Result> =
   | {
@@ -14,6 +14,12 @@ export type MutationResult<Result> =
     };
 
 export type MutationStatus = 'idle' | 'pending' | 'error' | 'success';
+
+export type MutationOptions<Parameter, Result> = {
+  onSuccess?: (result: Result, params: Parameter) => void;
+  onError?: (error: unknown, params: Parameter) => void;
+  injector?: Injector;
+};
 
 export type Mutation<Parameter, Result> = {
   (params: Parameter): Promise<MutationResult<Result>>;
