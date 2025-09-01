@@ -68,7 +68,7 @@ export type HttpMutation<Parameter, Result> = Mutation<Parameter, Result> & {
  *   json: { counter: number };
  * };
  *
- * private saveToServer = httpMutation<Params, CounterResponse>({
+ * const saveToServer = httpMutation<Params, CounterResponse>({
  *   request: (p) => ({
  *     url: `https://httpbin.org/post`,
  *     method: 'POST',
