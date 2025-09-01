@@ -2,7 +2,7 @@ import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { patchState, signalStore, withState } from '@ngrx/signals';
 import { delay, Observable, of, Subject, switchMap, throwError } from 'rxjs';
 import { concatOp, exhaustOp, mergeOp, switchOp } from './flattening-operator';
-import { rxMutation } from './rx-mutation';
+import { rxMutation } from './mutation/rx-mutation';
 import { withMutations } from './with-mutations';
 
 type Param =

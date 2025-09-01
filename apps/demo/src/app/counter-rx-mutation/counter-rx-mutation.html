@@ -1,0 +1,20 @@
+<h1>rxMutation (without Store)</h1>
+
+<div class="counter">{{ counter() }}</div>
+
+<ul>
+  <li>isPending: {{ isPending() }}</li>
+  <li>Status: {{ status() }}</li>
+  <li>Error: {{ error() | json }}</li>
+  <li>Value: {{ value() | json }}</li>
+  <li>hasValue: {{ hasValue() | json }}</li>
+</ul>
+
+<div>
+  <button (click)="incrementCounter()" [disabled]="isPending()">
+    Increment by 1
+  </button>
+  <button (click)="incrementBy13()" [disabled]="isPending()">
+    Increment by 13
+  </button>
+</div>
