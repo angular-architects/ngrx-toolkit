@@ -10,32 +10,11 @@ import {
   withMethods,
   WritableStateSource,
 } from '@ngrx/signals';
-
-export type Mutation<P, R> = {
-  (params: P): Promise<MutationResult<R>>;
-  status: Signal<MutationStatus>;
-  isPending: Signal<boolean>;
-  error: Signal<unknown>;
-};
+import { Mutation, MutationStatus } from './mutation/mutation';
 
 // NamedMutationMethods below will infer the actual parameter and return types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type MutationsDictionary = Record<string, Mutation<any, any>>;
-
-export type MutationResult<T> =
-  | {
-      status: 'success';
-      value: T;
-    }
-  | {
-      status: 'error';
-      error: unknown;
-    }
-  | {
-      status: 'aborted';
-    };
-
-export type MutationStatus = 'idle' | 'pending' | 'error' | 'success';
 
 // withMethods uses Record<string, Function> internally
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
