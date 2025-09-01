@@ -5,12 +5,12 @@
     "declaration": true,
     "declarationMap": true,
     "inlineSources": true,
-    "types": []
+    "types": ["node"]
   },
   "exclude": [
     "src/**/*.spec.ts",
     "src/test-setup.ts",
-    "jest.config.ts",
+    "vite.config.mts",
     "src/**/*.test.ts"
   ],
   "include": ["src/**/*.ts"]
