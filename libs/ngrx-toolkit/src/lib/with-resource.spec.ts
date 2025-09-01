@@ -48,7 +48,7 @@ describe('withResource', () => {
 
     function setupWithUnnamedResource() {
       const addressResolver = {
-        resolve: jest.fn(() => Promise.resolve(venice)),
+        resolve: vi.fn(() => Promise.resolve(venice)),
       };
       const AddressStore = signalStore(
         { providedIn: 'root', protectedState: false },
@@ -79,7 +79,7 @@ describe('withResource', () => {
 
     function setupWithNamedResource() {
       const addressResolver = {
-        resolve: jest.fn(() => Promise.resolve(venice)),
+        resolve: vi.fn(() => Promise.resolve(venice)),
       };
 
       const UserStore = signalStore(
@@ -390,7 +390,7 @@ describe('withResource', () => {
       });
 
       describe('override protection', () => {
-        const warningSpy = jest.spyOn(console, 'warn');
+        const warningSpy = vi.spyOn(console, 'warn');
 
         afterEach(() => {
           warningSpy.mockClear();
