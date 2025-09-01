@@ -13,12 +13,12 @@ import {
 import { concatOp, FlatteningOperator } from '../flattening-operator';
 import { Mutation, MutationResult, MutationStatus } from './mutation';
 
-export type Func<P, R> = (params: P) => R;
+export type Operation<Parameter, Result> = (param: Parameter) => Result;
 
-export interface RxMutationOptions<P, R> {
-  operation: Func<P, Observable<R>>;
-  onSuccess?: (result: R, params: P) => void;
-  onError?: (error: unknown, params: P) => void;
+export interface RxMutationOptions<Parameter, Result> {
+  operation: Operation<Parameter, Observable<Result>>;
+  onSuccess?: (result: Result, param: Parameter) => void;
+  onError?: (error: unknown, param: Parameter) => void;
   operator?: FlatteningOperator;
   injector?: Injector;
 }
@@ -44,11 +44,11 @@ export interface RxMutationOptions<P, R> {
  * Example usage without Store:
  *
  * ```typescript
- * private counterSignal = signal(0);
+ * const counterSignal = signal(0);
  *
- * private increment = rxMutation({
- *   operation: (params: Params) => {
- *     return calcSum(this.counterSignal(), params.value);
+ * const increment = rxMutation({
+ *   operation: (param: Param) => {
+ *     return calcSum(this.counterSignal(), param.value);
  *   },
  *   operator: concatOp,
  *   onSuccess: (result) => {
@@ -59,14 +59,14 @@ export interface RxMutationOptions<P, R> {
  *   },
  * });
  *
- * protected error = this.increment.error;
- * protected isPending = this.increment.isPending;
- * protected status = this.increment.status;
- * protected value = this.increment.value;
- * protected hasValue = this.increment.hasValue;
+ * const error = increment.error;
+ * const isPending = increment.isPending;
+ * const status = increment.status;
+ * const value = increment.value;
+ * const hasValue = increment.hasValue;
  *
- * async incrementCounter() {
- *     const result = await this.increment({ value: 1 });
+ * async function incrementCounter() {
+ *     const result = await increment({ value: 1 });
  *     if (result.status === 'success') {
  *       console.log('Success:', result.value);
  *     }
@@ -84,14 +84,16 @@ export interface RxMutationOptions<P, R> {
  * ```
  *
  * @param options
- * @returns
+ * @returns the actual mutation function along tracking data as properties/methods
  */
-export function rxMutation<P, R>(
-  optionsOrOperation: RxMutationOptions<P, R> | Func<P, Observable<R>>,
-): Mutation<P, R> {
+export function rxMutation<Parameter, Result>(
+  optionsOrOperation:
+    | RxMutationOptions<Parameter, Result>
+    | Operation<Parameter, Observable<Result>>,
+): Mutation<Parameter, Result> {
   const inputSubject = new Subject<{
-    param: P;
-    resolve: (result: MutationResult<R>) => void;
+    param: Parameter;
+    resolve: (result: MutationResult<Result>) => void;
   }>();
 
   const options =
@@ -107,14 +109,12 @@ export function rxMutation<P, R>(
   const errorSignal = signal<unknown>(undefined);
   const idle = signal(true);
   const isPending = computed(() => callCount() > 0);
-  const value = signal<R | undefined>(undefined);
-  const isFullfilled = computed(
-    () => !idle() && !isPending() && !errorSignal(),
-  );
+  const value = signal<Result | undefined>(undefined);
+  const isSuccess = computed(() => !idle() && !isPending() && !errorSignal());
 
   const hasValue = function (
-    this: Mutation<P, R>,
-  ): this is Mutation<Exclude<P, undefined>, R> {
+    this: Mutation<Parameter, Result>,
+  ): this is Mutation<Exclude<Parameter, undefined>, Result> {
     return typeof value() !== 'undefined';
   };
 
@@ -141,7 +141,7 @@ export function rxMutation<P, R>(
           callCount.update((c) => c + 1);
           idle.set(false);
           return options.operation(input.param).pipe(
-            tap((result: R) => {
+            tap((result: Result) => {
               options.onSuccess?.(result, input.param);
               innerStatus = 'success';
               errorSignal.set(undefined);
@@ -160,7 +160,7 @@ export function rxMutation<P, R>(
               if (innerStatus === 'success') {
                 input.resolve({
                   status: 'success',
-                  value: value() as R,
+                  value: value() as Result,
                 });
               } else if (innerStatus === 'error') {
                 input.resolve({
@@ -182,8 +182,8 @@ export function rxMutation<P, R>(
     )
     .subscribe();
 
-  const mutationFn = (param: P) => {
-    return new Promise<MutationResult<R>>((resolve) => {
+  const mutationFn = (param: Parameter) => {
+    return new Promise<MutationResult<Result>>((resolve) => {
       if (callCount() > 0 && flatteningOp.exhaustSemantics) {
         resolve({
           status: 'aborted',
@@ -197,12 +197,12 @@ export function rxMutation<P, R>(
     });
   };
 
-  const mutation = mutationFn as Mutation<P, R>;
+  const mutation = mutationFn as Mutation<Parameter, Result>;
   mutation.status = status;
   mutation.isPending = isPending;
   mutation.error = errorSignal;
   mutation.value = value;
   mutation.hasValue = hasValue;
-  mutation.isFullfilled = isFullfilled;
+  mutation.isSuccess = isSuccess;
   return mutation;
 }
