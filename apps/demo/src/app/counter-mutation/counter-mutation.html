@@ -1,13 +1,35 @@
-<h1>withMutations</h1>
+<h1>withMutations + HTTP</h1>
 
 <div class="counter">{{ counter() }}</div>
 
-<ul>
-  <li>isPending: {{ isPending() }}</li>
-  <li>Status: {{ status() }}</li>
-  <li>Error: {{ error() | json }}</li>
-</ul>
+<div class="section">
+  <h2>Local Increment</h2>
+  <ul>
+    <li>isPending: {{ isPending() }}</li>
+    <li>Status: {{ status() }}</li>
+    <li>Error: {{ error() | json }}</li>
+  </ul>
 
-<div>
-  <button (click)="increment()">Increment</button>
+  <div>
+    <button (click)="increment()" [disabled]="isPending()">
+      @if (isPending()) { Incrementing... } @else { Increment }
+    </button>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Sending to Server</h2>
+
+  <ul>
+    <li>isPending: {{ saveIsPending() }}</li>
+    <li>Status: {{ saveStatus() }}</li>
+    <li>Error: {{ saveError() | json }}</li>
+    <li>Last Response: {{ lastResponse() | json }}</li>
+  </ul>
+
+  <div>
+    <button (click)="saveToServer()" [disabled]="saveIsPending()">
+      @if (saveIsPending()) { Sending to Server... } @else { Sending to Server }
+    </button>
+  </div>
 </div>
