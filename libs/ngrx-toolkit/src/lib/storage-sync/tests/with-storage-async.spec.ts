@@ -244,7 +244,7 @@ describe('withStorageSync (async storage)', () => {
   describe('withStorageSync', () => {
     let warnings = [] as string[];
 
-    jest.spyOn(console, 'warn').mockImplementation((...messages: string[]) => {
+    vi.spyOn(console, 'warn').mockImplementation((...messages: string[]) => {
       warnings.push(...messages);
     });
 
