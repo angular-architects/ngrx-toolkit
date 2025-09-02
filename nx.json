@@ -26,6 +26,10 @@
       "options": {
         "packageRoot": "dist/libs/ngrx-toolkit"
       }
+    },
+    "@nx/vite:test": {
+      "cache": true,
+      "inputs": ["default", "^production"]
     }
   },
   "namedInputs": {
