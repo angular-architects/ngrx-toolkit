@@ -47,6 +47,7 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
       const syncer = inject(DevtoolsSyncer);
       const id = syncer.getNextId();
 
+      // TODO: use withProps and symbols
       return {
         [renameDevtoolsMethodName]: (newName: string) => {
           syncer.renameStore(name, newName);

@@ -11,8 +11,23 @@ const dummyConnection: Connection = {
   send: () => void true,
 };
 
+/**
+ * A service provided by the root injector is
+ * required because the synchronization runs
+ * globally.
+ *
+ * The SignalStore could be provided in a component.
+ * If the effect starts in the injection
+ * context of the SignalStore, the complete sync
+ * process would shut down once the component gets
+ * destroyed.
+ */
 @Injectable({ providedIn: 'root' })
 export class DevtoolsSyncer implements OnDestroy {
+  /**
+   * Stores all SignalStores that are connected to the
+   * DevTools along their options, names and id.
+   */
   #stores: StoreRegistry = {};
   readonly #isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   readonly #trackers: Tracker[] = [];
@@ -21,6 +36,20 @@ export class DevtoolsSyncer implements OnDestroy {
     ...inject(REDUX_DEVTOOLS_CONFIG, { optional: true }),
   };
 
+  /**
+   * Maintains the current states of all stores to avoid conflicts
+   * between glitch-free and glitched trackers when used simultaneously.
+   *
+   * The challenge lies in ensuring that glitched trackers do not
+   * interfere with the synchronization process of glitch-free trackers.
+   * Specifically, glitched trackers could cause the synchronization to
+   * read the current state of stores managed by glitch-free trackers.
+   *
+   * Therefore, the synchronization process doesn't read the state from
+   * each store, but relies on #currentState.
+   *
+   * Please note, that here the key is the name and not the id.
+   */
   #currentState: Record<string, object> = {};
   #currentId = 1;
 
@@ -93,6 +122,14 @@ export class DevtoolsSyncer implements OnDestroy {
     return String(this.#currentId++);
   }
 
+  /**
+   * Consumer provides the id. That is because we can only start
+   * tracking the store in the init hook.
+   * Unfortunately, methods for renaming having the final id
+   * need to be defined already before.
+   * That's why `withDevtools` requests first the id and
+   * then registers itself later.
+   */
   addStore(
     id: string,
     name: string,
@@ -133,6 +170,8 @@ Enable automatic indexing via withDevTools('${storeName}', { indexNames: true })
       {} as StoreRegistry,
     );
 
+    // we don't rename in #currentState but wait for tracker to notify
+    // us with a changed state that contains that name.
     this.#currentState = Object.entries(this.#currentState).reduce(
       (acc, [storeName, state]) => {
         if (storeName !== name) acc[storeName] = state;
