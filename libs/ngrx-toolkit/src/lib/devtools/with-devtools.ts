@@ -45,10 +45,8 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
   return signalStoreFeature(
     withMethods(() => {
       const syncer = inject(DevtoolsSyncer);
-
       const id = syncer.getNextId();
 
-      // TODO: use withProps and symbols
       return {
         [renameDevtoolsMethodName]: (newName: string) => {
           syncer.renameStore(name, newName);
@@ -58,7 +56,7 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
     }),
     withHooks((store) => {
       const syncer = inject(DevtoolsSyncer);
-      const id = String(store[uniqueDevtoolsId]());
+
       return {
         onInit() {
           const id = String(store[uniqueDevtoolsId]());
@@ -73,6 +71,7 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
           syncer.addStore(id, name, store, finalOptions);
         },
         onDestroy() {
+          const id = String(store[uniqueDevtoolsId]());
           syncer.removeStore(id);
         },
       };
