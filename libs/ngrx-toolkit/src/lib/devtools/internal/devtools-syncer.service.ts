@@ -170,8 +170,6 @@ Enable automatic indexing via withDevTools('${storeName}', { indexNames: true })
       {} as StoreRegistry,
     );
 
-    // we don't rename in #currentState but wait for tracker to notify
-    // us with a changed state that contains that name.
     this.#currentState = Object.entries(this.#currentState).reduce(
       (acc, [storeName, state]) => {
         if (storeName !== name) acc[storeName] = state;
@@ -204,6 +202,8 @@ Enable automatic indexing via withDevTools('${storeName}', { indexNames: true })
       return acc;
     }, {} as StoreRegistry);
 
+    // we don't rename in #currentState but wait for tracker to notify
+    // us with a changed state that contains that name.
     this.#currentState = Object.entries(this.#currentState).reduce(
       (acc, [storeName, state]) => {
         if (storeName !== oldName) acc[storeName] = state;
