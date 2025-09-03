@@ -8,7 +8,7 @@ import { DevtoolsInnerOptions } from './devtools-feature';
 import { Connection, StoreRegistry, Tracker } from './models';
 
 const dummyConnection: Connection = {
-  send: () => void true,
+  send: () => true,
 };
 
 /**
@@ -62,7 +62,6 @@ export class DevtoolsSyncer implements OnDestroy {
       console.warn(
         '[DevtoolsSyncer] Not running in browser. DevTools disabled.',
       );
-      return;
     }
   }
 
