@@ -1,4 +1,4 @@
-import { inject, InjectionToken } from '@angular/core';
+import { inject } from '@angular/core';
 import {
   EmptyFeatureResult,
   SignalStoreFeature,
@@ -22,11 +22,6 @@ declare global {
 
 export const renameDevtoolsMethodName = '___renameDevtoolsName';
 export const uniqueDevtoolsId = '___uniqueDevtoolsId';
-
-const EXISTING_NAMES = new InjectionToken(
-  'Array contain existing names for the signal stores',
-  { factory: () => [] as string[], providedIn: 'root' },
-);
 
 /**
  * Adds this store as a feature state to the Redux DevTools.
