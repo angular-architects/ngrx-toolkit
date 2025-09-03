@@ -42,10 +42,11 @@ export type HttpMutationRequest = {
 };
 
 export type HttpMutationOptions<Parameter, Result> = Omit<
-  RxMutationOptions<Parameter, Result>,
+  RxMutationOptions<Parameter, NoInfer<Result>>,
   'operation'
 > & {
   request: (param: Parameter) => HttpMutationRequest;
+  parse?: (response: unknown) => Result;
 };
 
 export type HttpMutation<Parameter, Result> = Mutation<Parameter, Result> & {
@@ -68,14 +69,22 @@ export type HttpMutation<Parameter, Result> = Mutation<Parameter, Result> & {
  *   json: { counter: number };
  * };
  *
- * const saveToServer = httpMutation<Params, CounterResponse>({
- *   request: (p) => ({
+ * const simpleSaveUser = httpMutation({
+ *   request: (userData: AddUserEntry) => ({
+ *     url: 'api/users',
+ *     body: userData,
+ *   }),
+ *   parse: Boolean,
+ * })
+ *
+ * const saveUser = httpMutation({
+ *   request: (p: Params) => ({
  *     url: `https://httpbin.org/post`,
  *     method: 'POST',
  *     body: { counter: p.value },
  *     headers: { 'Content-Type': 'application/json' },
  *   }),
- *   onSuccess: (response) => {
+ *   onSuccess: (response: CounterResponse) => {
  *     console.log('Counter sent to server:', response);
  *   },
  *   onError: (error) => {
@@ -85,7 +94,7 @@ export type HttpMutation<Parameter, Result> = Mutation<Parameter, Result> & {
  *
  * ...
  *
- * const result = await this.saveToServer({ value: 17 });
+ * const result = await this.saveUser({ value: 17 });
  * if (result.status === 'success') {
  *   console.log('Successfully saved to server:', result.value);
  * }
@@ -110,6 +119,8 @@ export function httpMutation<Parameter, Result>(
     typeof optionsOrRequest === 'function'
       ? { request: optionsOrRequest }
       : optionsOrRequest;
+
+  const parse = options.parse ?? ((raw: unknown) => raw as Result);
 
   const uploadProgress = signal<HttpProgressEvent | undefined>(undefined);
   const downloadProgress = signal<HttpProgressEvent | undefined>(undefined);
@@ -146,7 +157,7 @@ export function httpMutation<Parameter, Result>(
               headers.set(response.headers);
               statusCode.set(response.status.toString());
             }),
-            map((event) => event.body as Result),
+            map((event) => parse(event.body)),
           );
       });
     },

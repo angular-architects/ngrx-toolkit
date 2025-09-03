@@ -5,7 +5,7 @@ import {
 } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { httpMutation } from './http-mutation';
+import { HttpMutation, httpMutation } from './http-mutation';
 
 interface User {
   id: number;
@@ -14,6 +14,12 @@ interface User {
 }
 
 interface CreateUserRequest {
+  name: string;
+  email: string;
+}
+
+interface AddUserEntry {
+  firstname: string;
   name: string;
   email: string;
 }
@@ -380,5 +386,88 @@ describe('httpMutation', () => {
 
     expect(uploadData.status()).toBe('success');
     expect(uploadData.value()).toEqual(mockResponse);
+  });
+
+  it('can be explicitly typed', () => {
+    TestBed.runInInjectionContext(() => {
+      httpMutation<AddUserEntry, boolean>((userData: AddUserEntry) => ({
+        url: 'api/users',
+        method: 'POST',
+        body: userData,
+      })) satisfies HttpMutation<AddUserEntry, boolean>;
+    });
+  });
+
+  it('can be implicitly typed via request and parse', () => {
+    TestBed.runInInjectionContext(() => {
+      httpMutation({
+        request: (userData: AddUserEntry) => ({
+          url: 'api/users',
+          method: 'POST',
+          body: userData,
+        }),
+        parse: Boolean,
+      }) satisfies HttpMutation<AddUserEntry, boolean>;
+    });
+  });
+
+  it('can be implicitly typed via a request without a body, and parse', () => {
+    TestBed.runInInjectionContext(() => {
+      httpMutation({
+        request: (id: number) => ({
+          url: `api/users/${id}`,
+          method: 'DELETE',
+        }),
+        parse: Boolean,
+      }) satisfies HttpMutation<number, boolean>;
+    });
+  });
+
+  it('can not be implicitly typed with both onSuccess and parse having different types', () => {
+    TestBed.runInInjectionContext(() => {
+      httpMutation({
+        request: (userData: AddUserEntry) => ({
+          url: 'api/users',
+          method: 'POST',
+          body: userData,
+        }),
+        parse: Boolean,
+        // @ts-expect-error onSuccess need to use the type of parse
+        onSuccess: (result: { userId: number }) => {
+          console.log('User created:', result);
+        },
+      });
+    });
+  });
+
+  it('can be implicitly typed with both onSuccess and parse having same type', () => {
+    TestBed.runInInjectionContext(() => {
+      httpMutation({
+        request: (userData: AddUserEntry) => ({
+          url: 'api/users',
+          method: 'POST',
+          body: userData,
+        }),
+        parse: (result) => result as { id: number },
+        onSuccess: (result) => {
+          console.log('User created:', result);
+        },
+      }) satisfies HttpMutation<AddUserEntry, { id: number }>;
+    });
+  });
+
+  it('can be implicitly typed by defining onSuccess only', () => {
+    TestBed.runInInjectionContext(() => {
+      httpMutation({
+        request: (userData: AddUserEntry) => ({
+          url: 'api/users',
+          method: 'POST',
+          body: userData,
+        }),
+        onSuccess: (result: { id: number }) => {
+          console.log('User created:', result);
+        },
+      }) satisfies HttpMutation<AddUserEntry, { id: number }>;
+    });
   });
 });
