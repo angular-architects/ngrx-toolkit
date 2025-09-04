@@ -59,6 +59,7 @@ export type HttpMutation<Parameter, Result> = Mutation<Parameter, Result> & {
 /**
  * Creates an HTTP mutation.
  *
+ * ```typescript
  * export type Params = {
  *   value: number;
  * };
@@ -92,8 +93,6 @@ export type HttpMutation<Parameter, Result> = Mutation<Parameter, Result> & {
  *   },
  * });
  *
- * ...
- *
  * const result = await this.saveUser({ value: 17 });
  * if (result.status === 'success') {
  *   console.log('Successfully saved to server:', result.value);
@@ -104,6 +103,7 @@ export type HttpMutation<Parameter, Result> = Mutation<Parameter, Result> & {
  * else {
  *   console.log('Operation aborted');
  * }
+ * ```
  *
  * @param options The options for the HTTP mutation.
  * @returns The HTTP mutation.
