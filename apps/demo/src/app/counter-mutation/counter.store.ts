@@ -1,5 +1,6 @@
 import {
   concatOp,
+  httpMutation,
   rxMutation,
   withMutations,
 } from '@angular-architects/ngrx-toolkit';
@@ -10,9 +11,17 @@ export type Params = {
   value: number;
 };
 
+// httpbin.org echos the request in the json property
+export type CounterResponse = {
+  json: { counter: number };
+};
+
 export const CounterStore = signalStore(
   { providedIn: 'root' },
-  withState({ counter: 0 }),
+  withState({
+    counter: 0,
+    lastResponse: undefined as unknown | undefined,
+  }),
   withMutations((store) => ({
     increment: rxMutation({
       operation: (params: Params) => {
@@ -25,6 +34,21 @@ export const CounterStore = signalStore(
       },
       onError: (error) => {
         console.error('Error occurred:', error);
+      },
+    }),
+    saveToServer: httpMutation<void, CounterResponse>({
+      request: () => ({
+        url: `https://httpbin.org/post`,
+        method: 'POST',
+        body: { counter: store.counter() },
+        headers: { 'Content-Type': 'application/json' },
+      }),
+      onSuccess: (response) => {
+        console.log('Counter sent to server:', response);
+        patchState(store, { lastResponse: response.json });
+      },
+      onError: (error) => {
+        console.error('Failed to send counter:', error);
       },
     }),
   })),
