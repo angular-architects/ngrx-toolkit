@@ -8,7 +8,7 @@ import { DevtoolsInnerOptions } from './devtools-feature';
 import { Connection, StoreRegistry, Tracker } from './models';
 
 const dummyConnection: Connection = {
-  send: () => void true,
+  send: () => true,
 };
 
 /**
@@ -30,7 +30,7 @@ export class DevtoolsSyncer implements OnDestroy {
    */
   #stores: StoreRegistry = {};
   readonly #isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
-  readonly #trackers = [] as Tracker[];
+  readonly #trackers: Tracker[] = [];
   readonly #devtoolsConfig = {
     name: 'NgRx SignalStore',
     ...inject(REDUX_DEVTOOLS_CONFIG, { optional: true }),
@@ -54,19 +54,45 @@ export class DevtoolsSyncer implements OnDestroy {
   #currentId = 1;
 
   readonly #connection: Connection = this.#isBrowser
-    ? window.__REDUX_DEVTOOLS_EXTENSION__
-      ? window.__REDUX_DEVTOOLS_EXTENSION__.connect(this.#devtoolsConfig)
-      : dummyConnection
+    ? this.#initDevtoolsConnection()
     : dummyConnection;
 
   constructor() {
     if (!this.#isBrowser) {
-      return;
+      console.warn(
+        '[DevtoolsSyncer] Not running in browser. DevTools disabled.',
+      );
     }
   }
 
   ngOnDestroy(): void {
     currentActionNames.clear();
+  }
+
+  #initDevtoolsConnection(): Connection {
+    const extension = window.__REDUX_DEVTOOLS_EXTENSION__;
+    if (!extension) {
+      console.warn('[DevtoolsSyncer] Redux DevTools extension not found.');
+      return dummyConnection;
+    }
+
+    try {
+      if (typeof extension.connect === 'function') {
+        return extension.connect(this.#devtoolsConfig);
+      } else {
+        console.warn(
+          '[DevtoolsSyncer] Redux DevTools extension does not support .connect()',
+        );
+      }
+    } catch (error) {
+      console.error(
+        '[DevtoolsSyncer] Error connecting to Redux DevTools:',
+        error,
+      );
+      return dummyConnection;
+    }
+
+    return dummyConnection;
   }
 
   syncToDevTools(changedStatePerId: Record<string, object>) {
@@ -78,6 +104,7 @@ export class DevtoolsSyncer implements OnDestroy {
       },
       {} as Record<string, object>,
     );
+
     this.#currentState = {
       ...this.#currentState,
       ...mappedChangedStatePerName,
@@ -90,7 +117,7 @@ export class DevtoolsSyncer implements OnDestroy {
     this.#connection.send({ type }, this.#currentState);
   }
 
-  getNextId() {
+  getNextId(): string {
     return String(this.#currentId++);
   }
 
@@ -109,21 +136,17 @@ export class DevtoolsSyncer implements OnDestroy {
     options: DevtoolsInnerOptions,
   ) {
     let storeName = name;
-    const names = Object.values(this.#stores).map((store) => store.name);
+    const names = Object.values(this.#stores).map((s) => s.name);
 
-    if (names.includes(storeName)) {
-      // const { options } = throwIfNull(
-      //   Object.values(this.#stores).find((store) => store.name === storeName)
-      // );
-      if (!options.indexNames) {
-        throw new Error(`An instance of the store ${storeName} already exists. \
+    if (names.includes(storeName) && !options.indexNames) {
+      throw new Error(`An instance of the store ${storeName} already exists. \
 Enable automatic indexing via withDevTools('${storeName}', { indexNames: true }), or rename it upon instantiation.`);
-      }
     }
 
     for (let i = 1; names.includes(storeName); i++) {
       storeName = `${name}-${i}`;
     }
+
     this.#stores[id] = { name: storeName, options };
 
     const tracker = options.tracker;
@@ -136,23 +159,20 @@ Enable automatic indexing via withDevTools('${storeName}', { indexNames: true })
   }
 
   removeStore(id: string) {
-    const name = this.#stores[id].name;
+    const name = this.#stores[id]?.name;
+
     this.#stores = Object.entries(this.#stores).reduce(
-      (newStore, [storeId, value]) => {
-        if (storeId !== id) {
-          newStore[storeId] = value;
-        }
-        return newStore;
+      (acc, [storeId, value]) => {
+        if (storeId !== id) acc[storeId] = value;
+        return acc;
       },
       {} as StoreRegistry,
     );
 
     this.#currentState = Object.entries(this.#currentState).reduce(
-      (newState, [storeName, state]) => {
-        if (storeName !== name) {
-          newState[name] = state;
-        }
-        return newState;
+      (acc, [storeName, state]) => {
+        if (storeName !== name) acc[storeName] = state;
+        return acc;
       },
       {} as Record<string, object>,
     );
@@ -163,36 +183,30 @@ Enable automatic indexing via withDevTools('${storeName}', { indexNames: true })
   }
 
   renameStore(oldName: string, newName: string) {
-    const storeNames = Object.values(this.#stores).map((store) => store.name);
+    const storeNames = Object.values(this.#stores).map((s) => s.name);
     const id = throwIfNull(
-      Object.keys(this.#stores).find((id) => this.#stores[id].name === oldName),
+      Object.keys(this.#stores).find(
+        (key) => this.#stores[key].name === oldName,
+      ),
     );
+
     if (storeNames.includes(newName)) {
       throw new Error(
         `NgRx Toolkit/DevTools: cannot rename from ${oldName} to ${newName}. ${newName} is already assigned to another SignalStore instance.`,
       );
     }
 
-    this.#stores = Object.entries(this.#stores).reduce(
-      (newStore, [id, value]) => {
-        if (value.name === oldName) {
-          newStore[id] = { ...value, name: newName };
-        } else {
-          newStore[id] = value;
-        }
-        return newStore;
-      },
-      {} as StoreRegistry,
-    );
+    this.#stores = Object.entries(this.#stores).reduce((acc, [key, value]) => {
+      acc[key] = value.name === oldName ? { ...value, name: newName } : value;
+      return acc;
+    }, {} as StoreRegistry);
 
     // we don't rename in #currentState but wait for tracker to notify
     // us with a changed state that contains that name.
     this.#currentState = Object.entries(this.#currentState).reduce(
-      (newState, [storeName, state]) => {
-        if (storeName !== oldName) {
-          newState[storeName] = state;
-        }
-        return newState;
+      (acc, [storeName, state]) => {
+        if (storeName !== oldName) acc[storeName] = state;
+        return acc;
       },
       {} as Record<string, object>,
     );
