@@ -16,6 +16,9 @@ export type CounterResponse = {
   json: { counter: number };
 };
 
+// TODO - rename this file to just be `mutations-functions-standalone` + class/selector etc??
+// And then the other folder to "store"
+// Or maybe put these all in one folder too while we are at it?
 @Component({
   selector: 'demo-counter-rx-mutation',
   imports: [CommonModule],
