@@ -6,6 +6,10 @@ import {
   withHooks,
   withMethods,
 } from '@ngrx/signals';
+import { EventInstance, Events } from '@ngrx/signals/events';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { tap } from 'rxjs';
+import { currentActionNames } from './internal/current-action-names';
 import { DefaultTracker } from './internal/default-tracker';
 import {
   DevtoolsFeature,
@@ -22,6 +26,7 @@ declare global {
 
 export const renameDevtoolsMethodName = '___renameDevtoolsName';
 export const uniqueDevtoolsId = '___uniqueDevtoolsId';
+export const devtoolsEventsTracker = '___devtoolsEventsTracker';
 
 const EXISTING_NAMES = new InjectionToken(
   'Array contain existing names for the signal stores',
@@ -54,6 +59,16 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
           syncer.renameStore(name, newName);
         },
         [uniqueDevtoolsId]: () => id,
+        [devtoolsEventsTracker]: rxMethod<EventInstance<string, unknown>>(
+          (c$) =>
+            c$.pipe(
+              tap((ev) => {
+                if (ev && typeof ev.type === 'string' && ev.type.length > 0) {
+                  currentActionNames.add(ev.type);
+                }
+              }),
+            ),
+        ),
       } as Record<string, (newName?: unknown) => unknown>;
     }),
     withHooks((store) => {
@@ -68,9 +83,15 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
             tracker: inject(
               features.find((f) => f.tracker)?.tracker || DefaultTracker,
             ),
+            eventsTracking: features.some((f) => f.eventsTracking === true),
           };
 
           syncer.addStore(id, name, store, finalOptions);
+
+          if (finalOptions.eventsTracking) {
+            const events = inject(Events);
+            store[devtoolsEventsTracker](events.on());
+          }
         },
         onDestroy() {
           syncer.removeStore(id);
