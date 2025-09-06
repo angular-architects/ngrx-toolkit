@@ -24,6 +24,13 @@ In `withMutations()`
     increment: rxMutation({...}),
     saveToServer: httpMutation<void, CounterResponse>({...}),
   })),
+
+  // Enables the method (returns a promise)
+  store.increment({...})
+  store.saveToServer({...})
+
+  // Enables the following signal states
+  store.increment.(value/status/error/isPending/status/hasValue);
 ```
 
 Function examples, such as a component or service:
