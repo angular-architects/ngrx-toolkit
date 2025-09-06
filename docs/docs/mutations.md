@@ -16,24 +16,30 @@ import { withMutations } from '@angular-architects/ngrx-toolkit';
 
 The mutations feature (`withMutations`) and methods (`httpMutation` and `rxMutation`) seek to offer an appropriate equivalent to signal resources for sending data back to the backend. The methods can be used in `withMutations()` or on their own.
 
-In `withMutations()`
+Mutations enable the use of the following:
 
 ```ts
-  // functions defined below
+// 1. In the mutation:`onSuccess` and `onError` callbacks
+
+// 2. Enables the method (returns a promise)
+store.increment({...})
+store.saveToServer({...})
+
+// 3. Enables the following signal states
+store.increment.(value/status/error/isPending/status/hasValue);
+```
+
+Usage in `withMutations()`
+
+```ts
+  // functions defined in next block
   withMutations((store) => ({
     increment: rxMutation({...}),
     saveToServer: httpMutation<void, CounterResponse>({...}),
   })),
-
-  // Enables the method (returns a promise)
-  store.increment({...})
-  store.saveToServer({...})
-
-  // Enables the following signal states
-  store.increment.(value/status/error/isPending/status/hasValue);
 ```
 
-Function examples, such as a component or service:
+Usage as functions, such as a component or service:
 
 ```ts
   // function calcSum(a: number, b: number): Observable<number> {...}
@@ -43,10 +49,10 @@ Function examples, such as a component or service:
       return calcSum(this.counterSignal(), params.value);
     },
     operator: concatOp,
-    onSuccess: (result) => {
+    onSuccess: (result) => { // optional
       this.counterSignal.set(result);
     },
-    onError: (error) => {
+    onError: (error) => { // optional
       console.error('Error occurred:', error);
     },
   });
@@ -58,10 +64,10 @@ Function examples, such as a component or service:
       body: { counter: p.value },
       headers: { 'Content-Type': 'application/json' },
     }),
-    onSuccess: (response) => {
+    onSuccess: (response) => { // optional
       console.log('Counter sent to server:', response);
     },
-    onError: (error) => {
+    onError: (error) => { // optional
       console.error('Failed to send counter:', error);
     },
   });
@@ -93,8 +99,15 @@ Libraries like Angular Query offer a [Mutation API](https://tanstack.com/query/l
 
 The goal is to provide a simple Mutation API that is available now for early adopters. Ideally, migration to future mutation APIs will be straightforward. Hence, we aim to align with current ideas for them (if any).
 
-## TODO - actual API examples + definitons
+## Basic Usage
 
-1. Actual `httpMutation/rxMutation` standalones + feature
-   - Bundled by rx and non-rx? Or functions then the feature?
-   - Examples
+The mutation functions can be used in a `withMutations()` feature, but can be used outside of one in something like a component or service as well.
+
+Each mutation has the following:
+
+- State signals: value/status/error/isPending/status/hasValue
+- (optional) callbacks, `onSuccess` and `onError`
+
+### Inside `withMutations()`
+
+### Independent of a store
