@@ -8,12 +8,14 @@ export type DevtoolsOptions = {
   indexNames?: boolean; // defines if names should be indexed.
   map?: Mapper; // defines a mapper for the state.
   tracker?: new () => Tracker; // defines a tracker for the state
+  eventsTracking?: boolean; // enables @ngrx/signals/events → DevTools action name tracking
 };
 
 export type DevtoolsInnerOptions = {
   indexNames: boolean;
   map: Mapper;
   tracker: Tracker;
+  eventsTracking: boolean;
 };
 
 /**
