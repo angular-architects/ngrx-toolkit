@@ -58,7 +58,7 @@ button {
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin: 0.5rem 0;
+  margin: 0.5rem 0.5rem 0.5rem 0;
 }
 
 button:not(:disabled) {

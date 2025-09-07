@@ -68,4 +68,11 @@ export const lazyRoutes: Route[] = [
         (m) => m.CounterMutation,
       ),
   },
+  {
+    path: 'rx-mutation',
+    loadComponent: () =>
+      import('./counter-rx-mutation/counter-rx-mutation').then(
+        (m) => m.CounterRxMutation,
+      ),
+  },
 ];

@@ -1,0 +1,40 @@
+<h1>rxMutation + httpMutation (without Store)</h1>
+
+<div class="counter">{{ counter() }}</div>
+
+<div class="section">
+  <h2>Local Increment (rxMutation)</h2>
+  <ul>
+    <li>isPending: {{ isPending() }}</li>
+    <li>Status: {{ status() }}</li>
+    <li>Error: {{ error() | json }}</li>
+    <li>Value: {{ value() | json }}</li>
+    <li>hasValue: {{ hasValue() }}</li>
+  </ul>
+
+  <div>
+    <button (click)="incrementCounter()" [disabled]="isPending()">
+      @if (isPending()) { Incrementing... } @else { Increment by 1 }
+    </button>
+    <button (click)="incrementBy13()" [disabled]="isPending()">
+      @if (isPending()) { Incrementing... } @else { Increment by 13 }
+    </button>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Send to Server (httpMutation)</h2>
+
+  <ul>
+    <li>isPending: {{ saveIsPending() }}</li>
+    <li>Status: {{ saveStatus() }}</li>
+    <li>Error: {{ saveError() | json }}</li>
+    <li>lastResponse: {{ lastResponse() | json }}</li>
+  </ul>
+
+  <div>
+    <button (click)="saveCounterToServer()" [disabled]="saveIsPending()">
+      @if (saveIsPending()) { Sending to Server... } @else { Send to Server }
+    </button>
+  </div>
+</div>
