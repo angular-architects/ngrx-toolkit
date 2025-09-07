@@ -53,4 +53,5 @@ export {
   switchOp,
 } from './lib/flattening-operator';
 
+export * from './lib/mutation/http-mutation';
 export { rxMutation } from './lib/mutation/rx-mutation';

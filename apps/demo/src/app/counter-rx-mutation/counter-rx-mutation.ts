@@ -1,10 +1,19 @@
-import { concatOp, rxMutation } from '@angular-architects/ngrx-toolkit';
+import {
+  concatOp,
+  httpMutation,
+  rxMutation,
+} from '@angular-architects/ngrx-toolkit';
 import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { delay, Observable, of, throwError } from 'rxjs';
 
 export type Params = {
   value: number;
+};
+
+// httpbin.org echos the request in the json property
+export type CounterResponse = {
+  json: { counter: number };
 };
 
 @Component({
@@ -29,6 +38,21 @@ export class CounterRxMutation {
     },
   });
 
+  private saveToServer = httpMutation<Params, CounterResponse>({
+    request: (p) => ({
+      url: `https://httpbin.org/post`,
+      method: 'POST',
+      body: { counter: p.value },
+      headers: { 'Content-Type': 'application/json' },
+    }),
+    onSuccess: (response) => {
+      console.log('Counter sent to server:', response);
+    },
+    onError: (error) => {
+      console.error('Failed to send counter:', error);
+    },
+  });
+
   // Expose signals for template
   protected counter = this.counterSignal.asReadonly();
   protected error = this.increment.error;
@@ -36,6 +60,11 @@ export class CounterRxMutation {
   protected status = this.increment.status;
   protected value = this.increment.value;
   protected hasValue = this.increment.hasValue;
+
+  protected saveError = this.saveToServer.error;
+  protected saveIsPending = this.saveToServer.isPending;
+  protected saveStatus = this.saveToServer.status;
+  protected lastResponse = computed(() => this.saveToServer.value()?.json);
 
   async incrementCounter() {
     const result = await this.increment({ value: 1 });
@@ -52,6 +81,17 @@ export class CounterRxMutation {
 
   async incrementBy13() {
     await this.increment({ value: 13 });
+  }
+
+  async saveCounterToServer() {
+    const result = await this.saveToServer({ value: this.counter() });
+    if (result.status === 'success') {
+      console.log('Successfully saved to server:', result.value);
+    } else if (result.status === 'error') {
+      console.log('Failed to save:', result.error);
+    } else {
+      console.log('Operation aborted');
+    }
   }
 }
 
