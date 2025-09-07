@@ -140,7 +140,7 @@ increment: rxMutation({
 
 saveToServer: httpMutation<void, CounterResponse>({
   // ...
-  // Passing in custom option. Need to import like:
+  // Passing in a custom option. Need to import like:
   // `import { switchOp } from '@angular-architects/ngrx-toolkit'`
   operator: switchOp,
 }),
@@ -244,8 +244,6 @@ mutationName.value; // ^^^
 Callbacks can be used on success or error of the mutation. This allows for side effects, such as patching/setting
 state like a service's signal or a store's property.
 
-To shake up the examples, lets define an `onSuccess` in a `withMutations()` using store and an `onError` in a mutation which is a member of a component.
-
 ```ts
 export const CounterStore = signalStore(
   // ...
@@ -287,7 +285,7 @@ class CounterMutation {
   class SomeComponent {
     private saveToServer = httpMutation<Params, CounterResponse>({
       // ...
-      // Passing in custom option. Need to import like:
+      // Passing in a custom option. Need to import like:
       // `import { switchOp } from '@angular-architects/ngrx-toolkit'`
       operator: switchOp,
     });
@@ -331,7 +329,7 @@ For brevity, take `rx` as `rxMutation` and `http` for `httpMutation`
 
 - `rx` to utilize RxJS streams, `http` to make an `HttpClient` request
   - `rx` could be any valid observable, even if it is not HTTP related.
-  - `http` has to be HTTP request. The user's API is agnostic of RxJS. _Technically, HttpClient with observables is used under the hood_.
+  - `http` has to be an HTTP request. The user's API is agnostic of RxJS. _Technically, HttpClient with observables is used under the hood_.
 - Primary property to pass parameters to:
   - `rx`'s `operation` is a function that defines the mutation logic. It returns an Observable,
   - `http` takes parts of `HttpClient`'s method signature, or a `request` object which accepts those parts
