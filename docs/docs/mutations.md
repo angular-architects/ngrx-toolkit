@@ -8,6 +8,9 @@ import { httpMutation } from '@angular-architects/ngrx-toolkit';
 
 ```typescript
 import { rxMutation } from '@angular-architects/ngrx-toolkit';
+
+// Optional, `concatOp` is the default
+import { concatOp, exhaustOp, mergeOp, switchOp } from '@angular-architects/ngrx-toolkit';
 ```
 
 ```typescript
