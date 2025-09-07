@@ -278,3 +278,102 @@ For brevity, take `rx` as `rxMutation` and `http` for `httpMutation`
     - By default `concat` (`concatMap`) sematics are used
     - Optionally can be passed a `switchOp (switchMap)`, `mergeOp (mergeMap)`, `concatOp (concatMap)`, and `exhauseOp (exhaustMap)`
   - `http` does not automatically prevent race conditions using a flattening operator. The caller is responsible for handling concurrency, e.g., by disabling buttons during processing
+
+## Full example
+
+Our example application in the repository has more details and implementations, but here is a full example in a store using `withMutations`.
+
+This example is a dedicated store and used in a component, but they could be class members of a service/component or `const`s for example/
+
+### Declare mutations (ex - store)
+
+```ts
+import { concatOp, httpMutation, rxMutation, withMutations } from '@angular-architects/ngrx-toolkit';
+import { patchState, signalStore, withState } from '@ngrx/signals';
+import { delay, Observable } from 'rxjs';
+
+export type Params = {
+  value: number;
+};
+
+// httpbin.org echos the request in the json property
+export type CounterResponse = {
+  json: { counter: number };
+};
+
+export const CounterStore = signalStore(
+  { providedIn: 'root' },
+  withState({
+    counter: 0,
+    lastResponse: undefined as unknown | undefined,
+  }),
+  withMutations((store) => ({
+    increment: rxMutation({
+      operation: (params: Params) => {
+        return calcSum(store.counter(), params.value);
+      },
+      operator: concatOp,
+      onSuccess: (result) => {
+        console.log('result', result);
+        patchState(store, { counter: result });
+      },
+      onError: (error) => {
+        console.error('Error occurred:', error);
+      },
+    }),
+    saveToServer: httpMutation<void, CounterResponse>({
+      request: () => ({
+        url: `https://httpbin.org/post`,
+        method: 'POST',
+        body: { counter: store.counter() },
+        headers: { 'Content-Type': 'application/json' },
+      }),
+      onSuccess: (response) => {
+        console.log('Counter sent to server:', response);
+        patchState(store, { lastResponse: response.json });
+      },
+      onError: (error) => {
+        console.error('Failed to send counter:', error);
+      },
+    }),
+  })),
+);
+
+function createSumObservable(a: number, b: number): Observable<number> {
+  // ...
+}
+
+function calcSum(a: number, b: number): Observable<number> {
+  // return of(a + b);
+  return createSumObservable(a, b).pipe(delay(500));
+}
+```
+
+### Use (ex - component)
+
+```ts
+@Component({...})
+export class CounterMutation {
+  private store = inject(CounterStore);
+
+  // signals
+  protected counter = this.store.counter;
+  protected error = this.store.incrementError;
+  protected isPending = this.store.incrementIsPending;
+  protected status = this.store.incrementStatus;
+  // signals
+  protected saveError = this.store.saveToServerError;
+  protected saveIsPending = this.store.saveToServerIsPending;
+  protected saveStatus = this.store.saveToServerStatus;
+  protected lastResponse = this.store.lastResponse;
+
+  increment() {
+    this.store.increment({ value: 1 });
+  }
+
+  // promise version nice if you want to the result's `status`
+  async saveToServer() {
+    await this.store.saveToServer();
+  }
+}
+```
