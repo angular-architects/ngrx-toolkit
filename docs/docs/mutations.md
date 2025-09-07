@@ -165,7 +165,7 @@ export const CounterStore = signalStore(
 );
 
 @Component({...})
-class CounterRxMutation {
+class CounterMutation {
   // ...
   private saveToServer = httpMutation<Params, CounterResponse>({
     onSuccess: (response) => {
@@ -185,41 +185,62 @@ A mutation is its own function to be invoked, returning a promise should you wan
 ```ts
 @Component({...})
 class CounterRxMutation {
-  // From mutation methods in a class
   private increment = rxMutation({...});
-  //
+  private store = inject(CounterStore);
+
   // await or not
   async incrementBy13() {
-    const result = await this.increment({ value: 13 });
-    if (result.status === 'success') { ... }
-  }
-  incrementBy12() {
-    this.increment({ value: 12 });
+    const resultA = await this.increment({ value: 13 });
+    if (resultA.status === 'success') { ... }
+
+    const resultB = await this.store.increment({ value: 13 });
+    if (resultB.status === 'success') { ... }
   }
 
-  // From mutation in `withMutations()`
-  private store = inject(CounterStore);
-  //
-  // await or not
-  async incrementBy13() {
-    const result = await this.store.increment({ value: 13 });
-    if (result.status === 'success') { ... }
-  }
   incrementBy12() {
+    this.increment({ value: 12 });
+
     this.store.increment({ value: 12 });
   }
-}
 ```
+
+<!-- TODO
+     Question for not Michael:
+         This is implied and shown beforehand, but should it be spelled out more explicitly?
+     Michael's answer:
+         I am not certain myself, but if we are not concerned about the length of this page,
+         then I kind of like it. I
+-->
 
 ### Usage: in `withMutations()`, or outside of it
 
+Both of the mutation functions can be used either
+
+- In a signal store, inside of `withMutations()`
+- On its own, for example, like a class member of a component or service
+
 #### Independent of a store
 
-`rxMutation` and `httpMutation` are functions that can be used outside of a store, just as naturally as within a store. Including but not limited to:
-
--
+```ts
+@Component({...})
+class CounterMutation {
+  private increment = rxMutation({...});
+  private saveToServer = httpMutation<Params, CounterResponse>({...});
+}
+```
 
 #### Inside `withMutations()`
+
+```ts
+export const CounterStore = signalStore(
+  // ...
+  withMutations((store) => ({
+    // the same functions
+    increment: rxMutation({...}),
+    saveToServer: httpMutation<void, CounterResponse>({...}),
+  })),
+);
+```
 
 ### Choosing between `rxMutation` and `httpMutation`
 
