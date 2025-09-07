@@ -227,9 +227,7 @@ export const CounterStore = signalStore(
 class CounterMutation {
   // ...
   private saveToServer = httpMutation<Params, CounterResponse>({
-    onSuccess: (response) => {
-      console.log('Counter sent to server:', response);
-    },
+    // ...
     onError: (error) => {
       console.error('Failed to send counter:', error);
     },
