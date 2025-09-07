@@ -22,13 +22,23 @@ Mutations enable the use of the following:
 
 ```ts
 // 1. In the mutation:`onSuccess` and `onError` callbacks
+({
+  onSuccess: (result) => { // optional
+    // method: this.counterSignal.set(result);
+    // store: patchState(store, {counter: result});
+  },
+  onError: (error) => { // optional
+    console.error('Error occurred:', error);
+  },
+})
 
 // 2. Enables the method (returns a promise)
 store.increment({...})
-store.saveToServer({...})
+mutationName.saveToServer({...})
 
 // 3. Enables the following signal states
-store.increment.(value/status/error/isPending/status/hasValue);
+store.increment.value; // also status/error/isPending/status/hasValue;
+mutationName.value; // ^^^
 ```
 
 Usage in `withMutations()`
@@ -105,11 +115,111 @@ The goal is to provide a simple Mutation API that is available now for early ado
 
 The mutation functions can be used in a `withMutations()` feature, but can be used outside of one in something like a component or service as well.
 
+### Key features
+
 Each mutation has the following:
 
 - State signals: `value/status/error/isPending/status/hasValue`
-- (optional) callbacks, `onSuccess` and `onError`
+- (optional) callbacks: `onSuccess` and `onError`
 - Exposes a method of the same name as the mutation, which is a promise.
+
+#### State Signals
+
+```ts
+// Accessed from store or variable
+storeName.mutationName.value; // or other signals
+mutationName.value; // ^^^
+
+// With the following types:
+export type MutationStatus = 'idle' | 'pending' | 'error' | 'success';
+
+export type Mutation<Parameter, Result> = {
+  status: Signal<'idle' | 'pending' | 'error' | 'success'>;
+  value: Signal<Result | undefined>;
+  isPending: Signal<boolean>;
+  isSuccess: Signal<boolean>;
+  error: Signal<unknown>;
+  hasValue(): this is Mutation<Exclude<Parameter, undefined>, Result>; // type narrows `.value()`
+};
+```
+
+#### (optional) Callbacks: `onSuccess` and `onError`
+
+Callbacks can be used on success or error of the mutation. This allows for side effects, such as patching/setting
+state like a service's signal or a store's property.
+
+To shake up the examples, lets define an `onSuccess` in a `withMutations()` using store and an `onError` in a mutation which is a member of a component.
+
+```ts
+export const CounterStore = signalStore(
+  // ...
+  withMutations((store) => ({
+    increment: rxMutation({
+      // ...
+      onSuccess: (result) => {
+        console.log('result', result);
+        patchState(store, { counter: result });
+      },
+    }),
+  })),
+);
+
+@Component({...})
+class CounterRxMutation {
+  // ...
+  private saveToServer = httpMutation<Params, CounterResponse>({
+    onSuccess: (response) => {
+      console.log('Counter sent to server:', response);
+    },
+    onError: (error) => {
+      console.error('Failed to send counter:', error);
+    },
+  });
+}
+```
+
+#### Methods
+
+A mutation is its own function to be invoked, returning a promise should you want to await one.
+
+```ts
+@Component({...})
+class CounterRxMutation {
+  // From mutation methods in a class
+  private increment = rxMutation({...});
+  //
+  // await or not
+  async incrementBy13() {
+    const result = await this.increment({ value: 13 });
+    if (result.status === 'success') { ... }
+  }
+  incrementBy12() {
+    this.increment({ value: 12 });
+  }
+
+  // From mutation in `withMutations()`
+  private store = inject(CounterStore);
+  //
+  // await or not
+  async incrementBy13() {
+    const result = await this.store.increment({ value: 13 });
+    if (result.status === 'success') { ... }
+  }
+  incrementBy12() {
+    this.store.increment({ value: 12 });
+  }
+}
+```
+
+### Usage: in `withMutations()`, or outside of it
+
+#### Independent of a store
+
+`rxMutation` and `httpMutation` are functions that can be used outside of a store, just as naturally as within a store. Including but not limited to:
+
+-
+
+#### Inside `withMutations()`
 
 ### Choosing between `rxMutation` and `httpMutation`
 
@@ -127,7 +237,3 @@ For brevity, take `rx` as `rxMutation` and `http` for `httpMutation`
     - By default `concat` (`concatMap`) sematics are used
     - Optionally can be passed a `switchOp (switchMap)`, `mergeOp (mergeMap)`, `concatOp (concatMap)`, and `exhauseOp (exhaustMap)`
   - `http` does not automatically prevent race conditions using a flattening operator. The caller is responsible for handling concurrency, e.g., by disabling buttons during processing
-
-### Inside `withMutations()`
-
-### Independent of a store
