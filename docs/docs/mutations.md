@@ -14,6 +14,8 @@ import { rxMutation } from '@angular-architects/ngrx-toolkit';
 import { withMutations } from '@angular-architects/ngrx-toolkit';
 ```
 
+## Basic Usage - Summary
+
 The mutations feature (`withMutations`) and methods (`httpMutation` and `rxMutation`) seek to offer an appropriate equivalent to signal resources for sending data back to the backend. The methods can be used in `withMutations()` or on their own.
 
 Mutations enable the use of the following:
@@ -99,14 +101,32 @@ Libraries like Angular Query offer a [Mutation API](https://tanstack.com/query/l
 
 The goal is to provide a simple Mutation API that is available now for early adopters. Ideally, migration to future mutation APIs will be straightforward. Hence, we aim to align with current ideas for them (if any).
 
-## Basic Usage
+## Basic Usage - In Depth
 
 The mutation functions can be used in a `withMutations()` feature, but can be used outside of one in something like a component or service as well.
 
 Each mutation has the following:
 
-- State signals: value/status/error/isPending/status/hasValue
+- State signals: `value/status/error/isPending/status/hasValue`
 - (optional) callbacks, `onSuccess` and `onError`
+- Exposes a method of the same name as the mutation, which is a promise.
+
+### Choosing between `rxMutation` and `httpMutation`
+
+Though mutations and resources have different intents, the difference between `rxMutation` and `httpMutation` can be seen in a
+similar way as `rxResource` and `httpResource`
+
+For brevity, take `rx` as `rxMutation` and `http` for `httpMutation`
+
+- `rx` to utilize RxJS streams, `http` to make an `HttpClient` request agnostic of RxJS (at the user's API surface)
+- Primary property to pass parameters to:
+  - `rx`'s `operation` is a function that defines the mutation logic. It returns an Observable,
+  - `http` takes parts of `HttpClient`'s method signature, or a `request` object which accepts those parts
+- Race condition handling
+  - `rx` takes optional wrapper of an RxJS flattening operator.
+    - By default `concat` (`concatMap`) sematics are used
+    - Optionally can be passed a `switchOp (switchMap)`, `mergeOp (mergeMap)`, `concatOp (concatMap)`, and `exhauseOp (exhaustMap)`
+  - `http` does not automatically prevent race conditions using a flattening operator. The caller is responsible for handling concurrency, e.g., by disabling buttons during processing
 
 ### Inside `withMutations()`
 
