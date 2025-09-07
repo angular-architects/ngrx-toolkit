@@ -47,8 +47,6 @@ the "Why" and "Who" of why mutations were built for the toolkit like this.
 
 ## Background
 
-<!-- TODO - Johanderson's point on legacy need for occasional non-GET in resources -->
-
 ### Why not handle mutations using [`withResource`](./with-resource)?
 
 The `resource` API and discussion about it naturally lead to talks about all async operations.
