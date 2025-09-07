@@ -18,81 +18,108 @@ import { withMutations } from '@angular-architects/ngrx-toolkit';
 
 The mutations feature (`withMutations`) and methods (`httpMutation` and `rxMutation`) seek to offer an appropriate equivalent to signal resources for sending data back to the backend. The methods can be used in `withMutations()` or on their own.
 
-Mutations enable the use of the following:
+This guide covers
+
+- Key Features:
+  - The params to pass
+  - Callbacks available
+  - Calling the mutations (optionally as promises)
+  - State signals available
+- Why we do not use `withResource`, and the direction on mutations from the community
+- `httpMutation` and `rxMutation` as standalone _functions_ that can be used outside of a store
+- `withMutations` store _feature_, and the usage of `httpMutation` and `rxMutation` functions inside the feature
+
+But before going into depth of the "How" and "When" to use mutations, it is important to give context about
+the "Why" and "Who" of why mutations were built for the toolkit like this.
+
+### Key features
+
+Each mutation has the following:
+
+1. Parameters to pass to an RxJS stream (`rxMutation`) or RxJS agnostic `HttpClient` call (`httpMutation`)
+1. (optional) callbacks: `onSuccess` and `onError`
+1. Exposes a method of the same name as the mutation, returns a promise.
+1. State signals: `value/status/error/isPending/status/hasValue`
 
 ```ts
-// 1. In the mutation:`onSuccess` and `onError` callbacks
+// 1. Params + call
+
+// RxJS stream
+rxMutation({
+  operation: (params: Params) => {
+    // function calcSum(a: number, b: number): Observable<number>
+    return calcSum(this.counterSignal(), params.value);
+  },
+})
+
+// http call, as options
+httpMutation<CreateUserRequest, User>((userData) => ({
+  url: '/api/users',
+  method: 'POST',
+  body: userData,
+})),
+// OR
+// http call, as function + options
+httpMutation<Params, CounterResponse>({
+  request: (p) => ({
+    url: `https://httpbin.org/post`,
+    method: 'POST',
+    body: { counter: p.value },
+    headers: { 'Content-Type': 'application/json' },
+  })
+);
+
+// 2. In the mutation:`onSuccess` and `onError` callbacks
 ({
   onSuccess: (result) => { // optional
-    // method: this.counterSignal.set(result);
-    // store: patchState(store, {counter: result});
+    // method:
+    //     this.counterSignal.set(result);
+    // store:
+    //     patchState(store, {counter: result});
   },
   onError: (error) => { // optional
     console.error('Error occurred:', error);
   },
 })
 
-// 2. Enables the method (returns a promise)
-store.increment({...})
-mutationName.saveToServer({...})
+// 3. Enables the method (returns a promise)
+store.increment({...}); // const inc = await store.increment; if (inc.status === 'success')
+mutationName.saveToServer({...}); // const save = await store.save; if (inc.status === 'error')
 
-// 3. Enables the following signal states
+// 4. Enables the following signal states
 store.increment.value; // also status/error/isPending/status/hasValue;
 mutationName.value; // ^^^
 ```
 
-Usage in `withMutations()`
+### Usage: `withMutations()` or solo functions
+
+Both of the mutation functions can be used either
+
+- In a signal store, inside of `withMutations()`
+- On its own, for example, like a class member of a component or service
+
+#### Independent of a store
 
 ```ts
-  // functions defined in next block
+@Component({...})
+class CounterMutation {
+  private increment = rxMutation({...});
+  private saveToServer = httpMutation<Params, CounterResponse>({...});
+}
+```
+
+#### Inside `withMutations()`
+
+```ts
+export const CounterStore = signalStore(
+  // ...
   withMutations((store) => ({
+    // the same functions
     increment: rxMutation({...}),
     saveToServer: httpMutation<void, CounterResponse>({...}),
   })),
+);
 ```
-
-Usage as functions, such as a component or service:
-
-```ts
-  // function calcSum(a: number, b: number): Observable<number> {...}
-
-  private increment = rxMutation({
-    operation: (params: Params) => {
-      return calcSum(this.counterSignal(), params.value);
-    },
-    operator: concatOp,
-    onSuccess: (result) => { // optional
-      this.counterSignal.set(result);
-    },
-    onError: (error) => { // optional
-      console.error('Error occurred:', error);
-    },
-  });
-
-  private saveToServer = httpMutation<Params, CounterResponse>({
-    request: (p) => ({
-      url: `https://httpbin.org/post`,
-      method: 'POST',
-      body: { counter: p.value },
-      headers: { 'Content-Type': 'application/json' },
-    }),
-    onSuccess: (response) => { // optional
-      console.log('Counter sent to server:', response);
-    },
-    onError: (error) => { // optional
-      console.error('Failed to send counter:', error);
-    },
-  });
-```
-
-This guide covers
-
-- Why we do not use `withResource`, and the direction on mutations from the community
-- `withMutations` store _feature_, and the usage of `httpMutation` and `rxMutation` inside of the feature
-- `httpMutation` and `rxMutation` as standalone _functions_ that can be used outside of a store
-
-But before going into depth of the "How" and "When" to use mutations, it is important to give context about
-the "Why" and "Who" of why mutations were built for the toolkit like this.
 
 ## Background
 
@@ -105,7 +132,7 @@ for example, HTTP methods like POST/PUT/DELETE.**
 
 > "`httpResource` (and the more fundamental `resource`) both declare a dependency on data that should be fetched. It's not a suitable primitive for making imperative HTTP requests, such as requests to mutation APIs" - [Pawel Kozlowski, in the Resource API RFC](https://github.com/angular/angular/discussions/60121)
 
-### What lead the ngrx-toolkit is following for Mutations
+### Path the toolkit is following for Mutations
 
 Libraries like Angular Query offer a [Mutation API](https://tanstack.com/query/latest/docs/framework/angular/guides/mutations) for such cases. Some time ago, Marko Stanimirović also [proposed a Mutation API for Angular](https://github.com/markostanimirovic/rx-resource-proto). This RFC is heavily inspired by Marko's work and adapts it as a custom feature for the NgRx Signal Store.
 
@@ -119,6 +146,8 @@ The mutation functions can be used in a `withMutations()` feature, but can be us
 
 Each mutation has the following:
 
+<!-- TODO - params - roll into the `rx` vs `http`? -->
+
 - State signals: `value/status/error/isPending/status/hasValue`
 - (optional) callbacks: `onSuccess` and `onError`
 - Exposes a method of the same name as the mutation, which is a promise.
@@ -126,11 +155,7 @@ Each mutation has the following:
 #### State Signals
 
 ```ts
-// Accessed from store or variable
-storeName.mutationName.value; // or other signals
-mutationName.value; // ^^^
-
-// With the following types:
+// Fields + types types:
 export type MutationStatus = 'idle' | 'pending' | 'error' | 'success';
 
 export type Mutation<Parameter, Result> = {
@@ -141,6 +166,10 @@ export type Mutation<Parameter, Result> = {
   error: Signal<unknown>;
   hasValue(): this is Mutation<Exclude<Parameter, undefined>, Result>; // type narrows `.value()`
 };
+
+// Accessed from store or variable
+storeName.mutationName.value; // or other signals
+mutationName.value; // ^^^
 ```
 
 #### (optional) Callbacks: `onSuccess` and `onError`
@@ -202,44 +231,7 @@ class CounterRxMutation {
 
     this.store.increment({ value: 12 });
   }
-```
-
-<!-- TODO
-     Question for not Michael:
-         This is implied and shown beforehand, but should it be spelled out more explicitly?
-     Michael's answer:
-         I am not certain myself, but if we are not concerned about the length of this page,
-         then I kind of like it. I
--->
-
-### Usage: in `withMutations()`, or outside of it
-
-Both of the mutation functions can be used either
-
-- In a signal store, inside of `withMutations()`
-- On its own, for example, like a class member of a component or service
-
-#### Independent of a store
-
-```ts
-@Component({...})
-class CounterMutation {
-  private increment = rxMutation({...});
-  private saveToServer = httpMutation<Params, CounterResponse>({...});
 }
-```
-
-#### Inside `withMutations()`
-
-```ts
-export const CounterStore = signalStore(
-  // ...
-  withMutations((store) => ({
-    // the same functions
-    increment: rxMutation({...}),
-    saveToServer: httpMutation<void, CounterResponse>({...}),
-  })),
-);
 ```
 
 ### Choosing between `rxMutation` and `httpMutation`
