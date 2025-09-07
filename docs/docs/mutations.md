@@ -74,6 +74,8 @@ Each mutation has the following:
 1. Exposes a method of the same name as the mutation, returns a promise.
 1. State signals: `value/status/error/isPending/hasValue`
 
+Additionally, mutations can be used in either `withMutations()` or as standalone functions.
+
 ### Params
 
 See dedicated section on [choosing between `rxMutation` and `httpMutation`](#choosing-between-rxmutation-and-httpmutation)
@@ -209,8 +211,6 @@ The mutation functions can be used in a `withMutations()` feature, but can be us
 ### Key features (in depth)
 
 Each mutation has the following:
-
-<!-- TODO - params - roll into the `rx` vs `http`? -->
 
 - Passing params via RxJS or RxJS-less `HttpClient` signature
   - See ["Choosing between `rxMutation` and `httpMutation`"](#choosing-between-rxmutation-and-httpmutation)
