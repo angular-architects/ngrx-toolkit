@@ -19,24 +19,28 @@ import { withMutations } from '@angular-architects/ngrx-toolkit';
 import { concatOp, exhaustOp, mergeOp, switchOp } from '@angular-architects/ngrx-toolkit';
 ```
 
-## Basic Usage - Summary
+## Basic Usage
 
 The mutations feature (`withMutations`) and methods (`httpMutation` and `rxMutation`) seek to offer an appropriate equivalent to signal resources for sending data back to the backend. The methods can be used in `withMutations()` or on their own.
 
 This guide covers
 
 - Why we do not use [`withResource`](./with-resource), and the direction on mutations from the community
-- Key Features:
+- Key Features ([summary](#key-features-summary) and [in depth](#key-features-in-depth)):
+  <!-- TODO (discuss): I think it is important to know it is `HttpClient` under the hood for stuff like interceptors and global stuff -->
   - The params to pass (via RxJS or via `HttpClient` params without RxJS)
   - Callbacks available (`onSuccess` and `onError`)
+  - Flattening operators (`concatOp, exhaustOp, mergeOp, switchOp`)
   - Calling the mutations (optionally as promises)
-  - State signals available (`value/status/error/isPending/hasValue`)
-  <!-- TODO - mention in the short version then the long version -->
-  - Flattening operators
-- `httpMutation` and `rxMutation` as standalone _functions_ that can be used outside of a store
-- `withMutations` store _feature_, and the usage of `httpMutation` and `rxMutation` functions inside the feature
-- Differences between `httpMutation` and `rxMutation`
-- Full example of a usecase of both mutations in a `withMutations()` and then used in a component
+  <!-- TODO - narrowing not working like intended? -->
+  - State signals available (`value/status/error/isPending`) + `hasValue` signal to narrow type- `httpMutation` and `rxMutation`
+  - [How to use](#usage-withmutations-or-solo-functions), as:
+    - _standalone functions_
+    - In `withMutations` store _feature_
+- [Differences](#choosing-between-rxmutation-and-httpmutation) between `httpMutation` and `rxMutation`
+- [Full examples](#full-example) of
+  - Both mutations in a `withMutations()`
+  - Standalone functions in a component
 
 But before going into depth of the "How" and "When" to use mutations, it is important to give context about
 the "Why" and "Who" of why mutations were built for the toolkit like this.
@@ -60,21 +64,21 @@ Libraries like Angular Query offer a [Mutation API](https://tanstack.com/query/l
 
 The goal is to provide a simple Mutation API that is available now for early adopters. Ideally, migration to future mutation APIs will be straightforward. Hence, we aim to align with current ideas for them (if any).
 
-## Key features
+## Key features (summary)
 
 Each mutation has the following:
 
 1. Parameters to pass to an RxJS stream (`rxMutation`) or RxJS agnostic `HttpClient` call (`httpMutation`)
-1. (optional) callbacks: `onSuccess` and `onError`
+1. Callbacks: `onSuccess` and `onError` (optional)
+1. Flattening operators (optional, defaults to `concatOp`)
 1. Exposes a method of the same name as the mutation, returns a promise.
 1. State signals: `value/status/error/isPending/hasValue`
-1. Flattening operators
 
 ### Params
 
-```ts
-// 1. Params + call
+See dedicated section on [choosing between `rxMutation` and `httpMutation`](#choosing-between-rxmutation-and-httpmutation)
 
+```ts
 // RxJS stream
 rxMutation({
   operation: (params: Params) => {
@@ -103,8 +107,9 @@ httpMutation<Params, CounterResponse>({
 
 ### Callbacks
 
+In the mutation: _optional_ `onSuccess` and `onError` callbacks
+
 ```ts
-// 2. In the mutation: *optional* `onSuccess` and `onError` callbacks
 ({
   onSuccess: (result) => {
     // optional
@@ -120,40 +125,13 @@ httpMutation<Params, CounterResponse>({
 });
 ```
 
-### Methods
-
-```ts
-// 3. Enables the method (returns a promise)
-
-// Call directly
-store.increment({...});
-mutationName.saveToServer({...});
-
-// or await promises
-const inc = await store.increment({...}); if (inc.status === 'success')
-const save = await store.save({...}); if (inc.status === 'error')
-```
-
-### Signal values
-
-```ts
-// 4. Enables the following signal states
-
-// via store
-store.increment.value; // also status/error/isPending/status/hasValue;
-
-// via member variable
-mutationName.value; // ^^^
-```
-
 ### Flattening operators
 
+Enables handling race conditions
+
 ```ts
-// 5. Enables handling race conditions
-
-// All options: concatOp, exhaustOp, mergeOp, switchOp
 // Default: concatOp
-
+// All options: concatOp, exhaustOp, mergeOp, switchOp
 
 increment: rxMutation({
   // ...
@@ -166,6 +144,32 @@ saveToServer: httpMutation<void, CounterResponse>({
   // `import { switchOp } from '@angular-architects/ngrx-toolkit'`
   operator: switchOp,
 }),
+```
+
+### Methods
+
+Enables the method (returns a promise)
+
+```ts
+// Call directly
+store.increment({...});
+mutationName.saveToServer({...});
+
+// or await promises
+const inc = await store.increment({...}); if (inc.status === 'success')
+const save = await store.save({...}); if (inc.status === 'error')
+```
+
+### Signal values
+
+```ts
+// 5. Enables the following signal states
+
+// via store
+store.increment.value; // also status/error/isPending/status/hasValue;
+
+// via member variable
+mutationName.value; // ^^^
 ```
 
 ### Usage: `withMutations()` or solo functions
@@ -202,14 +206,16 @@ export const CounterStore = signalStore(
 
 The mutation functions can be used in a `withMutations()` feature, but can be used outside of one in something like a component or service as well.
 
-### Key features
+### Key features (in depth)
 
 Each mutation has the following:
 
 <!-- TODO - params - roll into the `rx` vs `http`? -->
 
-- Passing params via RxJS or RxJS-less `HttpClient` signature - see last section on difference
+- Passing params via RxJS or RxJS-less `HttpClient` signature
+  - See ["Choosing between `rxMutation` and `httpMutation`"](#choosing-between-rxmutation-and-httpmutation)
 - State signals: `value/status/error/isPending/status/hasValue`
+- (optional, but has default) Flattening operators
 - (optional) callbacks: `onSuccess` and `onError`
 - Exposes a method of the same name as the mutation, which is a promise.
 
@@ -233,7 +239,7 @@ storeName.mutationName.value; // or other signals
 mutationName.value; // ^^^
 ```
 
-#### (optional) Callbacks: `onSuccess` and `onError`
+#### Callbacks: `onSuccess` and `onError` (optional)
 
 Callbacks can be used on success or error of the mutation. This allows for side effects, such as patching/setting
 state like a service's signal or a store's property.
@@ -264,6 +270,28 @@ class CounterMutation {
     },
   });
 }
+```
+
+#### Flattening operators (optional to specify, has default)
+
+```ts
+// Default: concatOp
+// All options: concatOp, exhaustOp, mergeOp, switchOp
+
+(withMutations((store) => ({
+  increment: rxMutation({
+    // ...
+    operator: concatOp, // default if `operator` omitted
+  }),
+})),
+  class SomeComponent {
+    private saveToServer = httpMutation<Params, CounterResponse>({
+      // ...
+      // Passing in custom option. Need to import like:
+      // `import { switchOp } from '@angular-architects/ngrx-toolkit'`
+      operator: switchOp,
+    });
+  });
 ```
 
 #### Methods
@@ -307,7 +335,8 @@ For brevity, take `rx` as `rxMutation` and `http` for `httpMutation`
 - Primary property to pass parameters to:
   - `rx`'s `operation` is a function that defines the mutation logic. It returns an Observable,
   - `http` takes parts of `HttpClient`'s method signature, or a `request` object which accepts those parts
-      <!-- TODO - I am wrong on flattening part, re-write -->
+
+<!-- TODO - I was wrong on flattening part, re-write -->
 
 ## Full example
 
@@ -315,7 +344,7 @@ Our example application in the repository has more details and implementations, 
 
 This example is a dedicated store with `withMutations` and used in a component, but could be just the mutation functions as class members of a service/component or `const`s, for example.
 
-### Declare mutations (ex - store)
+### Declare
 
 ```ts
 import { concatOp, httpMutation, rxMutation, withMutations } from '@angular-architects/ngrx-toolkit';
@@ -369,17 +398,14 @@ export const CounterStore = signalStore(
   })),
 );
 
-function createSumObservable(a: number, b: number): Observable<number> {
-  // ...
-}
-
+// return of(a + b);
 function calcSum(a: number, b: number): Observable<number> {
-  // return of(a + b);
+  function createSumObservable(a: number, b: number): Observable<number> {...}
   return createSumObservable(a, b).pipe(delay(500));
 }
 ```
 
-### Use (ex - component)
+### Use
 
 ```ts
 @Component({...})
