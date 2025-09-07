@@ -8,13 +8,15 @@ import { httpMutation } from '@angular-architects/ngrx-toolkit';
 
 ```typescript
 import { rxMutation } from '@angular-architects/ngrx-toolkit';
-
-// Optional, `concatOp` is the default
-import { concatOp, exhaustOp, mergeOp, switchOp } from '@angular-architects/ngrx-toolkit';
 ```
 
 ```typescript
 import { withMutations } from '@angular-architects/ngrx-toolkit';
+```
+
+```typescript
+// Optional, `concatOp` is the default.
+import { concatOp, exhaustOp, mergeOp, switchOp } from '@angular-architects/ngrx-toolkit';
 ```
 
 ## Basic Usage - Summary
@@ -29,13 +31,19 @@ This guide covers
   - Callbacks available (`onSuccess` and `onError`)
   - Calling the mutations (optionally as promises)
   - State signals available (`value/status/error/isPending/hasValue`)
+  <!-- TODO - mention in the short version then the long version -->
+  - Flattening operators
 - `httpMutation` and `rxMutation` as standalone _functions_ that can be used outside of a store
 - `withMutations` store _feature_, and the usage of `httpMutation` and `rxMutation` functions inside the feature
+- Differences between `httpMutation` and `rxMutation`
+- Full example of a usecase of both mutations in a `withMutations()` and then used in a component
 
 But before going into depth of the "How" and "When" to use mutations, it is important to give context about
 the "Why" and "Who" of why mutations were built for the toolkit like this.
 
 ## Background
+
+<!-- TODO - Johanderson's point on legacy need for occasional non-GET in resources -->
 
 ### Why not handle mutations using [`withResource`](./with-resource)?
 
@@ -60,6 +68,7 @@ Each mutation has the following:
 1. (optional) callbacks: `onSuccess` and `onError`
 1. Exposes a method of the same name as the mutation, returns a promise.
 1. State signals: `value/status/error/isPending/hasValue`
+1. Flattening operators
 
 ### Params
 
@@ -135,6 +144,28 @@ store.increment.value; // also status/error/isPending/status/hasValue;
 
 // via member variable
 mutationName.value; // ^^^
+```
+
+### Flattening operators
+
+```ts
+// 5. Enables handling race conditions
+
+// All options: concatOp, exhaustOp, mergeOp, switchOp
+// Default: concatOp
+
+
+increment: rxMutation({
+  // ...
+  operator: concatOp, // default if `operator` omitted
+}),
+
+saveToServer: httpMutation<void, CounterResponse>({
+  // ...
+  // Passing in custom option. Need to import like:
+  // `import { switchOp } from '@angular-architects/ngrx-toolkit'`
+  operator: switchOp,
+}),
 ```
 
 ### Usage: `withMutations()` or solo functions
@@ -245,7 +276,7 @@ class CounterRxMutation {
   private increment = rxMutation({...});
   private store = inject(CounterStore);
 
-  // await or not
+  // To await
   async incrementBy13() {
     const resultA = await this.increment({ value: 13 });
     if (resultA.status === 'success') { ... }
@@ -254,6 +285,7 @@ class CounterRxMutation {
     if (resultB.status === 'success') { ... }
   }
 
+  // or not to await, that is the question
   incrementBy12() {
     this.increment({ value: 12 });
 
@@ -269,21 +301,19 @@ similar way as `rxResource` and `httpResource`
 
 For brevity, take `rx` as `rxMutation` and `http` for `httpMutation`
 
-- `rx` to utilize RxJS streams, `http` to make an `HttpClient` request agnostic of RxJS (at the user's API surface)
+- `rx` to utilize RxJS streams, `http` to make an `HttpClient` request
+  - `rx` could be any valid observable, even if it is not HTTP related.
+  - `http` has to be HTTP request. The user's API is agnostic of RxJS. _Technically, HttpClient with observables is used under the hood_.
 - Primary property to pass parameters to:
   - `rx`'s `operation` is a function that defines the mutation logic. It returns an Observable,
   - `http` takes parts of `HttpClient`'s method signature, or a `request` object which accepts those parts
-- Race condition handling
-  - `rx` takes optional wrapper of an RxJS flattening operator.
-    - By default `concat` (`concatMap`) sematics are used
-    - Optionally can be passed a `switchOp (switchMap)`, `mergeOp (mergeMap)`, `concatOp (concatMap)`, and `exhauseOp (exhaustMap)`
-  - `http` does not automatically prevent race conditions using a flattening operator. The caller is responsible for handling concurrency, e.g., by disabling buttons during processing
+      <!-- TODO - I am wrong on flattening part, re-write -->
 
 ## Full example
 
 Our example application in the repository has more details and implementations, but here is a full example in a store using `withMutations`.
 
-This example is a dedicated store and used in a component, but they could be class members of a service/component or `const`s for example/
+This example is a dedicated store with `withMutations` and used in a component, but could be just the mutation functions as class members of a service/component or `const`s, for example.
 
 ### Declare mutations (ex - store)
 
