@@ -54,7 +54,7 @@ the "Why" and "Who" of why mutations were built for the toolkit like this.
 The `resource` API and discussion about it naturally lead to talks about all async operations.
 Notably, one position has been remained firm by the Angular team through resources' debut, RFCs (#1, [Architecture](https://github.com/angular/angular/discussions/60120)) and (#2, [APIs](https://github.com/angular/angular/discussions/60121)), and followup
 enhancements: **Resources should only be responsible for read operations, such as an HTTP GET. Resources should NOT be used for MUTATIONS,
-for example, HTTP methods like POST/PUT/DELETE.**
+for example, HTTP methods like POST/PUT/DELETE.** Though other HTTP methods are supported in resources, there are edge cases for those who need them, such as some APIs that treat everything as a POST request 😬
 
 > "`httpResource` (and the more fundamental `resource`) both declare a dependency on data that should be fetched. It's not a suitable primitive for making imperative HTTP requests, such as requests to mutation APIs" - [Pawel Kozlowski, in the Resource API RFC](https://github.com/angular/angular/discussions/60121)
 
