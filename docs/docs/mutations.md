@@ -23,12 +23,12 @@ The mutations feature (`withMutations`) and methods (`httpMutation` and `rxMutat
 
 This guide covers
 
-- Why we do not use `withResource`, and the direction on mutations from the community
+- Why we do not use [`withResource`](./with-resource), and the direction on mutations from the community
 - Key Features:
   - The params to pass (via RxJS or via `HttpClient` params without RxJS)
   - Callbacks available (`onSuccess` and `onError`)
   - Calling the mutations (optionally as promises)
-  - State signals available (`value/status/error/isPending/status/hasValue`)
+  - State signals available (`value/status/error/isPending/hasValue`)
 - `httpMutation` and `rxMutation` as standalone _functions_ that can be used outside of a store
 - `withMutations` store _feature_, and the usage of `httpMutation` and `rxMutation` functions inside the feature
 
@@ -37,7 +37,7 @@ the "Why" and "Who" of why mutations were built for the toolkit like this.
 
 ## Background
 
-### Why not handle mutations using `withResource`?
+### Why not handle mutations using [`withResource`](./with-resource)?
 
 The `resource` API and discussion about it naturally lead to talks about all async operations.
 Notably, one position has been remained firm by the Angular team through resources' debut, RFCs (#1, [Architecture](https://github.com/angular/angular/discussions/60120)) and (#2, [APIs](https://github.com/angular/angular/discussions/60121)), and followup
@@ -48,7 +48,7 @@ for example, HTTP methods like POST/PUT/DELETE.**
 
 ### Path the toolkit is following for Mutations
 
-Libraries like Angular Query offer a [Mutation API](https://tanstack.com/query/latest/docs/framework/angular/guides/mutations) for such cases. Some time ago, Marko Stanimirović also [proposed a Mutation API for Angular](https://github.com/markostanimirovic/rx-resource-proto). This RFC is heavily inspired by Marko's work and adapts it as a custom feature for the NgRx Signal Store.
+Libraries like Angular Query offer a [Mutation API](https://tanstack.com/query/latest/docs/framework/angular/guides/mutations) for such cases. Some time ago, Marko Stanimirović also [proposed a Mutation API for Angular](https://github.com/markostanimirovic/rx-resource-proto). These mutation functions and features are heavily inspired by Marko's work and adapts it as a custom feature/functions for the NgRx Signal Store.
 
 The goal is to provide a simple Mutation API that is available now for early adopters. Ideally, migration to future mutation APIs will be straightforward. Hence, we aim to align with current ideas for them (if any).
 
@@ -59,7 +59,7 @@ Each mutation has the following:
 1. Parameters to pass to an RxJS stream (`rxMutation`) or RxJS agnostic `HttpClient` call (`httpMutation`)
 1. (optional) callbacks: `onSuccess` and `onError`
 1. Exposes a method of the same name as the mutation, returns a promise.
-1. State signals: `value/status/error/isPending/status/hasValue`
+1. State signals: `value/status/error/isPending/hasValue`
 
 ### Params
 
