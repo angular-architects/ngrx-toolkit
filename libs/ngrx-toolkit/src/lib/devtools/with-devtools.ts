@@ -51,7 +51,7 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
       // TODO: use withProps and symbols
       return {
         [renameDevtoolsMethodName]: (newName: string) => {
-          syncer.renameStore(name, newName);
+          syncer.renameStore(id, newName);
         },
         [uniqueDevtoolsId]: () => id,
       } as Record<string, (newName?: unknown) => unknown>;
