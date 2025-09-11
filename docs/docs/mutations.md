@@ -33,6 +33,7 @@ This guide covers
   - Calling the mutations (optionally as promises)
   - State signals available (`value/status/error/isPending`)
       <!-- TODO - resolve when #235 closed-->
+    - For `httpMutation`, the response type is specified with the param `parse: (res: T) => res as T`
     - `hasValue` signal to narrow type. NOTE: currently there is an outstanding bug that this does not properly narrow.
   - [How to use](#usage-withmutations-or-solo-functions), as:
     - _standalone functions_
@@ -213,6 +214,7 @@ Each mutation has the following:
 - Passing params via RxJS or RxJS-less `HttpClient` signature
   - See ["Choosing between `rxMutation` and `httpMutation`"](#choosing-between-rxmutation-and-httpmutation)
 - State signals: `value/status/error/isPending/status/hasValue`
+  - For `httpMutation`, the response type is specified with the param `parse: (res: T) => res as T`
 - (optional, but has default) Flattening operators
 - (optional) callbacks: `onSuccess` and `onError`
 - Exposes a method of the same name as the mutation, which is a promise.
