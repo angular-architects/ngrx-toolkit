@@ -43,6 +43,37 @@ This guide covers
   - Both mutations in a `withMutations()`
   - Standalone functions in a component
 
+```ts
+  withMutations((store) => ({
+    increment: rxMutation({
+      operation: (params: Params) => {
+        return calcSum(store.counter(), params.value);
+      },
+      onSuccess: (result) => {
+        // ...
+      },
+      onError: (error) => {
+        // ...
+      },
+    }),
+    saveToServer: httpMutation({
+      request: (_: void) => ({
+        url: `https://httpbin.org/post`,
+        method: 'POST',
+        body: { counter: store.counter() },
+      }),
+      parse: (response) => response as CounterResponse,
+      onSuccess: (response) => {
+        console.log('Counter sent to server:', response);
+        patchState(store, { lastResponse: response.json });
+      },
+      onError: (error) => {
+        console.error('Failed to send counter:', error);
+      },
+    }),
+  })),
+```
+
 But before going into depth of the "How" and "When" to use mutations, it is important to give context about
 the "Why" and "Who" of why mutations were built for the toolkit like this.
 
@@ -170,7 +201,7 @@ const save = await store.save({...}); if (inc.status === 'error')
 ### Signal values
 
 ```ts
-// 5. Enables the following signal states
+// Signals
 
 // via store
 store.increment.value; // also status/error/isPending/status/hasValue;
@@ -349,8 +380,6 @@ For brevity, take `rx` as `rxMutation` and `http` for `httpMutation`
 - Primary property to pass parameters to:
   - `rx`'s `operation` is a function that defines the mutation logic. It returns an `Observable`,
   - `http` takes parts of `HttpClient`'s method signature, or a `request` object which accepts those parts
-
-<!-- TODO - I was wrong on flattening part, re-write -->
 
 ## Full example
 
