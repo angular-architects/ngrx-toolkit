@@ -136,16 +136,22 @@ Enables handling race conditions
 
 increment: rxMutation({
   // ...
-  operator: concatOp, // default if `operator` omitted
+  // Passing in a custom option. Need to import like:
+  // import { switchOp } from '@angular-architects/ngrx-toolkit'
+  operator: mergeOp, // `concatOp` is the default if `operator` is omitted
 }),
 
 saveToServer: httpMutation({
   // ...
-  // Passing in a custom option. Need to import like:
-  // `import { switchOp } from '@angular-architects/ngrx-toolkit'`
   operator: switchOp,
 }),
 ```
+
+:::info
+Since a mutation returns a `Promise`, we would not be able to know if a request got skipped with native `exhaustMap`. That's why we are providing adapters which would just pass-through on `merge/switch/concatMap` but resolve the resulting `Promise` in `exhaustMap` if it would be skipped.
+
+We considered doing an object reference check internally (`operator === exhaustMap`) which would have removed the necessity for the adaptors. The reason why we decided against it was tree-shakability. Once `rxMutation` imports `exhaustMap` for the check, it will always be there (even if it is not used).
+:::
 
 ### Methods
 
@@ -279,14 +285,14 @@ class CounterMutation {
 (withMutations((store) => ({
   increment: rxMutation({
     // ...
-    operator: concatOp, // default if `operator` omitted
+    // Passing in a custom option. Need to import like:
+    // import { switchOp } from '@angular-architects/ngrx-toolkit'
+    operator: mergeOp, // `concatOp` is the default if `operator` is omitted
   }),
 })),
   class SomeComponent {
     private saveToServer = httpMutation({
       // ...
-      // Passing in a custom option. Need to import like:
-      // `import { switchOp } from '@angular-architects/ngrx-toolkit'`
       operator: switchOp,
     });
   });
@@ -379,7 +385,6 @@ export const CounterStore = signalStore(
       operation: (params: Params) => {
         return calcSum(store.counter(), params.value);
       },
-      operator: concatOp,
       onSuccess: (result) => {
         console.log('result', result);
         patchState(store, { counter: result });
