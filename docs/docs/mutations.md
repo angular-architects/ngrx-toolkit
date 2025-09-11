@@ -27,13 +27,13 @@ This guide covers
 
 - Why we do not use [`withResource`](./with-resource), and the direction on mutations from the community
 - Key Features ([summary](#key-features-summary) and [in depth](#key-features-in-depth)):
-  <!-- TODO (discuss): I think it is important to know it is `HttpClient` under the hood for stuff like interceptors and global stuff -->
   - The params to pass (via RxJS or via `HttpClient` params without RxJS)
   - Callbacks available (`onSuccess` and `onError`)
   - Flattening operators (`concatOp, exhaustOp, mergeOp, switchOp`)
   - Calling the mutations (optionally as promises)
-  <!-- TODO - narrowing not working like intended? -->
-  - State signals available (`value/status/error/isPending`) + `hasValue` signal to narrow type- `httpMutation` and `rxMutation`
+  - State signals available (`value/status/error/isPending`)
+      <!-- TODO - resolve when #235 closed-->
+    - `hasValue` signal to narrow type. NOTE: currently there is an outstanding bug that this does not properly narrow.
   - [How to use](#usage-withmutations-or-solo-functions), as:
     - _standalone functions_
     - In `withMutations` store _feature_
@@ -88,15 +88,15 @@ rxMutation({
 })
 
 // http call, as options
-httpMutation<CreateUserRequest, User>((userData) => ({
+httpMutation((userData: CreateUserRequest) => ({
   url: '/api/users',
   method: 'POST',
   body: userData,
 })),
 // OR
 // http call, as function + options
-httpMutation<Params, CounterResponse>({
-  request: (p) => ({
+httpMutation({
+  request: (p: Params) => ({
     url: `https://httpbin.org/post`,
     method: 'POST',
     body: { counter: p.value },
@@ -138,7 +138,7 @@ increment: rxMutation({
   operator: concatOp, // default if `operator` omitted
 }),
 
-saveToServer: httpMutation<void, CounterResponse>({
+saveToServer: httpMutation({
   // ...
   // Passing in a custom option. Need to import like:
   // `import { switchOp } from '@angular-architects/ngrx-toolkit'`
@@ -185,7 +185,7 @@ Both of the mutation functions can be used either
 @Component({...})
 class CounterMutation {
   private increment = rxMutation({...});
-  private saveToServer = httpMutation<Params, CounterResponse>({...});
+  private saveToServer = httpMutation({...});
 }
 ```
 
@@ -197,7 +197,7 @@ export const CounterStore = signalStore(
   withMutations((store) => ({
     // the same functions
     increment: rxMutation({...}),
-    saveToServer: httpMutation<void, CounterResponse>({...}),
+    saveToServer: httpMutation({...}),
   })),
 );
 ```
@@ -259,7 +259,7 @@ export const CounterStore = signalStore(
 @Component({...})
 class CounterMutation {
   // ...
-  private saveToServer = httpMutation<Params, CounterResponse>({
+  private saveToServer = httpMutation({
     // ...
     onError: (error) => {
       console.error('Failed to send counter:', error);
@@ -281,7 +281,7 @@ class CounterMutation {
   }),
 })),
   class SomeComponent {
-    private saveToServer = httpMutation<Params, CounterResponse>({
+    private saveToServer = httpMutation({
       // ...
       // Passing in a custom option. Need to import like:
       // `import { switchOp } from '@angular-architects/ngrx-toolkit'`
@@ -376,13 +376,14 @@ export const CounterStore = signalStore(
         console.error('Error occurred:', error);
       },
     }),
-    saveToServer: httpMutation<void, CounterResponse>({
-      request: () => ({
+    saveToServer: httpMutation({
+      request: (_: void) => ({
         url: `https://httpbin.org/post`,
         method: 'POST',
         body: { counter: store.counter() },
         headers: { 'Content-Type': 'application/json' },
       }),
+      parse: (res) => res as CounterResponse,
       onSuccess: (response) => {
         console.log('Counter sent to server:', response);
         patchState(store, { lastResponse: response.json });
