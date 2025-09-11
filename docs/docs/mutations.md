@@ -21,7 +21,7 @@ import { concatOp, exhaustOp, mergeOp, switchOp } from '@angular-architects/ngrx
 
 ## Basic Usage
 
-The mutations feature (`withMutations`) and methods (`httpMutation` and `rxMutation`) seek to offer an appropriate equivalent to signal resources for sending data back to the backend. The methods can be used in `withMutations()` or on their own.
+The mutations feature (`withMutations`) and methods (`httpMutation` and `rxMutation`) seek to offer an appropriate equivalent to signal resources for sending data back to the backend. The methods can be used in `withMutations()` but can be used outside of a store in something like a component or service as well.
 
 This guide covers
 
