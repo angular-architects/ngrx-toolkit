@@ -101,7 +101,8 @@ httpMutation({
     url: `https://httpbin.org/post`,
     method: 'POST',
     body: { counter: p.value },
-  })
+  }),
+  parse: (res) => res as CounterResponse,
 );
 ```
 
@@ -111,7 +112,7 @@ In the mutation: _optional_ `onSuccess` and `onError` callbacks
 
 ```ts
 ({
-  onSuccess: (result) => {
+  onSuccess: (result: CounterResponse) => {
     // optional
     // method:
     //     this.counterSignal.set(result);
@@ -255,7 +256,7 @@ export const CounterStore = signalStore(
   withMutations((store) => ({
     increment: rxMutation({
       // ...
-      onSuccess: (result) => {
+      onSuccess: (result: CounterResponse) => {
         console.log('result', result);
         patchState(store, { counter: result });
       },
@@ -384,7 +385,7 @@ export const CounterStore = signalStore(
       operation: (params: Params) => {
         return calcSum(store.counter(), params.value);
       },
-      onSuccess: (result) => {
+      onSuccess: (result: number) => {
         console.log('result', result);
         patchState(store, { counter: result });
       },
@@ -399,7 +400,7 @@ export const CounterStore = signalStore(
         body: { counter: store.counter() },
       }),
       parse: (res) => res as CounterResponse,
-      onSuccess: (response) => {
+      onSuccess: (response) => { // response inferred as per `parse` ^^^
         console.log('Counter sent to server:', response);
         patchState(store, { lastResponse: response.json });
       },
