@@ -338,8 +338,8 @@ similar way as `rxResource` and `httpResource`
 For brevity, take `rx` as `rxMutation` and `http` for `httpMutation`
 
 - `rx` to utilize RxJS streams, `http` to make an `HttpClient` request
-  - `rx` could be any valid observable, even if it is not HTTP related.
-  - `http` has to be an HTTP request. The user's API is agnostic of RxJS. _Technically, HttpClient with observables is used under the hood_.
+  - `rx` could be any valid `Observable`, even if it is not HTTP related.
+  - `http` has to be an HTTP request. The user's API is agnostic of RxJS. _Technically, HttpClient with `Observable`s is used under the hood_.
 - Primary property to pass parameters to:
   - `rx`'s `operation` is a function that defines the mutation logic. It returns an `Observable`,
   - `http` takes parts of `HttpClient`'s method signature, or a `request` object which accepts those parts
