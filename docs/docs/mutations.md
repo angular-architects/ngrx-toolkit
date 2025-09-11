@@ -101,7 +101,6 @@ httpMutation({
     url: `https://httpbin.org/post`,
     method: 'POST',
     body: { counter: p.value },
-    headers: { 'Content-Type': 'application/json' },
   })
 );
 ```
@@ -398,7 +397,6 @@ export const CounterStore = signalStore(
         url: `https://httpbin.org/post`,
         method: 'POST',
         body: { counter: store.counter() },
-        headers: { 'Content-Type': 'application/json' },
       }),
       parse: (res) => res as CounterResponse,
       onSuccess: (response) => {
