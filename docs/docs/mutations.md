@@ -320,6 +320,16 @@ class CounterRxMutation {
 }
 ```
 
+Why do we return a `Promise` and not something else, like an `Observable` or `Signal`?
+
+We were looking at the use case for showing a message,
+navigating to a different route, or showing/hiding a loading indicator while the mutation is active or ends. If we use a `Signal`, then it
+could be that a former mutation already set the value successful on the status. If we would have an `effect`, waiting for the `Signal` to
+succeed, that one would run immediately. `Observable` would have the same problem, and it would also add to the API which
+exposes an `Observable` which means users have to deal with RxJS once more. A `Promise` is perfect. It guarantees to return just a single
+value where `Observable` can emit one, none or multiple. It is always asynchronous and not like `Observable`. The syntax with `await`
+makes it quite good for DX and it is very easy to go from a `Promise` to an `Observable` or even `Signal`.
+
 ### Choosing between `rxMutation` and `httpMutation`
 
 Though mutations and resources have different intents, the difference between `rxMutation` and `httpMutation` can be seen in a
@@ -331,7 +341,7 @@ For brevity, take `rx` as `rxMutation` and `http` for `httpMutation`
   - `rx` could be any valid observable, even if it is not HTTP related.
   - `http` has to be an HTTP request. The user's API is agnostic of RxJS. _Technically, HttpClient with observables is used under the hood_.
 - Primary property to pass parameters to:
-  - `rx`'s `operation` is a function that defines the mutation logic. It returns an Observable,
+  - `rx`'s `operation` is a function that defines the mutation logic. It returns an `Observable`,
   - `http` takes parts of `HttpClient`'s method signature, or a `request` object which accepts those parts
 
 <!-- TODO - I was wrong on flattening part, re-write -->
