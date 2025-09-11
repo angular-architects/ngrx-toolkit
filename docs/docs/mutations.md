@@ -381,8 +381,6 @@ For brevity, take `rx` as `rxMutation` and `http` for `httpMutation`
   - `rx`'s `operation` is a function that defines the mutation logic. It returns an `Observable`,
   - `http` takes parts of `HttpClient`'s method signature, or a `request` object which accepts those parts
 
-<!-- TODO - I was wrong on flattening part, re-write -->
-
 ## Full example
 
 Our example application in the repository has more details and implementations, but here is a full example in a store using `withMutations`.
