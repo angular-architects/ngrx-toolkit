@@ -70,7 +70,7 @@ Each mutation has the following:
 1. Parameters to pass to an RxJS stream (`rxMutation`) or RxJS agnostic `HttpClient` call (`httpMutation`)
 1. Callbacks: `onSuccess` and `onError` (optional)
 1. Flattening operators (optional, defaults to `concatOp`)
-1. Exposes a method of the same name as the mutation, returns a `Promise`.
+1. Provides a factory function of the same name as the mutation, returns a `Promise`.
 1. State signals: `value/status/error/isPending/hasValue`
 
 Additionally, mutations can be used in either `withMutations()` or as standalone functions.
@@ -223,7 +223,7 @@ Each mutation has the following:
   - For `httpMutation`, the response type is specified with the param `parse: (res: T) => res as T`
 - (optional, but has default) Flattening operators
 - (optional) callbacks: `onSuccess` and `onError`
-- Exposes a method of the same name as the mutation, which is a `Promise`.
+- Provides a factory function of the same name as the mutation, returns a `Promise`.
 
 #### State Signals
 
