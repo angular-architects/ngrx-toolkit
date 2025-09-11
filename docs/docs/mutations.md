@@ -30,7 +30,7 @@ This guide covers
   - The params to pass (via RxJS or via `HttpClient` params without RxJS)
   - Callbacks available (`onSuccess` and `onError`)
   - Flattening operators (`concatOp, exhaustOp, mergeOp, switchOp`)
-  - Calling the mutations (optionally as promises)
+  - Calling the mutations (optionally as `Promise`)
   - State signals available (`value/status/error/isPending`)
       <!-- TODO - resolve when #235 closed-->
     - For `httpMutation`, the response type is specified with the param `parse: (res: T) => res as T`
@@ -70,7 +70,7 @@ Each mutation has the following:
 1. Parameters to pass to an RxJS stream (`rxMutation`) or RxJS agnostic `HttpClient` call (`httpMutation`)
 1. Callbacks: `onSuccess` and `onError` (optional)
 1. Flattening operators (optional, defaults to `concatOp`)
-1. Exposes a method of the same name as the mutation, returns a promise.
+1. Exposes a method of the same name as the mutation, returns a `Promise`.
 1. State signals: `value/status/error/isPending/hasValue`
 
 Additionally, mutations can be used in either `withMutations()` or as standalone functions.
@@ -149,14 +149,14 @@ saveToServer: httpMutation({
 
 ### Methods
 
-Enables the method (returns a promise)
+Enables the method (returns a `Promise`)
 
 ```ts
 // Call directly
 store.increment({...});
 mutationName.saveToServer({...});
 
-// or await promises
+// or await `Promise`s
 const inc = await store.increment({...}); if (inc.status === 'success')
 const save = await store.save({...}); if (inc.status === 'error')
 ```
@@ -217,7 +217,7 @@ Each mutation has the following:
   - For `httpMutation`, the response type is specified with the param `parse: (res: T) => res as T`
 - (optional, but has default) Flattening operators
 - (optional) callbacks: `onSuccess` and `onError`
-- Exposes a method of the same name as the mutation, which is a promise.
+- Exposes a method of the same name as the mutation, which is a `Promise`.
 
 #### State Signals
 
@@ -294,7 +294,7 @@ class CounterMutation {
 
 #### Methods
 
-A mutation is its own function to be invoked, returning a promise should you want to await one.
+A mutation is its own function to be invoked, returning a `Promise` should you want to await one.
 
 ```ts
 @Component({...})
@@ -426,7 +426,7 @@ export class CounterMutation {
     this.store.increment({ value: 1 });
   }
 
-  // promise version nice if you want to the result's `status`
+  // `Promise` version nice if you want to the result's `status`
   async saveToServer() {
     await this.store.saveToServer();
   }
