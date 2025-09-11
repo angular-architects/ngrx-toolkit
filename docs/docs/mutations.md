@@ -201,7 +201,7 @@ const save = await store.save({...}); if (inc.status === 'error')
 ### Signal values
 
 ```ts
-// Signal states
+// Signals
 
 // via store
 store.increment.value; // also status/error/isPending/status/hasValue;
