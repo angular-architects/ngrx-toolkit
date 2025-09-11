@@ -21,19 +21,20 @@ import { concatOp, exhaustOp, mergeOp, switchOp } from '@angular-architects/ngrx
 
 ## Basic Usage
 
-The mutations feature (`withMutations`) and methods (`httpMutation` and `rxMutation`) seek to offer an appropriate equivalent to signal resources for sending data back to the backend. The methods can be used in `withMutations()` or on their own.
+The mutations feature (`withMutations`) and methods (`httpMutation` and `rxMutation`) seek to offer an appropriate equivalent to signal resources for sending data back to the backend. The methods can be used in `withMutations()` but can be used outside of a store in something like a component or service as well.
 
 This guide covers
 
 - Why we do not use [`withResource`](./with-resource), and the direction on mutations from the community
 - Key Features ([summary](#key-features-summary) and [in depth](#key-features-in-depth)):
-  <!-- TODO (discuss): I think it is important to know it is `HttpClient` under the hood for stuff like interceptors and global stuff -->
   - The params to pass (via RxJS or via `HttpClient` params without RxJS)
   - Callbacks available (`onSuccess` and `onError`)
   - Flattening operators (`concatOp, exhaustOp, mergeOp, switchOp`)
-  - Calling the mutations (optionally as promises)
-  <!-- TODO - narrowing not working like intended? -->
-  - State signals available (`value/status/error/isPending`) + `hasValue` signal to narrow type- `httpMutation` and `rxMutation`
+  - Calling the mutations (optionally as `Promise`)
+  - State signals available (`value/status/error/isPending`)
+      <!-- TODO - resolve when #235 closed-->
+    - For `httpMutation`, the response type is specified with the param `parse: (res: T) => res as T`
+    - `hasValue` signal to narrow type. NOTE: currently there is an outstanding bug that this does not properly narrow.
   - [How to use](#usage-withmutations-or-solo-functions), as:
     - _standalone functions_
     - In `withMutations` store _feature_
@@ -58,7 +59,7 @@ for example, HTTP methods like POST/PUT/DELETE.** Though other HTTP methods are 
 
 ### Path the toolkit is following for Mutations
 
-Libraries like Angular Query offer a [Mutation API](https://tanstack.com/query/latest/docs/framework/angular/guides/mutations) for such cases. Some time ago, Marko Stanimirović also [proposed a Mutation API for Angular](https://github.com/markostanimirovic/rx-resource-proto). These mutation functions and features are heavily inspired by Marko's work and adapts it as a custom feature/functions for the NgRx Signal Store.
+Libraries like Angular Query offer a [Mutation API](https://tanstack.com/query/latest/docs/framework/angular/guides/mutations) for such cases. Some time ago, Marko Stanimirović also [proposed a Mutation API for Angular](https://github.com/markostanimirovic/rx-resource-proto). These mutation functions and features are heavily inspired by Marko's work and adapts it as a custom feature/functions for the NgRx SignalStore. We also had internal discussions with Alex Rickabaugh on our design.
 
 The goal is to provide a simple Mutation API that is available now for early adopters. Ideally, migration to future mutation APIs will be straightforward. Hence, we aim to align with current ideas for them (if any).
 
@@ -69,7 +70,7 @@ Each mutation has the following:
 1. Parameters to pass to an RxJS stream (`rxMutation`) or RxJS agnostic `HttpClient` call (`httpMutation`)
 1. Callbacks: `onSuccess` and `onError` (optional)
 1. Flattening operators (optional, defaults to `concatOp`)
-1. Exposes a method of the same name as the mutation, returns a promise.
+1. Provides a factory function of the same name as the mutation, returns a `Promise`.
 1. State signals: `value/status/error/isPending/hasValue`
 
 Additionally, mutations can be used in either `withMutations()` or as standalone functions.
@@ -88,20 +89,20 @@ rxMutation({
 })
 
 // http call, as options
-httpMutation<CreateUserRequest, User>((userData) => ({
+httpMutation((userData: CreateUserRequest) => ({
   url: '/api/users',
   method: 'POST',
   body: userData,
 })),
 // OR
 // http call, as function + options
-httpMutation<Params, CounterResponse>({
-  request: (p) => ({
+httpMutation({
+  request: (p: Params) => ({
     url: `https://httpbin.org/post`,
     method: 'POST',
     body: { counter: p.value },
-    headers: { 'Content-Type': 'application/json' },
-  })
+  }),
+  parse: (res) => res as CounterResponse,
 );
 ```
 
@@ -111,7 +112,7 @@ In the mutation: _optional_ `onSuccess` and `onError` callbacks
 
 ```ts
 ({
-  onSuccess: (result) => {
+  onSuccess: (result: CounterResponse) => {
     // optional
     // method:
     //     this.counterSignal.set(result);
@@ -135,27 +136,33 @@ Enables handling race conditions
 
 increment: rxMutation({
   // ...
-  operator: concatOp, // default if `operator` omitted
+  // Passing in a custom option. Need to import like:
+  // import { switchOp } from '@angular-architects/ngrx-toolkit'
+  operator: mergeOp, // `concatOp` is the default if `operator` is omitted
 }),
 
-saveToServer: httpMutation<void, CounterResponse>({
+saveToServer: httpMutation({
   // ...
-  // Passing in a custom option. Need to import like:
-  // `import { switchOp } from '@angular-architects/ngrx-toolkit'`
   operator: switchOp,
 }),
 ```
 
+:::info
+Since a mutation returns a `Promise`, we would not be able to know if a request got skipped with native `exhaustMap`. That's why we are providing adapters which would just pass-through on `merge/switch/concatMap` but resolve the resulting `Promise` in `exhaustMap` if it would be skipped.
+
+We considered doing an object reference check internally (`operator === exhaustMap`) which would have removed the necessity for the adaptors. The reason why we decided against it was tree-shakability. Once `rxMutation` imports `exhaustMap` for the check, it will always be there (even if it is not used).
+:::
+
 ### Methods
 
-Enables the method (returns a promise)
+Enables the method (returns a `Promise`)
 
 ```ts
 // Call directly
 store.increment({...});
 mutationName.saveToServer({...});
 
-// or await promises
+// or await `Promise`s
 const inc = await store.increment({...}); if (inc.status === 'success')
 const save = await store.save({...}); if (inc.status === 'error')
 ```
@@ -176,7 +183,7 @@ mutationName.value; // ^^^
 
 Both of the mutation functions can be used either
 
-- In a signal store, inside of `withMutations()`
+- In a `signalStore`, inside of `withMutations()`
 - On its own, for example, like a class member of a component or service
 
 #### Independent of a store
@@ -185,7 +192,7 @@ Both of the mutation functions can be used either
 @Component({...})
 class CounterMutation {
   private increment = rxMutation({...});
-  private saveToServer = httpMutation<Params, CounterResponse>({...});
+  private saveToServer = httpMutation({...});
 }
 ```
 
@@ -197,7 +204,7 @@ export const CounterStore = signalStore(
   withMutations((store) => ({
     // the same functions
     increment: rxMutation({...}),
-    saveToServer: httpMutation<void, CounterResponse>({...}),
+    saveToServer: httpMutation({...}),
   })),
 );
 ```
@@ -213,9 +220,10 @@ Each mutation has the following:
 - Passing params via RxJS or RxJS-less `HttpClient` signature
   - See ["Choosing between `rxMutation` and `httpMutation`"](#choosing-between-rxmutation-and-httpmutation)
 - State signals: `value/status/error/isPending/status/hasValue`
+  - For `httpMutation`, the response type is specified with the param `parse: (res: T) => res as T`
 - (optional, but has default) Flattening operators
 - (optional) callbacks: `onSuccess` and `onError`
-- Exposes a method of the same name as the mutation, which is a promise.
+- Provides a factory function of the same name as the mutation, returns a `Promise`.
 
 #### State Signals
 
@@ -248,7 +256,7 @@ export const CounterStore = signalStore(
   withMutations((store) => ({
     increment: rxMutation({
       // ...
-      onSuccess: (result) => {
+      onSuccess: (result: CounterResponse) => {
         console.log('result', result);
         patchState(store, { counter: result });
       },
@@ -259,7 +267,7 @@ export const CounterStore = signalStore(
 @Component({...})
 class CounterMutation {
   // ...
-  private saveToServer = httpMutation<Params, CounterResponse>({
+  private saveToServer = httpMutation({
     // ...
     onError: (error) => {
       console.error('Failed to send counter:', error);
@@ -277,14 +285,14 @@ class CounterMutation {
 (withMutations((store) => ({
   increment: rxMutation({
     // ...
-    operator: concatOp, // default if `operator` omitted
+    // Passing in a custom option. Need to import like:
+    // import { switchOp } from '@angular-architects/ngrx-toolkit'
+    operator: mergeOp, // `concatOp` is the default if `operator` is omitted
   }),
 })),
   class SomeComponent {
-    private saveToServer = httpMutation<Params, CounterResponse>({
+    private saveToServer = httpMutation({
       // ...
-      // Passing in a custom option. Need to import like:
-      // `import { switchOp } from '@angular-architects/ngrx-toolkit'`
       operator: switchOp,
     });
   });
@@ -292,7 +300,7 @@ class CounterMutation {
 
 #### Methods
 
-A mutation is its own function to be invoked, returning a promise should you want to await one.
+A mutation is its own function to be invoked, returning a `Promise` should you want to await one.
 
 ```ts
 @Component({...})
@@ -318,6 +326,16 @@ class CounterRxMutation {
 }
 ```
 
+Why do we return a `Promise` and not something else, like an `Observable` or `Signal`?
+
+We were looking at the use case for showing a message,
+navigating to a different route, or showing/hiding a loading indicator while the mutation is active or ends. If we use a `Signal`, then it
+could be that a former mutation already set the value successful on the status. If we would have an `effect`, waiting for the `Signal` to
+succeed, that one would run immediately. `Observable` would have the same problem, and it would also add to the API which
+exposes an `Observable` which means users have to deal with RxJS once more. A `Promise` is perfect. It guarantees to return just a single
+value where `Observable` can emit one, none or multiple. It is always asynchronous and not like `Observable`. The syntax with `await`
+makes it quite good for DX and it is very easy to go from a `Promise` to an `Observable` or even `Signal`.
+
 ### Choosing between `rxMutation` and `httpMutation`
 
 Though mutations and resources have different intents, the difference between `rxMutation` and `httpMutation` can be seen in a
@@ -326,10 +344,10 @@ similar way as `rxResource` and `httpResource`
 For brevity, take `rx` as `rxMutation` and `http` for `httpMutation`
 
 - `rx` to utilize RxJS streams, `http` to make an `HttpClient` request
-  - `rx` could be any valid observable, even if it is not HTTP related.
-  - `http` has to be an HTTP request. The user's API is agnostic of RxJS. _Technically, HttpClient with observables is used under the hood_.
+  - `rx` could be any valid `Observable`, even if it is not HTTP related.
+  - `http` has to be an HTTP request. The user's API is agnostic of RxJS. _Technically, HttpClient with `Observable`s is used under the hood_.
 - Primary property to pass parameters to:
-  - `rx`'s `operation` is a function that defines the mutation logic. It returns an Observable,
+  - `rx`'s `operation` is a function that defines the mutation logic. It returns an `Observable`,
   - `http` takes parts of `HttpClient`'s method signature, or a `request` object which accepts those parts
 
 <!-- TODO - I was wrong on flattening part, re-write -->
@@ -367,8 +385,7 @@ export const CounterStore = signalStore(
       operation: (params: Params) => {
         return calcSum(store.counter(), params.value);
       },
-      operator: concatOp,
-      onSuccess: (result) => {
+      onSuccess: (result: number) => {
         console.log('result', result);
         patchState(store, { counter: result });
       },
@@ -376,14 +393,14 @@ export const CounterStore = signalStore(
         console.error('Error occurred:', error);
       },
     }),
-    saveToServer: httpMutation<void, CounterResponse>({
-      request: () => ({
+    saveToServer: httpMutation({
+      request: (_: void) => ({
         url: `https://httpbin.org/post`,
         method: 'POST',
         body: { counter: store.counter() },
-        headers: { 'Content-Type': 'application/json' },
       }),
-      onSuccess: (response) => {
+      parse: (res) => res as CounterResponse,
+      onSuccess: (response) => { // response inferred as per `parse` ^^^
         console.log('Counter sent to server:', response);
         patchState(store, { lastResponse: response.json });
       },
@@ -423,7 +440,7 @@ export class CounterMutation {
     this.store.increment({ value: 1 });
   }
 
-  // promise version nice if you want to the result's `status`
+  // `Promise` version nice if you want to the result's `status`
   async saveToServer() {
     await this.store.saveToServer();
   }
