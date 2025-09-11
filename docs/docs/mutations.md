@@ -59,7 +59,7 @@ for example, HTTP methods like POST/PUT/DELETE.** Though other HTTP methods are 
 
 ### Path the toolkit is following for Mutations
 
-Libraries like Angular Query offer a [Mutation API](https://tanstack.com/query/latest/docs/framework/angular/guides/mutations) for such cases. Some time ago, Marko Stanimirović also [proposed a Mutation API for Angular](https://github.com/markostanimirovic/rx-resource-proto). These mutation functions and features are heavily inspired by Marko's work and adapts it as a custom feature/functions for the NgRx SignalStore.
+Libraries like Angular Query offer a [Mutation API](https://tanstack.com/query/latest/docs/framework/angular/guides/mutations) for such cases. Some time ago, Marko Stanimirović also [proposed a Mutation API for Angular](https://github.com/markostanimirovic/rx-resource-proto). These mutation functions and features are heavily inspired by Marko's work and adapts it as a custom feature/functions for the NgRx SignalStore. We also had internal discussions with Alex Rickabaugh on our design.
 
 The goal is to provide a simple Mutation API that is available now for early adopters. Ideally, migration to future mutation APIs will be straightforward. Hence, we aim to align with current ideas for them (if any).
 
