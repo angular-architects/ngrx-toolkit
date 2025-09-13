@@ -1,10 +1,10 @@
-import { CommonModule } from '@angular/common';
+import { JsonPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { CounterStore } from './counter.store';
 
 @Component({
   selector: 'demo-counter-mutation-store',
-  imports: [CommonModule],
+  imports: [JsonPipe],
   templateUrl: './counter-mutation-store.html',
   styleUrl: './counter-mutation-store.css',
 })

@@ -3,7 +3,7 @@ import {
   httpMutation,
   rxMutation,
 } from '@angular-architects/ngrx-toolkit';
-import { CommonModule } from '@angular/common';
+import { JsonPipe } from '@angular/common';
 import { Component, computed, signal } from '@angular/core';
 import { delay, Observable, of, throwError } from 'rxjs';
 
@@ -21,7 +21,7 @@ export type CounterResponse = {
 // Or maybe put these all in one folder too while we are at it?
 @Component({
   selector: 'demo-counter-mutation-functions',
-  imports: [CommonModule],
+  imports: [JsonPipe],
   templateUrl: './counter-mutation-functions.html',
   styleUrl: './counter-mutation-functions.css',
 })
