@@ -53,24 +53,26 @@ export const CounterStore = signalStore(
   })),
 );
 
+// For demo purposes, helps ensures we fail on the first time we hit 7 or 13
 let error = false;
 
-function createSumObservable(a: number, b: number): Observable<number> {
-  return new Observable<number>((subscriber) => {
-    const result = a + b;
-
-    if ((result === 7 || result === 13) && !error) {
-      subscriber.error({ message: 'error due to bad luck!', result });
-      error = true;
-    } else {
-      subscriber.next(result);
-      error = false;
-    }
-    subscriber.complete();
-  });
-}
-
+/**
+ * @description return of(a + b)
+ */
 function calcSum(a: number, b: number): Observable<number> {
-  // return of(a + b);
+  function createSumObservable(a: number, b: number): Observable<number> {
+    return new Observable<number>((subscriber) => {
+      const result = a + b;
+
+      if ((result === 7 || result === 13) && !error) {
+        subscriber.error({ message: 'error due to bad luck!', result });
+        error = true;
+      } else {
+        subscriber.next(result);
+        error = false;
+      }
+      subscriber.complete();
+    });
+  }
   return createSumObservable(a, b).pipe(delay(500));
 }
