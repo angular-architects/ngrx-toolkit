@@ -16,9 +16,6 @@ export type CounterResponse = {
   json: { counter: number };
 };
 
-// TODO - rename this file to just be `mutations-functions-standalone` + class/selector etc??
-// And then the other folder to "store"
-// Or maybe put these all in one folder too while we are at it?
 @Component({
   selector: 'demo-counter-mutation-functions',
   imports: [JsonPipe],
@@ -41,13 +38,13 @@ export class CounterRxMutationFunctions {
     },
   });
 
-  private saveToServer = httpMutation<Params, CounterResponse>({
-    request: (p) => ({
+  private saveToServer = httpMutation({
+    request: (p: Params) => ({
       url: `https://httpbin.org/post`,
       method: 'POST',
       body: { counter: p.value },
-      headers: { 'Content-Type': 'application/json' },
     }),
+    parse: (response) => response as CounterResponse,
     onSuccess: (response) => {
       console.log('Counter sent to server:', response);
     },

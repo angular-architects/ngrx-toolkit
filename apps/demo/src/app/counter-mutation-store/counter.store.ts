@@ -36,14 +36,13 @@ export const CounterStore = signalStore(
         console.error('Error occurred:', error);
       },
     }),
-    saveToServer: httpMutation<void, CounterResponse>({
-      request: () => ({
+    saveToServer: httpMutation({
+      request: (_: void) => ({
         url: `https://httpbin.org/post`,
         method: 'POST',
         body: { counter: store.counter() },
-        headers: { 'Content-Type': 'application/json' },
       }),
-      onSuccess: (response) => {
+      onSuccess: (response: CounterResponse) => {
         console.log('Counter sent to server:', response);
         patchState(store, { lastResponse: response.json });
       },
