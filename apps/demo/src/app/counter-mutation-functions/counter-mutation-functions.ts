@@ -20,12 +20,12 @@ export type CounterResponse = {
 // And then the other folder to "store"
 // Or maybe put these all in one folder too while we are at it?
 @Component({
-  selector: 'demo-counter-rx-mutation',
+  selector: 'demo-counter-mutation-functions',
   imports: [CommonModule],
-  templateUrl: './counter-rx-mutation.html',
-  styleUrl: './counter-rx-mutation.css',
+  templateUrl: './counter-mutation-functions.html',
+  styleUrl: './counter-mutation-functions.css',
 })
-export class CounterRxMutation {
+export class CounterRxMutationFunctions {
   private counterSignal = signal(0);
 
   private increment = rxMutation({
