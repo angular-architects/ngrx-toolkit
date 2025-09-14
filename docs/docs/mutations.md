@@ -74,7 +74,7 @@ This guide covers
   })),
 ```
 
-import MutationsVideo from '@site/src/components/Video';
+import MutationsVideo from '@site/src/components/MutationsVideo';
 
 <MutationsVideo />
 
