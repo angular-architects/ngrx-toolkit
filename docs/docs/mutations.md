@@ -74,6 +74,10 @@ This guide covers
   })),
 ```
 
+import MutationsVideo from '@site/src/components/MutationsVideo';
+
+<MutationsVideo />
+
 But before going into depth of the "How" and "When" to use mutations, it is important to give context about
 the "Why" and "Who" of why mutations were built for the toolkit like this.
 
