@@ -46,14 +46,16 @@ const TodoDetailStore = signalStore(
 
 @Component({
   selector: 'demo-todo-detail',
-  template: ` <section [attr.aria-label]="todo().name">
-    <mat-card>
-      <mat-card-title>{{ todo().name }}</mat-card-title>
-      <mat-card-content>
-        <textarea>{{ todo().description }}</textarea>
-      </mat-card-content>
-    </mat-card>
-  </section>`,
+  template: `
+    <section [attr.aria-label]="todo().name">
+      <mat-card>
+        <mat-card-title>{{ todo().name }}</mat-card-title>
+        <mat-card-content>
+          <textarea>{{ todo().description }}</textarea>
+        </mat-card-content>
+      </mat-card>
+    </section>
+  `,
   imports: [MatCardModule],
   providers: [TodoDetailStore],
   styles: `

@@ -1,34 +1,53 @@
-import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, inject, input, viewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { RouterModule } from '@angular/router';
 import { Flight } from '../shared/flight';
 import { SimpleFlightBookingStore } from './flight-booking-simple.store';
 
 @Component({
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [
+    RouterModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatCheckboxModule,
+    MatButtonModule,
+  ],
   selector: 'demo-flight-edit-simple',
   templateUrl: './flight-edit-simple.component.html',
+  styles: `
+    #fields {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    #buttons {
+      display: flex;
+      gap: 5px;
+    }
+  `,
 })
 export class FlightEditSimpleComponent implements OnInit {
-  @ViewChild(NgForm)
-  private form!: NgForm;
-
   private store = inject(SimpleFlightBookingStore);
+
+  private readonly form = viewChild.required(NgForm);
 
   current = this.store.current;
   loading = this.store.loading;
   error = this.store.error;
 
-  @Input({ required: true })
-  id = '';
+  readonly id = input.required<string>();
 
   ngOnInit(): void {
-    this.store.loadById(this.id);
+    this.store.loadById(this.id());
   }
 
   async save() {
-    const flight = this.form.value as Flight;
+    const flight = this.form().value as Flight;
     if (flight.id) {
       await this.store.update(flight);
     } else {
@@ -41,6 +60,6 @@ export class FlightEditSimpleComponent implements OnInit {
   }
 
   async deleteFlight() {
-    await this.store.delete(this.form.value);
+    await this.store.delete(this.form().value);
   }
 }
