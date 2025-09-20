@@ -28,6 +28,7 @@ const sidebars: SidebarsConfig = {
     'with-storage-sync',
     'with-undo-redo',
     'with-redux',
+    'mutations',
   ],
   reduxConnectorSidebar: [
     {

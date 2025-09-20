@@ -30,7 +30,14 @@ export const TodoStore = signalStore(
       },
 
       remove(id: number) {
-        updateState(store, 'remove todo', removeEntity(id));
+        updateState(
+          store,
+          'remove todo',
+          removeEntity(id),
+          ({ selectedIds }) => ({
+            selectedIds: selectedIds.filter((selectedId) => selectedId !== id),
+          }),
+        );
       },
 
       toggleFinished(id: number): void {
