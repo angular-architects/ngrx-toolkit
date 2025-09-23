@@ -1,5 +1,11 @@
 import { isPlatformBrowser } from '@angular/common';
-import { inject, Injectable, OnDestroy, PLATFORM_ID } from '@angular/core';
+import {
+  inject,
+  Injectable,
+  NgZone,
+  OnDestroy,
+  PLATFORM_ID,
+} from '@angular/core';
 import { StateSource } from '@ngrx/signals';
 import { REDUX_DEVTOOLS_CONFIG } from '../provide-devtools-config';
 import { currentActionNames } from './current-action-names';
@@ -52,11 +58,13 @@ export class DevtoolsSyncer implements OnDestroy {
   #currentState: Record<string, object> = {};
   #currentId = 1;
 
-  readonly #connection: Connection = this.#isBrowser
-    ? window.__REDUX_DEVTOOLS_EXTENSION__
-      ? window.__REDUX_DEVTOOLS_EXTENSION__.connect(this.#devtoolsConfig)
-      : dummyConnection
-    : dummyConnection;
+  readonly #connection: Connection = inject(NgZone).runOutsideAngular(() =>
+    this.#isBrowser
+      ? window.__REDUX_DEVTOOLS_EXTENSION__
+        ? window.__REDUX_DEVTOOLS_EXTENSION__.connect(this.#devtoolsConfig)
+        : dummyConnection
+      : dummyConnection,
+  );
 
   constructor() {
     if (!this.#isBrowser) {
