@@ -28,7 +28,7 @@ describe('withDevtools / renaming', () => {
     TestBed.inject(Store);
     runInInjectionContext(childContext, () => inject(Store));
 
-    TestBed.tick();
+    TestBed.flushEffects();
 
     expect(sendSpy).lastCalledWith(
       { type: 'Store Update' },
@@ -51,7 +51,7 @@ describe('withDevtools / renaming', () => {
     const childContext2 = createEnvironmentInjector([Store], envInjector);
 
     runInInjectionContext(childContext1, () => inject(Store));
-    TestBed.tick();
+    TestBed.flushEffects();
     childContext1.destroy();
 
     expect(sendSpy.mock.calls).toEqual([
@@ -64,7 +64,7 @@ describe('withDevtools / renaming', () => {
     ]);
 
     runInInjectionContext(childContext2, () => inject(Store));
-    TestBed.tick();
+    TestBed.flushEffects();
     expect(sendSpy.mock.calls).toEqual([
       [
         { type: 'Store Update' },
@@ -113,7 +113,7 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
       signalStore({ providedIn: 'root' }, withDevtools('flights')),
     );
 
-    TestBed.tick();
+    TestBed.flushEffects();
     expect(sendSpy.mock.calls).toEqual([
       [
         { type: 'Store Update' },
@@ -169,7 +169,7 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
 
       const store = TestBed.inject(Store);
       renameDevtoolsName(store, 'flights');
-      TestBed.tick();
+      TestBed.flushEffects();
 
       expect(sendSpy).toHaveBeenCalledWith(
         { type: 'Store Update' },
@@ -192,7 +192,7 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
       );
       TestBed.inject(Store1);
       const store = TestBed.inject(Store2);
-      TestBed.tick();
+      TestBed.flushEffects();
 
       expect(() => renameDevtoolsName(store, 'shop')).toThrow(
         'NgRx Toolkit/DevTools: cannot rename from mall to shop. shop is already assigned to another SignalStore instance.',
@@ -227,7 +227,7 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
       );
 
       const store = childContext.get(Store);
-      TestBed.tick();
+      TestBed.flushEffects();
 
       expect(sendSpy).toHaveBeenCalledWith(
         { type: 'Store Update' },
@@ -235,7 +235,7 @@ Enable automatic indexing via withDevTools('flights', { indexNames: true }), or 
       );
 
       childContext.destroy();
-      TestBed.tick();
+      TestBed.flushEffects();
 
       // Previously this could throw; now it is a no-op
       expect(() => renameDevtoolsName(store, 'flights')).not.toThrow();
