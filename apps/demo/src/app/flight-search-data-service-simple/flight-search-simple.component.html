@@ -1,75 +1,89 @@
 <h2 class="title">Flight Search (Simple)</h2>
 
-<form #form="ngForm">
+<form #form="ngForm" (ngSubmit)="search()">
   <div class="form-group">
-    <label
-      >From:
+    <mat-form-field>
+      <mat-label>From:</mat-label>
       <input
         #fromField
         [ngModel]="from()"
         (ngModelChange)="updateCriteria($event, toField.value)"
         name="from"
         class="form-control"
+        matInput
       />
-    </label>
+    </mat-form-field>
   </div>
 
-  <div
-    class="alert alert-warning"
-    *ngIf="form?.controls?.['from']?.hasError('appCity')"
-  >
-    Invalid city!
-  </div>
+  @if (form?.controls?.['from']?.hasError('appCity')) {
+    <div class="alert alert-warning">Invalid city!</div>
+  }
 
   <div class="form-group">
-    <label
-      >To:
+    <mat-form-field>
+      <mat-label>To:</mat-label>
       <input
         #toField
         [ngModel]="to()"
         (ngModelChange)="updateCriteria(fromField.value, $event)"
         name="to"
         class="form-control"
-    /></label>
+        matInput
+      />
+    </mat-form-field>
   </div>
 
   <div class="form-group">
     <button
-      (click)="search()"
       [disabled]="!from() || !to()"
       class="btn btn-default"
+      type="submit"
+      mat-raised-button
     >
       Search
     </button>
 
-    <button [disabled]="!canUndo()" (click)="undo()" class="btn btn-default">
+    <button
+      [disabled]="!canUndo()"
+      (click)="undo()"
+      class="btn btn-default"
+      mat-raised-button
+    >
       Undo
     </button>
-    <button [disabled]="!canRedo()" (click)="redo()" class="btn btn-default">
+    <button
+      [disabled]="!canRedo()"
+      (click)="redo()"
+      class="btn btn-default"
+      mat-raised-button
+    >
       Redo
     </button>
   </div>
 </form>
 
 <div>
-  <b *ngIf="loading()">Loading ...</b>
+  @if (loading()) {
+    <b>Loading...</b>
+  }
 </div>
 
 <div class="row">
-  <div
-    *ngFor="let f of flights()"
-    class="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-3"
-  >
-    <demo-flight-card
-      [item]="f"
-      [selected]="selectedIds()[f.id]"
-      (selectedChange)="updateBasket(f.id, $event)"
-    >
-      <a class="btn btn-default" [routerLink]="['../flight-edit-simple', f.id]"
-        >Edit</a
+  @for (f of flights(); track f.id) {
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-3">
+      <demo-flight-card
+        [item]="f"
+        [selected]="selectedIds()[f.id]"
+        (selectedChange)="updateBasket(f.id, $event)"
       >
-    </demo-flight-card>
-  </div>
+        <a
+          class="btn btn-default"
+          [routerLink]="['../flight-edit-simple', f.id]"
+          >Edit</a
+        >
+      </demo-flight-card>
+    </div>
+  }
 </div>
 
 <pre>{{ selected() | json }}</pre>

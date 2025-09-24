@@ -4,26 +4,28 @@ import { MatButton } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { Todo, TodoStore } from './todo-store';
+import { Todo } from '../shared/todo.service';
+import { TodoStore } from './todo-store';
 
 @Component({
   template: `
-    <div class="button">
-      <button mat-raised-button (click)="resetState()">Reset State</button>
-    </div>
+    <h2><code>withReset</code> Todo List</h2>
 
-    <div>
+    <button mat-raised-button (click)="resetState()" type="button">
+      Reset State
+    </button>
+
+    <section>
       <mat-table [dataSource]="dataSource" class="mat-elevation-z8">
         <!-- Checkbox Column -->
         <ng-container matColumnDef="finished">
-          <mat-header-cell *matHeaderCellDef></mat-header-cell>
+          <mat-header-cell *matHeaderCellDef />
           <mat-cell *matCellDef="let row" class="actions">
             <mat-checkbox
               (click)="$event.stopPropagation()"
               (change)="toggleFinished(row)"
               [checked]="row.finished"
-            >
-            </mat-checkbox>
+            />
           </mat-cell>
         </ng-container>
 
@@ -33,16 +35,16 @@ import { Todo, TodoStore } from './todo-store';
           <mat-cell *matCellDef="let element">{{ element.name }}</mat-cell>
         </ng-container>
 
-        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-header-row *matHeaderRowDef="displayedColumns" />
         <mat-row
           *matRowDef="let row; columns: displayedColumns"
           (click)="selection.toggle(row)"
-        ></mat-row>
+        />
       </mat-table>
-    </div>
+    </section>
   `,
   styles: `
-    .button {
+    button {
       margin-bottom: 1em;
     }
   `,
@@ -51,7 +53,7 @@ import { Todo, TodoStore } from './todo-store';
 export class TodoComponent {
   todoStore = inject(TodoStore);
 
-  displayedColumns: string[] = ['finished', 'name'];
+  displayedColumns = ['finished', 'name'] as const;
   dataSource = new MatTableDataSource<Todo>([]);
   selection = new SelectionModel<Todo>(true, []);
 
