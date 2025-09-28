@@ -21,7 +21,7 @@ export {
 export * from './lib/with-call-state';
 export * from './lib/with-data-service';
 export * from './lib/with-pagination';
-export { setResetState, withReset } from './lib/with-reset';
+export { reset, setResetState, withReset } from './lib/with-reset';
 export * from './lib/with-undo-redo';
 
 export { withImmutableState } from './lib/immutable-state/with-immutable-state';
