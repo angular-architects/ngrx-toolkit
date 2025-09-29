@@ -5,6 +5,6 @@
     "types": ["node", "vitest/globals"]
   },
   "files": ["src/main.ts"],
-  "include": ["src/**/*.ts"],
-  "exclude": ["vite.config.mts", "e2e"]
+  "include": ["src/**/*.d.ts"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.spec.ts"]
 }

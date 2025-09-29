@@ -7,19 +7,6 @@
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
     },
-    "@nx/vite:test": {
-      "cache": true,
-      "inputs": ["default", "^production"],
-      "options": {
-        "passWithNoTests": true
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
-        }
-      }
-    },
     "e2e": {
       "cache": true,
       "inputs": ["default", "^production"]
@@ -39,6 +26,10 @@
       "options": {
         "packageRoot": "dist/libs/ngrx-toolkit"
       }
+    },
+    "@nx/vite:test": {
+      "cache": true,
+      "inputs": ["default", "^production"]
     }
   },
   "namedInputs": {

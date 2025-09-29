@@ -10,8 +10,18 @@
   "exclude": [
     "src/**/*.spec.ts",
     "src/test-setup.ts",
+    "src/**/*.test.ts",
+    "vite.config.ts",
     "vite.config.mts",
-    "src/**/*.test.ts"
+    "vitest.config.ts",
+    "vitest.config.mts",
+    "src/**/*.test.tsx",
+    "src/**/*.spec.tsx",
+    "src/**/*.test.js",
+    "src/**/*.spec.js",
+    "src/**/*.test.jsx",
+    "src/**/*.spec.jsx",
+    "src/test-setup.ts"
   ],
   "include": ["src/**/*.ts"]
 }
