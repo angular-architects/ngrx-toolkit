@@ -1,4 +1,4 @@
-import { inject, InjectionToken } from '@angular/core';
+import { inject } from '@angular/core';
 import {
   EmptyFeatureResult,
   SignalStoreFeature,
@@ -6,6 +6,9 @@ import {
   withHooks,
   withMethods,
 } from '@ngrx/signals';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { tap } from 'rxjs';
+import { currentActionNames } from './internal/current-action-names';
 import { DefaultTracker } from './internal/default-tracker';
 import {
   DevtoolsFeature,
@@ -22,11 +25,7 @@ declare global {
 
 export const renameDevtoolsMethodName = '___renameDevtoolsName';
 export const uniqueDevtoolsId = '___uniqueDevtoolsId';
-
-const EXISTING_NAMES = new InjectionToken(
-  'Array contain existing names for the signal stores',
-  { factory: () => [] as string[], providedIn: 'root' },
-);
+export const devtoolsEventsTracker = '___devtoolsEventsTracker';
 
 /**
  * Adds this store as a feature state to the Redux DevTools.
@@ -54,6 +53,15 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
           syncer.renameStore(id, newName);
         },
         [uniqueDevtoolsId]: () => id,
+        [devtoolsEventsTracker]: rxMethod<{ type: string }>((c$) =>
+          c$.pipe(
+            tap((ev) => {
+              if (ev && typeof ev.type === 'string' && ev.type.length > 0) {
+                currentActionNames.add(ev.type);
+              }
+            }),
+          ),
+        ),
       } as Record<string, (newName?: unknown) => unknown>;
     }),
     withHooks((store) => {
@@ -68,9 +76,20 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
             tracker: inject(
               features.find((f) => f.tracker)?.tracker || DefaultTracker,
             ),
+            eventsTracking: features.some((f) => f.eventsTracking === true),
           };
 
           syncer.addStore(id, name, store, finalOptions);
+
+          for (const feature of features) {
+            if (typeof feature.onInit === 'function') {
+              feature.onInit({
+                id,
+                name,
+                trackEvents: (source$) => store[devtoolsEventsTracker](source$),
+              });
+            }
+          }
         },
         onDestroy() {
           syncer.removeStore(id);
