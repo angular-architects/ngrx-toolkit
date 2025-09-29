@@ -1,4 +1,4 @@
-import { inject, InjectionToken } from '@angular/core';
+import { inject } from '@angular/core';
 import {
   EmptyFeatureResult,
   SignalStoreFeature,
@@ -6,7 +6,6 @@ import {
   withHooks,
   withMethods,
 } from '@ngrx/signals';
-import { EventInstance, Events } from '@ngrx/signals/events';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tap } from 'rxjs';
 import { currentActionNames } from './internal/current-action-names';
@@ -27,11 +26,6 @@ declare global {
 export const renameDevtoolsMethodName = '___renameDevtoolsName';
 export const uniqueDevtoolsId = '___uniqueDevtoolsId';
 export const devtoolsEventsTracker = '___devtoolsEventsTracker';
-
-const EXISTING_NAMES = new InjectionToken(
-  'Array contain existing names for the signal stores',
-  { factory: () => [] as string[], providedIn: 'root' },
-);
 
 /**
  * Adds this store as a feature state to the Redux DevTools.
@@ -59,15 +53,14 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
           syncer.renameStore(name, newName);
         },
         [uniqueDevtoolsId]: () => id,
-        [devtoolsEventsTracker]: rxMethod<EventInstance<string, unknown>>(
-          (c$) =>
-            c$.pipe(
-              tap((ev) => {
-                if (ev && typeof ev.type === 'string' && ev.type.length > 0) {
-                  currentActionNames.add(ev.type);
-                }
-              }),
-            ),
+        [devtoolsEventsTracker]: rxMethod<{ type: string }>((c$) =>
+          c$.pipe(
+            tap((ev) => {
+              if (ev && typeof ev.type === 'string' && ev.type.length > 0) {
+                currentActionNames.add(ev.type);
+              }
+            }),
+          ),
         ),
       } as Record<string, (newName?: unknown) => unknown>;
     }),
@@ -88,9 +81,14 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
 
           syncer.addStore(id, name, store, finalOptions);
 
-          if (finalOptions.eventsTracking) {
-            const events = inject(Events);
-            store[devtoolsEventsTracker](events.on());
+          for (const feature of features) {
+            if (typeof feature.onInit === 'function') {
+              feature.onInit({
+                id,
+                name,
+                trackEvents: (source$) => store[devtoolsEventsTracker](source$),
+              });
+            }
           }
         },
         onDestroy() {

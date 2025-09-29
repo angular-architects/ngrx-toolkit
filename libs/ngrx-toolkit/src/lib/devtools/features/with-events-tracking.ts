@@ -1,3 +1,5 @@
+import { inject } from '@angular/core';
+import { Events } from '@ngrx/signals/events';
 import { createDevtoolsFeature } from '../internal/devtools-feature';
 
 /**
@@ -9,5 +11,11 @@ import { createDevtoolsFeature } from '../internal/devtools-feature';
  * the default "Store Update".
  */
 export function withEventsTracking() {
-  return createDevtoolsFeature({ eventsTracking: true });
+  return createDevtoolsFeature({
+    eventsTracking: true,
+    onInit: ({ trackEvents }) => {
+      const events = inject(Events);
+      trackEvents(events.on());
+    },
+  });
 }
