@@ -55,3 +55,5 @@ export {
 
 export * from './lib/mutation/http-mutation';
 export { rxMutation } from './lib/mutation/rx-mutation';
+
+export * from './lib/mutation/mutation';
