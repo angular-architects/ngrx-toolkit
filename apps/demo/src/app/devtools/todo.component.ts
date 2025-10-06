@@ -11,17 +11,18 @@ import { TodoStore } from './todo-store';
 @Component({
   selector: 'demo-todo',
   template: `
+    <h2>Todo List (DevTools)</h2>
+
     <mat-table [dataSource]="dataSource" class="mat-elevation-z8">
       <!-- Checkbox Column -->
       <ng-container matColumnDef="finished">
-        <mat-header-cell *matHeaderCellDef></mat-header-cell>
+        <mat-header-cell *matHeaderCellDef />
         <mat-cell *matCellDef="let row" class="actions">
           <mat-checkbox
             (click)="$event.stopPropagation()"
             (change)="checkboxLabel(row)"
             [checked]="row.finished"
-          >
-          </mat-checkbox>
+          />
           <mat-icon (click)="removeTodo(row)">delete</mat-icon>
         </mat-cell>
       </ng-container>
@@ -42,16 +43,16 @@ import { TodoStore } from './todo-store';
         </mat-cell>
       </ng-container>
 
-      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-header-row *matHeaderRowDef="displayedColumns" />
       <mat-row
         *matRowDef="let row; columns: displayedColumns"
         (click)="selection.toggle(row)"
-      ></mat-row>
+      />
     </mat-table>
 
     <div class="details">
       @for (todo of todoStore.selectedTodos(); track todo) {
-        <demo-todo-detail [todo]="todo"></demo-todo-detail>
+        <demo-todo-detail [todo]="todo" />
       }
     </div>
   `,
@@ -77,7 +78,7 @@ import { TodoStore } from './todo-store';
 export class TodoComponent {
   todoStore = inject(TodoStore);
 
-  displayedColumns: string[] = ['finished', 'name', 'deadline'];
+  displayedColumns = ['finished', 'name', 'deadline'] as const;
   dataSource = new MatTableDataSource<Todo>([]);
   selection = new SelectionModel<Todo>(true, []);
 

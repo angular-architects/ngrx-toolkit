@@ -26,7 +26,7 @@ export class FlightSearchWithPaginationComponent {
   searchParams: { from: string; to: string } = { from: 'Wien', to: '' };
   flightStore = inject(FlightBookingStore);
 
-  displayedColumns: string[] = ['from', 'to', 'date'];
+  displayedColumns = ['from', 'to', 'date'] as const;
   dataSource = new MatTableDataSource<Flight>([]);
   selection = new SelectionModel<Flight>(true, []);
 

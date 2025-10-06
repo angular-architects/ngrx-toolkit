@@ -1,18 +1,16 @@
-import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, inject, input, viewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Flight } from '../shared/flight';
 import { FlightBookingStore } from './flight-booking.store';
 
 @Component({
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [RouterModule, FormsModule],
   selector: 'demo-flight-edit',
   templateUrl: './flight-edit.component.html',
 })
 export class FlightEditDynamicComponent implements OnInit {
-  @ViewChild(NgForm)
-  private form!: NgForm;
+  private readonly form = viewChild.required(NgForm);
 
   private store = inject(FlightBookingStore);
 
@@ -20,15 +18,14 @@ export class FlightEditDynamicComponent implements OnInit {
   loading = this.store.flightLoading;
   error = this.store.flightError;
 
-  @Input({ required: true })
-  id = '';
+  readonly id = input.required<string>();
 
   ngOnInit(): void {
-    this.store.loadFlightById(this.id);
+    this.store.loadFlightById(this.id());
   }
 
   async save() {
-    const flight = this.form.value as Flight;
+    const flight = this.form().value as Flight;
     if (flight.id) {
       await this.store.updateFlight(flight);
     } else {
@@ -41,6 +38,6 @@ export class FlightEditDynamicComponent implements OnInit {
   }
 
   async deleteFlight() {
-    await this.store.deleteFlight(this.form.value);
+    await this.store.deleteFlight(this.form().value);
   }
 }
