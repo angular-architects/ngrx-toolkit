@@ -1,16 +1,15 @@
-import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
-import {
-  MatDrawer,
-  MatDrawerContainer,
-  MatDrawerContent,
-} from '@angular/material/sidenav';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterLink, RouterOutlet } from '@angular/router';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'demo-root',
@@ -22,11 +21,9 @@ import { RouterLink, RouterOutlet } from '@angular/router';
     MatListModule,
     RouterLink,
     RouterOutlet,
-    CommonModule,
     MatToolbarModule,
-    MatDrawer,
-    MatDrawerContainer,
-    MatDrawerContent,
+    MatSidenavModule,
+    MatButtonModule,
   ],
   styles: `
     .container {
@@ -37,4 +34,18 @@ import { RouterLink, RouterOutlet } from '@angular/router';
     }
   `,
 })
-export class AppComponent {}
+export class AppComponent {
+  opened = toSignal(
+    inject(BreakpointObserver)
+      .observe([Breakpoints.XSmall, Breakpoints.Small])
+      .pipe(
+        map(
+          ({ breakpoints }) =>
+            !(
+              breakpoints[Breakpoints.XSmall] || breakpoints[Breakpoints.Small]
+            ),
+        ),
+      ),
+    { requireSync: true },
+  );
+}

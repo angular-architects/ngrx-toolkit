@@ -1,8 +1,11 @@
 <mat-toolbar color="primary">
+  <button matIconButton (click)="drawer.toggle()">
+    <mat-icon>menu</mat-icon>
+  </button>
   <span>NgRx Toolkit Demo</span>
 </mat-toolbar>
 <mat-drawer-container class="container">
-  <mat-drawer mode="side" opened>
+  <mat-drawer mode="side" #drawer [opened]="opened()">
     <mat-nav-list>
       <a mat-list-item routerLink="/todo">DevTools</a>
       <a mat-list-item routerLink="/flight-search">withRedux</a>
