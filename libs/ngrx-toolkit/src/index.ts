@@ -8,7 +8,7 @@ export {
 export { renameDevtoolsName } from './lib/devtools/rename-devtools-name';
 export { patchState, updateState } from './lib/devtools/update-state';
 export { withDevToolsStub } from './lib/devtools/with-dev-tools-stub';
-export { withDevtools } from './lib/devtools/with-devtools';
+export { DevtoolsFeature, withDevtools } from './lib/devtools/with-devtools';
 
 export {
   createEffects,
