@@ -9,6 +9,9 @@ import {
 } from '@ngrx/signals';
 
 export type PublicMethods = {
+  /**
+   * @deprecated Use {@link reset} instead.
+   */
   resetState(): void;
 };
 
@@ -25,7 +28,10 @@ export function withReset() {
       // workaround to TS excessive property check
       const methods = {
         resetState() {
-          patchState(store, store._resetState.value);
+          patchState(
+            store,
+            reset(() => store._resetState.value),
+          );
         },
         __setResetState__(state: object) {
           store._resetState.value = state;
@@ -59,4 +65,64 @@ export function setResetState<State extends object>(
     );
   }
   (store.__setResetState__ as (state: State) => void)(state);
+}
+
+/**
+ * Creates a default value for a given type
+ */
+function getDefaultValue(value: unknown): unknown {
+  if (value === null || value === undefined) {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    return [];
+  }
+
+  if (typeof value === 'object' && value.constructor === Object) {
+    return {};
+  }
+
+  if (typeof value === 'string') {
+    return '';
+  }
+
+  if (typeof value === 'number') {
+    return 0;
+  }
+
+  if (typeof value === 'boolean') {
+    return false;
+  }
+
+  if (value instanceof Date) {
+    return new Date();
+  }
+
+  // For other types (functions, classes, etc.), return undefined
+  return undefined;
+}
+
+/**
+ * Creates a generic reset state by resetting each property to its default value
+ */
+function resetState<TState extends object>(state: TState): TState {
+  const resetState = {} as TState;
+
+  for (const key in state) {
+    resetState[key] = getDefaultValue(state[key]) as TState[Extract<
+      keyof TState,
+      string
+    >];
+  }
+
+  return resetState;
+}
+
+export function reset<TState extends object, K extends keyof TState>(
+  pick?: (initial: TState) => Pick<TState, K>,
+): (state: TState) => TState {
+  return (state: TState) => {
+    return pick ? { ...state, ...pick(state) } : resetState(state);
+  };
 }
