@@ -75,4 +75,11 @@ export const lazyRoutes: Route[] = [
         (m) => m.CounterRxMutation,
       ),
   },
+  {
+    path: 'with-resource',
+    loadComponent: () =>
+      import('./with-resource/with-resource.component').then(
+        (m) => m.WithResourceComponent,
+      ),
+  },
 ];
