@@ -1,5 +1,6 @@
 import { Route } from '@angular/router';
 import { TodoComponent } from './devtools/todo.component';
+import { EventsSampleComponent } from './events-sample/events-sample.component';
 import { FlightEditDynamicComponent } from './flight-search-data-service-dynamic/flight-edit.component';
 import { FlightSearchDynamicComponent } from './flight-search-data-service-dynamic/flight-search.component';
 import { FlightEditSimpleComponent } from './flight-search-data-service-simple/flight-edit-simple.component';
@@ -13,6 +14,7 @@ import { TodoStorageSyncComponent } from './todo-storage-sync/todo-storage-sync.
 
 export const lazyRoutes: Route[] = [
   { path: 'todo', component: TodoComponent },
+  { path: 'events-sample', component: EventsSampleComponent },
   { path: 'flight-search', component: FlightSearchComponent },
   {
     path: 'flight-search-data-service-simple',
