@@ -10,7 +10,8 @@ import {
   withHooks,
   withMethods,
 } from '@ngrx/signals';
-import { capitalize } from './with-data-service';
+import { capitalize } from '../with-data-service';
+import { ClearUndoRedoOptions } from './clear-undo-redo';
 
 export type StackItem = Record<string, unknown>;
 
@@ -69,6 +70,7 @@ export function withUndoRedo<Input extends EmptyFeatureResult>(
     methods: {
       undo: () => void;
       redo: () => void;
+      /** @deprecated Use {@link clearUndoRedo} instead. */
       clearStack: () => void;
     };
   }
@@ -105,7 +107,6 @@ export function withUndoRedo<Input extends EmptyFeatureResult>(
       canRedo: canRedo.asReadonly(),
     })),
     withMethods((store) => ({
-      __clearUndoRedo__: () => ({}),
       undo(): void {
         const item = undoStack.pop();
 
@@ -134,6 +135,12 @@ export function withUndoRedo<Input extends EmptyFeatureResult>(
           previous = item;
         }
 
+        updateInternal();
+      },
+      __clearUndoRedo__(opts?: ClearUndoRedoOptions<Input['state']>): void {
+        undoStack.splice(0);
+        redoStack.splice(0);
+        previous = null;
         updateInternal();
       },
       /** @deprecated Use {@link clearUndoRedo} instead. */

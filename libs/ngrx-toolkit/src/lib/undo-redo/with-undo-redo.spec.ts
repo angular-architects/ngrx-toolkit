@@ -9,7 +9,7 @@ import {
   withState,
 } from '@ngrx/signals';
 import { addEntity, withEntities } from '@ngrx/signals/entities';
-import { withCallState } from './with-call-state';
+import { withCallState } from '../with-call-state';
 import { withUndoRedo } from './with-undo-redo';
 
 const testState = { test: '' };
@@ -32,6 +32,7 @@ describe('withUndoRedo', () => {
         'canRedo',
         'undo',
         'redo',
+        '__clearUndoRedo__',
         'clearStack',
       ]);
     });
