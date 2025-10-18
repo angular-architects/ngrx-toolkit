@@ -18,7 +18,9 @@ export {
   withRedux,
 } from './lib/with-redux';
 
+export { clearUndoRedo } from './lib/undo-redo/clear-undo-redo';
 export * from './lib/undo-redo/with-undo-redo';
+
 export * from './lib/with-call-state';
 export * from './lib/with-data-service';
 export * from './lib/with-pagination';
