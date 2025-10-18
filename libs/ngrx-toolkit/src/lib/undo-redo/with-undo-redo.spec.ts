@@ -10,6 +10,7 @@ import {
 } from '@ngrx/signals';
 import { addEntity, withEntities } from '@ngrx/signals/entities';
 import { withCallState } from '../with-call-state';
+import { clearUndoRedo } from './clear-undo-redo';
 import { withUndoRedo } from './with-undo-redo';
 
 const testState = { test: '' };
@@ -261,7 +262,7 @@ describe('withUndoRedo', () => {
 
       store.update('Gordon');
 
-      store.clearStack();
+      clearUndoRedo(store, { lastRecord: null });
 
       // After clearing the undo/redo stack, there is no previous item anymore.
       // The following update becomes the first value.
