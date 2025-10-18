@@ -1,15 +1,16 @@
 import { StateSource } from '@ngrx/signals';
-import { StackItem } from './models/stack-item';
 
-export type ClearUndoRedoOptions = {
-  lastRecord: StackItem | null;
+export type ClearUndoRedoOptions<TState extends object> = {
+  lastRecord: Partial<TState> | null;
 };
 
-export type ClearUndoRedoFn = (opts?: ClearUndoRedoOptions) => void;
+export type ClearUndoRedoFn<TState extends object> = (
+  opts?: ClearUndoRedoOptions<TState>,
+) => void;
 
-export function clearUndoRedo<State extends object>(
-  store: StateSource<State>,
-  opts?: ClearUndoRedoOptions,
+export function clearUndoRedo<TState extends object>(
+  store: StateSource<TState>,
+  opts?: ClearUndoRedoOptions<TState>,
 ): void {
   if (canClearUndoRedo(store)) {
     store.__clearUndoRedo__(opts);
@@ -22,7 +23,9 @@ export function clearUndoRedo<State extends object>(
 
 function canClearUndoRedo<TState extends object>(
   store: StateSource<TState>,
-): store is StateSource<TState> & { __clearUndoRedo__: ClearUndoRedoFn } {
+): store is StateSource<TState> & {
+  __clearUndoRedo__: ClearUndoRedoFn<TState>;
+} {
   if (
     '__clearUndoRedo__' in store &&
     typeof store.__clearUndoRedo__ === 'function'

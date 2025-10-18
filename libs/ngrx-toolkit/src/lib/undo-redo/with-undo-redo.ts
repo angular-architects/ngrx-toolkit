@@ -136,7 +136,7 @@ export function withUndoRedo<Input extends EmptyFeatureResult>(
 
         updateInternal();
       },
-      __clearUndoRedo__(opts?: ClearUndoRedoOptions): void {
+      __clearUndoRedo__(opts?: ClearUndoRedoOptions<Input['state']>): void {
         undoStack.splice(0);
         redoStack.splice(0);
 
