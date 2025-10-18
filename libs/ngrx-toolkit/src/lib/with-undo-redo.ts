@@ -105,6 +105,7 @@ export function withUndoRedo<Input extends EmptyFeatureResult>(
       canRedo: canRedo.asReadonly(),
     })),
     withMethods((store) => ({
+      __clearUndoRedo__: () => ({}),
       undo(): void {
         const item = undoStack.pop();
 
@@ -135,6 +136,7 @@ export function withUndoRedo<Input extends EmptyFeatureResult>(
 
         updateInternal();
       },
+      /** @deprecated Use {@link clearUndoRedo} instead. */
       clearStack(): void {
         undoStack.splice(0);
         redoStack.splice(0);
