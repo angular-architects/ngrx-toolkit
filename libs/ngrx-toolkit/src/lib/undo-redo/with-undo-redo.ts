@@ -12,7 +12,8 @@ import {
 } from '@ngrx/signals';
 import { capitalize } from '../with-data-service';
 import { ClearUndoRedoOptions } from './clear-undo-redo';
-import { StackItem } from './models/stack-item';
+
+export type StackItem = Record<string, unknown>;
 
 export type NormalizedUndoRedoOptions = {
   maxStackSize: number;
