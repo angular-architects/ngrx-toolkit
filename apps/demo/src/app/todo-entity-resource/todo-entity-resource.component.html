@@ -1,0 +1,60 @@
+<div class="toolbar">
+  <mat-form-field appearance="outline" class="filter">
+    <mat-label>Filter</mat-label>
+    <input
+      matInput
+      [ngModel]="store.filter()"
+      (ngModelChange)="store.setFilter($event)"
+      data-id="todoer-filter"
+      placeholder="Type to filter todos"
+    />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="new-item">
+    <mat-label>New todo</mat-label>
+    <input
+      matInput
+      [(ngModel)]="newTitle"
+      (keyup.enter)="add()"
+      data-id="todoer-new"
+      placeholder="New todo"
+    />
+  </mat-form-field>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="add()"
+    data-id="todoer-add"
+  >
+    Add
+  </button>
+</div>
+
+<mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+  <ng-container matColumnDef="completed">
+    <mat-header-cell *matHeaderCellDef></mat-header-cell>
+    <mat-cell *matCellDef="let row" class="actions">
+      <mat-icon
+        (click)="store.toggleTodo({ id: row.id, completed: !row.completed })"
+        data-id="todoer-toggle"
+      >
+        {{ row.completed ? 'check_box' : 'check_box_outline_blank' }}
+      </mat-icon>
+      <mat-icon
+        color="warn"
+        (click)="store.removeTodo(row.id)"
+        data-id="todoer-delete"
+        aria-label="delete"
+        >delete</mat-icon
+      >
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="title">
+    <mat-header-cell *matHeaderCellDef>Title</mat-header-cell>
+    <mat-cell *matCellDef="let element">{{ element.title }}</mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="['completed', 'title']"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: ['completed', 'title']"></mat-row>
+</mat-table>

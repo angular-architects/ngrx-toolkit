@@ -31,9 +31,9 @@ export type ResourceResult<T> = {
   };
 };
 
-type ResourceDictionary = Record<string, ResourceRef<unknown>>;
+export type ResourceDictionary = Record<string, ResourceRef<unknown>>;
 
-type NamedResourceResult<T extends ResourceDictionary> = {
+export type NamedResourceResult<T extends ResourceDictionary> = {
   state: {
     [Prop in keyof T as `${Prop &
       string}Value`]: T[Prop]['value'] extends Signal<infer S> ? S : never;
@@ -223,7 +223,7 @@ function createNamedResource<Dictionary extends ResourceDictionary>(
   );
 }
 
-function isResourceRef(value: unknown): value is ResourceRef<unknown> {
+export function isResourceRef(value: unknown): value is ResourceRef<unknown> {
   return (
     value !== null &&
     typeof value === 'object' &&
