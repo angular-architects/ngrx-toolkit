@@ -8,7 +8,7 @@ export {
 export { renameDevtoolsName } from './lib/devtools/rename-devtools-name';
 export { patchState, updateState } from './lib/devtools/update-state';
 export { withDevToolsStub } from './lib/devtools/with-dev-tools-stub';
-export { withDevtools } from './lib/devtools/with-devtools';
+export { DevtoolsFeature, withDevtools } from './lib/devtools/with-devtools';
 
 export {
   createEffects,
@@ -56,3 +56,5 @@ export {
 
 export * from './lib/mutation/http-mutation';
 export { rxMutation } from './lib/mutation/rx-mutation';
+
+export * from './lib/mutation/mutation';

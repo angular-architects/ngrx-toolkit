@@ -82,4 +82,11 @@ export const lazyRoutes: Route[] = [
         (m) => m.TodoEntityResourceComponent,
       ),
   },
+  {
+    path: 'with-resource',
+    loadComponent: () =>
+      import('./with-resource/with-resource.component').then(
+        (m) => m.WithResourceComponent,
+      ),
+  },
 ];

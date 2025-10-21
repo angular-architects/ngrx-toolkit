@@ -26,6 +26,8 @@ import {
  * @description
  *
  * Integrates array-based `Resource` data into Entity-style state for NgRx SignalStore.
+ * This feature builds on {@link withResource} to provide an entity view over
+ * array resources.
  *
  * - For a single (unnamed) resource: exposes `value`, `status`, `error`, `isLoading`
  *   from the underlying resource (via `withResource`), and derives
@@ -82,6 +84,8 @@ import {
  * store.todosEntities();
  * patchState(store, addEntity({ id: 2, title: 'Y', completed: true }, { collection: 'todos' }));
  * ```
+ *
+ * @see {@link withResource}
  */
 export function withEntityResources<
   Input extends SignalStoreFeatureResult,

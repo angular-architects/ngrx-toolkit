@@ -9,9 +9,7 @@ import {
 import { withEntityResources } from './with-entity-resources';
 
 type Todo = { id: number; title: string; completed: boolean };
-const wait = async () => {
-  await new Promise((r) => setTimeout(r));
-};
+const wait = (ms = 0) => new Promise((r) => setTimeout(r, ms));
 
 describe('withEntityResources', () => {
   describe('unnamed entities', () => {

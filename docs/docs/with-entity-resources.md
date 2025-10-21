@@ -8,10 +8,12 @@ import { withEntityResources } from '@angular-architects/ngrx-toolkit';
 
 `withEntityResources()` integrates Angular Resources that return arrays into NgRx SignalStore using the Entity helpers from `@ngrx/signals/entities`.
 
+> Note: This feature builds on [withResource()](./with-resource.md) and adds an entity view over array resources.
+
 - **Unnamed resource**: Your store exposes resource members (`value`, `status`, `error`, `isLoading`, etc.) and additionally derives entity members: `ids`, `entityMap`, `entities`.
 - **Named resources**: Register multiple array resources by name. The store exposes prefixed members per resource, e.g. `todosValue`, `todosIds`, `todosEntityMap`, `todosEntities`.
 
-This feature composes `withResource()` and the Entities utilities without effects. Entity state is linked to the resource value using linked signals, so updaters like `addEntity`, `updateEntity`, and `removeEntity` mutate the entity view in the store while the source of truth remains the resource.
+This feature composes [withResource()](./with-resource.md) and the Entities utilities without effects. Entity state is linked to the resource value using linked signals, so updaters like `addEntity`, `updateEntity`, and `removeEntity` mutate the entity view in the store while the source of truth remains the resource.
 
 ## Accepted Inputs and Type Signatures
 
@@ -31,15 +33,6 @@ withEntityResources<
 - **Entity identity**: Array element type must include an `id` compatible with `EntityId`.
 - **Named resources**: For the dictionary form, keys become the name prefixes (e.g., `todosEntities()`), and each entry can have a different element type.
 - **Non-array resources**: If your resource does not produce an array, use `withResource()` instead.
-
-## How it works internally
-
-- **Composes withResource**: Internally calls `withResource()` with either a single `ResourceRef` or a dictionary of `ResourceRef`s, so all standard Resource members are available on the store (or prefixed for named resources).
-- **Derives entity signals**: From the resource's `value` signal (the array), it derives:
-  - `ids` via a linked signal that maps each entity to its `id`
-  - `entityMap` via a linked signal that builds an `id -> entity` map
-  - `entities` as a computed projection of `ids` through `entityMap`
-- **No effects**: Synchronization is purely signal-based; entity updaters mutate the store's entity state while the underlying Resource value remains the source of truth.
 
 ## Basic Usage
 
@@ -189,6 +182,15 @@ export const TodoEntityResourceStore = signalStore(
   })),
 );
 ```
+
+## How it works internally
+
+- **Composes withResource**: Internally calls [withResource()](./with-resource.md) with either a single `ResourceRef` or a dictionary of `ResourceRef`s, so all standard Resource members are available on the store (or prefixed for named resources).
+- **Derives entity signals**: From the resource's `value` signal (the array), it derives:
+  - `ids` via a linked signal that maps each entity to its `id`
+  - `entityMap` via a linked signal that builds an `id -> entity` map
+  - `entities` as a computed projection of `ids` through `entityMap`
+- **No effects**: Synchronization is purely signal-based; entity updaters mutate the store's entity state while the underlying Resource value remains the source of truth.
 
 ## Interop and Notes
 
