@@ -41,3 +41,6 @@ Thumbs.db
 .nx
 .angular
 /versions.txt
+
+vite.config.*.timestamp*
+vitest.config.*.timestamp*

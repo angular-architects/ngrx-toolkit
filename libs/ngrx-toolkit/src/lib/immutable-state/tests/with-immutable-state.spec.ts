@@ -37,7 +37,7 @@ describe('withImmutableState', () => {
   for (const isDevMode of [true, false]) {
     describe(isDevMode ? 'dev mode' : 'production mode', () => {
       beforeEach(() => {
-        jest.spyOn(devMode, 'isDevMode').mockReturnValue(isDevMode);
+        vi.spyOn(devMode, 'isDevMode').mockReturnValue(isDevMode);
       });
       for (const { stateFactory, enableInProduction, name, protectionOn } of [
         {
