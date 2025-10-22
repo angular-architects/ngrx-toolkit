@@ -18,11 +18,13 @@ export {
   withRedux,
 } from './lib/with-redux';
 
+export { clearUndoRedo } from './lib/undo-redo/clear-undo-redo';
+export * from './lib/undo-redo/with-undo-redo';
+
 export * from './lib/with-call-state';
 export * from './lib/with-data-service';
 export * from './lib/with-pagination';
 export { setResetState, withReset } from './lib/with-reset';
-export * from './lib/with-undo-redo';
 
 export { withImmutableState } from './lib/immutable-state/with-immutable-state';
 export { withIndexedDB } from './lib/storage-sync/features/with-indexed-db';
