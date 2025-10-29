@@ -11,11 +11,14 @@ import { tap } from 'rxjs';
 import { currentActionNames } from './internal/current-action-names';
 import { DefaultTracker } from './internal/default-tracker';
 import {
-  DevtoolsFeature,
+  DevtoolsFeature as DevtoolsFeatureInternal,
   DevtoolsInnerOptions,
 } from './internal/devtools-feature';
 import { DevtoolsSyncer } from './internal/devtools-syncer.service';
 import { ReduxDevtoolsExtension } from './internal/models';
+
+// Users requested that we export this type: https://github.com/angular-architects/ngrx-toolkit/issues/178
+export type DevtoolsFeature = DevtoolsFeatureInternal;
 
 declare global {
   interface Window {
@@ -50,7 +53,7 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
       // TODO: use withProps and symbols
       return {
         [renameDevtoolsMethodName]: (newName: string) => {
-          syncer.renameStore(name, newName);
+          syncer.renameStore(id, newName);
         },
         [uniqueDevtoolsId]: () => id,
         [devtoolsEventsTracker]: rxMethod<{ type: string }>((c$) =>

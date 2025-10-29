@@ -9,7 +9,7 @@ export {
 export { renameDevtoolsName } from './lib/devtools/rename-devtools-name';
 export { patchState, updateState } from './lib/devtools/update-state';
 export { withDevToolsStub } from './lib/devtools/with-dev-tools-stub';
-export { withDevtools } from './lib/devtools/with-devtools';
+export { DevtoolsFeature, withDevtools } from './lib/devtools/with-devtools';
 
 export {
   createEffects,
@@ -44,6 +44,7 @@ export { emptyFeature, withConditional } from './lib/with-conditional';
 export { withFeatureFactory } from './lib/with-feature-factory';
 
 export * from './lib/mutation/rx-mutation';
+export * from './lib/with-entity-resources';
 export * from './lib/with-mutations';
 export { mapToResource, withResource } from './lib/with-resource';
 
@@ -56,3 +57,5 @@ export {
 
 export * from './lib/mutation/http-mutation';
 export { rxMutation } from './lib/mutation/rx-mutation';
+
+export * from './lib/mutation/mutation';

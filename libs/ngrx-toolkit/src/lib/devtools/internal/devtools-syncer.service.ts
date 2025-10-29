@@ -1,7 +1,12 @@
 import { isPlatformBrowser } from '@angular/common';
-import { inject, Injectable, OnDestroy, PLATFORM_ID } from '@angular/core';
+import {
+  inject,
+  Injectable,
+  NgZone,
+  OnDestroy,
+  PLATFORM_ID,
+} from '@angular/core';
 import { StateSource } from '@ngrx/signals';
-import { throwIfNull } from '../../shared/throw-if-null';
 import { REDUX_DEVTOOLS_CONFIG } from '../provide-devtools-config';
 import { currentActionNames } from './current-action-names';
 import { DevtoolsInnerOptions } from './devtools-feature';
@@ -53,11 +58,13 @@ export class DevtoolsSyncer implements OnDestroy {
   #currentState: Record<string, object> = {};
   #currentId = 1;
 
-  readonly #connection: Connection = this.#isBrowser
-    ? window.__REDUX_DEVTOOLS_EXTENSION__
-      ? window.__REDUX_DEVTOOLS_EXTENSION__.connect(this.#devtoolsConfig)
-      : dummyConnection
-    : dummyConnection;
+  readonly #connection: Connection = inject(NgZone).runOutsideAngular(() =>
+    this.#isBrowser
+      ? window.__REDUX_DEVTOOLS_EXTENSION__
+        ? window.__REDUX_DEVTOOLS_EXTENSION__.connect(this.#devtoolsConfig)
+        : dummyConnection
+      : dummyConnection,
+  );
 
   constructor() {
     if (!this.#isBrowser) {
@@ -150,7 +157,7 @@ Enable automatic indexing via withDevTools('${storeName}', { indexNames: true })
     this.#currentState = Object.entries(this.#currentState).reduce(
       (newState, [storeName, state]) => {
         if (storeName !== name) {
-          newState[name] = state;
+          newState[storeName] = state;
         }
         return newState;
       },
@@ -162,23 +169,36 @@ Enable automatic indexing via withDevTools('${storeName}', { indexNames: true })
     }
   }
 
-  renameStore(oldName: string, newName: string) {
-    const storeNames = Object.values(this.#stores).map((store) => store.name);
-    const id = throwIfNull(
-      Object.keys(this.#stores).find((id) => this.#stores[id].name === oldName),
-    );
-    if (storeNames.includes(newName)) {
+  /**
+   * Renames a store identified by its internal id. If the store has already
+   * been removed (e.g. due to component destruction), this is a no-op.
+   */
+  renameStore(id: string, newName: string) {
+    const storeEntry = this.#stores[id];
+    if (!storeEntry) {
+      return;
+    }
+    const oldName = storeEntry.name;
+
+    if (oldName === newName) {
+      return;
+    }
+
+    const otherStoreNames = Object.entries(this.#stores)
+      .filter(([entryId]) => entryId !== id)
+      .map(([, s]) => s.name);
+    if (otherStoreNames.includes(newName)) {
       throw new Error(
         `NgRx Toolkit/DevTools: cannot rename from ${oldName} to ${newName}. ${newName} is already assigned to another SignalStore instance.`,
       );
     }
 
     this.#stores = Object.entries(this.#stores).reduce(
-      (newStore, [id, value]) => {
-        if (value.name === oldName) {
-          newStore[id] = { ...value, name: newName };
+      (newStore, [entryId, value]) => {
+        if (entryId === id) {
+          newStore[entryId] = { ...value, name: newName };
         } else {
-          newStore[id] = value;
+          newStore[entryId] = value;
         }
         return newStore;
       },

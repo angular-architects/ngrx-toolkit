@@ -24,9 +24,11 @@ const sidebars: SidebarsConfig = {
     'with-immutable-state',
     'with-reset',
     'with-resource',
+    'with-entity-resources',
     'with-storage-sync',
     'with-undo-redo',
     'with-redux',
+    'mutations',
   ],
   reduxConnectorSidebar: [
     {

@@ -77,4 +77,18 @@ export const lazyRoutes: Route[] = [
         (m) => m.CounterRxMutation,
       ),
   },
+  {
+    path: 'todo-entity-resource',
+    loadComponent: () =>
+      import('./todo-entity-resource/todo-entity-resource.component').then(
+        (m) => m.TodoEntityResourceComponent,
+      ),
+  },
+  {
+    path: 'with-resource',
+    loadComponent: () =>
+      import('./with-resource/with-resource.component').then(
+        (m) => m.WithResourceComponent,
+      ),
+  },
 ];
