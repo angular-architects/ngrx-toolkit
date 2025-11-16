@@ -2,6 +2,7 @@
 
 import {
   isSignal,
+  linkedSignal,
   Resource,
   ResourceRef,
   ResourceStatus,
@@ -54,6 +55,16 @@ export type NamedResourceResult<T extends ResourceDictionary> = {
   };
 };
 
+export type ErrorHandling = 'native' | 'undefined value' | 'previous value';
+
+export type ResourceOptions = {
+  errorHandling?: ErrorHandling;
+};
+
+const defaultOptions: Required<ResourceOptions> = {
+  errorHandling: 'undefined value',
+};
+
 //** Implementation of `withResource` */
 
 /**
@@ -94,6 +105,7 @@ export function withResource<
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
   ) => ResourceRef<ResourceValue>,
+  resourceOptions?: ResourceOptions,
 ): SignalStoreFeature<Input, ResourceResult<ResourceValue>>;
 
 /**
@@ -136,6 +148,7 @@ export function withResource<
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
   ) => Dictionary,
+  resourceOptions?: ResourceOptions,
 ): SignalStoreFeature<Input, NamedResourceResult<Dictionary>>;
 
 export function withResource<
@@ -145,7 +158,12 @@ export function withResource<
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
   ) => ResourceRef<ResourceValue> | ResourceDictionary,
+  resourceOptions?: ResourceOptions,
 ): SignalStoreFeature<Input> {
+  const options: Required<ResourceOptions> = {
+    ...defaultOptions,
+    ...(resourceOptions || {}),
+  };
   return (store) => {
     const resourceOrDictionary = resourceFactory({
       ...store.stateSignals,
@@ -154,22 +172,34 @@ export function withResource<
     });
 
     if (isResourceRef(resourceOrDictionary)) {
-      return createUnnamedResource(resourceOrDictionary)(store);
+      return createUnnamedResource(
+        resourceOrDictionary,
+        options.errorHandling,
+      )(store);
     } else {
-      return createNamedResource(resourceOrDictionary)(store);
+      return createNamedResource(
+        resourceOrDictionary,
+        options.errorHandling,
+      )(store);
     }
   };
 }
 
 function createUnnamedResource<ResourceValue>(
   resource: ResourceRef<ResourceValue>,
+  errorHandling: ErrorHandling,
 ) {
   function hasValue(): this is Resource<Exclude<ResourceValue, undefined>> {
     return resource.hasValue();
   }
 
   return signalStoreFeature(
-    withLinkedState(() => ({ value: resource.value })),
+    withLinkedState(() => ({
+      value: valueSignalForErrorHandling(
+        resource,
+        errorHandling,
+      ) as WritableSignal<ResourceValue>,
+    })),
     withProps(() => ({
       status: resource.status,
       error: resource.error,
@@ -184,13 +214,17 @@ function createUnnamedResource<ResourceValue>(
 
 function createNamedResource<Dictionary extends ResourceDictionary>(
   dictionary: Dictionary,
+  errorHandling: ErrorHandling,
 ) {
   const keys = Object.keys(dictionary);
 
   const state: Record<string, WritableSignal<unknown>> = keys.reduce(
     (state, resourceName) => ({
       ...state,
-      [`${resourceName}Value`]: dictionary[resourceName].value,
+      [`${resourceName}Value`]: valueSignalForErrorHandling(
+        dictionary[resourceName],
+        errorHandling,
+      ),
     }),
     {},
   );
@@ -318,4 +352,47 @@ export function mapToResource<
     isLoading: store[`${resourceName}IsLoading`],
     hasValue,
   } as MappedResource<Store, Name>;
+}
+
+// We require an explicit error symbol, to clearly communicate
+// that an error has happened. Since a resource's value can be
+// any value, we're ensuring here that an error of true is not
+// mistakenly seen as value.
+const ERROR = Symbol('ERROR');
+
+// Tests need to check if local changes are also executed.
+// Test needs to check if we go directly from initial into value. what happens if default value is there, what happens if undefined.
+function valueSignalForErrorHandling<T>(
+  res: ResourceRef<T>,
+  errorHandling: ErrorHandling,
+): WritableSignal<T> {
+  switch (errorHandling) {
+    case 'native':
+      return res.value;
+    case 'undefined value':
+      return linkedSignal(() =>
+        res.status() === 'error' ? undefined : res.value(),
+      );
+    case 'previous value':
+      return linkedSignal<T | typeof ERROR, T>({
+        source: () => {
+          if (res.status() === 'error') {
+            return ERROR;
+          }
+          return res.value();
+        },
+        computation: (source, previous) => {
+          if (source === ERROR) {
+            if (previous === undefined) {
+              throw new Error(
+                'impossible state: previous value is not available -> resource was initialized with error',
+              );
+            }
+            return previous.value;
+          } else {
+            return source;
+          }
+        },
+      });
+  }
 }
