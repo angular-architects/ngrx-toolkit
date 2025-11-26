@@ -13,11 +13,11 @@ export function setupExtensions(
   isPlatformBrowser = true,
   isExtensionAvailable = true,
 ) {
-  const sendSpy = jest.fn();
+  const sendSpy = vi.fn();
   const connection = {
     send: sendSpy,
   };
-  const connectSpy = jest.fn(() => connection);
+  const connectSpy = vi.fn(() => connection);
 
   if (isExtensionAvailable) {
     window.__REDUX_DEVTOOLS_EXTENSION__ = { connect: connectSpy };
