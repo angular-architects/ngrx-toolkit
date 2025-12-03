@@ -143,7 +143,12 @@ httpMutation({
 
 ### Callbacks
 
-In the mutation: _optional_ `onSuccess` and `onError` callbacks
+In the mutation: _optional_ `onSuccess` and `onError` callbacks.
+
+The callbacks are called with two parameters:
+
+1. The result of the mutation (`onSuccess`) or the error (`onError`)
+2. The parameter passed when calling the mutation
 
 ```ts
 ({
@@ -157,6 +162,14 @@ In the mutation: _optional_ `onSuccess` and `onError` callbacks
   onError: (error) => {
     // optional
     console.error('Error occurred:', error);
+  },
+});
+
+// using the passed parameter
+({
+  onSuccess: (_result, params) => {
+    // after successful deletion
+    store.listResource.set(store.listResource.value().filter((item) => item.id !== params.id));
   },
 });
 ```
