@@ -147,7 +147,7 @@ In the mutation: _optional_ `onSuccess` and `onError` callbacks.
 
 The callbacks are called with two parameters:
 
-1. The result of the mutation (onSuccess) or the error (onError)
+1. The result of the mutation (`onSuccess`) or the error (`onError`)
 2. The parameter passed when calling the mutation
 
 ```ts
