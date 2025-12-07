@@ -49,7 +49,7 @@ describe('withFeatureFactory', () => {
     const UserStore = signalStore(
       { providedIn: 'root' },
       withMethods(() => ({
-        findById(id: number) {
+        findById(_id: number) {
           return of({ id: 1, name: 'Konrad' });
         },
       })),

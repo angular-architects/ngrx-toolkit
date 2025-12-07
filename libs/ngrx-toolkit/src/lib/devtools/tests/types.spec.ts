@@ -3,6 +3,7 @@ import { patchState, signalStore, withState } from '@ngrx/signals';
 import { withDevtools } from '../with-devtools';
 
 it('should compile when signalStore is extended from', () => {
+  // eslint-disable-next-line unused-imports/no-unused-vars
   class CounterStore extends signalStore(
     { protectedState: false },
     withState({ count: 0 }),

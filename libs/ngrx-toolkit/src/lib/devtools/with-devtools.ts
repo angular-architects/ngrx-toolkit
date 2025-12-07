@@ -26,6 +26,7 @@ declare global {
 export const renameDevtoolsMethodName = '___renameDevtoolsName';
 export const uniqueDevtoolsId = '___uniqueDevtoolsId';
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 const EXISTING_NAMES = new InjectionToken(
   'Array contain existing names for the signal stores',
   { factory: () => [] as string[], providedIn: 'root' },
