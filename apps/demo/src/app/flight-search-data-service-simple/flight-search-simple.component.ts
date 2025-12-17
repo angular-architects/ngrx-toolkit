@@ -1,4 +1,4 @@
-import { JsonPipe, NgForOf, NgIf } from '@angular/common';
+import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,8 +10,6 @@ import { SimpleFlightBookingStore } from './flight-booking-simple.store';
 
 @Component({
   imports: [
-    NgIf,
-    NgForOf,
     JsonPipe,
     FormsModule,
     FlightCardComponent,

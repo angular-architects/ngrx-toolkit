@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, ViewChild, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -6,7 +5,7 @@ import { Flight } from '../shared/flight';
 import { SimpleFlightBookingStore } from './flight-booking-simple.store';
 
 @Component({
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [RouterModule, FormsModule],
   selector: 'demo-flight-edit-simple',
   templateUrl: './flight-edit-simple.component.html',
 })
