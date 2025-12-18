@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
@@ -11,7 +10,6 @@ import { TodoEntityResourceStore } from './todo-entity-resource.store';
   selector: 'demo-todo-entity-resource',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     MatIcon,
     MatInputModule,

@@ -1,15 +1,11 @@
 import { EnvironmentProviders, Signal, Type } from '@angular/core';
-import { DeepSignal } from '@ngrx/signals/src/deep-signal';
 import {
+  DeepSignal,
+  Prettify,
   SignalStoreFeatureResult,
   StateSignals,
-} from '@ngrx/signals/src/signal-store-models';
-import {
-  Action,
-  ActionCreator,
-  ActionType,
-  Prettify,
-} from '@ngrx/store/src/models';
+} from '@ngrx/signals';
+import { Action, ActionCreator, ActionType } from '@ngrx/store';
 import { Observable, Unsubscribable } from 'rxjs';
 
 export type IncludePropType<

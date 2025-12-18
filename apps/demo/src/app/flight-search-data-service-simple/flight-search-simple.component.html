@@ -14,12 +14,9 @@
     </label>
   </div>
 
-  <div
-    class="alert alert-warning"
-    *ngIf="form?.controls?.['from']?.hasError('appCity')"
-  >
-    Invalid city!
-  </div>
+  @if (form?.controls?.['from']?.hasError('appCity')) {
+    <div class="alert alert-warning">Invalid city!</div>
+  }
 
   <div class="form-group">
     <label
@@ -52,24 +49,27 @@
 </form>
 
 <div>
-  <b *ngIf="loading()">Loading ...</b>
+  @if (loading()) {
+    <b>Loading ...</b>
+  }
 </div>
 
 <div class="row">
-  <div
-    *ngFor="let f of flights()"
-    class="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-3"
-  >
-    <demo-flight-card
-      [item]="f"
-      [selected]="selectedIds()[f.id]"
-      (selectedChange)="updateBasket(f.id, $event)"
-    >
-      <a class="btn btn-default" [routerLink]="['../flight-edit-simple', f.id]"
-        >Edit</a
+  @for (f of flights(); track f) {
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 col-xl-3">
+      <demo-flight-card
+        [item]="f"
+        [selected]="selectedIds()[f.id]"
+        (selectedChange)="updateBasket(f.id, $event)"
       >
-    </demo-flight-card>
-  </div>
+        <a
+          class="btn btn-default"
+          [routerLink]="['../flight-edit-simple', f.id]"
+          >Edit</a
+        >
+      </demo-flight-card>
+    </div>
+  }
 </div>
 
 <pre>{{ selected() | json }}</pre>

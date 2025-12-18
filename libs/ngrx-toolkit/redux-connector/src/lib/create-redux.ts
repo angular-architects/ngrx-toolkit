@@ -3,7 +3,7 @@ import {
   makeEnvironmentProviders,
   provideEnvironmentInitializer,
 } from '@angular/core';
-import { ActionCreator, ActionType } from '@ngrx/store/src/models';
+import { ActionCreator, ActionType } from '@ngrx/store';
 import {
   CreateReduxState,
   ExtractActionTypes,
