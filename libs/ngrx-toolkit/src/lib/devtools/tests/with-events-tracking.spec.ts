@@ -24,7 +24,7 @@ describe('withEventsTracking', () => {
 
     const Store = signalStore(
       { providedIn: 'root' },
-      withDevtools('store-a', withEventsTracking({ withGlitchTracking: true })),
+      withDevtools('store-a', withEventsTracking()),
       withState({ count: 0 }),
       withReducer(
         on(testEvents.bump, (_event, state) => ({ count: state.count + 1 })),
@@ -48,7 +48,7 @@ describe('withEventsTracking', () => {
 
     const StoreA = signalStore(
       { providedIn: 'root' },
-      withDevtools('store-a', withEventsTracking({ withGlitchTracking: true })),
+      withDevtools('store-a', withEventsTracking()),
       withState({ count: 0 }),
       withReducer(
         on(testEvents.bump, (_event, state) => ({ count: state.count + 1 })),
@@ -57,7 +57,7 @@ describe('withEventsTracking', () => {
 
     const StoreB = signalStore(
       { providedIn: 'root' },
-      withDevtools('store-b', withEventsTracking({ withGlitchTracking: true })),
+      withDevtools('store-b', withEventsTracking()),
       withState({ count: 0 }),
       withReducer(
         on(testEvents.bump, (_event, state) => ({ count: state.count + 1 })),
