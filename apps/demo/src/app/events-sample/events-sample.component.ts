@@ -15,7 +15,6 @@ import { BookStore } from './book.store';
 
 @Component({
   selector: 'demo-events-sample',
-  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
