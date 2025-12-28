@@ -34,10 +34,17 @@ export type ResourceResult<T> = {
 
 export type ResourceDictionary = Record<string, ResourceRef<unknown>>;
 
-export type NamedResourceResult<T extends ResourceDictionary> = {
+export type NamedResourceResult<
+  T extends ResourceDictionary,
+  UndefinedErrorHandling extends boolean,
+> = {
   state: {
     [Prop in keyof T as `${Prop &
-      string}Value`]: T[Prop]['value'] extends Signal<infer S> ? S : never;
+      string}Value`]: T[Prop]['value'] extends Signal<infer S>
+      ? UndefinedErrorHandling extends true
+        ? S | undefined
+        : S
+      : never;
   };
   props: {
     [Prop in keyof T as `${Prop & string}Status`]: Signal<ResourceStatus>;
@@ -74,7 +81,7 @@ const defaultOptions: Required<ResourceOptions> = {
  * Integrates a `Resource` into the SignalStore and makes the store instance
  * implement the `Resource` interface.
  *
- * The resource’s value is stored under the `value` key in the state
+ * The resource's value is stored under the `value` key in the state
  * and is exposed as a `DeepSignal`.
  *
  * It can also be updated via `patchState`.
@@ -96,8 +103,19 @@ const defaultOptions: Required<ResourceOptions> = {
  * ```
  *
  * @param resourceFactory A factory function that receives the store's state signals,
- * methods, and props. Needs to return a `ResourceRef`.
+ * methods, and props.
+ * @param resourceOptions Allows to configure the error handling behavior.
  */
+export function withResource<
+  Input extends SignalStoreFeatureResult,
+  ResourceValue,
+>(
+  resourceFactory: (
+    store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
+  ) => ResourceRef<ResourceValue>,
+  resourceOptions: { errorHandling: 'undefined value' },
+): SignalStoreFeature<Input, ResourceResult<ResourceValue | undefined>>;
+
 export function withResource<
   Input extends SignalStoreFeatureResult,
   ResourceValue,
@@ -140,6 +158,7 @@ export function withResource<
  *
  * @param resourceFactory A factory function that receives the store's props,
  * methods, and state signals. It must return a `Record<string, ResourceRef>`.
+ * @param resourceOptions Allows to configure the error handling behavior.
  */
 export function withResource<
   Input extends SignalStoreFeatureResult,
@@ -148,8 +167,18 @@ export function withResource<
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
   ) => Dictionary,
+  resourceOptions: { errorHandling: 'undefined value' },
+): SignalStoreFeature<Input, NamedResourceResult<Dictionary, true>>;
+
+export function withResource<
+  Input extends SignalStoreFeatureResult,
+  Dictionary extends ResourceDictionary,
+>(
+  resourceFactory: (
+    store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
+  ) => Dictionary,
   resourceOptions?: ResourceOptions,
-): SignalStoreFeature<Input, NamedResourceResult<Dictionary>>;
+): SignalStoreFeature<Input, NamedResourceResult<Dictionary, false>>;
 
 export function withResource<
   Input extends SignalStoreFeatureResult,
@@ -195,10 +224,7 @@ function createUnnamedResource<ResourceValue>(
 
   return signalStoreFeature(
     withLinkedState(() => ({
-      value: valueSignalForErrorHandling(
-        resource,
-        errorHandling,
-      ) as WritableSignal<ResourceValue>,
+      value: valueSignalForErrorHandling(resource, errorHandling),
     })),
     withProps(() => ({
       status: resource.status,
@@ -364,8 +390,18 @@ const ERROR = Symbol('ERROR');
 // Test needs to check if we go directly from initial into value. what happens if default value is there, what happens if undefined.
 function valueSignalForErrorHandling<T>(
   res: ResourceRef<T>,
+  errorHandling: 'undefined value',
+): WritableSignal<T | undefined>;
+
+function valueSignalForErrorHandling<T>(
+  res: ResourceRef<T>,
   errorHandling: ErrorHandling,
-): WritableSignal<T> {
+): WritableSignal<T>;
+
+function valueSignalForErrorHandling<T>(
+  res: ResourceRef<T>,
+  errorHandling: ErrorHandling,
+): WritableSignal<T | undefined> {
   switch (errorHandling) {
     case 'native':
       return res.value;
