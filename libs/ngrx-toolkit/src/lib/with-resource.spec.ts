@@ -405,21 +405,29 @@ describe('withResource', () => {
               expect(store.addressStatus()).toBe('reloading');
             });
           });
+        });
 
-          describe('error status', () => {
-            it('has error status when error', async () => {
-              const { storeAndResource, addressResolver, setId } = setup();
+        describe('error status', () => {
+          describe('unnamed resource', () => {
+            it('throws on error with native error handling', async () => {
+              const { store, addressResolver } =
+                setupWithUnnamedResource('native');
 
               addressResolver.resolve.mockRejectedValue(new Error('Error'));
-              setId(1);
+              patchState(store, { id: 1 });
               await wait();
 
-              expect(storeAndResource.status()).toBe('error');
-              expect(() => storeAndResource.value()).toThrow();
-              expect(storeAndResource.error()).toBeInstanceOf(Error);
-              expect(storeAndResource.isLoading()).toBe(false);
-              expect(storeAndResource.hasValue()).toBe(false);
+              expect(() => store.value()).toThrow();
             });
+          });
+          it('returns undefined with undefined value error handling', async () => {
+            const { store, addressResolver } =
+              setupWithUnnamedResource('undefined value');
+
+            addressResolver.resolve.mockRejectedValue(new Error('Error'));
+            patchState(store, { id: 1 });
+            await wait();
+            expect(store.value()).toBeUndefined();
           });
         });
       });

@@ -380,14 +380,71 @@ export function mapToResource<
   } as MappedResource<Store, Name>;
 }
 
+/**
+ * Strategies to work around the error throwing behavior of the Resource API.
+ *
+ * The original idea was to use a `linkedSignal` as the state's value Signal. It would mean
+ * that we can leverage the `computation` callback to handle the error. The downside is that
+ * changes to that signal will not be reflected in the underlying resource, i.e. the resource
+ * will not switch to status `local`.
+ *
+ * 1. An option to fix that would be to put the `linkedSignal` as property in the SignalStore,
+ * where it would have the name `value`. Given, we apply a `DeepSignal` to it, it would not
+ * break from the outside. The original value would be put into the state behind a hidden Symbol
+ * as property name. In order to update the state, users will get an updater function, called
+ * `setResource`.
+ *
+ * That works perfectly for unnamed resources, but could cause potential problems
+ * for named resources, when they are defined multiple times, i.e. calling `withResource`
+ * multiple times. The reason is that, we would have to hide their values in the state again
+ * behind a symbol, but that would be a property which gets defined once, and would get new
+ * subproperties (the values of the resources) added per additional `withResource` call.
+ *
+ * Using a separate updated method is a common SignalStore pattern, which is also used
+ * in `withEntities`.
+ *
+ * For named resources, `setResource` would come with a name as first parameter.
+ *
+ * We saw in earlier experiments that there are TypeScript-specific challenges.
+ *
+ * Pros:
+ * - Uses Angular's native `linkedSignal` and isn't a hackish approach
+ * - Status transitions to 'local' work correctly (via direct `res.value.set()` in `setResource`)
+ * - Works with `patchState`/`getState` (linkedSignal handles errors on read)
+ * - Clear, explicit API with dedicated `setResource()` method
+ *
+ * Cons:
+ * - Requires API change: users must use `setResource()` instead of `patchState(store, { value })`
+ * - Named resources with multiple `withResource` calls: hidden state management becomes complex
+ *
+ * 2. A possible alternative would be to use a Proxy on value. Instead of using a `linkedSignal`,
+ * we can leave the value signal as is and create a proxy around it that intercepts the get/call
+ * operation and handles the error. The downside is that we need to implement the proxy ourselves,
+ * which is not as clean as using a `linkedSignal`. On the other hand, the Angular team is working
+ * on a better way to handle errors, which means that approach is only temporary. It could also
+ * happen, that we are getting some sort of "Mapped Signal", where not just the reading (as in
+ * `linkedSignal`) but also the writing is handled.
+ *
+ * Pros:
+ * - No API changes: `patchState(store, { value: x })` works naturally
+ * - Status transitions to 'local' work correctly (writes go directly to original signal)
+ * - Works with `patchState`/`getState` (proxy intercepts reads and handles errors)
+ * - Uniform solution: same approach for both named and unnamed resources
+ * - Transparent: looks and behaves like a normal signal from the outside
+ *
+ * Cons:
+ * - Manual implementation: must properly handle all signal methods (`set`, `update`, `asReadonly`, etc.)
+ * - Dependency tracking: need to verify proxy doesn't break Angular's reactivity system
+ * - More complex proxy logic required for 'previous value' strategy (caching previous values)
+ * - Less "Angular-native": doesn't leverage `linkedSignal`'s built-in reactivity guarantees
+ */
+
 // We require an explicit error symbol, to clearly communicate
 // that an error has happened. Since a resource's value can be
 // any value, we're ensuring here that an error of true is not
 // mistakenly seen as value.
 const ERROR = Symbol('ERROR');
 
-// Tests need to check if local changes are also executed.
-// Test needs to check if we go directly from initial into value. what happens if default value is there, what happens if undefined.
 function valueSignalForErrorHandling<T>(
   res: ResourceRef<T>,
   errorHandling: 'undefined value',
