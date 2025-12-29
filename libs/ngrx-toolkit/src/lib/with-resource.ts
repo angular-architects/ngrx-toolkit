@@ -2,11 +2,11 @@
 
 import {
   isSignal,
-  linkedSignal,
   Resource,
   ResourceRef,
   ResourceStatus,
   Signal,
+  untracked,
   WritableSignal,
 } from '@angular/core';
 import {
@@ -439,12 +439,19 @@ export function mapToResource<
  * - Less "Angular-native": doesn't leverage `linkedSignal`'s built-in reactivity guarantees
  */
 
-// We require an explicit error symbol, to clearly communicate
-// that an error has happened. Since a resource's value can be
-// any value, we're ensuring here that an error of true is not
-// mistakenly seen as value.
-const ERROR = Symbol('ERROR');
-
+/**
+ * Creates a proxy around a resource's value signal to handle errors
+ * based on the specified error handling strategy.
+ *
+ * The proxy intercepts calls to the signal (when invoked as a function)
+ * and applies error handling logic, while forwarding all other operations
+ * (set, update, asReadonly, etc.) directly to the original signal.
+ *
+ * This ensures that:
+ * - Writes go directly to the original signal (status transitions to 'local' work correctly)
+ * - Reads are intercepted and error handling is applied
+ * - All signal methods are properly forwarded
+ */
 function valueSignalForErrorHandling<T>(
   res: ResourceRef<T>,
   errorHandling: 'undefined value',
@@ -459,33 +466,65 @@ function valueSignalForErrorHandling<T>(
   res: ResourceRef<T>,
   errorHandling: ErrorHandling,
 ): WritableSignal<T | undefined> {
+  const originalSignal = res.value;
+
   switch (errorHandling) {
     case 'native':
-      return res.value;
-    case 'undefined value':
-      return linkedSignal(() =>
-        res.status() === 'error' ? undefined : res.value(),
-      );
-    case 'previous value':
-      return linkedSignal<T | typeof ERROR, T>({
-        source: () => {
-          if (res.status() === 'error') {
-            return ERROR;
-          }
-          return res.value();
-        },
-        computation: (source, previous) => {
-          if (source === ERROR) {
-            if (previous === undefined) {
-              throw new Error(
-                'impossible state: previous value is not available -> resource was initialized with error',
-              );
+      return originalSignal;
+    case 'undefined value': {
+      return new Proxy(originalSignal, {
+        apply(target) {
+          const status = untracked(() => res.status());
+          try {
+            // Always call the underlying signal to ensure reactivity.
+            const value = target();
+            if (status === 'error') {
+              return undefined;
             }
-            return previous.value;
-          } else {
-            return source;
+            return value;
+          } catch (error) {
+            if (status === 'error') {
+              return undefined;
+            }
+            throw error;
           }
         },
       });
+    }
+    case 'previous value': {
+      let previousValue: T | undefined = undefined;
+      let hasPreviousValue = false;
+
+      return new Proxy(originalSignal, {
+        apply(target) {
+          const status = untracked(() => res.status());
+          try {
+            // Always call the underlying signal to ensure reactivity.
+            const value = target();
+            if (status === 'error') {
+              if (!hasPreviousValue) {
+                throw new Error(
+                  'impossible state: previous value is not available -> resource was initialized with error',
+                );
+              }
+              return previousValue;
+            }
+            previousValue = value;
+            hasPreviousValue = true;
+            return value;
+          } catch (error) {
+            if (status === 'error') {
+              if (!hasPreviousValue) {
+                throw new Error(
+                  'impossible state: previous value is not available -> resource was initialized with error',
+                );
+              }
+              return previousValue;
+            }
+            throw error;
+          }
+        },
+      });
+    }
   }
 }
