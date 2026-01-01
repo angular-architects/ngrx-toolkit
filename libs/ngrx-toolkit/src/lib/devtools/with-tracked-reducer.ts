@@ -7,11 +7,16 @@ import {
   signalStoreFeature,
   type,
 } from '@ngrx/signals';
-import { ReducerEvents, withEventHandlers } from '@ngrx/signals/events';
+import {
+  EventCreator,
+  ReducerEvents,
+  withEventHandlers,
+} from '@ngrx/signals/events';
 import { tap } from 'rxjs/operators';
 import { updateState } from './update-state';
 
 export function withTrackedReducer<State extends object>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ...caseReducers: CaseReducerResult<State, any>[]
 ): SignalStoreFeature<
   EmptyFeatureResult & { state: State },
@@ -35,25 +40,15 @@ export function withTrackedReducer<State extends object>(
   );
 }
 
-type EventInstance<Type extends string, Payload> = {
-  type: Type;
-  payload: Payload;
-};
-
-type EventCreator<Type extends string, Payload> = ((
-  payload: Payload,
-) => EventInstance<Type, Payload>) & { type: Type };
-
-type CaseReducerResult<
-  State extends object,
-  EventCreators extends EventCreator<string, any>[],
-> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type CaseReducerResult<State extends object, EventCreators extends any[]> = {
   reducer: CaseReducer<State, EventCreators>;
   events: EventCreators;
 };
 
 type CaseReducer<
   State extends object,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   EventCreators extends EventCreator<string, any>[],
 > = (
   event: { [K in keyof EventCreators]: ReturnType<EventCreators[K]> }[number],

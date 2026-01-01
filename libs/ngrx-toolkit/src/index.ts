@@ -1,5 +1,4 @@
 export { withDisabledNameIndices } from './lib/devtools/features/with-disabled-name-indicies';
-export { withEventsTracking } from './lib/devtools/features/with-events-tracking';
 export { withGlitchTracking } from './lib/devtools/features/with-glitch-tracking';
 export { withMapper } from './lib/devtools/features/with-mapper';
 export {
@@ -10,6 +9,7 @@ export { renameDevtoolsName } from './lib/devtools/rename-devtools-name';
 export { patchState, updateState } from './lib/devtools/update-state';
 export { withDevToolsStub } from './lib/devtools/with-dev-tools-stub';
 export { DevtoolsFeature, withDevtools } from './lib/devtools/with-devtools';
+export { withTrackedReducer } from './lib/devtools/with-tracked-reducer';
 
 export {
   createEffects,

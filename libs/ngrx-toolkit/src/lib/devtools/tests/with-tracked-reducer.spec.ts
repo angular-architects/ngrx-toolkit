@@ -16,7 +16,6 @@ import {
   withEventHandlers,
 } from '@ngrx/signals/events';
 import { delay, tap } from 'rxjs';
-import { withEventsTracking } from '../features/with-events-tracking';
 import { withGlitchTracking } from '../features/with-glitch-tracking';
 import { updateState } from '../update-state';
 import { withDevtools } from '../with-devtools';
@@ -30,7 +29,7 @@ const testEvents = eventGroup({
   },
 });
 
-describe('withEventsTracking', () => {
+describe('withTrackedReducer', () => {
   it('should send a glitched update on event', async () => {
     const { sendSpy, withBasicStore } = setup();
 
@@ -139,7 +138,7 @@ describe('withEventsTracking', () => {
         on(testEvents.bump, (_, state) => ({ count: state.count + 1 })),
       ),
       // Injecting this here, means the reducer gets notified before the tracker
-      withDevtools('store', withEventsTracking()),
+      withDevtools('store', withGlitchTracking()),
     );
 
     TestBed.inject(Store);
