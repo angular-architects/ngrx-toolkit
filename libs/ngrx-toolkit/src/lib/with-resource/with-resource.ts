@@ -321,7 +321,7 @@ type IsValidResourceName<
       : false
     : false;
 
-type ResourceNames<Store extends Record<string, unknown>> = keyof {
+export type ResourceNames<Store extends Record<string, unknown>> = keyof {
   [Prop in keyof Store as Prop extends `${infer Name}Value`
     ? IsValidResourceName<Name, Store> extends true
       ? Name
@@ -437,20 +437,11 @@ export function mapToResource<
  * - Dependency tracking: need to verify proxy doesn't break Angular's reactivity system
  * - More complex proxy logic required for 'previous value' strategy (caching previous values)
  * - Less "Angular-native": doesn't leverage `linkedSignal`'s built-in reactivity guarantees
- */
-
-/**
- * Creates a proxy around a resource's value signal to handle errors
- * based on the specified error handling strategy.
  *
- * The proxy intercepts calls to the signal (when invoked as a function)
- * and applies error handling logic, while forwarding all other operations
- * (set, update, asReadonly, etc.) directly to the original signal.
+ * =====
  *
- * This ensures that:
- * - Writes go directly to the original signal (status transitions to 'local' work correctly)
- * - Reads are intercepted and error handling is applied
- * - All signal methods are properly forwarded
+ * The decision was made to use the proxy approach, because it is temporary and will not be
+ * a breaking change.
  */
 function valueSignalForErrorHandling<T>(
   res: ResourceRef<T>,

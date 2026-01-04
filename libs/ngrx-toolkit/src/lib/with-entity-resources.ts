@@ -19,7 +19,7 @@ import {
   ResourceResult,
   isResourceRef,
   withResource,
-} from './with-resource';
+} from './with-resource/with-resource';
 
 /**
  * @experimental

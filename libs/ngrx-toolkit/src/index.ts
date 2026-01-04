@@ -45,7 +45,7 @@ export { withFeatureFactory } from './lib/with-feature-factory';
 export * from './lib/mutation/rx-mutation';
 export * from './lib/with-entity-resources';
 export * from './lib/with-mutations';
-export { mapToResource, withResource } from './lib/with-resource';
+export { mapToResource, withResource } from './lib/with-resource/with-resource';
 
 export {
   concatOp,

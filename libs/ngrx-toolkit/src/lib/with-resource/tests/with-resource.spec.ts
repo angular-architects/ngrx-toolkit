@@ -3,7 +3,7 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
-import { inject, Injectable, Resource, resource, Signal } from '@angular/core';
+import { Resource, resource, Signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { TestBed } from '@angular/core/testing';
 import {
@@ -14,108 +14,14 @@ import {
   withState,
 } from '@ngrx/signals';
 import { of } from 'rxjs';
-import { ErrorHandling, mapToResource, withResource } from './with-resource';
+import { ErrorHandling, mapToResource, withResource } from '../with-resource';
+import { Address, venice, vienna } from './util/fixtures';
+import { paramsForResourceTypes } from './util/params-for-resource-types';
+import { setupUnnamedResource } from './util/setup-unnamed-resource';
 
 describe('withResource', () => {
   describe('standard tests', () => {
     const wait = (ms = 0) => new Promise((resolve) => setTimeout(resolve, ms));
-
-    type Address = {
-      street: string;
-      city: {
-        zip: string;
-        name: string;
-      };
-      country: string;
-    };
-
-    const venice: Address = {
-      street: 'Sestiere Dorsoduro, 2771',
-      city: {
-        zip: '30123',
-        name: 'Venezia VE',
-      },
-      country: 'Italy',
-    };
-
-    @Injectable({ providedIn: 'root' })
-    class AddressResolver {
-      resolve(id: number) {
-        void id;
-        return Promise.resolve<Address>(venice);
-      }
-    }
-
-    function setupWithUnnamedResource(errorHandling: ErrorHandling) {
-      const addressResolver = {
-        resolve: jest.fn(() => Promise.resolve(venice)),
-      };
-      const AddressStore = signalStore(
-        { providedIn: 'root', protectedState: false },
-        withState({ id: undefined as number | undefined }),
-        withResource(
-          (store) => {
-            const resolver = inject(AddressResolver);
-            return resource({
-              params: store.id,
-              loader: ({ params: id }) => resolver.resolve(id),
-            });
-          },
-          { errorHandling },
-        ),
-        withMethods((store) => ({ reload: () => store._reload() })),
-      );
-
-      TestBed.configureTestingModule({
-        providers: [
-          {
-            provide: AddressResolver,
-            useValue: addressResolver,
-          },
-        ],
-      });
-
-      const store = TestBed.inject(AddressStore);
-
-      return { store, addressResolver };
-    }
-
-    function setupWithNamedResource(errorHandling: ErrorHandling) {
-      const addressResolver = {
-        resolve: jest.fn(() => Promise.resolve(venice)),
-      };
-
-      const UserStore = signalStore(
-        { providedIn: 'root', protectedState: false },
-        withState({ id: undefined as number | undefined }),
-        withResource(
-          (store) => {
-            const resolver = inject(AddressResolver);
-            return {
-              address: resource({
-                params: store.id,
-                loader: ({ params: id }) => resolver.resolve(id),
-              }),
-            };
-          },
-          { errorHandling },
-        ),
-        withMethods((store) => ({ reload: () => store._addressReload() })),
-      );
-
-      TestBed.configureTestingModule({
-        providers: [
-          {
-            provide: AddressResolver,
-            useValue: addressResolver,
-          },
-        ],
-      });
-
-      const store = TestBed.inject(UserStore);
-
-      return { store, addressResolver };
-    }
 
     describe('withResource', () => {
       describe('InnerSignalStore access', () => {
@@ -191,243 +97,167 @@ describe('withResource', () => {
       });
 
       describe('status checks', () => {
-        describe.each([
-          'native',
-          'undefined value',
-          'previous value',
-        ] as ErrorHandling[])(`Error Handling: %s`, (errorHandling) => {
-          const testParameters = [
-            {
-              name: 'unnamed resource',
-              setup: () => {
-                const { store, addressResolver } =
-                  setupWithUnnamedResource(errorHandling);
-                const setId = (id: number) => patchState(store, { id });
-                const setValue = (value: Address) =>
-                  patchState(store, { value });
-                return {
-                  storeAndResource: store,
-                  addressResolver,
-                  setId,
-                  setValue,
-                };
+        describe('all except error', () => {
+          describe.each([
+            'native',
+            'undefined value',
+            'previous value',
+          ] as ErrorHandling[])(`Error Handling: %s`, (errorHandling) => {
+            describe.each(paramsForResourceTypes(errorHandling))(
+              `$name`,
+              ({ setup }) => {
+                it('has idle status in the beginning', () => {
+                  const { getValue, getMetadata } = setup();
+
+                  expect(getValue()).toBeUndefined();
+                  expect(getMetadata()).toEqual({
+                    status: 'idle',
+                    error: undefined,
+                    isLoading: false,
+                    hasValue: false,
+                  });
+                });
+
+                it('has loading status when loading', () => {
+                  const { getValue, getMetadata, addressResolver, setId } =
+                    setup();
+
+                  addressResolver.resolve.mockResolvedValue(venice);
+                  setId(1);
+
+                  expect(getValue()).toBeUndefined();
+                  expect(getMetadata()).toEqual({
+                    status: 'loading',
+                    error: undefined,
+                    isLoading: true,
+                    hasValue: false,
+                  });
+                });
+
+                it('has resolved status when loaded', async () => {
+                  const { getValue, getMetadata, addressResolver, setId } =
+                    setup();
+
+                  addressResolver.resolve.mockResolvedValue(venice);
+                  setId(1);
+
+                  await wait();
+
+                  expect(getValue()).toEqual(venice);
+                  expect(getMetadata()).toEqual({
+                    status: 'resolved',
+                    error: undefined,
+                    isLoading: false,
+                    hasValue: true,
+                  });
+                });
+
+                it('has local once updated', async () => {
+                  const {
+                    getValue,
+                    getMetadata,
+                    addressResolver,
+                    setId,
+                    setValue,
+                  } = setup();
+
+                  addressResolver.resolve.mockResolvedValue(venice);
+                  setId(1);
+
+                  await wait();
+                  setValue(vienna);
+
+                  expect(getValue()).toEqual(vienna);
+                  expect(getMetadata()).toEqual({
+                    status: 'local',
+                    error: undefined,
+                    isLoading: false,
+                    hasValue: true,
+                  });
+                });
               },
-            },
-            {
-              name: 'mapped named resource',
-              setup: () => {
-                const { store, addressResolver } =
-                  setupWithNamedResource(errorHandling);
-                const storeAndResource = mapToResource(store, 'address');
-                const setId = (id: number) => patchState(store, { id });
-                const setValue = (value: Address) =>
-                  patchState(store, { addressValue: value });
-                return { storeAndResource, addressResolver, setId, setValue };
-              },
-            },
-            {
-              name: 'mapped named resource',
-              setup: () => {
-                const { store, addressResolver } =
-                  setupWithNamedResource(errorHandling);
-                const storeAndResource = mapToResource(store, 'address');
-                const setId = (id: number) => patchState(store, { id });
-                const setValue = (value: Address) =>
-                  patchState(store, { addressValue: value });
-                return { storeAndResource, addressResolver, setId, setValue };
-              },
-            },
-          ];
+            );
 
-          describe.each(testParameters)(`$name`, ({ setup }) => {
-            it('has idle status in the beginning', () => {
-              const { storeAndResource } = setup();
-
-              expect(storeAndResource.status()).toBe('idle');
-              expect(storeAndResource.value()).toBeUndefined();
-              expect(storeAndResource.error()).toBeUndefined();
-              expect(storeAndResource.isLoading()).toBe(false);
-              expect(storeAndResource.hasValue()).toBe(false);
-            });
-
-            it('has loading status when loading', () => {
-              const { storeAndResource, addressResolver, setId } = setup();
-
-              addressResolver.resolve.mockResolvedValue(venice);
-              setId(1);
-
-              expect(storeAndResource.status()).toBe('loading');
-              expect(storeAndResource.value()).toBeUndefined();
-              expect(storeAndResource.error()).toBeUndefined();
-              expect(storeAndResource.isLoading()).toBe(true);
-              expect(storeAndResource.hasValue()).toBe(false);
-            });
-
-            it('has resolved status when loaded', async () => {
-              const { storeAndResource, addressResolver, setId } = setup();
-
-              addressResolver.resolve.mockResolvedValue(venice);
-              setId(1);
-
-              await wait();
-
-              expect(storeAndResource.status()).toBe('resolved');
-              expect(storeAndResource.value()).toEqual(venice);
-              expect(storeAndResource.error()).toBeUndefined();
-              expect(storeAndResource.isLoading()).toBe(false);
-              expect(storeAndResource.hasValue()).toBe(true);
-            });
-
-            it('has local once updated', async () => {
-              const { storeAndResource, addressResolver, setId, setValue } =
-                setup();
+            it('reloads an unnamed resource', async () => {
+              const { addressResolver, setId, getMetadata, reload, getValue } =
+                setupUnnamedResource(errorHandling);
 
               addressResolver.resolve.mockResolvedValue(venice);
               setId(1);
 
               await wait();
-              setValue({ ...venice, country: 'Italia' });
+              expect(getMetadata().hasValue).toBe(true);
 
-              expect(storeAndResource.status()).toBe('local');
-              expect(storeAndResource.value()?.country).toBe('Italia');
-              expect(storeAndResource.error()).toBeUndefined();
-              expect(storeAndResource.isLoading()).toBe(false);
-              expect(storeAndResource.hasValue()).toBe(true);
-            });
-          });
-
-          it('reloads an unnamed resource', async () => {
-            const { store, addressResolver } =
-              setupWithUnnamedResource(errorHandling);
-
-            addressResolver.resolve.mockResolvedValue(venice);
-            patchState(store, { id: 1 });
-
-            await wait();
-            expect(store.hasValue()).toBe(true);
-
-            addressResolver.resolve.mockResolvedValue({
-              ...venice,
-              country: 'Great Britain',
-            });
-            store.reload();
-
-            await wait();
-            expect(store.value()?.country).toBe('Great Britain');
-          });
-
-          describe('named resource', () => {
-            it('has idle status in the beginning', () => {
-              const { store } = setupWithNamedResource(errorHandling);
-
-              expect(store.addressStatus()).toBe('idle');
-              expect(store.addressValue()).toBeUndefined();
-              expect(store.addressError()).toBeUndefined();
-              expect(store.addressIsLoading()).toBe(false);
-              expect(store.addressHasValue()).toBe(false);
-            });
-
-            it('has loading status when loading', () => {
-              const { store, addressResolver } =
-                setupWithNamedResource(errorHandling);
-
-              addressResolver.resolve.mockResolvedValue(venice);
-              patchState(store, { id: 1 });
-
-              expect(store.addressStatus()).toBe('loading');
-              expect(store.addressValue()).toBeUndefined();
-              expect(store.addressError()).toBeUndefined();
-              expect(store.addressIsLoading()).toBe(true);
-              expect(store.addressHasValue()).toBe(false);
-            });
-
-            it('has resolved status when loaded', async () => {
-              const { store, addressResolver } =
-                setupWithNamedResource(errorHandling);
-
-              addressResolver.resolve.mockResolvedValue(venice);
-              patchState(store, { id: 1 });
+              addressResolver.resolve.mockResolvedValue(vienna);
+              reload();
 
               await wait();
-
-              expect(store.addressStatus()).toBe('resolved');
-              expect(store.addressValue()).toEqual(venice);
-              expect(store.addressError()).toBeUndefined();
-              expect(store.addressIsLoading()).toBe(false);
-              expect(store.addressHasValue()).toBe(true);
-            });
-
-            it('has error status when error', async () => {
-              const { store, addressResolver } =
-                setupWithNamedResource(errorHandling);
-
-              addressResolver.resolve.mockRejectedValue(new Error('Error'));
-              patchState(store, { id: 1 });
-              await wait();
-
-              expect(store.addressStatus()).toBe('error');
-              expect(() => store.addressValue()).toThrow();
-              expect(store.addressError()).toBeInstanceOf(Error);
-              expect(store.addressIsLoading()).toBe(false);
-              expect(store.addressHasValue()).toBe(false);
-            });
-
-            it('has local once updated', async () => {
-              const { store, addressResolver } =
-                setupWithNamedResource(errorHandling);
-
-              addressResolver.resolve.mockResolvedValue(venice);
-              patchState(store, { id: 1 });
-
-              await wait();
-              patchState(store, ({ addressValue }) => ({
-                addressValue: addressValue
-                  ? { ...addressValue, country: 'Italia' }
-                  : undefined,
-              }));
-
-              expect(store.addressStatus()).toBe('local');
-              expect(store.addressValue()?.country).toBe('Italia');
-              expect(store.addressError()).toBeUndefined();
-              expect(store.addressIsLoading()).toBe(false);
-              expect(store.addressHasValue()).toBe(true);
-            });
-
-            it('can also reload by resource name', async () => {
-              const { store, addressResolver } =
-                setupWithNamedResource(errorHandling);
-
-              addressResolver.resolve.mockResolvedValueOnce(venice);
-              patchState(store, { id: 1 });
-              await wait();
-              expect(store.addressStatus()).toBe('resolved');
-              store.reload();
-              expect(store.addressStatus()).toBe('reloading');
+              expect(getValue()).toEqual(vienna);
             });
           });
         });
 
         describe('error status', () => {
-          describe('unnamed resource', () => {
-            it('throws on error with native error handling', async () => {
-              const { store, addressResolver } =
-                setupWithUnnamedResource('native');
+          describe('Error Handling: native', () => {
+            it.each(paramsForResourceTypes('native'))(
+              `$name`,
+              async ({ setup }) => {
+                const { addressResolver, setId, getValue } = setup();
 
-              addressResolver.resolve.mockRejectedValue(new Error('Error'));
-              patchState(store, { id: 1 });
-              await wait();
+                addressResolver.resolve.mockRejectedValue(new Error('Error'));
+                setId(1);
+                await wait();
 
-              expect(() => store.value()).toThrow();
-            });
+                expect(() => getValue()).toThrow();
+              },
+            );
           });
-          it('returns undefined with undefined value error handling', async () => {
-            const { store, addressResolver } =
-              setupWithUnnamedResource('undefined value');
 
-            addressResolver.resolve.mockRejectedValue(new Error('Error'));
-            patchState(store, { id: 1 });
-            await wait();
-            expect(store.value()).toBeUndefined();
+          describe('Error Handling: undefined value', () => {
+            it.each(paramsForResourceTypes('undefined value'))(
+              '$name',
+              async ({ setup }) => {
+                const { addressResolver, setId, getValue } = setup();
+
+                addressResolver.resolve.mockRejectedValue(new Error('Error'));
+                setId(1);
+                await wait();
+                expect(getValue()).toBeUndefined();
+              },
+            );
+          });
+
+          describe('Error Handling: previous value', () => {
+            it('returns the previous value', async () => {
+              const { addressResolver, setId, getValue } =
+                setupUnnamedResource('previous value');
+
+              setId(1);
+              addressResolver.resolve.mockReturnValue(Promise.resolve(venice));
+              await wait();
+              expect(getValue()).toBe(venice);
+
+              setId(2);
+              addressResolver.resolve.mockRejectedValue(new Error('Error'));
+              await wait();
+              expect(getValue()).toBe(venice);
+            });
+
+            it('returns the local previous value', async () => {
+              const { addressResolver, setId, setValue, getValue } =
+                setupUnnamedResource('previous value');
+
+              setId(1);
+              addressResolver.resolve.mockReturnValue(Promise.resolve(venice));
+              await wait();
+              expect(getValue()).toBe(venice);
+              setValue(vienna);
+
+              setId(2);
+              addressResolver.resolve.mockRejectedValue(new Error('Error'));
+              await wait();
+              expect(getValue()).toBe(vienna);
+            });
           });
         });
       });
@@ -658,6 +488,23 @@ describe('withResource', () => {
 
         const store = TestBed.inject(Store);
         mapToResource(store, 'id') satisfies Resource<number>;
+      });
+
+      it('adds undefined when error handling is "undefined value"', () => {
+        const Store = signalStore(
+          { providedIn: 'root' },
+          withResource(
+            () => ({
+              id: resource({
+                loader: () => Promise.resolve(1),
+                defaultValue: 0,
+              }),
+            }),
+            { errorHandling: 'undefined value' },
+          ),
+        );
+        const store = TestBed.inject(Store);
+        mapToResource(store, 'id') satisfies Resource<number | undefined>;
       });
 
       it('provides hasValue as type predicate', () => {
