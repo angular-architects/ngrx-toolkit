@@ -1,6 +1,8 @@
+<!-- TODO - mention error handling strategies -->
+
 ---
-title: withEntityResources()
----
+
+## title: withEntityResources()
 
 ```typescript
 import { withEntityResources } from '@angular-architects/ngrx-toolkit';

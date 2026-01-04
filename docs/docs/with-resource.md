@@ -1,6 +1,8 @@
+<!-- TODO - mention error handling strategies -->
+
 ---
-title: withResource()
----
+
+## title: withResource()
 
 ```typescript
 import { withResource } from '@angular-architects/ngrx-toolkit';
