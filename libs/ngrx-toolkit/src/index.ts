@@ -9,6 +9,10 @@ export { renameDevtoolsName } from './lib/devtools/rename-devtools-name';
 export { patchState, updateState } from './lib/devtools/update-state';
 export { withDevToolsStub } from './lib/devtools/with-dev-tools-stub';
 export { DevtoolsFeature, withDevtools } from './lib/devtools/with-devtools';
+export {
+  WithResourceErrorHandlingConfig,
+  provideWithResourceErrorHandlingConfig,
+} from './lib/with-resource/provide-with-resourceErrorHandlingConfig';
 
 export {
   createEffects,

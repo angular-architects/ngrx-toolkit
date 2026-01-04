@@ -1,6 +1,7 @@
 import { inject, resource } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
+import { provideWithResourceErrorHandlingConfig } from '../../provide-with-resourceErrorHandlingConfig';
 import { ErrorHandling, withResource } from '../../with-resource';
 import { Address, AddressResolver, venice } from './fixtures';
 import { ResourceTestAdapter } from './resource-test-adapter';
@@ -33,6 +34,7 @@ export function setupUnnamedResource(
         provide: AddressResolver,
         useValue: addressResolver,
       },
+      provideWithResourceErrorHandlingConfig({ type: errorHandling }),
     ],
   });
 

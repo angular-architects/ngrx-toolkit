@@ -1,6 +1,7 @@
 //** Types for `withResource` */
 
 import {
+  inject,
   isSignal,
   Resource,
   ResourceRef,
@@ -18,6 +19,7 @@ import {
   withMethods,
   withProps,
 } from '@ngrx/signals';
+import { WITH_RESOURCE_ERROR_HANDLING_CONFIG } from './provide-with-resourceErrorHandlingConfig';
 
 export type ResourceResult<T> = {
   state: { value: T };
@@ -459,7 +461,11 @@ function valueSignalForErrorHandling<T>(
 ): WritableSignal<T | undefined> {
   const originalSignal = res.value;
 
-  switch (errorHandling) {
+  const errHandling =
+    inject(WITH_RESOURCE_ERROR_HANDLING_CONFIG, { optional: true })?.type ??
+    errorHandling;
+
+  switch (errHandling) {
     case 'native':
       return originalSignal;
     case 'undefined value': {
