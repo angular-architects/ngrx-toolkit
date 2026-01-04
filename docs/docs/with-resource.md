@@ -1,8 +1,6 @@
-<!-- TODO - mention error handling strategies -->
-
 ---
-
-## title: withResource()
+title: withResource()
+---
 
 ```typescript
 import { withResource } from '@angular-architects/ngrx-toolkit';
@@ -84,6 +82,35 @@ With named resources, each resource gets prefixed properties:
 
 - **Single resource:** use when your store works with just one data source.
 - **Named resources:** use when your store is larger and manages multiple entities or async operations.
+
+## Error Handling
+
+The behavior of Angular's resources' error handling and the NgRx SignalStore's `getState/patchState` required `withResource` to handle error handling with a particular strategy.
+To prevent resource failures from blocking the store, the Toolkit provides some strategies to handle errors.
+
+```ts
+withResource(
+  () => ({
+    id: resource({
+      loader: () => Promise.resolve(1),
+      defaultValue: 0,
+    }),
+  }),
+  // Other values: 'native' and 'previous value'
+  { errorHandling: 'undefined value' }, // default if not specified
+),
+```
+
+Options:
+
+1. `'undfined value'` (default). In the event of an error, the resource's value will be `undefined`
+1. `'previous value'`. Provided the resource had a previous value, that previous value will be returned. If not, an error is thrown.
+1. `'native'`. No special handling is provided, inline with default error behavior.
+
+<!-- TODO - mention both approaches with pros & cons like the jsdoc? link to it? IMO - mention we use a proxy approach while Angular works on error handling and then link to jsdoc -->
+<!-- TODO - PROPOSED COPY -->
+
+Under the hood, `'previous value'` and `'undefined value'` proxy the value. For a detailed explanation for why this is done and what a more longterm solution may be with some framework enhancements, check out the [JSDoc for the error handling strategy](https://google.com).
 
 ## Component Usage
 

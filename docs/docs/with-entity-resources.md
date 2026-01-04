@@ -1,8 +1,6 @@
-<!-- TODO - mention error handling strategies -->
-
 ---
-
 ## title: withEntityResources()
+---
 
 ```typescript
 import { withEntityResources } from '@angular-architects/ngrx-toolkit';
@@ -87,6 +85,10 @@ This exposes per-resource members with the resource name as a prefix:
 
 - **Resource members**: `todosValue()`, `todosStatus()`, `todosError()`, `todosIsLoading()`; `projectsValue()`, ...
 - **Entity members**: `todosIds()`, `todosEntityMap()`, `todosEntities()`; `projectsIds()`, `projectsEntityMap()`, `projectsEntities()`
+
+## Error Handling
+
+<!-- TODO - mention error handling strategies -->
 
 ## Component Usage
 
