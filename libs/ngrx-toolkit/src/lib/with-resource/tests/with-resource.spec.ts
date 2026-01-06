@@ -14,7 +14,12 @@ import {
   withState,
 } from '@ngrx/signals';
 import { of } from 'rxjs';
-import { ErrorHandling, mapToResource, withResource } from '../with-resource';
+import { Assert, AssertNot, IsEqual, Satisfies } from '../../test-utils/types';
+import {
+  ErrorHandling,
+  mapToResource,
+  withResource,
+} from '../../with-resource';
 import { Address, venice, vienna } from './util/fixtures';
 import { paramsForResourceTypes } from './util/params-for-resource-types';
 import { setupUnnamedResource } from './util/setup-unnamed-resource';
@@ -357,13 +362,16 @@ describe('withResource', () => {
   });
 
   describe('Type Tests', () => {
-    describe('unnamed resource', () => {
+    describe('Error Handling: default', () => {
       it('satisfies the Resource interface without default value', () => {
         const Store = signalStore(
           { providedIn: 'root' },
           withResource(() => resource({ loader: () => Promise.resolve(1) })),
         );
-        TestBed.inject(Store) satisfies Resource<number | undefined>;
+        const _store = TestBed.inject(Store);
+        type _T1 = Assert<
+          Satisfies<typeof _store, Resource<number | undefined>>
+        >;
       });
 
       it('satisfies the Resource interface with default value', () => {
@@ -373,7 +381,10 @@ describe('withResource', () => {
             resource({ loader: () => Promise.resolve(1), defaultValue: 0 }),
           ),
         );
-        TestBed.inject(Store) satisfies Resource<number>;
+        const _store = TestBed.inject(Store);
+        type _T1 = Assert<
+          Satisfies<typeof _store, Resource<number | undefined>>
+        >;
       });
 
       it('provides hasValue as type predicate when explicitly typed', () => {
@@ -383,7 +394,7 @@ describe('withResource', () => {
         );
         const store: Resource<number | undefined> = TestBed.inject(Store);
         if (store.hasValue()) {
-          store.value() satisfies number;
+          type _T1 = Assert<IsEqual<typeof store.value, Signal<number>>>;
         }
       });
 
@@ -394,11 +405,128 @@ describe('withResource', () => {
         );
         const store = TestBed.inject(Store);
         if (store.hasValue()) {
-          // @ts-expect-error - we want to test the type error
-          store.value() satisfies number;
+          const _value = store.value();
+          type _T1 = AssertNot<IsEqual<typeof _value, number>>;
+        }
+      });
+    });
+
+    describe('Error Handling: undefined value', () => {
+      it('satisfies the Resource interface without default value', () => {
+        const Store = signalStore(
+          { providedIn: 'root' },
+          withResource(() => resource({ loader: () => Promise.resolve(1) }), {
+            errorHandling: 'undefined value',
+          }),
+        );
+        const _store = TestBed.inject(Store);
+        type _T1 = Assert<
+          Satisfies<typeof _store, Resource<number | undefined>>
+        >;
+      });
+
+      it('satisfies the Resource interface with default value', () => {
+        const Store = signalStore(
+          { providedIn: 'root' },
+          withResource(
+            () =>
+              resource({ loader: () => Promise.resolve(1), defaultValue: 0 }),
+            { errorHandling: 'undefined value' },
+          ),
+        );
+        const _store = TestBed.inject(Store);
+        type _T1 = Assert<
+          Satisfies<typeof _store, Resource<number | undefined>>
+        >;
+      });
+
+      it('provides hasValue as type predicate when explicitly typed', () => {
+        const Store = signalStore(
+          { providedIn: 'root' },
+          withResource(() => resource({ loader: () => Promise.resolve(1) }), {
+            errorHandling: 'undefined value',
+          }),
+        );
+        const store: Resource<number | undefined> = TestBed.inject(Store);
+        if (store.hasValue()) {
+          type _T1 = Assert<IsEqual<typeof store.value, Signal<number>>>;
         }
       });
 
+      it('fails on hasValue as type predicate when not explicitly typed', () => {
+        const Store = signalStore(
+          { providedIn: 'root' },
+          withResource(() => resource({ loader: () => Promise.resolve(1) }), {
+            errorHandling: 'undefined value',
+          }),
+        );
+        const store = TestBed.inject(Store);
+        if (store.hasValue()) {
+          const _value = store.value();
+          type _T1 = AssertNot<IsEqual<typeof _value, number>>;
+        }
+      });
+    });
+
+    describe.each(['previous value', 'native'] as const)(
+      `Error Handling: %s`,
+      (errorHandling) => {
+        it('satisfies the Resource interface without default value', () => {
+          const Store = signalStore(
+            { providedIn: 'root' },
+            withResource(() => resource({ loader: () => Promise.resolve(1) }), {
+              errorHandling,
+            }),
+          );
+          const _store = TestBed.inject(Store);
+          type _T1 = Assert<
+            Satisfies<typeof _store, Resource<number | undefined>>
+          >;
+        });
+
+        it('satisfies the Resource interface with default value', () => {
+          const Store = signalStore(
+            { providedIn: 'root' },
+            withResource(
+              () =>
+                resource({ loader: () => Promise.resolve(1), defaultValue: 0 }),
+              { errorHandling },
+            ),
+          );
+          const _store = TestBed.inject(Store);
+          type _T1 = Assert<Satisfies<typeof _store, Resource<number>>>;
+        });
+
+        it('provides hasValue as type predicate when explicitly typed', () => {
+          const Store = signalStore(
+            { providedIn: 'root' },
+            withResource(() => resource({ loader: () => Promise.resolve(1) }), {
+              errorHandling,
+            }),
+          );
+          const store: Resource<number | undefined> = TestBed.inject(Store);
+          if (store.hasValue()) {
+            type _T1 = Assert<IsEqual<typeof store.value, Signal<number>>>;
+          }
+        });
+
+        it('fails on hasValue as type predicate when not explicitly typed', () => {
+          const Store = signalStore(
+            { providedIn: 'root' },
+            withResource(() => resource({ loader: () => Promise.resolve(1) }), {
+              errorHandling,
+            }),
+          );
+          const store = TestBed.inject(Store);
+          if (store.hasValue()) {
+            const _value = store.value();
+            type _T1 = AssertNot<IsEqual<typeof _value, number>>;
+          }
+        });
+      },
+    );
+
+    describe('unnamed resource', () => {
       it('does not have access to the STATE_SOURCE', () => {
         signalStore(
           withState({ id: 1 }),
@@ -439,58 +567,70 @@ describe('withResource', () => {
     it('shoud allow different resource types with named resources', () => {
       const Store = signalStore(
         { providedIn: 'root' },
+        withResource(
+          () => ({
+            id: resource({
+              loader: () => Promise.resolve(1),
+              defaultValue: 0,
+            }),
+          }),
+          { errorHandling: 'native' },
+        ),
+        withResource(
+          () => ({
+            word: resource({
+              loader: () => Promise.resolve('hello'),
+              defaultValue: '',
+            }),
+          }),
+          { errorHandling: 'undefined value' },
+        ),
+        withResource(
+          () => ({
+            optionalId: resource({
+              loader: () => Promise.resolve(1),
+              defaultValue: 0,
+            }),
+          }),
+          { errorHandling: 'previous value' },
+        ),
         withResource(() => ({
-          id: resource({
-            loader: () => Promise.resolve(1),
+          digit: resource({
+            loader: () => Promise.resolve(-1),
             defaultValue: 0,
-          }),
-        })),
-        withResource(() => ({
-          word: resource({
-            loader: () => Promise.resolve('hello'),
-            defaultValue: '',
-          }),
-        })),
-        withResource(() => ({
-          optionalId: resource({
-            loader: () => Promise.resolve(1),
           }),
         })),
       );
 
-      const store = TestBed.inject(Store);
+      const _store = TestBed.inject(Store);
 
-      store.idValue satisfies Signal<number>;
-      store.wordValue satisfies Signal<string>;
-      store.optionalIdValue satisfies Signal<number | undefined>;
+      type _T1 = Assert<IsEqual<typeof _store.idValue, Signal<number>>>;
+      type _T2 = Assert<
+        IsEqual<typeof _store.wordValue, Signal<string | undefined>>
+      >;
+      type _T3 = Assert<IsEqual<typeof _store.optionalIdValue, Signal<number>>>;
+      type _T4 = Assert<
+        IsEqual<typeof _store.digitValue, Signal<number | undefined>>
+      >;
     });
 
     describe('mapToResource', () => {
       it('satisfies the Resource interface without default value', () => {
         const Store = signalStore(
           { providedIn: 'root' },
-          withResource(() => ({
-            id: resource({ loader: () => Promise.resolve(1) }),
-          })),
+          withResource(
+            () => ({
+              id: resource({ loader: () => Promise.resolve(1) }),
+            }),
+            { errorHandling: 'native' },
+          ),
         );
 
-        const store = TestBed.inject(Store);
-        mapToResource(store, 'id') satisfies Resource<number | undefined>;
+        const _store = mapToResource(TestBed.inject(Store), 'id');
+        type _T1 = Assert<IsEqual<typeof _store, Resource<number | undefined>>>;
       });
 
-      it('satisfies the Resource interface with default value', () => {
-        const Store = signalStore(
-          { providedIn: 'root' },
-          withResource(() => ({
-            id: resource({ loader: () => Promise.resolve(1), defaultValue: 0 }),
-          })),
-        );
-
-        const store = TestBed.inject(Store);
-        mapToResource(store, 'id') satisfies Resource<number>;
-      });
-
-      it('adds undefined when error handling is "undefined value"', () => {
+      it('satisfies the Resource interface with default value and native error handling', () => {
         const Store = signalStore(
           { providedIn: 'root' },
           withResource(
@@ -500,11 +640,13 @@ describe('withResource', () => {
                 defaultValue: 0,
               }),
             }),
-            { errorHandling: 'undefined value' },
+            { errorHandling: 'native' },
           ),
         );
+
         const store = TestBed.inject(Store);
-        mapToResource(store, 'id') satisfies Resource<number | undefined>;
+        const _resource = mapToResource(store, 'id');
+        type _T1 = Assert<IsEqual<typeof _resource, Resource<number>>>;
       });
 
       it('provides hasValue as type predicate', () => {
@@ -519,7 +661,8 @@ describe('withResource', () => {
         const res = mapToResource(store, 'id');
 
         if (res.hasValue()) {
-          res.value() satisfies number;
+          const _value = res.value();
+          type _T1 = Assert<IsEqual<typeof _value, number>>;
         }
       });
 
@@ -561,6 +704,46 @@ describe('withResource', () => {
         // @ts-expect-error - we want to test the type error
         mapToResource(store, 'user');
       });
+    });
+  });
+
+  describe('Signature Tests', () => {
+    it('can call unnamed with error handler', () => {
+      signalStore(
+        withResource(
+          () => ({
+            id: resource({ loader: () => Promise.resolve(1) }),
+          }),
+          { errorHandling: 'undefined value' },
+        ),
+      );
+    });
+
+    it('can call named with error handler', () => {
+      signalStore(
+        withResource(
+          () => ({
+            id: resource({ loader: () => Promise.resolve(1) }),
+          }),
+          { errorHandling: 'undefined value' },
+        ),
+      );
+    });
+
+    it('can call unnamed without error handler', () => {
+      signalStore(
+        withResource(() => ({
+          id: resource({ loader: () => Promise.resolve(1) }),
+        })),
+      );
+    });
+
+    it('can call named without error handler', () => {
+      signalStore(
+        withResource(() => ({
+          id: resource({ loader: () => Promise.resolve(1) }),
+        })),
+      );
     });
   });
 });

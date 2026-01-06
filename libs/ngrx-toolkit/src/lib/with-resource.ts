@@ -36,12 +36,12 @@ export type ResourceDictionary = Record<string, ResourceRef<unknown>>;
 
 export type NamedResourceResult<
   T extends ResourceDictionary,
-  UndefinedErrorHandling extends boolean,
+  HasUndefinedErrorHandling extends boolean,
 > = {
   state: {
     [Prop in keyof T as `${Prop &
       string}Value`]: T[Prop]['value'] extends Signal<infer S>
-      ? UndefinedErrorHandling extends true
+      ? HasUndefinedErrorHandling extends true
         ? S | undefined
         : S
       : never;
@@ -113,6 +113,15 @@ export function withResource<
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
   ) => ResourceRef<ResourceValue>,
+): SignalStoreFeature<Input, ResourceResult<ResourceValue | undefined>>;
+
+export function withResource<
+  Input extends SignalStoreFeatureResult,
+  ResourceValue,
+>(
+  resourceFactory: (
+    store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
+  ) => ResourceRef<ResourceValue>,
   resourceOptions: { errorHandling: 'undefined value' },
 ): SignalStoreFeature<Input, ResourceResult<ResourceValue | undefined>>;
 
@@ -160,6 +169,15 @@ export function withResource<
  * methods, and state signals. It must return a `Record<string, ResourceRef>`.
  * @param resourceOptions Allows to configure the error handling behavior.
  */
+export function withResource<
+  Input extends SignalStoreFeatureResult,
+  Dictionary extends ResourceDictionary,
+>(
+  resourceFactory: (
+    store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
+  ) => Dictionary,
+): SignalStoreFeature<Input, NamedResourceResult<Dictionary, true>>;
+
 export function withResource<
   Input extends SignalStoreFeatureResult,
   Dictionary extends ResourceDictionary,

@@ -253,4 +253,31 @@ describe('withEntityResources', () => {
       ]);
     });
   });
+
+  describe('Signature Tests', () => {
+    it('can call unnamed with error handler', () => {
+      signalStore(
+        withEntityResources(
+          () =>
+            resource({
+              params: () => true,
+              loader: () => Promise.resolve([] as Todo[]),
+              defaultValue: [],
+            }),
+          { errorHandling: 'undefined value' },
+        ),
+      );
+    });
+
+    it('can call unnamed without error handler', () => {
+      signalStore(
+        withEntityResources(() =>
+          resource({
+            loader: () => Promise.resolve([] as Todo[]),
+            defaultValue: [],
+          }),
+        ),
+      );
+    });
+  });
 });

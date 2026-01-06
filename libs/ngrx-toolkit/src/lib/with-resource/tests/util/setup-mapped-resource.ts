@@ -2,7 +2,7 @@ import {
   ErrorHandling,
   mapToResource,
   ResourceNames,
-} from '../../with-resource';
+} from '../../../with-resource';
 import { ResourceTestAdapter } from './resource-test-adapter';
 import { setupNamedResource } from './setup-named-resource';
 

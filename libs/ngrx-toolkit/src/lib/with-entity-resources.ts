@@ -15,11 +15,13 @@ import {
   NamedEntityState,
 } from '@ngrx/signals/entities';
 import {
+  ErrorHandling,
   NamedResourceResult,
+  ResourceOptions,
   ResourceResult,
   isResourceRef,
   withResource,
-} from './with-resource/with-resource';
+} from './with-resource';
 
 /**
  * @experimental
@@ -56,7 +58,7 @@ import {
  * );
  *
  * const store = TestBed.inject(Store);
- * store.status();    // 'idle' | 'loading' | 'resolved' | 'error'
+ * store.status();    // 'idle' | 'loading' | 'resolved' | 'error' | 'local'
  * store.value();     // Todo[]
  * store.ids();       // EntityId[]
  * store.entityMap(); // Record<EntityId, Todo>
@@ -94,6 +96,17 @@ export function withEntityResources<
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
   ) => ResourceRef<readonly Entity[] | Entity[] | undefined>,
+  resourceOptions: { errorHandling: 'undefined value' },
+): SignalStoreFeature<Input, EntityResourceResult<Entity | undefined>>;
+
+export function withEntityResources<
+  Input extends SignalStoreFeatureResult,
+  Entity extends { id: EntityId },
+>(
+  resourceFactory: (
+    store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
+  ) => ResourceRef<readonly Entity[] | Entity[] | undefined>,
+  resourceOptions?: ResourceOptions,
 ): SignalStoreFeature<Input, EntityResourceResult<Entity>>;
 
 export function withEntityResources<
@@ -103,7 +116,28 @@ export function withEntityResources<
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
   ) => Dictionary,
-): SignalStoreFeature<Input, NamedEntityResourceResult<Dictionary>>;
+  resourceOptions: { errorHandling: 'undefined value' },
+): SignalStoreFeature<Input, NamedEntityResourceResult<Dictionary, true>>;
+
+export function withEntityResources<
+  Input extends SignalStoreFeatureResult,
+  Dictionary extends EntityDictionary,
+>(
+  resourceFactory: (
+    store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
+  ) => Dictionary,
+  resourceOptions?: ResourceOptions,
+): SignalStoreFeature<Input, NamedEntityResourceResult<Dictionary, false>>;
+
+export function withEntityResources<
+  Input extends SignalStoreFeatureResult,
+  Dictionary extends EntityDictionary,
+>(
+  resourceFactory: (
+    store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
+  ) => Dictionary,
+  resourceOptions: { errorHandling: ErrorHandling },
+): SignalStoreFeature<Input, NamedEntityResourceResult<Dictionary, false>>;
 
 export function withEntityResources<
   Input extends SignalStoreFeatureResult,
@@ -248,10 +282,15 @@ type MergeNamedEntityProps<T extends EntityDictionary> = MergeUnion<
   }[keyof T]
 >;
 
-export type NamedEntityResourceResult<T extends EntityDictionary> = {
-  state: NamedResourceResult<T>['state'] & MergeNamedEntityStates<T>;
-  props: NamedResourceResult<T>['props'] & MergeNamedEntityProps<T>;
-  methods: NamedResourceResult<T>['methods'];
+export type NamedEntityResourceResult<
+  T extends EntityDictionary,
+  HasUndefinedErrorHandling extends boolean,
+> = {
+  state: NamedResourceResult<T, HasUndefinedErrorHandling>['state'] &
+    MergeNamedEntityStates<T>;
+  props: NamedResourceResult<T, HasUndefinedErrorHandling>['props'] &
+    MergeNamedEntityProps<T>;
+  methods: NamedResourceResult<T, HasUndefinedErrorHandling>['methods'];
 };
 
 /**

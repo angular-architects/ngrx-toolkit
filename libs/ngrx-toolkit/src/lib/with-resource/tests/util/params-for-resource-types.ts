@@ -1,4 +1,4 @@
-import { ErrorHandling } from '../../with-resource';
+import { ErrorHandling } from '../../../with-resource';
 import { setupMappedResource } from './setup-mapped-resource';
 import { setupNamedResource } from './setup-named-resource';
 import { setupUnnamedResource } from './setup-unnamed-resource';
