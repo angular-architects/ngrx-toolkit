@@ -104,7 +104,7 @@ const defaultOptions: Required<ResourceOptions> = {
  *
  * @param resourceFactory A factory function that receives the store's state signals,
  * methods, and props.
- * @param resourceOptions Allows to configure the error handling behavior.
+ * @param resourceOptions Allows configuration of the error handling behavior.
  */
 export function withResource<
   Input extends SignalStoreFeatureResult,
