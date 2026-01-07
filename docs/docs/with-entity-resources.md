@@ -88,7 +88,31 @@ This exposes per-resource members with the resource name as a prefix:
 
 ## Error Handling
 
-<!-- TODO - mention error handling strategies -->
+The behavior of Angular's resources' error handling and the NgRx SignalStore's `getState/patchState` required `withEntityResource` to handle error handling with a particular strategy.
+To prevent resource failures from blocking the store, the Toolkit provides some strategies to handle errors.
+
+```ts
+withEntityResource(
+  () => ({
+    id: resource({
+      loader: () => Promise.resolve(1),
+      defaultValue: 0,
+    }),
+  }),
+  // Other values: 'native' and 'previous value'
+  { errorHandling: 'undefined value' }, // default if not specified
+),
+```
+
+Options:
+
+1. `'undfined value'` (default). In the event of an error, the resource's value will be `undefined`
+1. `'previous value'`. Provided the resource had a previous value, that previous value will be returned. If not, an error is thrown.
+1. `'native'`. No special handling is provided, inline with default error behavior.
+
+<!-- TODO - update link when the code is merged -->
+
+Under the hood, `'previous value'` and `'undefined value'` proxy the value. For a detailed explanation for why this is done and what a more longterm solution may be with some framework enhancements, check out the [JSDoc for the error handling strategy](https://google.com).
 
 ## Component Usage
 

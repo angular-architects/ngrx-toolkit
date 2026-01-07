@@ -107,8 +107,7 @@ Options:
 1. `'previous value'`. Provided the resource had a previous value, that previous value will be returned. If not, an error is thrown.
 1. `'native'`. No special handling is provided, inline with default error behavior.
 
-<!-- TODO - mention both approaches with pros & cons like the jsdoc? link to it? IMO - mention we use a proxy approach while Angular works on error handling and then link to jsdoc -->
-<!-- TODO - PROPOSED COPY -->
+<!-- TODO - update link when the code is merged -->
 
 Under the hood, `'previous value'` and `'undefined value'` proxy the value. For a detailed explanation for why this is done and what a more longterm solution may be with some framework enhancements, check out the [JSDoc for the error handling strategy](https://google.com).
 
