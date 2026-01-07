@@ -85,7 +85,8 @@ With named resources, each resource gets prefixed properties:
 
 ## Error Handling
 
-The behavior of Angular's resources' error handling and the NgRx SignalStore's `getState/patchState` required `withResource` to handle error handling with a particular strategy.
+The behavior of Angular's resources' error handling and the NgRx SignalStore's `getState/patchState` required `withResource` to approach error handling
+with a particular strategy unique to the intersection of resources and the Signal Store.
 To prevent resource failures from blocking the store, the Toolkit provides some strategies to handle errors.
 
 ```ts
