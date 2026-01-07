@@ -525,7 +525,7 @@ function valueSignalForErrorHandling<T>(
             if (status === 'error') {
               if (!hasPreviousValue) {
                 throw new Error(
-                  'impossible state: previous value is not available -> resource was initialized with error',
+                  'Impossible state: previous value is not available -> resource was initialized with error',
                 );
               }
               return previousValue;
