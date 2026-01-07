@@ -428,7 +428,7 @@ export function mapToResource<
  * Pros:
  * - Uses Angular's native `linkedSignal` and isn't a hackish approach
  * - Status transitions to 'local' work correctly (via direct `res.value.set()` in `setResource`)
- * - Works with `patchState`/`getState` (linkedSignal handles errors on read)
+ * - Works with `patchState`/`getState` (`linkedSignal` handles errors on read)
  * - Clear, explicit API with dedicated `setResource()` method
  *
  * Cons:
