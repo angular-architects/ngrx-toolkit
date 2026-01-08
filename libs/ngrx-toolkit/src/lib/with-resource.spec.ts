@@ -14,15 +14,11 @@ import {
   withState,
 } from '@ngrx/signals';
 import { of } from 'rxjs';
-import { Assert, AssertNot, IsEqual, Satisfies } from '../../test-utils/types';
-import {
-  ErrorHandling,
-  mapToResource,
-  withResource,
-} from '../../with-resource';
-import { Address, venice, vienna } from './util/fixtures';
-import { paramsForResourceTypes } from './util/params-for-resource-types';
-import { setupUnnamedResource } from './util/setup-unnamed-resource';
+import { Assert, AssertNot, IsEqual, Satisfies } from './test-utils/types';
+import { ErrorHandling, mapToResource, withResource } from './with-resource';
+import { Address, venice, vienna } from './with-resource/tests/util/fixtures';
+import { paramsForResourceTypes } from './with-resource/tests/util/params-for-resource-types';
+import { setupUnnamedResource } from './with-resource/tests/util/setup-unnamed-resource';
 
 describe('withResource', () => {
   describe('standard tests', () => {
