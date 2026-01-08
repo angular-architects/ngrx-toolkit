@@ -253,4 +253,43 @@ describe('withEntityResources', () => {
       ]);
     });
   });
+
+  describe('error handling', () => {
+    it('does not throw for unnamed resources', async () => {
+      const Store = signalStore(
+        { providedIn: 'root' },
+        withEntityResources(() =>
+          resource({
+            loader: (): Promise<Todo[]> => {
+              return Promise.reject('error');
+            },
+          }),
+        ),
+      );
+
+      const store = TestBed.inject(Store);
+      await wait();
+      expect(store.status()).toEqual('error');
+      expect(store.ids()).toEqual([]);
+      expect(store.entities()).toEqual([]);
+      expect(store.value()).toBeUndefined();
+    });
+
+    it('does not throw for named resources', async () => {
+      const Store = signalStore(
+        { providedIn: 'root' },
+        withEntityResources(() => ({
+          todos: resource({
+            loader: (): Promise<Todo[]> => Promise.reject('error'),
+          }),
+        })),
+      );
+      const store = TestBed.inject(Store);
+      await wait();
+
+      expect(store.todosIds()).toEqual([]);
+      expect(store.todosEntities()).toEqual([]);
+      expect(store.todosValue()).toBeUndefined();
+    });
+  });
 });
