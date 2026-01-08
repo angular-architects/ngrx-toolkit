@@ -438,10 +438,12 @@ export function mapToResource<
  * 2. A possible alternative would be to use a Proxy on value. Instead of using a `linkedSignal`,
  * we can leave the value signal as is and create a proxy around it that intercepts the get/call
  * operation and handles the error. The downside is that we need to implement the proxy ourselves,
- * which is not as clean as using a `linkedSignal`. On the other hand, the Angular team is working
- * on a better way to handle errors, which means that approach is only temporary. It could also
- * happen, that we are getting some sort of "Mapped Signal", where not just the reading (as in
- * `linkedSignal`) but also the writing is handled.
+ * which is not as clean as using a `linkedSignal`. On the other hand, there are indicators that
+ * in future version of Angular, there are better ways of handling errors, which means that this
+ * approach is only temporary.
+ *
+ * It could also happen, that we are getting some sort of "Mapped Signal", where not just the
+ * reading (as in `linkedSignal`) but also the writing is handled.
  *
  * Pros:
  * - No API changes: `patchState(store, { value: x })` works naturally
