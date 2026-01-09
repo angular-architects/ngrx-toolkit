@@ -26,6 +26,8 @@ As easy as `withStorageSync('storeNameHere')`. IndexedDB was added last year by 
 - `withFeature` of the SignalStore started out in the Toolkit as `withFeatureFactory`
 - Other features can be found in the documentation: https://ngrx-toolkit.angulararchitects.io/docs/extensions
 
+// TODO - some snippets? Screenshot(s)?
+
 ## But first: v20 minor features: `withResource`/`withEntityResources`/Mutations
 
 Before talking about v21, there were two new features from v20 Toolkit minor versions: `withResource()` and its 
@@ -39,11 +41,65 @@ The Mutations API came in a later minor, providing the other pieces of the REST 
 standalone functions (`httpMutation`/`rxMutation`), as well as in a `withMutation` feature. The API was inspired by Angular Query and Marko Stanimirović's 
 proposed mutations API for Angular. We also had internal discussions with Alex Rickabaugh on our design.
 
+// TODO - snippets?
+
 ## TODO: v21
+
+Finally, actual Toolkit v21 notes. Future posts that are not our debut blogpost for the library won't always have a three act structure with a detailed backstory, we promise.
+
+The two major items for v21 tie into topics we already discussed:
+
+- Better error handling for `withResource()` and `withEntityResources()`
+- Events integration into the devtools
+
+### Upgraded `withResource()` and `withEntityResources()` error handling
+
+The error throwing behavior of Angular's resources proved tricky for the signal store. Deadlock scenario: once a resource is in an 
+error state and we update a signal in `params`, the update calls `patchState`, which will again access the value of the state.
+
+After a lot of experiemtnation, as well as discussion with various members of the Angular community, we arrived on an error handling 
+strategy that gives Toolkit users a few options:
+
+```ts
+    // TODO - reduce indent
+    type ErrorHandling = 'native' | 'undefined value' | 'previous value';
+
+    withResource(
+      (store) => {
+        const resolver = inject(AddressResolver);
+        return {
+          address: resource({
+            params: store.id,
+            loader: ({ params: id }) => resolver.resolve(id),
+          }),
+        };
+      },
+      // Other values: 'native' and 'previous value'
+      { errorHandling: 'undefined value' }, // default if not specified
+    ),
+```
+
+Options:
+
+1. `'undfined value'` (default). In the event of an error, the resource's value will be `undefined`
+1. `'previous value'`. Provided the resource had a previous value, that previous value will be returned. If not, an error is thrown.
+1. `'native'`. No special handling is provided, inline with default error behavior.
+
+<!-- TODO - update link when the code is merged -->
+
+Under the hood, `'previous value'` and `'undefined value'` proxy the value. For a detailed explanation for why this is done and what a more longterm solution may be with some framework enhancements, check out the [JSDoc for the error handling strategy](https://google.com).
 
 ### Events integration into devtools
 
-### Upgraded `withResource`
+There is some irony with this. The NgRx Toolkit brought events to the SignalStore before there was an official plugin, and the Toolkit 
+provides Redux Devtools integration, with or without redux used. However, the now official NgRx events feature as it shaped up 
+did not translate directly to working with the Toolkit's `withDevtools`.
+
+In NgRx Toolkit v21, we are fixing this with `withTrackedReducer()`, an alternative approach to tracking reducer-based state changes in Redux DevTools.
+
+```ts
+// TODO - snippet with imports
+```
 
 ## TODO (also decide location) - where to mention Murat's OpenAPI library based on the toolkit
 
@@ -59,3 +115,5 @@ An OpenAPI generator that creates:
 On top of that, the generated code is genuinely beautiful – which is not something you usually 
 see with code generators. [Check it out on npm](https://www.npmjs.com/package/ngrx-toolkit-openapi-gen), 
 as well as [its documentation](https://coderabbit-gmbh.github.io/ngrx-toolkit-openapi-gen/).
+
+## TODO - where to put this and what to say - our strategy to release a compatible minor with the next major in the future in a more timely manor
