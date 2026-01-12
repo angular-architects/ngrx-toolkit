@@ -1,4 +1,4 @@
-import { ResourceRef, Signal, computed, linkedSignal } from '@angular/core';
+import { ResourceRef, Signal, isSignal, linkedSignal } from '@angular/core';
 import {
   SignalStoreFeature,
   SignalStoreFeatureResult,
@@ -56,7 +56,7 @@ import {
  * );
  *
  * const store = TestBed.inject(Store);
- * store.status();    // 'idle' | 'loading' | 'resolved' | 'error'
+ * store.status();    // 'idle' | 'loading' | 'resolved' | 'error' | 'local'
  * store.value();     // Todo[]
  * store.ids();       // EntityId[]
  * store.entityMap(); // Record<EntityId, Todo>
@@ -93,7 +93,7 @@ export function withEntityResources<
 >(
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
-  ) => ResourceRef<readonly Entity[] | Entity[] | undefined>,
+  ) => ResourceRef<TypedEntityResourceValue<Entity>>,
 ): SignalStoreFeature<Input, EntityResourceResult<Entity>>;
 
 export function withEntityResources<
@@ -107,7 +107,7 @@ export function withEntityResources<
 
 export function withEntityResources<
   Input extends SignalStoreFeatureResult,
-  ResourceValue extends readonly unknown[] | unknown[] | undefined,
+  ResourceValue extends EntityResourceValue,
 >(
   entityResourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
@@ -127,52 +127,93 @@ export function withEntityResources<
   };
 }
 
-function createUnnamedEntityResource<
-  R extends ResourceRef<readonly unknown[] | unknown[] | undefined>,
->(resource: R) {
-  type E = InferEntityFromRef<R> & { id: EntityId };
-  const { idsLinked, entityMapLinked, entitiesSignal } =
-    createEntityDerivations<E>(
-      resource.value as Signal<readonly E[] | E[] | undefined>,
-    );
-
+/**
+ * We cannot use the value of `resource` directly, but
+ * have to use the one created through {@link withResource}
+ * because {@link withResource} creates a Proxy around the resource value
+ * to avoid the error throwing behavior of the Resource API.
+ */
+function createUnnamedEntityResource<E extends Entity>(
+  resource: ResourceRef<TypedEntityResourceValue<E>>,
+) {
   return signalStoreFeature(
     withResource(() => resource),
-    withLinkedState(() => ({
-      entityMap: entityMapLinked,
-      ids: idsLinked,
-    })),
-    withComputed(() => ({
-      entities: entitiesSignal,
+    withLinkedState(({ value }) => {
+      const { ids, entityMap } = createEntityDerivations(value);
+
+      return {
+        entityMap,
+        ids,
+      };
+    }),
+    withComputed(({ ids, entityMap }) => ({
+      entities: createComputedEntities(ids, entityMap),
     })),
   );
 }
 
+/**
+ * See {@link createUnnamedEntityResource} for why we cannot use the value of `resource` directly.
+ */
 function createNamedEntityResources<Dictionary extends EntityDictionary>(
   dictionary: Dictionary,
 ) {
   const keys = Object.keys(dictionary);
 
-  const linkedState: Record<string, Signal<unknown>> = {};
-  const computedProps: Record<string, Signal<unknown>> = {};
+  const stateFactories = keys.map((name) => {
+    return (store: Record<string, unknown>) => {
+      const resourceValue = store[
+        `${name}Value`
+      ] as Signal<EntityResourceValue>;
+      if (!isSignal(resourceValue)) {
+        throw new Error(`Resource's value ${name}Value does not exist`);
+      }
 
-  keys.forEach((name) => {
-    const ref = dictionary[name];
-    type E = InferEntityFromRef<typeof ref> & { id: EntityId };
-    const { idsLinked, entityMapLinked, entitiesSignal } =
-      createEntityDerivations<E>(
-        ref.value as Signal<readonly E[] | E[] | undefined>,
-      );
+      const { ids, entityMap } = createEntityDerivations(resourceValue);
 
-    linkedState[`${String(name)}EntityMap`] = entityMapLinked;
-    linkedState[`${String(name)}Ids`] = idsLinked;
-    computedProps[`${String(name)}Entities`] = entitiesSignal;
+      return {
+        [`${name}EntityMap`]: entityMap,
+        [`${name}Ids`]: ids,
+      };
+    };
+  });
+
+  const computedFactories = keys.map((name) => {
+    return (store: Record<string, unknown>) => {
+      const ids = store[`${name}Ids`] as Signal<EntityId[]>;
+      const entityMap = store[`${name}EntityMap`] as Signal<
+        Record<EntityId, Entity>
+      >;
+
+      if (!isSignal(ids)) {
+        throw new Error(`Entity Resource's ids ${name}Ids does not exist`);
+      }
+      if (!isSignal(entityMap)) {
+        throw new Error(
+          `Entity Resource's entityMap ${name}EntityMap does not exist`,
+        );
+      }
+
+      return {
+        [`${name}Entities`]: createComputedEntities(ids, entityMap),
+      };
+    };
   });
 
   return signalStoreFeature(
     withResource(() => dictionary),
-    withLinkedState(() => linkedState),
-    withComputed(() => computedProps),
+    withLinkedState((store) =>
+      stateFactories.reduce(
+        (acc, factory) => ({ ...acc, ...factory(store) }),
+        {},
+      ),
+    ),
+    withComputed((store) =>
+      computedFactories.reduce(
+        (acc, factory) => ({ ...acc, ...factory(store) }),
+        {},
+      ),
+    ),
   );
 }
 
@@ -209,20 +250,19 @@ type ArrayElement<T> = T extends readonly (infer E)[] | (infer E)[] ? E : never;
 type InferEntityFromSignal<T> =
   T extends Signal<infer V> ? ArrayElement<V> : never;
 
-type InferEntityFromRef<
-  R extends ResourceRef<readonly unknown[] | unknown[] | undefined>,
-> = R['value'] extends Signal<infer V> ? ArrayElement<V> : never;
-
 type MergeUnion<U> = (U extends unknown ? (k: U) => void : never) extends (
   k: infer I,
 ) => void
   ? I
   : never;
 
-export type EntityDictionary = Record<
-  string,
-  ResourceRef<readonly unknown[] | unknown[] | undefined>
->;
+type Entity = { id: EntityId };
+
+type EntityResourceValue = Entity[] | (Entity[] | undefined);
+
+type TypedEntityResourceValue<E extends Entity> = E[] | (E[] | undefined);
+
+export type EntityDictionary = Record<string, ResourceRef<EntityResourceValue>>;
 
 type MergeNamedEntityStates<T extends EntityDictionary> = MergeUnion<
   {
@@ -249,21 +289,20 @@ type MergeNamedEntityProps<T extends EntityDictionary> = MergeUnion<
 >;
 
 export type NamedEntityResourceResult<T extends EntityDictionary> = {
-  state: NamedResourceResult<T>['state'] & MergeNamedEntityStates<T>;
-  props: NamedResourceResult<T>['props'] & MergeNamedEntityProps<T>;
-  methods: NamedResourceResult<T>['methods'];
+  state: NamedResourceResult<T, false>['state'] & MergeNamedEntityStates<T>;
+  props: NamedResourceResult<T, false>['props'] & MergeNamedEntityProps<T>;
+  methods: NamedResourceResult<T, false>['methods'];
 };
 
 /**
  * @internal
  * @description
  *
- * Creates the three entity-related signals (`ids`, `entityMap`, `entities`) from
+ * Creates the two entity-related state properties (`ids`, `entityMap`) from
  * a single source signal of entities. This mirrors the public contract of
  * `withEntities()`:
  * - `ids`: derived list of entity ids
  * - `entityMap`: map of id -> entity
- * - `entities`: projection of `ids` through `entityMap`
  *
  * Implementation details:
  * - Uses `withLinkedState` + `linkedSignal` for `ids` and `entityMap` so they are
@@ -280,15 +319,15 @@ export type NamedEntityResourceResult<T extends EntityDictionary> = {
  *   derived from signals. Using linked signals keeps the data flow declarative
  *   and avoids imperative syncing code.
  */
-function createEntityDerivations<E extends { id: EntityId }>(
-  source: Signal<readonly E[] | E[] | undefined>,
+function createEntityDerivations<E extends Entity>(
+  source: Signal<TypedEntityResourceValue<E>>,
 ) {
-  const idsLinked = linkedSignal({
+  const ids = linkedSignal({
     source,
     computation: (list) => (list ?? []).map((e) => e.id),
   });
 
-  const entityMapLinked = linkedSignal({
+  const entityMap = linkedSignal({
     source,
     computation: (list) => {
       const map = {} as Record<EntityId, E>;
@@ -299,11 +338,14 @@ function createEntityDerivations<E extends { id: EntityId }>(
     },
   });
 
-  const entitiesSignal = computed(() => {
-    const ids = idsLinked();
-    const map = entityMapLinked();
-    return ids.map((id) => map[id]) as readonly E[];
-  });
+  return { ids, entityMap };
+}
 
-  return { idsLinked, entityMapLinked, entitiesSignal };
+function createComputedEntities<E extends Entity>(
+  ids: Signal<EntityId[]>,
+  entityMap: Signal<Record<EntityId, E>>,
+) {
+  return () => {
+    return ids().map((id) => entityMap()[id]);
+  };
 }
