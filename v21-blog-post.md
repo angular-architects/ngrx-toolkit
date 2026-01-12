@@ -1,17 +1,35 @@
 # NgRx Toolkit v21
 
-## TODO: Explain Toolkit
-
-- It existed alreday at a time where the signalStore was not even stable
-- It sees itself as rich set of extensions you need in typical Angular applications.
-- Mention redux extension, but also maybe 2 further features from the beginning
-
-The Toolkit originates as far back as when the SignalStore was not even marked stable.
+The NgRx Toolkit originates as far back as when the SignalStore was not even marked stable.
 As the package was in its early stages, community requests for various functionality
 poured in. However, the NgRx team wanted to focus on core functionality that would be 
 broadly usable and supported to their full standard. But they provided the tools for the 
 community to make its own tools, the `signalStoreFeature` function. Rainer Hahnekamp 
 saw the opportunity to house these tools inside what is now the NgRx Toolkit.
+
+```ts
+import { withStorageSync } from '@angular-architects/ngrx-toolkit';
+import { withImmutableState } from '@angular-architects/ngrx-toolkit';
+import { withCallState } from '@angular-architects/ngrx-toolkit';
+import { withDevtools } from '@angular-architects/ngrx-toolkit';
+
+const UserStore = signalStore(
+  // will throw runtime error if unitended mutation happens
+  withImmutableState({ name: 'John' }),
+
+  // automatically synchronizes state to localStorage on each change via the key 'user'
+  // (also can do sesssion storage and IndexedDB
+  withStorageSync('user'),
+
+  // exposes `setLoaded()/setLoading()/setError(error)`
+  withCallState(),
+
+  // allows Redux Devtools (even without Redux!)
+  withDevtools('user'),
+
+  // and more! https://ngrx-toolkit.angulararchitects.io/docs/extensions
+);
+```
 
 The NgRx Toolkit sees itself as rich set of extensions that you need in typical Angular applications. 
 Core functionality and its history:
@@ -26,7 +44,7 @@ As easy as `withStorageSync('storeNameHere')`. IndexedDB was added last year by 
 - `withFeature` of the SignalStore started out in the Toolkit as `withFeatureFactory`
 - Other features can be found in the documentation: https://ngrx-toolkit.angulararchitects.io/docs/extensions
 
-// TODO - some snippets? Screenshot(s)?
+<img width="2204" height="1464" alt="Redux Devtools showing application state from withStorageSync()" src="https://github.com/user-attachments/assets/4dcc0b0f-27e4-4e95-ac0e-24dcd06716c0" />
 
 ## But first: v20 minor features: `withResource`/`withEntityResources`/Mutations
 
@@ -41,9 +59,47 @@ The Mutations API came in a later minor, providing the other pieces of the REST 
 standalone functions (`httpMutation`/`rxMutation`), as well as in a `withMutation` feature. The API was inspired by Angular Query and Marko Stanimirović's 
 proposed mutations API for Angular. We also had internal discussions with Alex Rickabaugh on our design.
 
-// TODO - snippets?
+```ts
+import { httpMutation, rxMutation, withMutations } from '@angular-architects/ngrx-toolkit';
+import { withResource, withEntityResources } from '@angular-architects/ngrx-toolkit';
 
-## TODO: v21
+export const UserStore = signalStore(
+  withState({ userId: undefined as number | undefined }),
+  withResource(({ userId }) => ({
+    detail: httpResource<User>(() => (userId === undefined ? undefined : `/user/${userId}`)),
+  })),
+  withMutations((store, userService = inject(UserService)) => ({
+    saveUserDetail: rxMutation({
+      operation: (params: Params) => {
+        return userService.saveUserDetail(store.counter(), params.value);
+      },
+      onSuccess: (result) => {
+        // ...
+      },
+      onError: (error) => {
+        // ...
+      },
+    }),
+    saveToServer: httpMutation({
+      request: (_: void) => ({
+        url: `https://httpbin.org/post`,
+        method: 'POST',
+        body: { counter: store.counter() },
+      }),
+      parse: (response) => response as UserResponse,
+      onSuccess: (result) => {
+        // ...
+      },
+      onError: (error) => {
+        // ...
+      },
+    }),
+  })),
+  withEntityResources(() => resource({ loader: () => Promise.resolve([] as User[]), defaultValue: [] })),
+);
+```
+
+## v21
 
 Finally, actual Toolkit v21 notes. Future posts that are not our debut blogpost for the library won't always have a three act structure with a detailed backstory, we promise.
 
@@ -101,7 +157,7 @@ In NgRx Toolkit v21, we are fixing this with `withTrackedReducer()`, an alternat
 // TODO - snippet with imports
 ```
 
-## TODO (also decide location) - where to mention Murat's OpenAPI library based on the toolkit
+## ngrx-toolkit-openapi-gen
 
 We got a fantastic Christmas present from Murat Sari (TODO: social to link to?)
 
