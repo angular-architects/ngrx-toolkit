@@ -12,6 +12,7 @@
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
     "src/**/*.d.ts",
+    "src/**/tests/**/*.ts",
     "src/lib/storage-sync/tests/with-storage-sync-indexedb.spec.ts"
   ]
 }
