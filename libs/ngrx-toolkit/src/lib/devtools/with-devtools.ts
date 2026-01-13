@@ -16,8 +16,7 @@ import { DevtoolsSyncer } from './internal/devtools-syncer.service';
 import { ReduxDevtoolsExtension } from './internal/models';
 
 // Users requested that we export this type: https://github.com/angular-architects/ngrx-toolkit/issues/178
-export type DevtoolsFeature<Name extends string = string> =
-  DevtoolsFeatureInternal<Name>;
+export type DevtoolsFeature = DevtoolsFeatureInternal;
 
 declare global {
   interface Window {
@@ -28,7 +27,7 @@ declare global {
 export const renameDevtoolsMethodName = '___renameDevtoolsName';
 export const uniqueDevtoolsId = '___uniqueDevtoolsId';
 // Used to declare the existence of the devtools extension
-export const DEVTOOL_PROP = Symbol('DEVTOOL_PROP');
+export const DEVTOOL_FEATURE_NAMES = Symbol('DEVTOOL_PROP');
 
 /**
  * Adds this store as a feature state to the Redux DevTools.
@@ -43,51 +42,6 @@ export const DEVTOOL_PROP = Symbol('DEVTOOL_PROP');
  * @param name name of the store as it should appear in the DevTools
  * @param features features to extend or modify the behavior of the Devtools
  */
-export function withDevtools(
-  name: string,
-): SignalStoreFeature<
-  EmptyFeatureResult,
-  EmptyFeatureResult & { props: { [DEVTOOL_PROP]: [] } }
->;
-
-export function withDevtools<DV1 extends DevtoolsFeature>(
-  name: string,
-  feature: DV1,
-): SignalStoreFeature<
-  EmptyFeatureResult,
-  EmptyFeatureResult & { props: { [DEVTOOL_PROP]: DV1['name'] } }
->;
-
-export function withDevtools<
-  DV1 extends DevtoolsFeature,
-  DV2 extends DevtoolsFeature,
->(
-  name: string,
-  feature1: DV1,
-  feature2: DV2,
-): SignalStoreFeature<
-  EmptyFeatureResult,
-  EmptyFeatureResult & {
-    props: { [DEVTOOL_PROP]: DV1['name'] | DV2['name'] };
-  }
->;
-
-export function withDevtools<
-  DV1 extends DevtoolsFeature,
-  DV2 extends DevtoolsFeature,
-  DV3 extends DevtoolsFeature,
->(
-  name: string,
-  feature1: DV1,
-  feature2: DV2,
-  feature3: DV3,
-): SignalStoreFeature<
-  EmptyFeatureResult,
-  EmptyFeatureResult & {
-    props: { [DEVTOOL_PROP]: DV1['name'] | DV2['name'] | DV3['name'] };
-  }
->;
-
 export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
   return signalStoreFeature(
     withMethods(() => {
@@ -104,7 +58,7 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
       } as Record<string, (newName?: unknown) => unknown>;
     }),
     withProps(() => ({
-      [DEVTOOL_PROP]: features.filter((f) => f.name).map((f) => f.name),
+      [DEVTOOL_FEATURE_NAMES]: features.filter(Boolean).map((f) => f.name),
     })),
     withHooks((store) => {
       const syncer = inject(DevtoolsSyncer);
@@ -128,6 +82,6 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
     }),
   ) as SignalStoreFeature<
     EmptyFeatureResult,
-    EmptyFeatureResult & { props: { [DEVTOOL_PROP]: unknown } }
+    EmptyFeatureResult & { props: { [DEVTOOL_FEATURE_NAMES]: string[] } }
   >;
 }

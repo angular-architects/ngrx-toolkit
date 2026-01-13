@@ -6,6 +6,7 @@ import {
   SignalStoreFeature,
   signalStoreFeature,
   type,
+  withHooks,
 } from '@ngrx/signals';
 import {
   EventCreator,
@@ -15,22 +16,14 @@ import {
 import { tap } from 'rxjs/operators';
 import { GLITCH_TRACKING_FEATURE } from './features/with-glitch-tracking';
 import { updateState } from './update-state';
-import { DEVTOOL_PROP } from './with-devtools';
+import { DEVTOOL_FEATURE_NAMES } from './with-devtools';
 
-export function withTrackedReducer<
-  State extends object,
-  DevtoolsFeatureName extends string,
->(
+export function withTrackedReducer<State extends object>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ...caseReducers: CaseReducerResult<State, any>[]
 ): SignalStoreFeature<
   EmptyFeatureResult & {
     state: State;
-    props: {
-      [DEVTOOL_PROP]: typeof GLITCH_TRACKING_FEATURE extends DevtoolsFeatureName
-        ? DevtoolsFeatureName
-        : 'NO GLITCHED TRACKING ACTIVATED';
-    };
   },
   EmptyFeatureResult
 > {
@@ -51,6 +44,24 @@ export function withTrackedReducer<
         ),
       ),
     ),
+    withHooks((store) => ({
+      onInit() {
+        if (!(DEVTOOL_FEATURE_NAMES in store)) {
+          throw new Error(
+            `In order to use withTrackedReducer, you must first enable the devtools feature via withDevtools('[your store name]', withGlitchTracking())`,
+          );
+        }
+        if (
+          !(store[DEVTOOL_FEATURE_NAMES] as string[]).includes(
+            GLITCH_TRACKING_FEATURE,
+          )
+        ) {
+          throw new Error(
+            `In order to use withTrackedReducer, you must first enable the glitch tracking devtools feature via withDevtools('[your store name]', withGlitchTracking())`,
+          );
+        }
+      },
+    })),
   );
 }
 

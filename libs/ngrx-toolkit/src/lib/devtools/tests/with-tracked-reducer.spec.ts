@@ -202,26 +202,46 @@ describe('withTrackedReducer', () => {
     );
   });
 
-  describe('types', () => {
+  describe('devtools checks', () => {
     it('should fail if `withDevtools` is not used', () => {
-      signalStore(withState({ count: 0 }), withTrackedReducer());
-    });
-    it('should fail during runtime if `withDevtools` is missing glitched tracking', () => {
-      signalStore(withDevtools('store'), withTrackedReducer());
-    });
-    it('should succeed if `withDevtools` is used with glitched tracking', () => {
-      // In order to have a type-safe test
-      signalStore(
-        withDevtools('store', withGlitchTracking()),
+      const Store = signalStore(
+        { providedIn: 'root' },
+        withState({ count: 0 }),
         withTrackedReducer(),
+      );
+      expect(() => TestBed.inject(Store)).toThrow(
+        `In order to use withTrackedReducer, you must first enable the devtools feature via withDevtools('[your store name]', withGlitchTracking())`,
       );
     });
 
+    it('should fail during runtime if `withDevtools` is missing glitched tracking', () => {
+      const Store = signalStore(
+        { providedIn: 'root' },
+        withDevtools('store'),
+        withTrackedReducer(),
+      );
+      expect(() => TestBed.inject(Store)).toThrow(
+        `In order to use withTrackedReducer, you must first enable the glitch tracking devtools feature via withDevtools('[your store name]', withGlitchTracking())`,
+      );
+    });
+
+    it('should succeed if `withDevtools` is used with glitched tracking', () => {
+      // In order to have a type-safe test
+      const Store = signalStore(
+        { providedIn: 'root' },
+        withDevtools('store', withGlitchTracking()),
+        withTrackedReducer(),
+      );
+      expect(() => TestBed.inject(Store)).not.toThrow();
+    });
+
     it('should also work with multiple devtools features', () => {
-      signalStore(
+      const Store = signalStore(
+        { providedIn: 'root' },
         withDevtools('store', withGlitchTracking(), withDisabledNameIndices()),
         withTrackedReducer(),
       );
+      expect(() => TestBed.inject(Store)).not.toThrow();
     });
   });
 });

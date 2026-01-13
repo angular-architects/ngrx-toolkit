@@ -1,7 +1,7 @@
 import { createDevtoolsFeature } from '../internal/devtools-feature';
 import { GlitchTrackerService } from '../internal/glitch-tracker.service';
 
-export const GLITCH_TRACKING_FEATURE = 'GLITCH_TRACKING_FEATURE' as const;
+export const GLITCH_TRACKING_FEATURE = 'GLITCH_TRACKING_FEATURE';
 
 /**
  * It tracks all state changes of the State, including intermediary updates
@@ -33,10 +33,8 @@ export const GLITCH_TRACKING_FEATURE = 'GLITCH_TRACKING_FEATURE' as const;
  * Without `withGlitchTracking`, the DevTools would only show the final value of 3.
  */
 export function withGlitchTracking() {
-  return createDevtoolsFeature(
-    {
-      tracker: GlitchTrackerService,
-    },
-    GLITCH_TRACKING_FEATURE,
-  );
+  return createDevtoolsFeature({
+    name: GLITCH_TRACKING_FEATURE,
+    tracker: GlitchTrackerService,
+  });
 }

@@ -1,8 +1,11 @@
 import { signalStoreFeature, withProps } from '@ngrx/signals';
-import { DEVTOOL_PROP, withDevtools } from './with-devtools';
-
+import { DEVTOOL_FEATURE_NAMES, withDevtools } from './with-devtools';
 /**
  * Stub for DevTools integration. Can be used to disable DevTools in production.
  */
 export const withDevToolsStub: typeof withDevtools = () =>
-  signalStoreFeature(withProps(() => ({ [DEVTOOL_PROP]: [] as [] })));
+  signalStoreFeature(
+    withProps(() => ({
+      [DEVTOOL_FEATURE_NAMES]: [],
+    })),
+  );

@@ -5,6 +5,7 @@ export const DEVTOOLS_FEATURE = Symbol('DEVTOOLS_FEATURE');
 export type Mapper = (state: object) => object;
 
 export type DevtoolsOptions = {
+  name?: string; // defines the name of the feature
   indexNames?: boolean; // defines if names should be indexed.
   map?: Mapper; // defines a mapper for the state.
   tracker?: new () => Tracker; // defines a tracker for the state
@@ -23,18 +24,15 @@ export type DevtoolsInnerOptions = {
  * We use them (function calls) instead of a config object,
  * because of tree-shaking.
  */
-export type DevtoolsFeature<Name extends string> = {
+export type DevtoolsFeature = {
   [DEVTOOLS_FEATURE]: true;
-  name: Name;
 } & Partial<DevtoolsOptions>;
 
-export function createDevtoolsFeature<Name extends string = ''>(
+export function createDevtoolsFeature(
   options: DevtoolsOptions,
-  name: Name = '' as Name,
-): DevtoolsFeature<Name> {
+): DevtoolsFeature {
   return {
     [DEVTOOLS_FEATURE]: true,
     ...options,
-    name,
   };
 }
