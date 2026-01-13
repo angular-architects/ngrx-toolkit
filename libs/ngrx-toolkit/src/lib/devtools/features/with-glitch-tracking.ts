@@ -1,6 +1,8 @@
 import { createDevtoolsFeature } from '../internal/devtools-feature';
 import { GlitchTrackerService } from '../internal/glitch-tracker.service';
 
+export const GLITCH_TRACKING_FEATURE = 'GLITCH_TRACKING_FEATURE' as const;
+
 /**
  * It tracks all state changes of the State, including intermediary updates
  * that are typically suppressed by Angular's glitch-free mechanism.
@@ -31,5 +33,10 @@ import { GlitchTrackerService } from '../internal/glitch-tracker.service';
  * Without `withGlitchTracking`, the DevTools would only show the final value of 3.
  */
 export function withGlitchTracking() {
-  return createDevtoolsFeature({ tracker: GlitchTrackerService });
+  return createDevtoolsFeature(
+    {
+      tracker: GlitchTrackerService,
+    },
+    GLITCH_TRACKING_FEATURE,
+  );
 }

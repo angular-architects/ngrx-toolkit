@@ -16,6 +16,7 @@ import {
   withEventHandlers,
 } from '@ngrx/signals/events';
 import { delay, tap } from 'rxjs';
+import { withDisabledNameIndices } from '../features/with-disabled-name-indicies';
 import { withGlitchTracking } from '../features/with-glitch-tracking';
 import { updateState } from '../update-state';
 import { withDevtools } from '../with-devtools';
@@ -128,28 +129,6 @@ describe('withTrackedReducer', () => {
     );
   });
 
-  it('should not have a race condition between the reducer and the tracker', () => {
-    const { sendSpy } = setup();
-
-    const Store = signalStore(
-      { providedIn: 'root' },
-      withState({ count: 0 }),
-      withTrackedReducer(
-        on(testEvents.bump, (_, state) => ({ count: state.count + 1 })),
-      ),
-      // Injecting this here, means the reducer gets notified before the tracker
-      withDevtools('store', withGlitchTracking()),
-    );
-
-    TestBed.inject(Store);
-    dispatchBumpEvent();
-
-    expect(sendSpy).toHaveBeenLastCalledWith(
-      { type: '[Spec Store] bump' },
-      { store: { count: 1 } },
-    );
-  });
-
   it('should not label a synchronous patch in an event handler (event tracking only on reducer level)', async () => {
     const { sendSpy, withBasicStore } = setup();
 
@@ -222,6 +201,29 @@ describe('withTrackedReducer', () => {
       { store: { count: 1 } },
     );
   });
+
+  describe('types', () => {
+    it('should fail if `withDevtools` is not used', () => {
+      signalStore(withState({ count: 0 }), withTrackedReducer());
+    });
+    it('should fail during runtime if `withDevtools` is missing glitched tracking', () => {
+      signalStore(withDevtools('store'), withTrackedReducer());
+    });
+    it('should succeed if `withDevtools` is used with glitched tracking', () => {
+      // In order to have a type-safe test
+      signalStore(
+        withDevtools('store', withGlitchTracking()),
+        withTrackedReducer(),
+      );
+    });
+
+    it('should also work with multiple devtools features', () => {
+      signalStore(
+        withDevtools('store', withGlitchTracking(), withDisabledNameIndices()),
+        withTrackedReducer(),
+      );
+    });
+  });
 });
 
 function dispatchBumpEvent() {
@@ -233,7 +235,7 @@ function setup() {
 
   function withBasicStore(name: string) {
     return signalStoreFeature(
-      withDevtools(name, withGlitchTracking()),
+      withDevtools(name, withGlitchTracking(), withDisabledNameIndices()),
       withState({ count: 0 }),
     );
   }

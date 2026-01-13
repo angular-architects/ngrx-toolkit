@@ -23,15 +23,18 @@ export type DevtoolsInnerOptions = {
  * We use them (function calls) instead of a config object,
  * because of tree-shaking.
  */
-export type DevtoolsFeature = {
+export type DevtoolsFeature<Name extends string> = {
   [DEVTOOLS_FEATURE]: true;
+  name: Name;
 } & Partial<DevtoolsOptions>;
 
-export function createDevtoolsFeature(
+export function createDevtoolsFeature<Name extends string = ''>(
   options: DevtoolsOptions,
-): DevtoolsFeature {
+  name: Name = '' as Name,
+): DevtoolsFeature<Name> {
   return {
     [DEVTOOLS_FEATURE]: true,
     ...options,
+    name,
   };
 }
