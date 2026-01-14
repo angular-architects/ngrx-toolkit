@@ -1,10 +1,11 @@
-import { inject, InjectionToken } from '@angular/core';
+import { inject } from '@angular/core';
 import {
   EmptyFeatureResult,
   SignalStoreFeature,
   signalStoreFeature,
   withHooks,
   withMethods,
+  withProps,
 } from '@ngrx/signals';
 import { DefaultTracker } from './internal/default-tracker';
 import {
@@ -25,11 +26,8 @@ declare global {
 
 export const renameDevtoolsMethodName = '___renameDevtoolsName';
 export const uniqueDevtoolsId = '___uniqueDevtoolsId';
-
-const EXISTING_NAMES = new InjectionToken(
-  'Array contain existing names for the signal stores',
-  { factory: () => [] as string[], providedIn: 'root' },
-);
+// Used to declare the existence of the devtools extension
+export const DEVTOOL_FEATURE_NAMES = Symbol('DEVTOOL_PROP');
 
 /**
  * Adds this store as a feature state to the Redux DevTools.
@@ -59,12 +57,14 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
         [uniqueDevtoolsId]: () => id,
       } as Record<string, (newName?: unknown) => unknown>;
     }),
+    withProps(() => ({
+      [DEVTOOL_FEATURE_NAMES]: features.filter(Boolean).map((f) => f.name),
+    })),
     withHooks((store) => {
       const syncer = inject(DevtoolsSyncer);
       const id = String(store[uniqueDevtoolsId]());
       return {
         onInit() {
-          const id = String(store[uniqueDevtoolsId]());
           const finalOptions: DevtoolsInnerOptions = {
             indexNames: !features.some((f) => f.indexNames === false),
             map: features.find((f) => f.map)?.map ?? ((state) => state),
@@ -80,5 +80,8 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
         },
       };
     }),
-  ) as SignalStoreFeature<EmptyFeatureResult, EmptyFeatureResult>;
+  ) as SignalStoreFeature<
+    EmptyFeatureResult,
+    EmptyFeatureResult & { props: { [DEVTOOL_FEATURE_NAMES]: string[] } }
+  >;
 }

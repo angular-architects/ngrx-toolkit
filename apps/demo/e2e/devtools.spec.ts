@@ -8,7 +8,7 @@ test.describe('DevTools', () => {
     await page.goto('');
     const errors = [];
     page.on('pageerror', (error) => errors.push(error));
-    await page.getByRole('link', { name: 'DevTools' }).click();
+    await page.getByRole('link', { name: 'DevTools', exact: true }).click();
     await expect(
       page.getByRole('row', { name: 'Go for a walk' }),
     ).toBeVisible();
@@ -30,7 +30,7 @@ test.describe('DevTools', () => {
         },
       };
     });
-    await page.getByRole('link', { name: 'DevTools' }).click();
+    await page.getByRole('link', { name: 'DevTools', exact: true }).click();
     await page
       .getByRole('row', { name: 'Go for a walk' })
       .getByRole('checkbox')

@@ -5,6 +5,7 @@ export const DEVTOOLS_FEATURE = Symbol('DEVTOOLS_FEATURE');
 export type Mapper = (state: object) => object;
 
 export type DevtoolsOptions = {
+  name?: string; // defines the name of the feature
   indexNames?: boolean; // defines if names should be indexed.
   map?: Mapper; // defines a mapper for the state.
   tracker?: new () => Tracker; // defines a tracker for the state
