@@ -19,6 +19,7 @@ import { delay, tap } from 'rxjs';
 import { withDisabledNameIndices } from '../features/with-disabled-name-indicies';
 import { withGlitchTracking } from '../features/with-glitch-tracking';
 import { updateState } from '../update-state';
+import { withDevToolsStub } from '../with-dev-tools-stub';
 import { withDevtools } from '../with-devtools';
 import { withTrackedReducer } from '../with-tracked-reducer';
 import { setupExtensions } from './helpers.spec';
@@ -239,6 +240,15 @@ describe('withTrackedReducer', () => {
       const Store = signalStore(
         { providedIn: 'root' },
         withDevtools('store', withGlitchTracking(), withDisabledNameIndices()),
+        withTrackedReducer(),
+      );
+      expect(() => TestBed.inject(Store)).not.toThrow();
+    });
+
+    it('should not throw with stubbed devtools', () => {
+      const Store = signalStore(
+        { providedIn: 'root' },
+        withDevToolsStub('store'),
         withTrackedReducer(),
       );
       expect(() => TestBed.inject(Store)).not.toThrow();
