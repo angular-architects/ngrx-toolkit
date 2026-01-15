@@ -1,5 +1,5 @@
 ---
-## title: withEntityResources()
+title: withEntityResources()
 ---
 
 ```typescript
