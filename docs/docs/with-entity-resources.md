@@ -88,6 +88,8 @@ This exposes per-resource members with the resource name as a prefix:
 
 ## Error Handling
 
+Starting in NgRx Toolkit v20.6.0, error handling now has more resilient options.
+
 The behavior of Angular's resources' error handling and the NgRx SignalStore's `getState/patchState` required `withEntityResource` to approach error handling
 with a particular strategy unique to the intersection of resources and the Signal Store.
 To prevent resource failures from blocking the store, the Toolkit provides some strategies to handle errors.
@@ -111,9 +113,7 @@ Options:
 1. `'previous value'`. Provided the resource had a previous value, that previous value will be returned. If not, an error is thrown.
 1. `'native'`. No special handling is provided, inline with default error behavior.
 
-<!-- TODO - update link when the code is merged -->
-
-Under the hood, `'previous value'` and `'undefined value'` proxy the value. For a detailed explanation for why this is done and what a more longterm solution may be with some framework enhancements, check out the [JSDoc for the error handling strategy](https://google.com).
+Under the hood, `'previous value'` and `'undefined value'` proxy the value. For a detailed explanation for why this is done and what a more longterm solution may be with some framework enhancements, check out the [JSDoc for the error handling strategy](https://github.com/angular-architects/ngrx-toolkit/blob/main/libs/ngrx-toolkit/src/lib/with-resource.ts#L402).
 
 ## Component Usage
 
