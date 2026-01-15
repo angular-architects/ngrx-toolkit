@@ -14,7 +14,7 @@ describe('withUndoRedo', () => {
       );
     });
 
-    it('should not throw no error if the store is configured with withUndoRedo()', () => {
+    it('should not throw an error if the store is configured with withUndoRedo()', () => {
       const Store = signalStore(
         { providedIn: 'root' },
         withState({}),
