@@ -88,32 +88,11 @@ This exposes per-resource members with the resource name as a prefix:
 
 ## Error Handling
 
-Starting in NgRx Toolkit v20.6.0, error handling now has more resilient options.
+Starting in NgRx Toolkit v20.6.0, error state handling for `withResource` and `withEntityResources` was enhanced.
 
-The behavior of Angular's resources' error handling and the NgRx SignalStore's `getState/patchState` required `withEntityResource` to approach error handling
-with a particular strategy unique to the intersection of resources and the Signal Store.
-To prevent resource failures from blocking the store, the Toolkit provides some strategies to handle errors.
+In the event of an error in a resource declared in `withEntityResource`, the resource's value will be `undefined`.
 
-```ts
-withEntityResource(
-  () => ({
-    id: resource({
-      loader: () => Promise.resolve(1),
-      defaultValue: 0,
-    }),
-  }),
-  // Other values: 'native' and 'previous value'
-  { errorHandling: 'undefined value' }, // default if not specified
-),
-```
-
-Options:
-
-1. `'undfined value'` (default). In the event of an error, the resource's value will be `undefined`
-1. `'previous value'`. Provided the resource had a previous value, that previous value will be returned. If not, an error is thrown.
-1. `'native'`. No special handling is provided, inline with default error behavior.
-
-Under the hood, `'previous value'` and `'undefined value'` proxy the value. For a detailed explanation for why this is done and what a more longterm solution may be with some framework enhancements, check out the [JSDoc for the error handling strategy](https://github.com/angular-architects/ngrx-toolkit/blob/main/libs/ngrx-toolkit/src/lib/with-resource.ts#L402).
+For further details, check out the error handling section of [`withResource`](./with-resource.md#error-handling).
 
 ## Component Usage
 

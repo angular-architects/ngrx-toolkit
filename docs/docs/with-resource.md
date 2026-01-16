@@ -85,10 +85,9 @@ With named resources, each resource gets prefixed properties:
 
 ## Error Handling
 
-Starting in NgRx Toolkit v20.6.0, error handling now has more resilient options.
+The error throwing behavior of the native `resource` causes a deadlock in the error case.
+That's why `withResource` (as of NgRx Toolkit v20.6.0) comes with a different error handling strategy, which doesn't throw.
 
-The behavior of Angular's resources' error handling and the NgRx SignalStore's `getState/patchState` required `withResource` to approach error handling
-with a particular strategy unique to the intersection of resources and the Signal Store.
 To prevent resource failures from blocking the store, the Toolkit provides some strategies to handle errors.
 
 ```ts
@@ -106,11 +105,11 @@ withResource(
 
 Options:
 
-1. `'undfined value'` (default). In the event of an error, the resource's value will be `undefined`
-1. `'previous value'`. Provided the resource had a previous value, that previous value will be returned. If not, an error is thrown.
+1. `'undefined value'` (default). In the event of an error, the resource's value will be `undefined`
+1. `'previous value'`. The resource's previous value will be returned.
 1. `'native'`. No special handling is provided, inline with default error behavior.
 
-Under the hood, `'previous value'` and `'undefined value'` proxy the value. For a detailed explanation for why this is done and what a more longterm solution may be with some framework enhancements, check out the [JSDoc for the error handling strategy](https://github.com/angular-architects/ngrx-toolkit/blob/main/libs/ngrx-toolkit/src/lib/with-resource.ts#L402).
+Under the hood, `'previous value'` and `'undefined value'` proxy the value. For a detailed explanation for why this is done, check out the [JSDoc for the error handling strategy](https://github.com/angular-architects/ngrx-toolkit/blob/main/libs/ngrx-toolkit/src/lib/with-resource.ts#L402).
 
 ## Component Usage
 
