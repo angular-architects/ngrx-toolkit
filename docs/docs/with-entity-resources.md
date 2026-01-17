@@ -86,6 +86,14 @@ This exposes per-resource members with the resource name as a prefix:
 - **Resource members**: `todosValue()`, `todosStatus()`, `todosError()`, `todosIsLoading()`; `projectsValue()`, ...
 - **Entity members**: `todosIds()`, `todosEntityMap()`, `todosEntities()`; `projectsIds()`, `projectsEntityMap()`, `projectsEntities()`
 
+## Error Handling
+
+Starting in NgRx Toolkit v20.6.0, error state handling for `withResource` and `withEntityResources` was enhanced.
+
+In the event of an error in a resource declared in `withEntityResource`, the resource's value will be `undefined`.
+
+For further details, check out the error handling section of [`withResource`](./with-resource.md#error-handling).
+
 ## Component Usage
 
 ```typescript

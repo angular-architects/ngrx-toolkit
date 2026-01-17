@@ -83,6 +83,34 @@ With named resources, each resource gets prefixed properties:
 - **Single resource:** use when your store works with just one data source.
 - **Named resources:** use when your store is larger and manages multiple entities or async operations.
 
+## Error Handling
+
+The error throwing behavior of the native `resource` causes a deadlock in the error case.
+That's why `withResource` (as of NgRx Toolkit v20.6.0) comes with a different error handling strategy, which doesn't throw.
+
+To prevent resource failures from blocking the store, the Toolkit provides some strategies to handle errors.
+
+```ts
+withResource(
+  () => ({
+    id: resource({
+      loader: () => Promise.resolve(1),
+      defaultValue: 0,
+    }),
+  }),
+  // Other values: 'native' and 'previous value'
+  { errorHandling: 'undefined value' }, // default if not specified
+),
+```
+
+Options:
+
+1. `'undefined value'` (default). In the event of an error, the resource's value will be `undefined`
+1. `'previous value'`. The resource's previous value will be returned.
+1. `'native'`. No special handling is provided, inline with default error behavior.
+
+Under the hood, `'previous value'` and `'undefined value'` proxy the value. For a detailed explanation for why this is done, check out the [JSDoc for the error handling strategy](https://github.com/angular-architects/ngrx-toolkit/blob/main/libs/ngrx-toolkit/src/lib/with-resource.ts#L402).
+
 ## Component Usage
 
 ```typescript
