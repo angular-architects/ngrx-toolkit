@@ -6,6 +6,10 @@ title: withDevtools()
 import { withDevtools } from '@angular-architects/ngrx-toolkit';
 ```
 
+:::info
+Devtools integration with `@ngrx/signals/events` is now available starting in version 20.7, via [`withTrackedReducer`](#events-tracking-withtrackedreducer).
+:::
+
 Redux Devtools is a powerful browser extension tool, that allows you to inspect every change in your stores. Originally, it was designed for Redux, but it can also be used with the SignalStore. You can download it for Chrome [here](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd).
 
 To use the Devtools, you need to add the `withDevtools()` extension to your SignalStore:
@@ -162,6 +166,48 @@ const Store = signalStore(
     'user',
     withMapper((state) => ({ ...state, enteredPassword: '***' })),
   ),
+);
+```
+
+## Events tracking: `withTrackedReducer`
+
+`withTrackedReducer` tracks state changes within the events
+plugin. This utility automatically derives the event name, streamlining
+the tracking process.
+
+To use it
+
+1. _Replace usages of `withReducer` with `withTrackedReducer`_. Note: native `withReducer` support is planned for the future, but that requires upstream support from `@ngrx/signals`.
+2. _[`withGlitchTracking`](#withglitchtracking) must be specified within `withDevtools`_. If `withTrackedReducer` is used without the devtools and glitch tracking, runtime errors will be thrown.
+
+```ts
+// Must have all three, or runtime errors for thee!
+import { withTrackedReducer, withGlitchTracking, withDevtools } from '@angular-architects/ngrx-toolkit';
+
+export const bookEvents = eventGroup({
+  source: 'Book Store',
+  events: {
+    loadBooks: type<void>(),
+  },
+});
+
+const Store = signalStore(
+  { providedIn: 'root' },
+  withDevtools('book-store-events', withGlitchTracking()),
+  withState({
+    books: [] as Book[],
+  }),
+  withTrackedReducer(
+    // `[Book Store] loadBooks` will show up in the devtools
+    on(bookEvents.loadBooks, () => ({
+      books: mockBooks,
+    })),
+  ),
+  withHooks({
+    onInit() {
+      injectDispatch(bookEvents).loadBooks();
+    },
+  }),
 );
 ```
 
