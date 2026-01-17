@@ -9,7 +9,8 @@ import {
   withHooks,
   withMethods,
 } from '@ngrx/signals';
-import { capitalize } from './with-data-service';
+import { capitalize } from '../with-data-service';
+import { ClearUndoRedoOptions } from './clear-undo-redo';
 
 export type StackItem = Record<string, unknown>;
 
@@ -68,11 +69,12 @@ export function withUndoRedo<Input extends EmptyFeatureResult>(
     methods: {
       undo: () => void;
       redo: () => void;
+      /** @deprecated Use {@link clearUndoRedo} instead. */
       clearStack: () => void;
     };
   }
 > {
-  let previous: StackItem | null = null;
+  let lastRecord: StackItem | null = null;
   let skipOnce = false;
 
   const normalized = {
@@ -107,14 +109,14 @@ export function withUndoRedo<Input extends EmptyFeatureResult>(
       undo(): void {
         const item = undoStack.pop();
 
-        if (item && previous) {
-          redoStack.push(previous);
+        if (item && lastRecord) {
+          redoStack.push(lastRecord);
         }
 
         if (item) {
           skipOnce = true;
           patchState(store, item);
-          previous = item;
+          lastRecord = item;
         }
 
         updateInternal();
@@ -122,23 +124,33 @@ export function withUndoRedo<Input extends EmptyFeatureResult>(
       redo(): void {
         const item = redoStack.pop();
 
-        if (item && previous) {
-          undoStack.push(previous);
+        if (item && lastRecord) {
+          undoStack.push(lastRecord);
         }
 
         if (item) {
           skipOnce = true;
           patchState(store, item);
-          previous = item;
+          lastRecord = item;
         }
 
         updateInternal();
       },
-      clearStack(): void {
+      __clearUndoRedo__(opts?: ClearUndoRedoOptions<Input['state']>): void {
         undoStack.splice(0);
         redoStack.splice(0);
-        previous = null;
+
+        if (opts) {
+          lastRecord = opts.lastRecord;
+        }
+
         updateInternal();
+      },
+    })),
+    withMethods((store) => ({
+      /** @deprecated Use {@link clearUndoRedo} instead. */
+      clearStack(): void {
+        store.__clearUndoRedo__();
       },
     })),
     withHooks({
@@ -173,22 +185,22 @@ export function withUndoRedo<Input extends EmptyFeatureResult>(
           // if the component sends back the undone filter
           // to the store.
           //
-          if (JSON.stringify(cand) === JSON.stringify(previous)) {
+          if (JSON.stringify(cand) === JSON.stringify(lastRecord)) {
             return;
           }
 
           // Clear redoStack after recorded action
           redoStack.splice(0);
 
-          if (previous) {
-            undoStack.push(previous);
+          if (lastRecord) {
+            undoStack.push(lastRecord);
           }
 
           if (redoStack.length > normalized.maxStackSize) {
             undoStack.unshift();
           }
 
-          previous = cand;
+          lastRecord = cand;
 
           // Don't propogate current reactive context
           untracked(() => updateInternal());

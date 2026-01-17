@@ -9,7 +9,8 @@ import {
   withState,
 } from '@ngrx/signals';
 import { addEntity, withEntities } from '@ngrx/signals/entities';
-import { withCallState } from './with-call-state';
+import { withCallState } from '../with-call-state';
+import { clearUndoRedo } from './clear-undo-redo';
 import { withUndoRedo } from './with-undo-redo';
 
 const testState = { test: '' };
@@ -32,6 +33,7 @@ describe('withUndoRedo', () => {
         'canRedo',
         'undo',
         'redo',
+        '__clearUndoRedo__',
         'clearStack',
       ]);
     });
@@ -271,7 +273,7 @@ describe('withUndoRedo', () => {
       store.update('Gordon');
       tick(1);
 
-      store.clearStack();
+      clearUndoRedo(store, { lastRecord: null });
       tick(1);
 
       // After clearing the undo/redo stack, there is no previous item anymore.
@@ -281,6 +283,31 @@ describe('withUndoRedo', () => {
       tick(1);
 
       expect(store.canUndo()).toBe(false);
+      expect(store.canRedo()).toBe(false);
+    }));
+
+    it('can undo after setting lastRecord', fakeAsync(() => {
+      const Store = signalStore(
+        { providedIn: 'root' },
+        withState(testState),
+        withMethods((store) => ({
+          update: (value: string) => patchState(store, { test: value }),
+        })),
+        withUndoRedo({ keys: testKeys }),
+      );
+
+      const store = TestBed.inject(Store);
+
+      store.update('Alan');
+
+      store.update('Gordon');
+
+      clearUndoRedo(store, { lastRecord: { test: 'Joan' } });
+
+      store.update('Hugh');
+      tick();
+
+      expect(store.canUndo()).toBe(true);
       expect(store.canRedo()).toBe(false);
     }));
   });
