@@ -24,6 +24,8 @@ const SyncStore = signalStore(
 ```
 
 ```typescript
+import { clearUndoRedo } from '@angular-architects/ngrx-toolkit';
+
 @Component(...)
 public class UndoRedoComponent {
   private syncStore = inject(SyncStore);
@@ -43,7 +45,7 @@ public class UndoRedoComponent {
   }
 
   clearStack(): void {
-    this.store.clearStack();
+    clearUndoRedo(this.store);
   }
 }
 ```
