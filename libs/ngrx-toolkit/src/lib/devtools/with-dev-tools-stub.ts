@@ -6,7 +6,10 @@ import { DEVTOOL_FEATURE_NAMES, withDevtools } from './with-devtools';
  */
 export const withDevToolsStub: typeof withDevtools = () =>
   signalStoreFeature(
-    withProps(() => ({
-      [DEVTOOL_FEATURE_NAMES]: [GLITCH_TRACKING_FEATURE],
-    })),
+    withProps(
+      () =>
+        ({
+          [DEVTOOL_FEATURE_NAMES]: [GLITCH_TRACKING_FEATURE],
+        }) as Record<string, never>,
+    ),
   );
