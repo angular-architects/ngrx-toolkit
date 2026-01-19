@@ -12,6 +12,7 @@ Example:
 
 ```typescript
 import { withUndoRedo } from '@angular-architects/ngrx-toolkit';
+import { clearUndoRedo } from '@angular-architects/ngrx-toolkit';
 
 const SyncStore = signalStore(
   withUndoRedo({
@@ -32,7 +33,6 @@ public class UndoRedoComponent {
 
   canUndo = this.store.canUndo; // use in template or in ts
   canRedo = this.store.canRedo; // use in template or in ts
-  clearStack = this.store.clearStack; // use in template or in ts
 
   undo(): void {
     if (!this.canUndo()) return;
@@ -45,7 +45,11 @@ public class UndoRedoComponent {
   }
 
   clearStack(): void {
+    // Does a soft reset (not setting the state to `null`) by default.
     clearUndoRedo(this.store);
+
+    // The hard reset can be set via options,
+    // clearUndoRedo(store, { lastRecord: null })
   }
 }
 ```
