@@ -80,8 +80,5 @@ export function withDevtools(name: string, ...features: DevtoolsFeature[]) {
         },
       };
     }),
-  ) as SignalStoreFeature<
-    EmptyFeatureResult,
-    EmptyFeatureResult & { props: { [DEVTOOL_FEATURE_NAMES]: string[] } }
-  >;
+  ) as SignalStoreFeature<EmptyFeatureResult, EmptyFeatureResult>;
 }
