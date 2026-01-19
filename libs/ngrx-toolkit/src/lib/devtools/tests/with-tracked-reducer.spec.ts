@@ -13,7 +13,7 @@ import {
   eventGroup,
   Events,
   on,
-  withEventHandlers,
+  withEffects,
 } from '@ngrx/signals/events';
 import { delay, tap } from 'rxjs';
 import { withDisabledNameIndices } from '../features/with-disabled-name-indicies';
@@ -137,15 +137,15 @@ describe('withTrackedReducer', () => {
       { providedIn: 'root' },
       withBasicStore('store'),
       withState({ count: 0 }),
-      withEventHandlers((store, events = inject(Events)) => [
-        events
+      withEffects((store, events = inject(Events)) => ({
+        bump$: events
           .on(testEvents.bump)
           .pipe(
             tap(() =>
               patchState(store, (state) => ({ count: state.count + 1 })),
             ),
           ),
-      ]),
+      })),
     );
 
     TestBed.inject(Store);
@@ -163,12 +163,12 @@ describe('withTrackedReducer', () => {
     const Store = signalStore(
       { providedIn: 'root' },
       withBasicStore('store'),
-      withEventHandlers((store, events = inject(Events)) => [
-        events.on(testEvents.bump).pipe(
+      withEffects((store, events = inject(Events)) => ({
+        bump$: events.on(testEvents.bump).pipe(
           delay(0),
           tap(() => patchState(store, (state) => ({ count: state.count + 1 }))),
         ),
-      ]),
+      })),
     );
 
     TestBed.inject(Store);
@@ -187,11 +187,11 @@ describe('withTrackedReducer', () => {
     const Store = signalStore(
       { providedIn: 'root' },
       withBasicStore('store'),
-      withEventHandlers((store, events = inject(Events)) => [
-        events
+      withEffects((store, events = inject(Events)) => ({
+        bump$: events
           .on(testEvents.bump)
           .pipe(tap(() => updateState(store, 'Bump', { count: 1 }))),
-      ]),
+      })),
     );
 
     TestBed.inject(Store);

@@ -31,6 +31,6 @@ export const vienna: Address = {
 export class AddressResolver {
   resolve(id: number) {
     void id;
-    return Promise.resolve<Address>(this.address);
+    return Promise.resolve<Address>(venice);
   }
 }
