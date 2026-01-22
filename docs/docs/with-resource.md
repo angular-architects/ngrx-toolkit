@@ -83,6 +83,25 @@ With named resources, each resource gets prefixed properties:
 - **Single resource:** use when your store works with just one data source.
 - **Named resources:** use when your store is larger and manages multiple entities or async operations.
 
+## Updating
+
+The state to patch corresponds directly to the name of the resource's value signal.
+
+```ts
+const UserStore = signalStore(
+  withResource((state) => httpResource<User>(() => `/user/${state.userId}`)),
+  withResource(({ userId }) => ({
+    list: httpResource<User[]>(() => '/users', { defaultValue: [] }),
+  })),
+);
+
+// Unnamed resource: `value`
+patchState(store, { value: undefined });
+
+// Named resource: name prefix + `Value`
+patchState(store, { listValue: [] });
+```
+
 ## Error Handling
 
 The error throwing behavior of the native `resource` causes a deadlock in the error case.
