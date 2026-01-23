@@ -96,10 +96,10 @@ const UserStore = signalStore(
 );
 
 // Unnamed resource: `value`
-patchState(store, { value: undefined });
+patchState(store, { value: { id: 1, name: 'John' } });
 
 // Named resource: name prefix + `Value`
-patchState(store, { listValue: [] });
+patchState(store, ({ listValue }) => ({ listValue: [...(listValue ?? []), { id: 1, name: 'John' }] }));
 ```
 
 ## Error Handling
