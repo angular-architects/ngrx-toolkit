@@ -132,7 +132,7 @@ Options:
 Under the hood, `'previous value'` and `'undefined value'` proxy the value. For a detailed explanation for why this is done, check out the [JSDoc for the error handling strategy](https://github.com/angular-architects/ngrx-toolkit/blob/main/libs/ngrx-toolkit/src/lib/with-resource.ts#L402).
 
 The implications of `undefined value` is that the inferred value can be `undefined`, even if there is a `defaultValue` set for the resource.
-For example, in the [`Updating`](#updating) section, `listValue` will be inferred as `User[] | undefined`. To be able to infer the type with a gauranteed value,
+For example, in the [`Updating`](#updating) section, `listValue` will be inferred as `User[] | undefined`. To be able to infer the type with a guaranteed value,
 use `{ errorHandling: 'previous value' }` of `withResource` in conjunction with `defaultValue` of said resource.
 
 ## Component Usage
