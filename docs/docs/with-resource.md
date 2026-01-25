@@ -99,6 +99,7 @@ const UserStore = signalStore(
 patchState(store, { value: { id: 1, name: 'John' } });
 
 // Named resource: name prefix + `Value`
+// See the "Error Handling" section about why `listValue` has to be treated like it could be undefined.
 patchState(store, ({ listValue }) => ({ listValue: [...(listValue ?? []), { id: 1, name: 'John' }] }));
 ```
 
@@ -129,6 +130,10 @@ Options:
 1. `'native'`. No special handling is provided, inline with default error behavior.
 
 Under the hood, `'previous value'` and `'undefined value'` proxy the value. For a detailed explanation for why this is done, check out the [JSDoc for the error handling strategy](https://github.com/angular-architects/ngrx-toolkit/blob/main/libs/ngrx-toolkit/src/lib/with-resource.ts#L402).
+
+The implications of `undefined value` is that the inferred value can be `undefined`, even if there is a `defaultValue` set for the resource.
+For example, in the [`Updating`](#updating) section, `listValue` will be inferred as `User[] | undefined`. To be able to infer the type with a gauranteed value,
+use `{ errorHandling: 'previous value' }` of `withResource` in conjunction with `defaultValue` of said resource.
 
 ## Component Usage
 
