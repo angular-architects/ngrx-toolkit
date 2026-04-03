@@ -3,7 +3,11 @@ import {
   PartialStateUpdater,
   WritableStateSource,
 } from '@ngrx/signals';
-import { currentActionNames } from './internal/current-action-names';
+import { EventInstance } from '@ngrx/signals/events';
+import {
+  currentActionNames,
+  currentEvents,
+} from './internal/current-action-names';
 
 type PatchFn = typeof originalPatchState extends (
   arg1: infer First,
@@ -32,7 +36,32 @@ export function updateState<State extends object>(
   ...updaters: Array<
     Partial<NoInfer<State>> | PartialStateUpdater<NoInfer<State>>
   >
+): void;
+/**
+ * Wrapper of `patchState` for DevTools integration. Next to updating the state,
+ * it also sends the action to the DevTools.
+ * @param stateSource state of Signal Store
+ * @param eventInstance event instance which provides the action name for DevTools
+ * @param updaters updater functions or objects
+ */
+export function updateState<State extends object>(
+  stateSource: WritableStateSource<State>,
+  eventInstance: EventInstance<string, any>,
+  ...updaters: Array<
+    Partial<NoInfer<State>> | PartialStateUpdater<NoInfer<State>>
+  >
+): void;
+export function updateState<State extends object>(
+  stateSource: WritableStateSource<State>,
+  eventOrEventType: string | EventInstance<string, any>,
+  ...updaters: Array<
+    Partial<NoInfer<State>> | PartialStateUpdater<NoInfer<State>>
+  >
 ): void {
-  currentActionNames.add(action);
+  if (typeof eventOrEventType === 'string') {
+    currentActionNames.add(eventOrEventType);
+  } else {
+    currentEvents.add(eventOrEventType);
+  }
   return originalPatchState(stateSource, ...updaters);
 }

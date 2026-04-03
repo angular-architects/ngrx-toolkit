@@ -28,6 +28,7 @@ const testEvents = eventGroup({
   source: 'Spec Store',
   events: {
     bump: type<void>(),
+    bumpWithPayload: type<{ amount: number }>(),
   },
 });
 
@@ -49,6 +50,30 @@ describe('withTrackedReducer', () => {
     expect(sendSpy).toHaveBeenLastCalledWith(
       { type: '[Spec Store] bump' },
       { store: { count: 1 } },
+    );
+  });
+
+  it('should send a glitched update on event with payload', async () => {
+    const { sendSpy, withBasicStore } = setup();
+
+    const Store = signalStore(
+      { providedIn: 'root' },
+      withBasicStore('store'),
+      withTrackedReducer(
+        on(testEvents.bumpWithPayload, (event, state) => ({
+          count: state.count + event.payload.amount,
+        })),
+      ),
+    );
+    TestBed.inject(Store);
+
+    TestBed.inject(Dispatcher).dispatch(
+      testEvents.bumpWithPayload({ amount: 5 }),
+    );
+
+    expect(sendSpy).toHaveBeenLastCalledWith(
+      { type: '[Spec Store] bumpWithPayload', payload: { amount: 5 } },
+      { store: { count: 5 } },
     );
   });
 

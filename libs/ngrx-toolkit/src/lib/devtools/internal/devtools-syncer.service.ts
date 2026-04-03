@@ -8,9 +8,9 @@ import {
 } from '@angular/core';
 import { StateSource } from '@ngrx/signals';
 import { REDUX_DEVTOOLS_CONFIG } from '../provide-devtools-config';
-import { currentActionNames } from './current-action-names';
+import { currentActionNames, currentEvents } from './current-action-names';
 import { DevtoolsInnerOptions } from './devtools-feature';
-import { Connection, StoreRegistry, Tracker } from './models';
+import { Action, Connection, StoreRegistry, Tracker } from './models';
 
 const dummyConnection: Connection = {
   send: () => void true,
@@ -74,6 +74,7 @@ export class DevtoolsSyncer implements OnDestroy {
 
   ngOnDestroy(): void {
     currentActionNames.clear();
+    currentEvents.clear();
   }
 
   syncToDevTools(changedStatePerId: Record<string, object>) {
@@ -90,11 +91,21 @@ export class DevtoolsSyncer implements OnDestroy {
       ...mappedChangedStatePerName,
     };
 
-    const names = Array.from(currentActionNames);
-    const type = names.length ? names.join(', ') : 'Store Update';
-    currentActionNames.clear();
+    const action: Action = { type: 'Store Update' };
 
-    this.#connection.send({ type }, this.#currentState);
+    if (currentActionNames.size > 0) {
+      action.type = Array.from(currentActionNames).join(', ');
+    } else if (currentEvents.size > 0) {
+      const events = Array.from(currentEvents);
+      action.type = events.map((e) => e.type).join(', ');
+      action.payload =
+        events.length > 1 ? events.map((e) => e.payload) : events[0].payload;
+    }
+
+    this.#connection.send(action, this.#currentState);
+
+    currentActionNames.clear();
+    currentEvents.clear();
   }
 
   getNextId() {
