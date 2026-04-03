@@ -50,6 +50,10 @@ patchState(this.store, { loading: false });
 
 // updateState is a wrapper around patchState and has an action name as second parameter
 updateState(this.store, 'update loading', { loading: false });
+
+// updateState can also accept an EventInstance from @ngrx/signals/events.
+// It will use the event type and payload for the DevTools.
+updateState(this.store, bookEvents.addBook({ book }), { loading: false });
 ```
 
 ## `renameDevtoolsName()`
@@ -188,6 +192,7 @@ export const bookEvents = eventGroup({
   source: 'Book Store',
   events: {
     loadBooks: type<void>(),
+    addBook: type<{ book: Book }>(),
   },
 });
 
@@ -202,10 +207,16 @@ const Store = signalStore(
     on(bookEvents.loadBooks, () => ({
       books: mockBooks,
     })),
+    // `[Book Store] addBook` will show up in the devtools along with its payload `{ book }`
+    on(bookEvents.addBook, (event, state) => ({
+      books: [...state.books, event.book],
+    })),
   ),
   withHooks({
     onInit() {
-      injectDispatch(bookEvents).loadBooks();
+      const dispatch = injectDispatch(bookEvents);
+      dispatch.loadBooks();
+      dispatch.addBook({ book: { id: 1, title: '1984' } });
     },
   }),
 );
