@@ -12,12 +12,10 @@ import { addEntity, withEntities } from '@ngrx/signals/entities';
 import { withCallState } from '../with-call-state';
 import { clearUndoRedo } from './clear-undo-redo';
 import { withUndoRedo } from './with-undo-redo';
-
 const testState = { test: '' };
 const testKeys = ['test' as const];
 const newValue = 'new value';
 const newerValue = 'newer value';
-
 describe('withUndoRedo', () => {
   it('adds methods for undo, redo, canUndo, canRedo', () => {
     TestBed.runInInjectionContext(() => {
@@ -26,7 +24,6 @@ describe('withUndoRedo', () => {
         withUndoRedo({ keys: testKeys }),
       );
       const store = new Store();
-
       expect(Object.keys(store)).toEqual([
         'test',
         'canUndo',
@@ -38,7 +35,6 @@ describe('withUndoRedo', () => {
       ]);
     });
   });
-
   it('should check keys and collection types', () => {
     signalStore(
       withState(testState),
@@ -73,7 +69,6 @@ describe('withUndoRedo', () => {
       withUndoRedo({ collections: ['test'] }),
     );
   });
-
   describe('undo and redo', () => {
     it('restores previous state for regular store key', () => {
       TestBed.runInInjectionContext(() => {
@@ -85,23 +80,17 @@ describe('withUndoRedo', () => {
           })),
           withUndoRedo({ keys: testKeys }),
         );
-
         const store = new Store();
-
         store.updateTest(newValue);
-
         expect(store.test()).toEqual(newValue);
         expect(store.canUndo()).toBe(true);
         expect(store.canRedo()).toBe(false);
-
         store.undo();
-
         expect(store.test()).toEqual('');
         expect(store.canUndo()).toBe(false);
         expect(store.canRedo()).toBe(true);
       });
     });
-
     it('restores previous state for regular store key and respects skip', () => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
@@ -112,30 +101,25 @@ describe('withUndoRedo', () => {
           })),
           withUndoRedo({ keys: testKeys, skip: 1 }),
         );
-
         const store = new Store();
-
         store.updateTest(newValue);
-
         expect(store.test()).toEqual(newValue);
-
         store.updateTest(newerValue);
-
         store.undo();
-
         expect(store.test()).toEqual(newValue);
         expect(store.canUndo()).toBe(false);
-
         store.undo();
-
         // should not change
         expect(store.test()).toEqual(newValue);
       });
     });
-
     it('undoes and redoes previous state for entity', () => {
       const Store = signalStore(
-        withEntities({ entity: type<{ id: string }>() }),
+        withEntities({
+          entity: type<{
+            id: string;
+          }>(),
+        }),
         withMethods((store) => ({
           addEntity: (newTest: string) =>
             patchState(store, addEntity({ id: newTest })),
@@ -145,57 +129,45 @@ describe('withUndoRedo', () => {
       TestBed.configureTestingModule({ providers: [Store] });
       TestBed.runInInjectionContext(() => {
         const store = inject(Store);
-
         expect(store.entities()).toEqual([]);
         expect(store.canUndo()).toBe(false);
         expect(store.canRedo()).toBe(false);
-
         store.addEntity(newValue);
-
         expect(store.entities()).toEqual([{ id: newValue }]);
         expect(store.canUndo()).toBe(true);
         expect(store.canRedo()).toBe(false);
-
         store.addEntity(newerValue);
-
         expect(store.entities()).toEqual([
           { id: newValue },
           { id: newerValue },
         ]);
         expect(store.canUndo()).toBe(true);
         expect(store.canRedo()).toBe(false);
-
         store.undo();
-
         expect(store.entities()).toEqual([{ id: newValue }]);
         expect(store.canUndo()).toBe(true);
         expect(store.canRedo()).toBe(true);
-
         store.undo();
-
         expect(store.entities()).toEqual([]);
         expect(store.canUndo()).toBe(false);
         expect(store.canRedo()).toBe(true);
-
         store.redo();
-
         expect(store.entities()).toEqual([{ id: newValue }]);
         expect(store.canUndo()).toBe(true);
         expect(store.canRedo()).toBe(true);
-
         // should return canRedo=false after a change
         store.addEntity('newest');
-
         expect(store.canUndo()).toBe(true);
         expect(store.canRedo()).toBe(false);
       });
     });
-
     it('restores previous state for named entity', () => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
           withEntities({
-            entity: type<{ id: string }>(),
+            entity: type<{
+              id: string;
+            }>(),
             collection: 'flight',
           }),
           withMethods((store) => ({
@@ -208,23 +180,17 @@ describe('withUndoRedo', () => {
           withCallState({ collection: 'flight' }),
           withUndoRedo({ collections: ['flight'] }),
         );
-
         const store = new Store();
-
         store.addEntity(newValue);
-
         expect(store.flightEntities()).toEqual([{ id: newValue }]);
         expect(store.canUndo()).toBe(true);
         expect(store.canRedo()).toBe(false);
-
         store.undo();
-
         expect(store.flightEntities()).toEqual([]);
         expect(store.canUndo()).toBe(false);
         expect(store.canRedo()).toBe(true);
       });
     });
-
     it('clears undo redo stack', () => {
       const Store = signalStore(
         { providedIn: 'root' },
@@ -234,18 +200,14 @@ describe('withUndoRedo', () => {
         })),
         withUndoRedo({ keys: testKeys }),
       );
-
       const store = TestBed.inject(Store);
-
       store.update('Foo');
       store.update('Bar');
       store.undo();
       store.clearStack();
-
       expect(store.canUndo()).toBe(false);
       expect(store.canRedo()).toBe(false);
     });
-
     it('cannot undo after clearing and setting a new value', () => {
       const Store = signalStore(
         { providedIn: 'root' },
@@ -255,24 +217,17 @@ describe('withUndoRedo', () => {
         })),
         withUndoRedo({ keys: testKeys }),
       );
-
       const store = TestBed.inject(Store);
-
       store.update('Alan');
-
       store.update('Gordon');
-
       clearUndoRedo(store, { lastRecord: null });
-
       // After clearing the undo/redo stack, there is no previous item anymore.
       // The following update becomes the first value.
       // Since there is no other value before, it cannot be undone.
       store.update('Hugh');
-
       expect(store.canUndo()).toBe(false);
       expect(store.canRedo()).toBe(false);
     });
-
     it('can undo after setting lastRecord', () => {
       const Store = signalStore(
         { providedIn: 'root' },
@@ -282,17 +237,11 @@ describe('withUndoRedo', () => {
         })),
         withUndoRedo({ keys: testKeys }),
       );
-
       const store = TestBed.inject(Store);
-
       store.update('Alan');
-
       store.update('Gordon');
-
       clearUndoRedo(store, { lastRecord: { test: 'Joan' } });
-
       store.update('Hugh');
-
       expect(store.canUndo()).toBe(true);
       expect(store.canRedo()).toBe(false);
     });

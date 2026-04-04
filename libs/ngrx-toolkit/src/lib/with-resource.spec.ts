@@ -19,11 +19,9 @@ import { ErrorHandling, mapToResource, withResource } from './with-resource';
 import { Address, venice, vienna } from './with-resource/tests/util/fixtures';
 import { paramsForResourceTypes } from './with-resource/tests/util/params-for-resource-types';
 import { setupUnnamedResource } from './with-resource/tests/util/setup-unnamed-resource';
-
 describe('withResource', () => {
   describe('standard tests', () => {
     const wait = (ms = 0) => new Promise((resolve) => setTimeout(resolve, ms));
-
     describe('withResource', () => {
       describe('InnerSignalStore access', () => {
         it('can access the state signals', async () => {
@@ -37,13 +35,10 @@ describe('withResource', () => {
               }),
             ),
           );
-
           const userStore = TestBed.inject(UserStore);
-
           await wait();
           expect(userStore.value()).toBe(2);
         });
-
         it('can accept an rxResource', async () => {
           const UserStore = signalStore(
             { providedIn: 'root' },
@@ -55,13 +50,10 @@ describe('withResource', () => {
               }),
             ),
           );
-
           const userStore = TestBed.inject(UserStore);
-
           await wait();
           expect(userStore.value()).toBe(2);
         });
-
         it('can access the props', async () => {
           const UserStore = signalStore(
             { providedIn: 'root' },
@@ -73,12 +65,10 @@ describe('withResource', () => {
               }),
             ),
           );
-
           const userStore = TestBed.inject(UserStore);
           await wait();
           expect(userStore.value()).toBe(2);
         });
-
         it('can access the methods', async () => {
           const UserStore = signalStore(
             { providedIn: 'root' },
@@ -90,13 +80,11 @@ describe('withResource', () => {
               }),
             ),
           );
-
           const userStore = TestBed.inject(UserStore);
           await wait();
           expect(userStore.value()).toBe(2);
         });
       });
-
       describe('status checks', () => {
         describe('all except error', () => {
           describe.each([
@@ -109,7 +97,6 @@ describe('withResource', () => {
               ({ setup }) => {
                 it('has idle status in the beginning', () => {
                   const { getValue, getMetadata } = setup();
-
                   expect(getValue()).toBeUndefined();
                   expect(getMetadata()).toEqual({
                     status: 'idle',
@@ -118,14 +105,11 @@ describe('withResource', () => {
                     hasValue: false,
                   });
                 });
-
                 it('has loading status when loading', () => {
                   const { getValue, getMetadata, addressResolver, setId } =
                     setup();
-
                   addressResolver.resolve.mockResolvedValue(venice);
                   setId(1);
-
                   expect(getValue()).toBeUndefined();
                   expect(getMetadata()).toEqual({
                     status: 'loading',
@@ -134,16 +118,12 @@ describe('withResource', () => {
                     hasValue: false,
                   });
                 });
-
                 it('has resolved status when loaded', async () => {
                   const { getValue, getMetadata, addressResolver, setId } =
                     setup();
-
                   addressResolver.resolve.mockResolvedValue(venice);
                   setId(1);
-
                   await wait();
-
                   expect(getValue()).toEqual(venice);
                   expect(getMetadata()).toEqual({
                     status: 'resolved',
@@ -152,7 +132,6 @@ describe('withResource', () => {
                     hasValue: true,
                   });
                 });
-
                 it('has local once updated', async () => {
                   const {
                     getValue,
@@ -161,13 +140,10 @@ describe('withResource', () => {
                     setId,
                     setValue,
                   } = setup();
-
                   addressResolver.resolve.mockResolvedValue(venice);
                   setId(1);
-
                   await wait();
                   setValue(vienna);
-
                   expect(getValue()).toEqual(vienna);
                   expect(getMetadata()).toEqual({
                     status: 'local',
@@ -178,48 +154,38 @@ describe('withResource', () => {
                 });
               },
             );
-
             it('reloads an unnamed resource', async () => {
               const { addressResolver, setId, getMetadata, reload, getValue } =
                 setupUnnamedResource(errorHandling);
-
               addressResolver.resolve.mockResolvedValue(venice);
               setId(1);
-
               await wait();
               expect(getMetadata().hasValue).toBe(true);
-
               addressResolver.resolve.mockResolvedValue(vienna);
               reload();
-
               await wait();
               expect(getValue()).toEqual(vienna);
             });
           });
         });
-
         describe('error status', () => {
           describe('Error Handling: native', () => {
             it.each(paramsForResourceTypes('native'))(
               `$name`,
               async ({ setup }) => {
                 const { addressResolver, setId, getValue } = setup();
-
                 addressResolver.resolve.mockRejectedValue(new Error('Error'));
                 setId(1);
                 await wait();
-
                 expect(() => getValue()).toThrow();
               },
             );
           });
-
           describe('Error Handling: undefined value', () => {
             it.each(paramsForResourceTypes('undefined value'))(
               '$name',
               async ({ setup }) => {
                 const { addressResolver, setId, getValue } = setup();
-
                 addressResolver.resolve.mockRejectedValue(new Error('Error'));
                 setId(1);
                 await wait();
@@ -227,33 +193,27 @@ describe('withResource', () => {
               },
             );
           });
-
           describe('Error Handling: previous value', () => {
             it('returns the previous value', async () => {
               const { addressResolver, setId, getValue } =
                 setupUnnamedResource('previous value');
-
               setId(1);
               addressResolver.resolve.mockReturnValue(Promise.resolve(venice));
               await wait();
               expect(getValue()).toBe(venice);
-
               setId(2);
               addressResolver.resolve.mockRejectedValue(new Error('Error'));
               await wait();
               expect(getValue()).toBe(venice);
             });
-
             it('returns the local previous value', async () => {
               const { addressResolver, setId, setValue, getValue } =
                 setupUnnamedResource('previous value');
-
               setId(1);
               addressResolver.resolve.mockReturnValue(Promise.resolve(venice));
               await wait();
               expect(getValue()).toBe(venice);
               setValue(vienna);
-
               setId(2);
               addressResolver.resolve.mockRejectedValue(new Error('Error'));
               await wait();
@@ -262,14 +222,11 @@ describe('withResource', () => {
           });
         });
       });
-
       describe('override protection', () => {
         const warningSpy = jest.spyOn(console, 'warn');
-
         afterEach(() => {
           warningSpy.mockClear();
         });
-
         //TODO wait for https://github.com/ngrx/platform/pull/4932 and then add 'value' to the list
         it.each(['status', 'error', 'isLoading', '_reload', 'hasValue'])(
           `warns if %s is not a member of the store`,
@@ -281,9 +238,7 @@ describe('withResource', () => {
                 resource({ loader: () => Promise.resolve(1) }),
               ),
             );
-
             TestBed.inject(Store);
-
             expect(warningSpy).toHaveBeenCalledWith(
               '@ngrx/signals: SignalStore members cannot be overridden.',
               'Trying to override:',
@@ -291,7 +246,6 @@ describe('withResource', () => {
             );
           },
         );
-
         //TODO wait for https://github.com/ngrx/platform/pull/4932
         it.skip('also checks for named resources', () => {
           const Store = signalStore(
@@ -303,9 +257,7 @@ describe('withResource', () => {
               }),
             })),
           );
-
           TestBed.inject(Store);
-
           expect(warningSpy).toHaveBeenCalledWith(
             '@ngrx/signals: SignalStore members cannot be overridden.',
             'Trying to override:',
@@ -313,40 +265,36 @@ describe('withResource', () => {
           );
         });
       });
-
       it('works also with list/detail use case', async () => {
         const Store = signalStore(
           { providedIn: 'root', protectedState: false },
           withState({ id: undefined as number | undefined }),
           withResource(({ id }) => ({
-            list: httpResource<{ id: number; name: string }[]>(
-              () => '/address',
+            list: httpResource<
               {
-                defaultValue: [],
-              },
-            ),
+                id: number;
+                name: string;
+              }[]
+            >(() => '/address', {
+              defaultValue: [],
+            }),
             detail: httpResource<Address>(() =>
               id() ? `/address/${id()}` : undefined,
             ),
           })),
         );
-
         TestBed.configureTestingModule({
           providers: [provideHttpClient(), provideHttpClientTesting()],
         });
-
         const store = TestBed.inject(Store);
         const ctrl = TestBed.inject(HttpTestingController);
-
         expect(store.listValue()).toEqual([]);
         expect(store.detailValue()).toBeUndefined();
         await wait();
         ctrl.expectOne('/address').flush([{ id: 1, name: 'Italy' }]);
-
         await wait();
         expect(store.listValue()).toEqual([{ id: 1, name: 'Italy' }]);
         expect(store.detailValue()).toBeUndefined();
-
         patchState(store, { id: 1 });
         await wait();
         ctrl.expectOne('/address/1').flush(venice);
@@ -356,7 +304,6 @@ describe('withResource', () => {
       });
     });
   });
-
   describe('Type Tests', () => {
     describe('Error Handling: default', () => {
       it('satisfies the Resource interface without default value', () => {
@@ -369,7 +316,6 @@ describe('withResource', () => {
           Satisfies<typeof _store, Resource<number | undefined>>
         >;
       });
-
       it('satisfies the Resource interface with default value', () => {
         const Store = signalStore(
           { providedIn: 'root' },
@@ -382,7 +328,6 @@ describe('withResource', () => {
           Satisfies<typeof _store, Resource<number | undefined>>
         >;
       });
-
       it('provides hasValue as type predicate when explicitly typed', () => {
         const Store = signalStore(
           { providedIn: 'root' },
@@ -393,7 +338,6 @@ describe('withResource', () => {
           type _T1 = Assert<IsEqual<typeof store.value, Signal<number>>>;
         }
       });
-
       it('fails on hasValue as type predicate when not explicitly typed', () => {
         const Store = signalStore(
           { providedIn: 'root' },
@@ -406,7 +350,6 @@ describe('withResource', () => {
         }
       });
     });
-
     describe('Error Handling: undefined value', () => {
       it('satisfies the Resource interface without default value', () => {
         const Store = signalStore(
@@ -420,7 +363,6 @@ describe('withResource', () => {
           Satisfies<typeof _store, Resource<number | undefined>>
         >;
       });
-
       it('satisfies the Resource interface with default value', () => {
         const Store = signalStore(
           { providedIn: 'root' },
@@ -435,7 +377,6 @@ describe('withResource', () => {
           Satisfies<typeof _store, Resource<number | undefined>>
         >;
       });
-
       it('provides hasValue as type predicate when explicitly typed', () => {
         const Store = signalStore(
           { providedIn: 'root' },
@@ -448,7 +389,6 @@ describe('withResource', () => {
           type _T1 = Assert<IsEqual<typeof store.value, Signal<number>>>;
         }
       });
-
       it('fails on hasValue as type predicate when not explicitly typed', () => {
         const Store = signalStore(
           { providedIn: 'root' },
@@ -463,7 +403,6 @@ describe('withResource', () => {
         }
       });
     });
-
     describe.each(['previous value', 'native'] as const)(
       `Error Handling: %s`,
       (errorHandling) => {
@@ -479,7 +418,6 @@ describe('withResource', () => {
             Satisfies<typeof _store, Resource<number | undefined>>
           >;
         });
-
         it('satisfies the Resource interface with default value', () => {
           const Store = signalStore(
             { providedIn: 'root' },
@@ -492,7 +430,6 @@ describe('withResource', () => {
           const _store = TestBed.inject(Store);
           type _T1 = Assert<Satisfies<typeof _store, Resource<number>>>;
         });
-
         it('provides hasValue as type predicate when explicitly typed', () => {
           const Store = signalStore(
             { providedIn: 'root' },
@@ -505,7 +442,6 @@ describe('withResource', () => {
             type _T1 = Assert<IsEqual<typeof store.value, Signal<number>>>;
           }
         });
-
         it('fails on hasValue as type predicate when not explicitly typed', () => {
           const Store = signalStore(
             { providedIn: 'root' },
@@ -521,7 +457,6 @@ describe('withResource', () => {
         });
       },
     );
-
     describe('unnamed resource', () => {
       it('does not have access to the STATE_SOURCE', () => {
         signalStore(
@@ -532,7 +467,6 @@ describe('withResource', () => {
               loader: ({ params: id }) => {
                 // @ts-expect-error - we want to test the type error
                 patchState(store, { id: 0 });
-
                 return Promise.resolve(id + 1);
               },
             }),
@@ -540,7 +474,6 @@ describe('withResource', () => {
         );
       });
     });
-
     describe('named resources', () => {
       it('does not have access to the STATE_SOURCE', () => {
         signalStore(
@@ -551,7 +484,6 @@ describe('withResource', () => {
               loader: ({ params: id }) => {
                 // @ts-expect-error - we want to test the type error
                 patchState(store, { id: 0 });
-
                 return Promise.resolve(id + 1);
               },
             }),
@@ -559,7 +491,6 @@ describe('withResource', () => {
         );
       });
     });
-
     it('shoud allow different resource types with named resources', () => {
       const Store = signalStore(
         { providedIn: 'root' },
@@ -597,9 +528,7 @@ describe('withResource', () => {
           }),
         })),
       );
-
       const _store = TestBed.inject(Store);
-
       type _T1 = Assert<IsEqual<typeof _store.idValue, Signal<number>>>;
       type _T2 = Assert<
         IsEqual<typeof _store.wordValue, Signal<string | undefined>>
@@ -609,7 +538,6 @@ describe('withResource', () => {
         IsEqual<typeof _store.digitValue, Signal<number | undefined>>
       >;
     });
-
     describe('mapToResource', () => {
       it('satisfies the Resource interface without default value', () => {
         const Store = signalStore(
@@ -621,11 +549,9 @@ describe('withResource', () => {
             { errorHandling: 'native' },
           ),
         );
-
         const _store = mapToResource(TestBed.inject(Store), 'id');
         type _T1 = Assert<IsEqual<typeof _store, Resource<number | undefined>>>;
       });
-
       it('satisfies the Resource interface with default value and native error handling', () => {
         const Store = signalStore(
           { providedIn: 'root' },
@@ -639,12 +565,10 @@ describe('withResource', () => {
             { errorHandling: 'native' },
           ),
         );
-
         const store = TestBed.inject(Store);
         const _resource = mapToResource(store, 'id');
         type _T1 = Assert<IsEqual<typeof _resource, Resource<number>>>;
       });
-
       it('provides hasValue as type predicate', () => {
         const Store = signalStore(
           { providedIn: 'root' },
@@ -652,16 +576,13 @@ describe('withResource', () => {
             id: resource({ loader: () => Promise.resolve(1) }),
           })),
         );
-
         const store = TestBed.inject(Store);
         const res = mapToResource(store, 'id');
-
         if (res.hasValue()) {
           const _value = res.value();
           type _T1 = Assert<IsEqual<typeof _value, number>>;
         }
       });
-
       describe('resource name checks', () => {
         const setup = () => {
           const Store = signalStore(
@@ -672,37 +593,30 @@ describe('withResource', () => {
               word: resource({ loader: () => Promise.resolve('hello') }),
             })),
           );
-
           return TestBed.inject(Store);
         };
-
         it('allows passing id as a valid resource name', () => {
           const store = setup();
           mapToResource(store, 'id') satisfies Resource<number | undefined>;
         });
-
         it('allows passing word as a valid resource name', () => {
           const store = setup();
           mapToResource(store, 'word') satisfies Resource<string | undefined>;
         });
-
         it('fails when passing key as a resource name', () => {
           const store = setup();
           // @ts-expect-error - we want to test the type error
           mapToResource(store, 'key');
         });
       });
-
       it('fails when Resource properties are not fully defined', () => {
         const Store = signalStore(withState({ userValue: 0 }));
-
         const store = new Store();
         // @ts-expect-error - we want to test the type error
         mapToResource(store, 'user');
       });
     });
   });
-
   describe('Signature Tests', () => {
     it('can call unnamed with error handler', () => {
       signalStore(
@@ -714,7 +628,6 @@ describe('withResource', () => {
         ),
       );
     });
-
     it('can call named with error handler', () => {
       signalStore(
         withResource(
@@ -725,7 +638,6 @@ describe('withResource', () => {
         ),
       );
     });
-
     it('can call unnamed without error handler', () => {
       signalStore(
         withResource(() => ({
@@ -733,7 +645,6 @@ describe('withResource', () => {
         })),
       );
     });
-
     it('can call named without error handler', () => {
       signalStore(
         withResource(() => ({

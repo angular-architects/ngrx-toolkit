@@ -3,11 +3,9 @@ import { signalStore, withState } from '@ngrx/signals';
 import { withMapper } from '../features/with-mapper';
 import { withDevtools } from '../with-devtools';
 import { setupExtensions } from './helpers.spec';
-
 function domRemover(state: Record<string, unknown>) {
   return Object.keys(state).reduce((acc, key) => {
     const value = state[key];
-
     if (value instanceof HTMLElement) {
       return acc;
     } else {
@@ -15,11 +13,9 @@ function domRemover(state: Record<string, unknown>) {
     }
   }, {});
 }
-
 describe('with-mapper', () => {
   it('should remove DOM Nodes', () => {
     const { sendSpy } = setupExtensions();
-
     const Store = signalStore(
       { providedIn: 'root' },
       withState({
@@ -28,7 +24,6 @@ describe('with-mapper', () => {
       }),
       withDevtools('shop', withMapper(domRemover)),
     );
-
     TestBed.inject(Store);
     TestBed.flushEffects();
     expect(sendSpy).toHaveBeenCalledWith(
@@ -36,7 +31,6 @@ describe('with-mapper', () => {
       { shop: { name: 'Car' } },
     );
   });
-
   it('should every property ending with *Key', () => {
     const { sendSpy } = setupExtensions();
     const Store = signalStore(
@@ -58,7 +52,6 @@ describe('with-mapper', () => {
         ),
       ),
     );
-
     TestBed.inject(Store);
     TestBed.flushEffects();
     expect(sendSpy).toHaveBeenCalledWith(

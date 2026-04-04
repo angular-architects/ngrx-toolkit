@@ -9,8 +9,11 @@ import {
   setPageSize,
   withPagination,
 } from './with-pagination';
-
-type Book = { id: number; title: string; author: string };
+type Book = {
+  id: number;
+  title: string;
+  author: string;
+};
 const generateBooks = (count = 10) => {
   const books = [] as Book[];
   for (let i = 1; i <= count; i++) {
@@ -18,7 +21,6 @@ const generateBooks = (count = 10) => {
   }
   return books;
 };
-
 describe('withPagination', () => {
   it('should use and update a pagination', () => {
     const Store = signalStore(
@@ -26,98 +28,72 @@ describe('withPagination', () => {
       withEntities({ entity: type<Book>() }),
       withPagination(),
     );
-
     const store = new Store();
-
     patchState(store, setAllEntities(generateBooks(55)));
     expect(store.currentPage()).toBe(0);
     expect(store.pageCount()).toBe(6);
   });
-
   it('should use and update a pagination with collection', () => {
     const Store = signalStore(
       { protectedState: false },
       withEntities({ entity: type<Book>(), collection: 'books' }),
       withPagination({ entity: type<Book>(), collection: 'books' }),
     );
-
     const store = new Store();
-
     patchState(
       store,
       setAllEntities(generateBooks(55), { collection: 'books' }),
     );
-
     patchState(store, gotoPage(5, { collection: 'books' }));
     expect(store.booksCurrentPage()).toBe(5);
     expect(store.selectedPageBooksEntities().length).toBe(5);
     expect(store.booksPageCount()).toBe(6);
   });
-
   it('should navigate through pages', () => {
     const Store = signalStore(
       { protectedState: false },
       withEntities({ entity: type<Book>() }),
       withPagination(),
     );
-
     const store = new Store();
-
     patchState(store, setAllEntities(generateBooks(55)));
     expect(store.currentPage()).toBe(0);
-
     patchState(store, nextPage());
     expect(store.currentPage()).toBe(1);
-
     patchState(store, previousPage());
     expect(store.currentPage()).toBe(0);
-
     patchState(store, nextPage());
     patchState(store, nextPage());
     expect(store.currentPage()).toBe(2);
-
     patchState(store, firstPage());
     expect(store.currentPage()).toBe(0);
   });
-
   it('should set page size', () => {
     const Store = signalStore(
       { protectedState: false },
       withEntities({ entity: type<Book>() }),
       withPagination(),
     );
-
     const store = new Store();
-
     patchState(store, setAllEntities(generateBooks(50)), setPageSize(10));
     expect(store.pageCount()).toBe(5);
-
     patchState(store, setPageSize(5));
     expect(store.pageCount()).toBe(10);
   });
-
   it('should react on entity changes', () => {
     const Store = signalStore(
       { protectedState: false },
       withEntities({ entity: type<Book>() }),
       withPagination(),
     );
-
     const store = new Store();
-
     patchState(store, setAllEntities(generateBooks(100)));
-
     expect(store.pageCount()).toBe(10);
-
     patchState(store, setAllEntities(generateBooks(20)));
-
     expect(store.pageCount()).toBe(2);
-
     patchState(store, setPageSize(5));
-
     expect(store.pageCount()).toBe(4);
   });
-
   describe('internal pageNavigationArray', () => {
     it('should return an array of page numbers', () => {
       const pages = createPageArray(8, 10, 500, 7);

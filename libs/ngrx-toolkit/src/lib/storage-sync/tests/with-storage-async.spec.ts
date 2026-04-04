@@ -4,18 +4,15 @@ import 'fake-indexeddb/auto';
 import { withIndexedDB } from '../features/with-indexed-db';
 import { IndexedDBService } from '../internal/indexeddb.service';
 import { withStorageSync } from '../with-storage-sync';
-
 interface StateObject {
   foo: string;
   age: number;
 }
-
 const initialState: StateObject = {
   foo: 'bar',
   age: 18,
 };
 const key = 'FooBar';
-
 const waitForSyncStable = async (store: {
   whenSynced?: () => Promise<void>;
 }) => {
@@ -23,18 +20,15 @@ const waitForSyncStable = async (store: {
     await store.whenSynced();
   }
 };
-
 describe('withStorageSync (async storage)', () => {
   beforeEach(() => {
     // make sure to start with a clean storage
     globalThis.indexedDB = new IDBFactory();
   });
-
   it('adds methods for storage access to the store', () => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(withStorageSync({ key }, withIndexedDB()));
       const store = new Store();
-
       expect(Object.keys(store)).toEqual([
         'isSynced',
         'whenSynced',
@@ -44,7 +38,6 @@ describe('withStorageSync (async storage)', () => {
       ]);
     });
   });
-
   it('offers manual sync using provided methods', async () => {
     TestBed.runInInjectionContext(async () => {
       // prefill storage
@@ -56,7 +49,6 @@ describe('withStorageSync (async storage)', () => {
           age: 99,
         }),
       );
-
       const Store = signalStore(
         { protectedState: false },
         withState(initialState),
@@ -64,34 +56,26 @@ describe('withStorageSync (async storage)', () => {
       );
       const store = TestBed.inject(Store);
       await waitForSyncStable(store);
-
       expect(getState(store)).toEqual({});
-
       await store.readFromStorage();
-
       expect(getState(store)).toEqual({
         foo: 'baz',
         age: 99,
       });
-
       patchState(store, { ...initialState });
       await waitForSyncStable(store);
-
       expect(await indexedDBService.getItem(key)).toEqual({
         foo: 'baz',
         age: 99,
       });
-
       await store.writeToStorage();
       expect(await indexedDBService.getItem(key)).toEqual({
         ...initialState,
       });
-
       await store.clearStorage();
       expect(await indexedDBService.getItem(key)).toEqual(null);
     });
   });
-
   describe('autoSync', () => {
     it('inits from storage and write to storage on changes when set to `true`', async () => {
       const indexedDBService = TestBed.inject(IndexedDBService);
@@ -103,32 +87,26 @@ describe('withStorageSync (async storage)', () => {
           age: 99,
         } as StateObject),
       );
-
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
         withState(initialState),
         withStorageSync(key, withIndexedDB()),
       );
-
       const store = TestBed.inject(Store);
       await waitForSyncStable(store);
       expect(getState(store)).toEqual({
         foo: 'baz',
         age: 99,
       });
-
       patchState(store, { ...initialState });
       await waitForSyncStable(store);
-
       expect(getState(store)).toEqual({
         ...initialState,
       });
-
       expect(await indexedDBService.getItem(key)).toEqual(
         JSON.stringify(initialState),
       );
     });
-
     it('does not init from storage and does write to storage on changes when set to `false`', async () => {
       const indexedDBService = TestBed.inject(IndexedDBService);
       await indexedDBService.setItem(
@@ -138,7 +116,6 @@ describe('withStorageSync (async storage)', () => {
           age: 99,
         }),
       );
-
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
         withStorageSync({ key, autoSync: false }, withIndexedDB()),
@@ -146,10 +123,8 @@ describe('withStorageSync (async storage)', () => {
       const store = TestBed.inject(Store);
       expect(store.isSynced()).toBe(false);
       expect(getState(store)).toEqual({});
-
       patchState(store, { ...initialState });
       expect(store.isSynced()).toBe(false);
-
       const storeItem = JSON.parse(
         (await indexedDBService.getItem(key)) || '{}',
       );
@@ -159,7 +134,6 @@ describe('withStorageSync (async storage)', () => {
       });
     });
   });
-
   describe('select', () => {
     it('syncs the whole state by default', async () => {
       const indexedDBService = TestBed.inject(IndexedDBService);
@@ -170,15 +144,12 @@ describe('withStorageSync (async storage)', () => {
       );
       const store = TestBed.inject(Store);
       await waitForSyncStable(store);
-
       patchState(store, { foo: 'baz', age: 25 });
       await waitForSyncStable(store);
-
       expect(await indexedDBService.getItem(key)).toEqual(
         JSON.stringify({ foo: 'baz', age: 25 }),
       );
     });
-
     it('syncs selected slices when specified', async () => {
       const indexedDBService = TestBed.inject(IndexedDBService);
       const Store = signalStore(
@@ -191,10 +162,8 @@ describe('withStorageSync (async storage)', () => {
       );
       const store = TestBed.inject(Store);
       await waitForSyncStable(store);
-
       patchState(store, { foo: 'baz' });
       await waitForSyncStable(store);
-
       const storeItem = JSON.parse(
         (await indexedDBService.getItem(key)) || '{}',
       );
@@ -203,7 +172,6 @@ describe('withStorageSync (async storage)', () => {
       });
     });
   });
-
   describe('parse/stringify', () => {
     it('uses custom parsing/stringification when specified', async () => {
       const indexedDBService = TestBed.inject(IndexedDBService);
@@ -214,7 +182,6 @@ describe('withStorageSync (async storage)', () => {
           age: +age,
         };
       };
-
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
         withState(initialState),
@@ -227,12 +194,10 @@ describe('withStorageSync (async storage)', () => {
           withIndexedDB(),
         ),
       );
-
       const store = TestBed.inject(Store);
       await waitForSyncStable(store);
       patchState(store, { foo: 'baz' });
       await waitForSyncStable(store);
-
       const storeItem = parse((await indexedDBService.getItem(key)) || '');
       expect(storeItem).toEqual({
         ...initialState,
@@ -240,18 +205,14 @@ describe('withStorageSync (async storage)', () => {
       });
     });
   });
-
   describe('withStorageSync', () => {
     let warnings = [] as string[];
-
     jest.spyOn(console, 'warn').mockImplementation((...messages: string[]) => {
       warnings.push(...messages);
     });
-
     beforeEach(() => {
       warnings = [];
     });
-
     it('logs when writing happens before state is synchronized', async () => {
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
@@ -260,39 +221,32 @@ describe('withStorageSync (async storage)', () => {
       );
       const store = TestBed.inject(Store);
       await waitForSyncStable(store);
-
       expect(warnings).toEqual([]);
     });
-
     it('warns when reading happens during a write', async () => {
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
         withState({ name: 'Delta', age: 52 }),
         withStorageSync('flights', withIndexedDB()),
       );
-
       const store = TestBed.inject(Store);
       await waitForSyncStable(store);
       patchState(store, { name: 'Lufthansa', age: 27 });
       store.readFromStorage();
-
       expect(warnings).toEqual([
         'Reading to Store (flights) happened during an ongoing synchronization process.',
         'Please ensure that the store is not in syncing state via `store.whenSynced()`.',
         'Alternatively, you can disable the autoSync by passing `autoSync: false` in the config.',
       ]);
     });
-
     it('warns when writing happens during a read', async () => {
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
         withState({ name: 'Delta', age: 52 }),
         withStorageSync('flights', withIndexedDB()),
       );
-
       const store = TestBed.inject(Store);
       await waitForSyncStable(store);
-
       store.readFromStorage();
       patchState(store, { name: 'Lufthansa', age: 27 });
       expect(warnings).toEqual([

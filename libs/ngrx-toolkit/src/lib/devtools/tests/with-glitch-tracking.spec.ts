@@ -10,29 +10,23 @@ import { withGlitchTracking } from '../features/with-glitch-tracking';
 import { renameDevtoolsName } from '../rename-devtools-name';
 import { withDevtools } from '../with-devtools';
 import { setupExtensions } from './helpers.spec';
-
 describe('withGlitchTracking', () => {
   it('should sync immediately upon instantiation', () => {
     const { sendSpy } = setupExtensions();
-
     const Store = signalStore(
       { providedIn: 'root' },
       withDevtools('counter', withGlitchTracking()),
       withState({ count: 0 }),
     );
-
     expect(sendSpy).not.toHaveBeenCalled();
     TestBed.inject(Store);
-
     expect(sendSpy).toHaveBeenCalledWith(
       { type: 'Store Update' },
       { counter: { count: 0 } },
     );
   });
-
   it('should sync synchronous state changes', () => {
     const { sendSpy } = setupExtensions();
-
     const Store = signalStore(
       { providedIn: 'root' },
       withState({ count: 0 }),
@@ -42,14 +36,11 @@ describe('withGlitchTracking', () => {
           patchState(store, (value) => ({ count: value.count + 1 })),
       })),
     );
-
     const store = TestBed.inject(Store);
-
     store.increase();
     store.increase();
     store.increase();
     TestBed.flushEffects();
-
     expect(sendSpy.mock.calls).toEqual([
       [{ type: 'Store Update' }, { counter: { count: 0 } }],
       [{ type: 'Store Update' }, { counter: { count: 1 } }],
@@ -57,10 +48,8 @@ describe('withGlitchTracking', () => {
       [{ type: 'Store Update' }, { counter: { count: 3 } }],
     ]);
   });
-
   it('should support a mixed approach', () => {
     const { sendSpy } = setupExtensions();
-
     const GlitchFreeStore = signalStore(
       { providedIn: 'root' },
       withState({ count: 0 }),
@@ -70,7 +59,6 @@ describe('withGlitchTracking', () => {
           patchState(store, (value) => ({ count: value.count + 1 })),
       })),
     );
-
     const GlitchStore = signalStore(
       { providedIn: 'root' },
       withState({ count: 0 }),
@@ -80,17 +68,14 @@ describe('withGlitchTracking', () => {
           patchState(store, (value) => ({ count: value.count + 1 })),
       })),
     );
-
     const glitchFreeStore = TestBed.inject(GlitchFreeStore);
     const glitchStore = TestBed.inject(GlitchStore);
-
     TestBed.flushEffects();
     for (let i = 0; i < 2; i++) {
       glitchFreeStore.increase();
       glitchStore.increase();
     }
     TestBed.flushEffects();
-
     expect(sendSpy.mock.calls).toEqual([
       [{ type: 'Store Update' }, { 'glitch counter': { count: 0 } }],
       [
@@ -111,10 +96,8 @@ describe('withGlitchTracking', () => {
       ],
     ]);
   });
-
   it('two glitch stores should sync per change', () => {
     const { sendSpy } = setupExtensions();
-
     const GlitchStore1 = signalStore(
       { providedIn: 'root' },
       withState({ count: 0 }),
@@ -124,7 +107,6 @@ describe('withGlitchTracking', () => {
           patchState(store, (value) => ({ count: value.count + 1 })),
       })),
     );
-
     const GlitchStore2 = signalStore(
       { providedIn: 'root' },
       withState({ count: 0 }),
@@ -134,16 +116,13 @@ describe('withGlitchTracking', () => {
           patchState(store, (value) => ({ count: value.count + 1 })),
       })),
     );
-
     const glitchStore1 = TestBed.inject(GlitchStore1);
     const glitchStore2 = TestBed.inject(GlitchStore2);
-
     for (let i = 0; i < 2; i++) {
       glitchStore1.increase();
       glitchStore2.increase();
     }
     TestBed.flushEffects();
-
     expect(sendSpy.mock.calls).toEqual([
       [{ type: 'Store Update' }, { 'glitch counter 1': { count: 0 } }],
       [
@@ -168,27 +147,21 @@ describe('withGlitchTracking', () => {
       ],
     ]);
   });
-
   it('should not sync glitch-free if glitched is renamed', () => {
     const { sendSpy } = setupExtensions();
-
     const GlitchFreeStore = signalStore(
       { providedIn: 'root' },
       withState({ name: 'Product', price: 10.5 }),
       withDevtools('flight1'),
     );
-
     const GlitchStore = signalStore(
       { providedIn: 'root' },
       withState({ name: 'Product', price: 10.5 }),
       withDevtools('flight2', withGlitchTracking()),
     );
-
     TestBed.inject(GlitchFreeStore);
     const glitchStore = TestBed.inject(GlitchStore);
-
     TestBed.flushEffects();
-
     expect(sendSpy.mock.calls).toEqual([
       [{ type: 'Store Update' }, { flight2: { name: 'Product', price: 10.5 } }],
       [
@@ -200,10 +173,8 @@ describe('withGlitchTracking', () => {
       ],
     ]);
     sendSpy.mockClear();
-
     renameDevtoolsName(glitchStore, 'flights2');
     TestBed.flushEffects();
-
     expect(sendSpy.mock.calls).toEqual([
       [
         { type: 'Store Update' },
@@ -214,31 +185,25 @@ describe('withGlitchTracking', () => {
       ],
     ]);
   });
-
   it('should not sync glitch tracker if glitch-free store is renamed', () => {
     const { sendSpy } = setupExtensions();
-
     const GlitchFreeStore = signalStore(
       { providedIn: 'root' },
       withState({ name: 'Product', price: 10.5 }),
       withDevtools('flight1'),
     );
-
     const GlitchStore = signalStore(
       { providedIn: 'root' },
       withState({ name: 'Product', price: 10.5 }),
       withDevtools('glitched Flights', withGlitchTracking()),
     );
-
     const glitchFreeStore = TestBed.inject(GlitchFreeStore);
     TestBed.inject(GlitchStore);
     TestBed.flushEffects();
-
     sendSpy.mockClear();
     renameDevtoolsName(glitchFreeStore, 'glitch-free Flights');
     expect(sendSpy).not.toHaveBeenCalled();
     TestBed.flushEffects();
-
     expect(sendSpy.mock.calls).toEqual([
       [
         { type: 'Store Update' },
@@ -249,21 +214,17 @@ describe('withGlitchTracking', () => {
       ],
     ]);
   });
-
   it('should destroy watcher if store is destroyed', () => {
     const { sendSpy } = setupExtensions();
-
     const GlitchStore = signalStore(
       withState({ name: 'Product', price: 10.5 }),
       withDevtools('Glitched Store', withGlitchTracking()),
     );
-
     const childContext = createEnvironmentInjector(
       [GlitchStore],
       TestBed.inject(EnvironmentInjector),
     );
     runInInjectionContext(childContext, () => inject(GlitchStore));
-
     expect(sendSpy).toHaveBeenCalled();
     sendSpy.mockClear();
     childContext.destroy();

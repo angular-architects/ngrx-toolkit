@@ -3,7 +3,6 @@ import { signalStore, withMethods, withState } from '@ngrx/signals';
 import { updateState } from '../update-state';
 import { withDevtools } from '../with-devtools';
 import { setupExtensions } from './helpers.spec';
-
 describe('updateState', () => {
   it('should show the name of the action', () => {
     const { sendSpy } = setupExtensions();
@@ -20,10 +19,8 @@ describe('updateState', () => {
       { shop: { name: 'Car' } },
     );
   });
-
   it('should set the action name', () => {
     const { sendSpy } = setupExtensions();
-
     const Store = signalStore(
       { providedIn: 'root' },
       withDevtools('shop'),
@@ -36,10 +33,8 @@ describe('updateState', () => {
     );
     const store = TestBed.inject(Store);
     TestBed.flushEffects();
-
     store.setName('i4');
     TestBed.flushEffects();
-
     expect(sendSpy).toHaveBeenLastCalledWith(
       { type: 'Set Name' },
       { shop: { name: 'i4' } },

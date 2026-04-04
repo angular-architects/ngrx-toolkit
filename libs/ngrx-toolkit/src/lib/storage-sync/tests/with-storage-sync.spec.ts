@@ -2,29 +2,24 @@ import { TestBed } from '@angular/core/testing';
 import { getState, patchState, signalStore, withState } from '@ngrx/signals';
 import { withLocalStorage } from '../features/with-local-storage';
 import { withStorageSync } from '../with-storage-sync';
-
 interface StateObject {
   foo: string;
   age: number;
 }
-
 const initialState: StateObject = {
   foo: 'bar',
   age: 18,
 };
 const key = 'FooBar';
-
 describe('withStorageSync (sync storage)', () => {
   beforeEach(() => {
     // make sure to start with a clean storage
     localStorage.removeItem(key);
   });
-
   it('adds methods for storage access to the store', () => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(withStorageSync({ key }));
       const store = new Store();
-
       expect(Object.keys(store)).toEqual([
         'clearStorage',
         'readFromStorage',
@@ -32,7 +27,6 @@ describe('withStorageSync (sync storage)', () => {
       ]);
     });
   });
-
   it('offers manual sync using provided methods', () => {
     TestBed.runInInjectionContext(() => {
       // prefill storage
@@ -43,7 +37,6 @@ describe('withStorageSync (sync storage)', () => {
           age: 99,
         } as StateObject),
       );
-
       const Store = signalStore(
         { protectedState: false },
         withState(initialState),
@@ -51,34 +44,28 @@ describe('withStorageSync (sync storage)', () => {
       );
       const store = new Store();
       expect(getState(store)).toEqual(initialState);
-
       store.readFromStorage();
       expect(getState(store)).toEqual({
         foo: 'baz',
         age: 99,
       });
-
       patchState(store, { ...initialState });
       TestBed.flushEffects();
-
       let storeItem = JSON.parse(localStorage.getItem(key) || '{}');
       expect(storeItem).toEqual({
         foo: 'baz',
         age: 99,
       });
-
       store.writeToStorage();
       storeItem = JSON.parse(localStorage.getItem(key) || '{}');
       expect(storeItem).toEqual({
         ...initialState,
       });
-
       store.clearStorage();
       storeItem = localStorage.getItem(key);
       expect(storeItem).toEqual(null);
     });
   });
-
   describe('autoSync', () => {
     it('inits from storage and write to storage on changes when set to `true`', () => {
       TestBed.runInInjectionContext(() => {
@@ -90,7 +77,6 @@ describe('withStorageSync (sync storage)', () => {
             age: 99,
           } as StateObject),
         );
-
         const Store = signalStore(
           { protectedState: false },
           withState(initialState),
@@ -101,10 +87,8 @@ describe('withStorageSync (sync storage)', () => {
           foo: 'baz',
           age: 99,
         });
-
         patchState(store, { ...initialState });
         TestBed.flushEffects();
-
         expect(getState(store)).toEqual({
           ...initialState,
         });
@@ -114,7 +98,6 @@ describe('withStorageSync (sync storage)', () => {
         });
       });
     });
-
     it('does not init from storage and does write to storage on changes when set to `false`', () => {
       TestBed.runInInjectionContext(() => {
         // prefill storage
@@ -125,7 +108,6 @@ describe('withStorageSync (sync storage)', () => {
             age: 99,
           } as StateObject),
         );
-
         const Store = signalStore(
           { protectedState: false },
           withState(initialState),
@@ -133,7 +115,6 @@ describe('withStorageSync (sync storage)', () => {
         );
         const store = new Store();
         expect(getState(store)).toEqual(initialState);
-
         patchState(store, { ...initialState });
         const storeItem = JSON.parse(localStorage.getItem(key) || '{}');
         expect(storeItem).toEqual({
@@ -143,7 +124,6 @@ describe('withStorageSync (sync storage)', () => {
       });
     });
   });
-
   describe('select', () => {
     it('syncs the whole state by default', () => {
       TestBed.runInInjectionContext(() => {
@@ -153,9 +133,7 @@ describe('withStorageSync (sync storage)', () => {
           withStorageSync(key),
         );
         const store = new Store();
-
         patchState(store, { foo: 'baz', age: 25 });
-
         const storeItem = JSON.parse(localStorage.getItem(key) || '{}');
         expect(storeItem).toEqual({
           foo: 'baz',
@@ -163,7 +141,6 @@ describe('withStorageSync (sync storage)', () => {
         });
       });
     });
-
     it('syncs selected slices when specified', () => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
@@ -172,10 +149,8 @@ describe('withStorageSync (sync storage)', () => {
           withStorageSync({ key, select: ({ foo }) => ({ foo }) }),
         );
         const store = new Store();
-
         patchState(store, { foo: 'baz' });
         TestBed.flushEffects();
-
         const storeItem = JSON.parse(localStorage.getItem(key) || '{}');
         expect(storeItem).toEqual({
           foo: 'baz',
@@ -183,7 +158,6 @@ describe('withStorageSync (sync storage)', () => {
       });
     });
   });
-
   describe('parse/stringify', () => {
     it('uses custom parsing/stringification when specified', () => {
       const parse = (stateString: string) => {
@@ -193,7 +167,6 @@ describe('withStorageSync (sync storage)', () => {
           age: +age,
         };
       };
-
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
           { protectedState: false },
@@ -205,10 +178,8 @@ describe('withStorageSync (sync storage)', () => {
           }),
         );
         const store = new Store();
-
         patchState(store, { foo: 'baz' });
         TestBed.flushEffects();
-
         const storeItem = parse(localStorage.getItem(key) || '');
         expect(storeItem).toEqual({
           ...initialState,
@@ -217,7 +188,6 @@ describe('withStorageSync (sync storage)', () => {
       });
     });
   });
-
   describe('storage factory', () => {
     it('should throw an error when both config and storage strategy are provided', () => {
       const signalStoreFactory = () =>
@@ -227,12 +197,10 @@ describe('withStorageSync (sync storage)', () => {
             withLocalStorage(),
           ),
         );
-
       expect(signalStoreFactory).toThrow(
         'You can either pass a storage strategy or a config with storage, but not both.',
       );
     });
-
     it('uses specified storage', () => {
       TestBed.runInInjectionContext(() => {
         // prefill storage
@@ -243,7 +211,6 @@ describe('withStorageSync (sync storage)', () => {
             age: 99,
           } as StateObject),
         );
-
         const Store = signalStore(
           { protectedState: false },
           withState(initialState),
@@ -254,10 +221,8 @@ describe('withStorageSync (sync storage)', () => {
           foo: 'baz',
           age: 99,
         });
-
         patchState(store, { ...initialState });
         TestBed.flushEffects();
-
         expect(getState(store)).toEqual({
           ...initialState,
         });
@@ -265,7 +230,6 @@ describe('withStorageSync (sync storage)', () => {
         expect(storeItem).toEqual({
           ...initialState,
         });
-
         store.clearStorage();
       });
     });

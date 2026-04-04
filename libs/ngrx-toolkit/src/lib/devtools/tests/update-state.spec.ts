@@ -2,14 +2,12 @@ import { signalStore, withMethods } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 import { setLoaded, withCallState } from '../../with-call-state';
 import { updateState } from '../update-state';
-
 describe('updateState', () => {
   it('should work with multiple updaters', () => {
     interface Item {
       id: string;
       name: string;
     }
-
     signalStore(
       withEntities<Item>(),
       withCallState({ collection: 'items' }),

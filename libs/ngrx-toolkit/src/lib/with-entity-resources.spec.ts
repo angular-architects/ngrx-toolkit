@@ -7,10 +7,12 @@ import {
   setAllEntities,
 } from '@ngrx/signals/entities';
 import { withEntityResources } from './with-entity-resources';
-
-type Todo = { id: number; title: string; completed: boolean };
+type Todo = {
+  id: number;
+  title: string;
+  completed: boolean;
+};
 const wait = (ms = 0) => new Promise((r) => setTimeout(r, ms));
-
 describe('withEntityResources', () => {
   describe('unnamed entities', () => {
     it('derives ids, entityMap and entities from resource value', async () => {
@@ -30,13 +32,10 @@ describe('withEntityResources', () => {
           }),
         ),
       );
-
       const store = TestBed.inject(Store);
-
       // trigger load and verify derived signals
       patchState(store, { load: true });
       await wait();
-
       expect(store.ids()).toEqual([1]);
       expect(store.entityMap()).toEqual({
         1: { id: 1, title: 'A', completed: false },
@@ -45,7 +44,6 @@ describe('withEntityResources', () => {
         { id: 1, title: 'A', completed: false },
       ]);
     });
-
     it('supports addEntity updater mutating ids/entityMap/derived entities', async () => {
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
@@ -57,16 +55,12 @@ describe('withEntityResources', () => {
         ),
       );
       const store = TestBed.inject(Store);
-
       await wait();
-
       expect(store.entities()).toEqual([]);
-
       patchState(
         store,
         addEntity({ id: 1, title: 'X', completed: false } as Todo),
       );
-
       expect(store.ids()).toEqual([1]);
       expect(store.entityMap()).toEqual({
         1: { id: 1, title: 'X', completed: false },
@@ -76,7 +70,6 @@ describe('withEntityResources', () => {
       ]);
     });
   });
-
   describe('named entities', () => {
     it('derives <name>Ids, <name>EntityMap and <name>Entities from resource value', async () => {
       const Store = signalStore(
@@ -99,11 +92,8 @@ describe('withEntityResources', () => {
           }),
         })),
       );
-
       const store = TestBed.inject(Store);
-
       await wait();
-
       expect(store.todosIds()).toEqual([1]);
       expect(store.todosEntityMap()).toEqual({
         1: { id: 1, title: 'A', completed: false },
@@ -114,7 +104,6 @@ describe('withEntityResources', () => {
       expect(store.projectsEntities()).toHaveLength(1);
       expect(store.projectsValue()).toEqual([{ id: 10, name: 'X' }]);
     });
-
     it('supports addEntity for named collection via ids/entityMap', async () => {
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
@@ -126,11 +115,8 @@ describe('withEntityResources', () => {
         })),
       );
       const store = TestBed.inject(Store);
-
       await wait();
-
       expect(store.todosEntities()).toEqual([]);
-
       patchState(
         store,
         addEntity(
@@ -138,7 +124,6 @@ describe('withEntityResources', () => {
           { collection: 'todos' },
         ),
       );
-
       expect(store.todosIds()).toEqual([2]);
       expect(store.todosEntityMap()).toEqual({
         2: { id: 2, title: 'Y', completed: true },
@@ -148,7 +133,6 @@ describe('withEntityResources', () => {
       ]);
     });
   });
-
   describe('entity updaters', () => {
     it('supports setAllEntities/addEntity/removeEntity for unnamed', async () => {
       const Store = signalStore(
@@ -161,9 +145,7 @@ describe('withEntityResources', () => {
         ),
       );
       const store = TestBed.inject(Store);
-
       await wait();
-
       // set all
       patchState(
         store,
@@ -177,7 +159,6 @@ describe('withEntityResources', () => {
         { id: 1, title: 'A', completed: false },
         { id: 2, title: 'B', completed: true },
       ]);
-
       // add
       patchState(
         store,
@@ -189,7 +170,6 @@ describe('withEntityResources', () => {
         { id: 2, title: 'B', completed: true },
         { id: 3, title: 'C', completed: false },
       ]);
-
       // remove
       patchState(store, removeEntity(2));
       expect(store.ids()).toEqual([1, 3]);
@@ -198,7 +178,6 @@ describe('withEntityResources', () => {
         { id: 3, title: 'C', completed: false },
       ]);
     });
-
     it('supports setAllEntities/addEntity/removeEntity for named', async () => {
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
@@ -210,9 +189,7 @@ describe('withEntityResources', () => {
         })),
       );
       const store = TestBed.inject(Store);
-
       await wait();
-
       // set all
       patchState(
         store,
@@ -229,7 +206,6 @@ describe('withEntityResources', () => {
         { id: 10, title: 'X', completed: false },
         { id: 11, title: 'Y', completed: true },
       ]);
-
       // add
       patchState(
         store,
@@ -243,7 +219,6 @@ describe('withEntityResources', () => {
         { id: 11, title: 'Y', completed: true },
         { id: 12, title: 'Z', completed: false },
       ]);
-
       // remove
       patchState(store, removeEntity(11, { collection: 'todos' }));
       expect(store.todosIds()).toEqual([10, 12]);
@@ -253,7 +228,6 @@ describe('withEntityResources', () => {
       ]);
     });
   });
-
   describe('error handling', () => {
     it('does not throw for unnamed resources', async () => {
       const Store = signalStore(
@@ -266,7 +240,6 @@ describe('withEntityResources', () => {
           }),
         ),
       );
-
       const store = TestBed.inject(Store);
       await wait();
       expect(store.status()).toEqual('error');
@@ -274,7 +247,6 @@ describe('withEntityResources', () => {
       expect(store.entities()).toEqual([]);
       expect(store.value()).toBeUndefined();
     });
-
     it('does not throw for named resources', async () => {
       const Store = signalStore(
         { providedIn: 'root' },
@@ -286,7 +258,6 @@ describe('withEntityResources', () => {
       );
       const store = TestBed.inject(Store);
       await wait();
-
       expect(store.todosIds()).toEqual([]);
       expect(store.todosEntities()).toEqual([]);
       expect(store.todosValue()).toBeUndefined();

@@ -4,7 +4,6 @@ import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { renameDevtoolsName } from '../rename-devtools-name';
 import { withDevtools } from '../with-devtools';
 import { setupExtensions } from './helpers.spec';
-
 describe('Devtools Basics', () => {
   it('should dispatch update', () => {
     const { sendSpy } = setupExtensions();
@@ -21,7 +20,6 @@ describe('Devtools Basics', () => {
       { shop: { name: 'Car' } },
     );
   });
-
   it('should add multiple stores as feature stores', () => {
     const { sendSpy } = setupExtensions();
     for (const name of ['category', 'booking']) {
@@ -36,52 +34,41 @@ describe('Devtools Basics', () => {
       },
     );
   });
-
   it('should remove the state once destroyed', () => {
     const { sendSpy } = setupExtensions();
-
     const Store = signalStore(withDevtools('flight'));
     const childInjector = createEnvironmentInjector(
       [Store],
       TestBed.inject(EnvironmentInjector),
     );
-
     childInjector.get(Store);
     TestBed.flushEffects();
-
     expect(sendSpy).toHaveBeenCalledWith(
       { type: 'Store Update' },
       { flight: {} },
     );
-
     childInjector.destroy();
     TestBed.flushEffects();
     expect(sendSpy).toHaveBeenCalledWith({ type: 'Store Update' }, {});
   });
-
   it('should remove a renamed state once destroyed', () => {
     const { sendSpy } = setupExtensions();
-
     const Store = signalStore(withDevtools('flight'));
     const childInjector = createEnvironmentInjector(
       [Store],
       TestBed.inject(EnvironmentInjector),
     );
-
     const store = childInjector.get(Store);
     TestBed.flushEffects();
-
     expect(sendSpy).toHaveBeenCalledWith(
       { type: 'Store Update' },
       { flight: {} },
     );
-
     renameDevtoolsName(store, 'flights');
     childInjector.destroy();
     TestBed.flushEffects();
     expect(sendSpy).toHaveBeenCalledWith({ type: 'Store Update' }, {});
   });
-
   it('should group multiple patchState running before the synchronization', () => {
     const { sendSpy } = setupExtensions();
     const store = TestBed.inject(
@@ -99,11 +86,9 @@ describe('Devtools Basics', () => {
         })),
       ),
     );
-
     store.increment();
     store.increment();
     TestBed.flushEffects();
-
     expect(sendSpy.mock.calls).toEqual([
       [{ type: 'Store Update' }, { shop: { name: 'Car', amount: 2 } }],
     ]);

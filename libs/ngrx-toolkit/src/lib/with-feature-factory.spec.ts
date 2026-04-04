@@ -11,12 +11,10 @@ import {
 } from '@ngrx/signals';
 import { lastValueFrom, of } from 'rxjs';
 import { withFeatureFactory } from './with-feature-factory';
-
 type User = {
   id: number;
   name: string;
 };
-
 function withMyEntity<Entity>(loadMethod: (id: number) => Promise<Entity>) {
   return signalStoreFeature(
     withState({
@@ -31,7 +29,6 @@ function withMyEntity<Entity>(loadMethod: (id: number) => Promise<Entity>) {
     })),
   );
 }
-
 describe('withFeatureFactory', () => {
   it('should allow a sum feature', () => {
     function withSum(a: Signal<number>, b: Signal<number>) {
@@ -44,7 +41,6 @@ describe('withFeatureFactory', () => {
       withFeatureFactory((store) => withSum(store.a, store.b)),
     );
   });
-
   it('should allow to pass elements from a SignalStore to a feature', async () => {
     const UserStore = signalStore(
       { providedIn: 'root' },
@@ -58,7 +54,6 @@ describe('withFeatureFactory', () => {
         return withMyEntity<User>(loader);
       }),
     );
-
     const userStore = TestBed.inject(UserStore);
     await userStore.load(1);
     expect(getState(userStore)).toEqual({
