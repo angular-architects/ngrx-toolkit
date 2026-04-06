@@ -248,6 +248,7 @@ function createUnnamedResource<ResourceValue>(
       status: resource.status,
       error: resource.error,
       isLoading: resource.isLoading,
+      // TODO - expose snapshot property?
     })),
     withMethods(() => ({
       hasValue,
