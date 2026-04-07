@@ -4,6 +4,7 @@ import {
   isSignal,
   Resource,
   ResourceRef,
+  ResourceSnapshot,
   ResourceStatus,
   Signal,
   untracked,
@@ -25,6 +26,7 @@ export type ResourceResult<T> = {
     status: Signal<ResourceStatus>;
     error: Signal<Error | undefined>;
     isLoading: Signal<boolean>;
+    snapshot: Signal<ResourceSnapshot<T>>;
   };
   methods: {
     hasValue(): this is Resource<Exclude<T, undefined>>;
@@ -55,6 +57,10 @@ export type NamedResourceResult<
     [Prop in keyof T as `${Prop & string}Error`]: Signal<Error | undefined>;
   } & {
     [Prop in keyof T as `${Prop & string}IsLoading`]: Signal<boolean>;
+  } & {
+    [Prop in keyof T as `${Prop & string}Snapshot`]: Signal<
+      ResourceSnapshot<T[Prop]['value'] extends Signal<infer S> ? S : never>
+    >;
   };
   methods: {
     [Prop in keyof T as `${Prop & string}HasValue`]: () => this is Resource<
@@ -260,7 +266,7 @@ function createUnnamedResource<ResourceValue>(
       status: resource.status,
       error: resource.error,
       isLoading: resource.isLoading,
-      // TODO - expose snapshot property?
+      snapshot: resource.snapshot,
     })),
     withMethods(() => ({
       hasValue,
@@ -292,6 +298,7 @@ function createNamedResource<Dictionary extends ResourceDictionary>(
       [`${resourceName}Status`]: dictionary[resourceName].status,
       [`${resourceName}Error`]: dictionary[resourceName].error,
       [`${resourceName}IsLoading`]: dictionary[resourceName].isLoading,
+      [`${resourceName}Snapshot`]: dictionary[resourceName].snapshot,
     }),
     {},
   );
@@ -332,6 +339,7 @@ export function isResourceRef(value: unknown): value is ResourceRef<unknown> {
     'status' in value &&
     'error' in value &&
     'isLoading' in value &&
+    'snapshot' in value &&
     'hasValue' in value &&
     'reload' in value
   );
@@ -345,6 +353,7 @@ export function isResource(value: unknown): value is Resource<unknown> {
     'status' in value &&
     'error' in value &&
     'isLoading' in value &&
+    'snapshot' in value &&
     'hasValue' in value
   );
 }
@@ -361,6 +370,8 @@ type NamedResource<Name extends string, T> = {
   [Prop in `${Name}IsLoading`]: Signal<boolean>;
 } & {
   [Prop in `${Name}HasValue`]: () => boolean;
+} & {
+  [Prop in `${Name}Snapshot`]: Signal<ResourceSnapshot<T>>;
 };
 
 type IsValidResourceName<
@@ -428,6 +439,7 @@ export function mapToResource<
     status: store[`${resourceName}Status`],
     error: store[`${resourceName}Error`],
     isLoading: store[`${resourceName}IsLoading`],
+    snapshot: store[`${resourceName}Snapshot`],
     hasValue,
   } as MappedResource<Store, Name>;
 }
