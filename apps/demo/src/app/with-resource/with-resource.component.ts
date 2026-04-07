@@ -4,16 +4,24 @@ import { httpResource } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
 import { signalStore, withState } from '@ngrx/signals';
 import { Flight } from '../shared/flight';
+import { withPreviousValue } from './snapshot';
 
 const url = 'https://demo.angulararchitects.io/api/flight?from=Paris&to=';
 
 export const FlightStore = signalStore(
   withState({ flightTo: 'New York' }),
-  withResource(({ flightTo }) => httpResource(() => `${url}${flightTo()}`)),
+  withResource(({ flightTo }) =>
+    httpResource<Flight>(() => `${url}${flightTo()}`),
+  ),
   withResource(({ flightTo }) => ({
     list: httpResource<Flight[]>(() => `${url}${flightTo()}`, {
       defaultValue: [],
     }),
+    listSnapshot: withPreviousValue(
+      httpResource<Flight[]>(() => `${url}${flightTo()}`, {
+        defaultValue: [],
+      }),
+    ),
   })),
 );
 
@@ -38,9 +46,16 @@ export const FlightStore = signalStore(
     <pre>{{ store.listValue() | json }}</pre>
     <pre>status: {{ store.listStatus() }}</pre>
     <pre>error: {{ store.listError() | json }}</pre>
-    <pre>hasValue: {{ store.listHasValue() }}</pre> `,
+    <pre>hasValue: {{ store.listHasValue() }}</pre>
+    <pre>snapshot: {{ store.listSnapshotValue() | json }}</pre> `,
   providers: [FlightStore],
 })
 export class WithResourceComponent {
   store = inject(FlightStore);
+
+  constructor() {
+    const res = this.store.value();
+    const listRes = this.store.listValue();
+    const listResSnap = this.store.listSnapshotValue();
+  }
 }

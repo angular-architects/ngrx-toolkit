@@ -32,7 +32,10 @@ export type ResourceResult<T> = {
   };
 };
 
-export type ResourceDictionary = Record<string, ResourceRef<unknown>>;
+// TODO - do not export once tests are chill?
+export type WidenedResource<T> = ResourceRef<T> | Resource<T>;
+
+export type ResourceDictionary = Record<string, WidenedResource<unknown>>;
 
 export type NamedResourceResult<
   T extends ResourceDictionary,
@@ -112,7 +115,7 @@ export function withResource<
 >(
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
-  ) => ResourceRef<ResourceValue>,
+  ) => WidenedResource<ResourceValue>,
 ): SignalStoreFeature<Input, ResourceResult<ResourceValue | undefined>>;
 
 export function withResource<
@@ -121,7 +124,7 @@ export function withResource<
 >(
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
-  ) => ResourceRef<ResourceValue>,
+  ) => WidenedResource<ResourceValue>,
   resourceOptions: { errorHandling: 'undefined value' },
 ): SignalStoreFeature<Input, ResourceResult<ResourceValue | undefined>>;
 
@@ -131,7 +134,7 @@ export function withResource<
 >(
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
-  ) => ResourceRef<ResourceValue>,
+  ) => WidenedResource<ResourceValue>,
   resourceOptions?: ResourceOptions,
 ): SignalStoreFeature<Input, ResourceResult<ResourceValue>>;
 
@@ -166,7 +169,7 @@ export function withResource<
  * ```
  *
  * @param resourceFactory A factory function that receives the store's props,
- * methods, and state signals. It must return a `Record<string, ResourceRef>`.
+ * methods, and state signals. It must return a `Record<string, WidenedResource>`.
  * @param resourceOptions Allows to configure the error handling behavior.
  */
 export function withResource<
@@ -204,7 +207,7 @@ export function withResource<
 >(
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
-  ) => ResourceRef<ResourceValue> | ResourceDictionary,
+  ) => WidenedResource<ResourceValue> | ResourceDictionary,
   resourceOptions?: ResourceOptions,
 ): SignalStoreFeature<Input> {
   const options: Required<ResourceOptions> = {
@@ -218,7 +221,10 @@ export function withResource<
       ...store.methods,
     });
 
-    if (isResourceRef(resourceOrDictionary)) {
+    if (
+      isResourceRef(resourceOrDictionary) ||
+      isResource(resourceOrDictionary)
+    ) {
       return createUnnamedResource(
         resourceOrDictionary,
         options.errorHandling,
@@ -233,11 +239,17 @@ export function withResource<
 }
 
 function createUnnamedResource<ResourceValue>(
-  resource: ResourceRef<ResourceValue>,
+  resource: WidenedResource<ResourceValue>,
   errorHandling: ErrorHandling,
 ) {
-  function hasValue(): this is Resource<Exclude<ResourceValue, undefined>> {
-    return resource.hasValue();
+  function hasValue(): this is WidenedResource<
+    Exclude<ResourceValue, undefined>
+  > {
+    if (isResourceRef(resource)) {
+      return resource.hasValue();
+    } else {
+      return resource.hasValue();
+    }
   }
 
   return signalStoreFeature(
@@ -252,7 +264,7 @@ function createUnnamedResource<ResourceValue>(
     })),
     withMethods(() => ({
       hasValue,
-      _reload: () => resource.reload(),
+      _reload: () => (isResourceRef(resource) ? resource.reload() : {}), // TODO - add conditionally
     })),
   );
 }
@@ -286,11 +298,20 @@ function createNamedResource<Dictionary extends ResourceDictionary>(
 
   const methods: Record<string, () => boolean> = keys.reduce(
     (methods, resourceName) => {
-      return {
-        ...methods,
-        [`${resourceName}HasValue`]: () => dictionary[resourceName].hasValue(),
-        [`_${resourceName}Reload`]: () => dictionary[resourceName].reload(),
-      };
+      const res = dictionary[resourceName];
+
+      if (isResourceRef(res)) {
+        return {
+          ...methods,
+          [`${resourceName}HasValue`]: () => res.hasValue(),
+          [`_${resourceName}Reload`]: () => res.reload(),
+        };
+      } else {
+        return {
+          ...methods,
+          [`${resourceName}HasValue`]: () => res.hasValue(),
+        };
+      }
     },
     {},
   );
@@ -313,6 +334,18 @@ export function isResourceRef(value: unknown): value is ResourceRef<unknown> {
     'isLoading' in value &&
     'hasValue' in value &&
     'reload' in value
+  );
+}
+export function isResource(value: unknown): value is Resource<unknown> {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    'value' in value &&
+    isSignal(value.value) &&
+    'status' in value &&
+    'error' in value &&
+    'isLoading' in value &&
+    'hasValue' in value
   );
 }
 
@@ -376,7 +409,7 @@ type MappedResource<
  *
  * @param store The store instance to map the resource to.
  * @param name The name of the resource to map.
- * @returns `ResourceRef<T>`
+ * @returns `WidenedResource<T>`
  */
 export function mapToResource<
   Name extends ResourceNames<Store>,
@@ -465,19 +498,19 @@ export function mapToResource<
  * a breaking change.
  */
 function valueSignalForErrorHandling<T>(
-  res: ResourceRef<T>,
+  res: WidenedResource<T>,
   errorHandling: 'undefined value',
-): WritableSignal<T | undefined>;
+): Signal<T | undefined>;
 
 function valueSignalForErrorHandling<T>(
-  res: ResourceRef<T>,
+  res: WidenedResource<T>,
   errorHandling: ErrorHandling,
-): WritableSignal<T>;
+): Signal<T>;
 
 function valueSignalForErrorHandling<T>(
-  res: ResourceRef<T>,
+  res: WidenedResource<T>,
   errorHandling: ErrorHandling,
-): WritableSignal<T | undefined> {
+): Signal<T | undefined> {
   const originalSignal = res.value;
 
   switch (errorHandling) {
