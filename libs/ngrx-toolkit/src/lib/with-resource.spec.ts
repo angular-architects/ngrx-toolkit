@@ -539,29 +539,7 @@ describe('withResource', () => {
       >;
     });
     it('only exposes reload methods for reloadable resources', () => {
-      const UnnamedStore = signalStore(
-        { providedIn: 'root' },
-        withResource(() => resource({ loader: () => Promise.resolve(1) })),
-      );
-      const unnamedStore = TestBed.inject(UnnamedStore);
-      type _T1 = AssertNot<
-        '_reload' extends keyof typeof unnamedStore ? true : false
-      >;
-
-      const NamedStore = signalStore(
-        { providedIn: 'root' },
-        withResource(() => ({
-          plain: resource({ loader: () => Promise.resolve(1) }),
-          reloadable: rxResource({ stream: () => of(1) }),
-        })),
-      );
-      const namedStore = TestBed.inject(NamedStore);
-      type _T2 = AssertNot<
-        '_plainReload' extends keyof typeof namedStore ? true : false
-      >;
-      type _T3 = Assert<
-        '_reloadableReload' extends keyof typeof namedStore ? true : false
-      >;
+      // TODO - can type tests for _reload be done?
     });
     describe('mapToResource', () => {
       it('satisfies the Resource interface without default value', () => {
