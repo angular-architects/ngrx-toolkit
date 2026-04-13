@@ -2,7 +2,7 @@ import { withResource } from '@angular-architects/ngrx-toolkit';
 import { JsonPipe } from '@angular/common';
 import { httpResource } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
-import { signalStore, withState } from '@ngrx/signals';
+import { signalStore, withMethods, withState } from '@ngrx/signals';
 import { Flight } from '../shared/flight';
 import { withPreviousValue } from './snapshot';
 
@@ -22,6 +22,11 @@ export const FlightStore = signalStore(
         defaultValue: [],
       }),
     ),
+  })),
+  withMethods((store) => ({
+    reloadList: () => store._listReload(),
+    // todo - THIS SOHULD BE EXPOSED
+    stuff: () => store._reload(),
   })),
 );
 
@@ -52,10 +57,4 @@ export const FlightStore = signalStore(
 })
 export class WithResourceComponent {
   store = inject(FlightStore);
-
-  constructor() {
-    const res = this.store.value();
-    const listRes = this.store.listValue();
-    const listResSnap = this.store.listSnapshotValue();
-  }
 }
