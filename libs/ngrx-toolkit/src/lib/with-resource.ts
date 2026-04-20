@@ -204,11 +204,7 @@ export function withResource<
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
   ) => ResourceType,
   resourceOptions?: ResourceOptions,
-): SignalStoreFeature<
-  Input,
-  | UnnamedResourceResult<ResourceType, false>
-  | UnnamedResourceResult<ResourceType, true>
->;
+): SignalStoreFeature<Input, UnnamedResourceResult<ResourceType, false>>;
 
 /**
  * @experimental
