@@ -1,9 +1,11 @@
 //** Types for `withResource` */
 
+import { HttpResourceRef } from '@angular/common/http';
 import {
   isSignal,
   Resource,
   ResourceRef,
+  ResourceSnapshot,
   ResourceStatus,
   Signal,
   untracked,
@@ -19,12 +21,39 @@ import {
   withProps,
 } from '@ngrx/signals';
 
+// TODO - add other specifics of HttpResourceRef (headers, statusCode, progress)
+export type HttpResourceRefResult<T> = {
+  state: { value: T };
+  props: {
+    status: Signal<ResourceStatus>;
+    error: Signal<Error | undefined>;
+    isLoading: Signal<boolean>;
+    snapshot: Signal<ResourceSnapshot<T>>;
+  };
+  methods: {
+    hasValue(): this is Resource<Exclude<T, undefined>>;
+    _reload(): boolean;
+  };
+};
 export type ResourceResult<T> = {
   state: { value: T };
   props: {
     status: Signal<ResourceStatus>;
     error: Signal<Error | undefined>;
     isLoading: Signal<boolean>;
+    snapshot: Signal<ResourceSnapshot<T>>;
+  };
+  methods: {
+    hasValue(): this is Resource<Exclude<T, undefined>>;
+  };
+};
+export type ResourceRefResult<T> = {
+  state: { value: T };
+  props: {
+    status: Signal<ResourceStatus>;
+    error: Signal<Error | undefined>;
+    isLoading: Signal<boolean>;
+    snapshot: Signal<ResourceSnapshot<T>>;
   };
   methods: {
     hasValue(): this is Resource<Exclude<T, undefined>>;
@@ -32,7 +61,43 @@ export type ResourceResult<T> = {
   };
 };
 
-export type ResourceDictionary = Record<string, ResourceRef<unknown>>;
+type ReloadableResource<T> = ResourceRef<T> | HttpResourceRef<T>;
+
+type InferResourceValue<T extends WidenedResource<unknown>> =
+  T['value'] extends Signal<infer S> ? S : never;
+
+type ConditionalReloadMethod<T extends WidenedResource<unknown>> =
+  T extends ReloadableResource<unknown>
+    ? { _reload(): boolean }
+    : Record<never, never>;
+
+type UnnamedResourceResult<
+  T extends WidenedResource<unknown>,
+  HasUndefinedErrorHandling extends boolean,
+> = {
+  state: {
+    value: HasUndefinedErrorHandling extends true
+      ? InferResourceValue<T> | undefined
+      : InferResourceValue<T>;
+  };
+  props: {
+    status: Signal<ResourceStatus>;
+    error: Signal<Error | undefined>;
+    isLoading: Signal<boolean>;
+    snapshot: Signal<ResourceSnapshot<InferResourceValue<T>>>;
+  };
+  methods: {
+    hasValue(): this is Resource<Exclude<InferResourceValue<T>, undefined>>;
+  } & ConditionalReloadMethod<T>;
+};
+
+// TODO - do not export once tests are chill?
+export type WidenedResource<T> =
+  | ResourceRef<T>
+  | Resource<T>
+  | HttpResourceRef<T>;
+
+export type ResourceDictionary = Record<string, WidenedResource<unknown>>;
 
 export type NamedResourceResult<
   T extends ResourceDictionary,
@@ -52,13 +117,19 @@ export type NamedResourceResult<
     [Prop in keyof T as `${Prop & string}Error`]: Signal<Error | undefined>;
   } & {
     [Prop in keyof T as `${Prop & string}IsLoading`]: Signal<boolean>;
+  } & {
+    [Prop in keyof T as `${Prop & string}Snapshot`]: Signal<
+      ResourceSnapshot<T[Prop]['value'] extends Signal<infer S> ? S : never>
+    >;
   };
   methods: {
     [Prop in keyof T as `${Prop & string}HasValue`]: () => this is Resource<
-      Exclude<T[Prop]['value'], undefined>
+      Exclude<InferResourceValue<T[Prop]>, undefined>
     >;
   } & {
-    [Prop in keyof T as `_${Prop & string}Reload`]: () => boolean;
+    [Prop in keyof T as T[Prop] extends ReloadableResource<unknown>
+      ? `_${Prop & string}Reload`
+      : never]: () => boolean;
   };
 };
 
@@ -108,32 +179,32 @@ const defaultOptions: Required<ResourceOptions> = {
  */
 export function withResource<
   Input extends SignalStoreFeatureResult,
-  ResourceValue,
+  ResourceType extends WidenedResource<unknown>,
 >(
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
-  ) => ResourceRef<ResourceValue>,
-): SignalStoreFeature<Input, ResourceResult<ResourceValue | undefined>>;
+  ) => ResourceType,
+): SignalStoreFeature<Input, UnnamedResourceResult<ResourceType, true>>;
 
 export function withResource<
   Input extends SignalStoreFeatureResult,
-  ResourceValue,
+  ResourceType extends WidenedResource<unknown>,
 >(
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
-  ) => ResourceRef<ResourceValue>,
+  ) => ResourceType,
   resourceOptions: { errorHandling: 'undefined value' },
-): SignalStoreFeature<Input, ResourceResult<ResourceValue | undefined>>;
+): SignalStoreFeature<Input, UnnamedResourceResult<ResourceType, true>>;
 
 export function withResource<
   Input extends SignalStoreFeatureResult,
-  ResourceValue,
+  ResourceType extends WidenedResource<unknown>,
 >(
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
-  ) => ResourceRef<ResourceValue>,
+  ) => ResourceType,
   resourceOptions?: ResourceOptions,
-): SignalStoreFeature<Input, ResourceResult<ResourceValue>>;
+): SignalStoreFeature<Input, UnnamedResourceResult<ResourceType, false>>;
 
 /**
  * @experimental
@@ -166,7 +237,7 @@ export function withResource<
  * ```
  *
  * @param resourceFactory A factory function that receives the store's props,
- * methods, and state signals. It must return a `Record<string, ResourceRef>`.
+ * methods, and state signals. It must return a `Record<string, WidenedResource>`.
  * @param resourceOptions Allows to configure the error handling behavior.
  */
 export function withResource<
@@ -204,7 +275,7 @@ export function withResource<
 >(
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
-  ) => ResourceRef<ResourceValue> | ResourceDictionary,
+  ) => WidenedResource<ResourceValue> | ResourceDictionary,
   resourceOptions?: ResourceOptions,
 ): SignalStoreFeature<Input> {
   const options: Required<ResourceOptions> = {
@@ -218,7 +289,10 @@ export function withResource<
       ...store.methods,
     });
 
-    if (isResourceRef(resourceOrDictionary)) {
+    if (
+      isResourceRef(resourceOrDictionary) ||
+      isResource(resourceOrDictionary)
+    ) {
       return createUnnamedResource(
         resourceOrDictionary,
         options.errorHandling,
@@ -233,26 +307,46 @@ export function withResource<
 }
 
 function createUnnamedResource<ResourceValue>(
-  resource: ResourceRef<ResourceValue>,
+  resource: WidenedResource<ResourceValue>,
   errorHandling: ErrorHandling,
 ) {
-  function hasValue(): this is Resource<Exclude<ResourceValue, undefined>> {
-    return resource.hasValue();
+  function hasValue(): this is WidenedResource<
+    Exclude<ResourceValue, undefined>
+  > {
+    if (isHttpResourceRef(resource)) {
+      return resource.hasValue();
+    } else if (isResourceRef(resource)) {
+      return resource.hasValue();
+    } else {
+      return resource.hasValue();
+    }
+  }
+
+  const stateFeature = withLinkedState(() => ({
+    value: valueSignalForErrorHandling(resource, errorHandling),
+  }));
+  const propsFeature = withProps(() => ({
+    status: resource.status,
+    error: resource.error,
+    isLoading: resource.isLoading,
+    snapshot: resource.snapshot,
+  }));
+
+  if (isHttpResourceRef(resource) || isResourceRef(resource)) {
+    return signalStoreFeature(
+      stateFeature,
+      propsFeature,
+      withMethods(() => ({
+        hasValue,
+        _reload: () => resource.reload(),
+      })),
+    );
   }
 
   return signalStoreFeature(
-    withLinkedState(() => ({
-      value: valueSignalForErrorHandling(resource, errorHandling),
-    })),
-    withProps(() => ({
-      status: resource.status,
-      error: resource.error,
-      isLoading: resource.isLoading,
-    })),
-    withMethods(() => ({
-      hasValue,
-      _reload: () => resource.reload(),
-    })),
+    stateFeature,
+    propsFeature,
+    withMethods(() => ({ hasValue })),
   );
 }
 
@@ -279,17 +373,33 @@ function createNamedResource<Dictionary extends ResourceDictionary>(
       [`${resourceName}Status`]: dictionary[resourceName].status,
       [`${resourceName}Error`]: dictionary[resourceName].error,
       [`${resourceName}IsLoading`]: dictionary[resourceName].isLoading,
+      [`${resourceName}Snapshot`]: dictionary[resourceName].snapshot,
     }),
     {},
   );
 
   const methods: Record<string, () => boolean> = keys.reduce(
     (methods, resourceName) => {
-      return {
-        ...methods,
-        [`${resourceName}HasValue`]: () => dictionary[resourceName].hasValue(),
-        [`_${resourceName}Reload`]: () => dictionary[resourceName].reload(),
-      };
+      const res = dictionary[resourceName];
+
+      if (isHttpResourceRef(res)) {
+        return {
+          ...methods,
+          [`${resourceName}HasValue`]: () => res.hasValue(),
+          [`_${resourceName}Reload`]: () => res.reload(),
+        };
+      } else if (isResourceRef(res)) {
+        return {
+          ...methods,
+          [`${resourceName}HasValue`]: () => res.hasValue(),
+          [`_${resourceName}Reload`]: () => res.reload(),
+        };
+      } else {
+        return {
+          ...methods,
+          [`${resourceName}HasValue`]: () => res.hasValue(),
+        };
+      }
     },
     {},
   );
@@ -310,8 +420,42 @@ export function isResourceRef(value: unknown): value is ResourceRef<unknown> {
     'status' in value &&
     'error' in value &&
     'isLoading' in value &&
+    'snapshot' in value &&
     'hasValue' in value &&
     'reload' in value
+  );
+}
+export function isHttpResourceRef(
+  value: unknown,
+): value is HttpResourceRef<unknown> {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    'value' in value &&
+    isSignal(value.value) &&
+    'status' in value &&
+    'error' in value &&
+    'isLoading' in value &&
+    'snapshot' in value &&
+    'hasValue' in value &&
+    'reload' in value &&
+    'headers' in value &&
+    'statusCode' in value &&
+    'progress' in value
+  );
+}
+
+export function isResource(value: unknown): value is Resource<unknown> {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    'value' in value &&
+    isSignal(value.value) &&
+    'status' in value &&
+    'error' in value &&
+    'isLoading' in value &&
+    'snapshot' in value &&
+    'hasValue' in value
   );
 }
 
@@ -327,6 +471,8 @@ type NamedResource<Name extends string, T> = {
   [Prop in `${Name}IsLoading`]: Signal<boolean>;
 } & {
   [Prop in `${Name}HasValue`]: () => boolean;
+} & {
+  [Prop in `${Name}Snapshot`]: Signal<ResourceSnapshot<T>>;
 };
 
 type IsValidResourceName<
@@ -375,7 +521,7 @@ type MappedResource<
  *
  * @param store The store instance to map the resource to.
  * @param name The name of the resource to map.
- * @returns `ResourceRef<T>`
+ * @returns `WidenedResource<T>`
  */
 export function mapToResource<
   Name extends ResourceNames<Store>,
@@ -394,6 +540,7 @@ export function mapToResource<
     status: store[`${resourceName}Status`],
     error: store[`${resourceName}Error`],
     isLoading: store[`${resourceName}IsLoading`],
+    snapshot: store[`${resourceName}Snapshot`],
     hasValue,
   } as MappedResource<Store, Name>;
 }
@@ -464,19 +611,19 @@ export function mapToResource<
  * a breaking change.
  */
 function valueSignalForErrorHandling<T>(
-  res: ResourceRef<T>,
+  res: WidenedResource<T>,
   errorHandling: 'undefined value',
-): WritableSignal<T | undefined>;
+): Signal<T | undefined>;
 
 function valueSignalForErrorHandling<T>(
-  res: ResourceRef<T>,
+  res: WidenedResource<T>,
   errorHandling: ErrorHandling,
-): WritableSignal<T>;
+): Signal<T>;
 
 function valueSignalForErrorHandling<T>(
-  res: ResourceRef<T>,
+  res: WidenedResource<T>,
   errorHandling: ErrorHandling,
-): WritableSignal<T | undefined> {
+): Signal<T | undefined> {
   const originalSignal = res.value;
 
   switch (errorHandling) {

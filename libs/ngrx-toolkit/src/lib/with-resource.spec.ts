@@ -319,12 +319,14 @@ describe('withResource', () => {
           { providedIn: 'root', protectedState: false },
           withState({ id: undefined as number | undefined }),
           withResource(({ id }) => ({
-            list: httpResource<{ id: number; name: string }[]>(
-              () => '/address',
+            list: httpResource<
               {
-                defaultValue: [],
-              },
-            ),
+                id: number;
+                name: string;
+              }[]
+            >(() => '/address', {
+              defaultValue: [],
+            }),
             detail: httpResource<Address>(() =>
               id() ? `/address/${id()}` : undefined,
             ),
@@ -609,7 +611,9 @@ describe('withResource', () => {
         IsEqual<typeof _store.digitValue, Signal<number | undefined>>
       >;
     });
-
+    it('only exposes reload methods for reloadable resources', () => {
+      // TODO - can type tests for _reload be done?
+    });
     describe('mapToResource', () => {
       it('satisfies the Resource interface without default value', () => {
         const Store = signalStore(
