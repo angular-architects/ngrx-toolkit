@@ -91,11 +91,7 @@ type UnnamedResourceResult<
   } & ConditionalReloadMethod<T>;
 };
 
-// TODO - do not export once tests are chill?
-export type WidenedResource<T> =
-  | ResourceRef<T>
-  | Resource<T>
-  | HttpResourceRef<T>;
+type WidenedResource<T> = ResourceRef<T> | Resource<T> | HttpResourceRef<T>;
 
 export type ResourceDictionary = Record<string, WidenedResource<unknown>>;
 
