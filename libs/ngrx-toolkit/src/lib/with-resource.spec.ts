@@ -19,6 +19,7 @@ import { ErrorHandling, mapToResource, withResource } from './with-resource';
 import { Address, venice, vienna } from './with-resource/tests/util/fixtures';
 import { paramsForResourceTypes } from './with-resource/tests/util/params-for-resource-types';
 import { setupUnnamedResource } from './with-resource/tests/util/setup-unnamed-resource';
+import { withPreviousValue } from './with-resource/tests/util/snapshot';
 
 describe('withResource', () => {
   describe('standard tests', () => {
@@ -612,7 +613,38 @@ describe('withResource', () => {
       >;
     });
     it('only exposes reload methods for reloadable resources', () => {
-      // TODO - can type tests for _reload be done?
+      const Store = signalStore(
+        { providedIn: 'root' },
+        withResource(() => ({
+          digit: resource({
+            loader: () => Promise.resolve(-1),
+            defaultValue: 0,
+          }),
+          digitSnapshotted: withPreviousValue(
+            resource({
+              loader: () => Promise.resolve(-1),
+              defaultValue: 0,
+            }),
+          ),
+        })),
+        withResource(() =>
+          resource({
+            loader: () => Promise.resolve(-1),
+            defaultValue: 0,
+          }),
+        ),
+        withMethods((store) => ({
+          namedReload: () => store._digitReload(),
+          unnamedReload: () => store._reload(),
+          // @ts-expect-error - a snapshot should not have a reload
+          invalidReload: () => store._digitSnapshottedReload(),
+        })),
+      );
+
+      const _store = TestBed.inject(Store);
+
+      type _T1 = Assert<IsEqual<typeof _store.namedReload, () => boolean>>;
+      type _T2 = Assert<IsEqual<typeof _store.unnamedReload, () => boolean>>;
     });
     describe('mapToResource', () => {
       it('satisfies the Resource interface without default value', () => {
