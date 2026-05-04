@@ -646,6 +646,42 @@ describe('withResource', () => {
       type _T1 = Assert<IsEqual<typeof _store.namedReload, () => boolean>>;
       type _T2 = Assert<IsEqual<typeof _store.unnamedReload, () => boolean>>;
     });
+
+    it('does not allow patching an unnamed non-reloadable resource value', () => {
+      signalStore(
+        withResource(() =>
+          withPreviousValue(
+            resource({
+              loader: () => Promise.resolve(1),
+              defaultValue: 0,
+            }),
+          ),
+        ),
+        withMethods((store) => ({
+          // @ts-expect-error - non-reloadable Resource values are not state
+          setValue: (value: number) => patchState(store, { value }),
+        })),
+      );
+    });
+
+    it('does not allow patching a named non-reloadable resource value', () => {
+      signalStore(
+        withResource(() => ({
+          digitSnapshotted: withPreviousValue(
+            resource({
+              loader: () => Promise.resolve(-1),
+              defaultValue: 0,
+            }),
+          ),
+        })),
+        withMethods((store) => ({
+          setNamedValue: (value: number) =>
+            // @ts-expect-error digitSnapshotted is a `Resource` value, but not state, so it should not be patchable
+            patchState(store, { digitSnapshottedValue: value }),
+        })),
+      );
+    });
+
     describe('mapToResource', () => {
       it('satisfies the Resource interface without default value', () => {
         const Store = signalStore(

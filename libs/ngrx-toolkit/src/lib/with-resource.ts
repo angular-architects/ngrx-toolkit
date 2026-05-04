@@ -71,16 +71,33 @@ type ConditionalReloadMethod<T extends WidenedResource<unknown>> =
     ? { _reload(): boolean }
     : Record<never, never>;
 
+declare const NON_PATCHABLE_RESOURCE_STATE: unique symbol;
+
+type NonPatchableResourceStateMarker = {
+  [NON_PATCHABLE_RESOURCE_STATE]?: never;
+};
+
+type ResourceValueType<
+  T extends WidenedResource<unknown>,
+  HasUndefinedErrorHandling extends boolean,
+> = HasUndefinedErrorHandling extends true
+  ? InferResourceValue<T> | undefined
+  : InferResourceValue<T>;
+
 type UnnamedResourceResult<
   T extends WidenedResource<unknown>,
   HasUndefinedErrorHandling extends boolean,
 > = {
-  state: {
-    value: HasUndefinedErrorHandling extends true
-      ? InferResourceValue<T> | undefined
-      : InferResourceValue<T>;
-  };
-  props: {
+  state: T extends ReloadableResource<unknown>
+    ? {
+        value: ResourceValueType<T, HasUndefinedErrorHandling>;
+      }
+    : NonPatchableResourceStateMarker;
+  props: (T extends ReloadableResource<unknown>
+    ? Record<never, never>
+    : {
+        value: Signal<ResourceValueType<T, HasUndefinedErrorHandling>>;
+      }) & {
     status: Signal<ResourceStatus>;
     error: Signal<Error | undefined>;
     isLoading: Signal<boolean>;
@@ -100,14 +117,21 @@ export type NamedResourceResult<
   HasUndefinedErrorHandling extends boolean,
 > = {
   state: {
-    [Prop in keyof T as `${Prop &
-      string}Value`]: T[Prop]['value'] extends Signal<infer S>
-      ? HasUndefinedErrorHandling extends true
-        ? S | undefined
-        : S
+    [Prop in keyof T as T[Prop] extends ReloadableResource<unknown>
+      ? `${Prop & string}Value`
+      : never]: T[Prop] extends WidenedResource<unknown>
+      ? ResourceValueType<T[Prop], HasUndefinedErrorHandling>
       : never;
-  };
+  } & NonPatchableResourceStateMarker;
   props: {
+    [Prop in keyof T as T[Prop] extends ReloadableResource<unknown>
+      ? never
+      : `${Prop & string}Value`]: Signal<
+      T[Prop] extends WidenedResource<unknown>
+        ? ResourceValueType<T[Prop], HasUndefinedErrorHandling>
+        : never
+    >;
+  } & {
     [Prop in keyof T as `${Prop & string}Status`]: Signal<ResourceStatus>;
   } & {
     [Prop in keyof T as `${Prop & string}Error`]: Signal<Error | undefined>;
@@ -148,10 +172,11 @@ const defaultOptions: Required<ResourceOptions> = {
  * Integrates a `Resource` into the SignalStore and makes the store instance
  * implement the `Resource` interface.
  *
- * The resource's value is stored under the `value` key in the state
- * and is exposed as a `DeepSignal`.
+ * Reloadable resources (`ResourceRef`/`HttpResourceRef`) expose their
+ * value under `value` in the store state and can be updated via `patchState`.
  *
- * It can also be updated via `patchState`.
+ * Plain `Resource` values are exposed as signals on the store instance,
+ * but are not part of state and therefore cannot be changed via `patchState`.
  *
  * @usageNotes
  *
@@ -210,9 +235,11 @@ export function withResource<
  * registered by name, which is used as a prefix when spreading the members
  * of `Resource` onto the store.
  *
- * Each resource’s value is part of the state, stored under the `value` key
- * with the resource name as prefix. Values are exposed as `DeepSignal`s and
- * can be updated via `patchState`.
+ * Reloadable resources (`ResourceRef`/`HttpResourceRef`) place their values
+ * in state using `<name>Value` keys and support updates via `patchState`.
+ *
+ * Plain `Resource` values are exposed as read-only signals with `<name>Value`
+ * but are not stored in state.
  *
  * @usageNotes
  *
@@ -318,20 +345,19 @@ function createUnnamedResource<ResourceValue>(
     }
   }
 
-  const stateFeature = withLinkedState(() => ({
-    value: valueSignalForErrorHandling(resource, errorHandling),
-  }));
-  const propsFeature = withProps(() => ({
+  const metadataProps = {
     status: resource.status,
     error: resource.error,
     isLoading: resource.isLoading,
     snapshot: resource.snapshot,
-  }));
+  };
 
   if (isHttpResourceRef(resource) || isResourceRef(resource)) {
     return signalStoreFeature(
-      stateFeature,
-      propsFeature,
+      withLinkedState(() => ({
+        value: valueSignalForErrorHandling(resource, errorHandling),
+      })),
+      withProps(() => metadataProps),
       withMethods(() => ({
         hasValue,
         _reload: () => resource.reload(),
@@ -340,8 +366,10 @@ function createUnnamedResource<ResourceValue>(
   }
 
   return signalStoreFeature(
-    stateFeature,
-    propsFeature,
+    withProps(() => ({
+      value: valueSignalForErrorHandling(resource, errorHandling),
+      ...metadataProps,
+    })),
     withMethods(() => ({ hasValue })),
   );
 }
@@ -352,53 +380,43 @@ function createNamedResource<Dictionary extends ResourceDictionary>(
 ) {
   const keys = Object.keys(dictionary);
 
-  const state: Record<string, WritableSignal<unknown>> = keys.reduce(
-    (state, resourceName) => ({
-      ...state,
-      [`${resourceName}Value`]: valueSignalForErrorHandling(
-        dictionary[resourceName],
+  const state: Record<string, WritableSignal<unknown>> = {};
+  const props: Record<string, Signal<unknown>> = {};
+  const methods: Record<string, () => boolean> = {};
+
+  for (const resourceName of keys) {
+    const res = dictionary[resourceName];
+
+    props[`${resourceName}Status`] = res.status;
+    props[`${resourceName}Error`] = res.error;
+    props[`${resourceName}IsLoading`] = res.isLoading;
+    props[`${resourceName}Snapshot`] = res.snapshot;
+    methods[`${resourceName}HasValue`] = isHttpResourceRef(res)
+      ? () => res.hasValue()
+      : isResourceRef(res)
+        ? () => res.hasValue()
+        : () => res.hasValue();
+
+    if (isHttpResourceRef(res) || isResourceRef(res)) {
+      state[`${resourceName}Value`] = valueSignalForErrorHandling(
+        res,
         errorHandling,
-      ),
-    }),
-    {},
-  );
+      ) as WritableSignal<unknown>;
+      methods[`_${resourceName}Reload`] = () => res.reload();
+    } else {
+      props[`${resourceName}Value`] = valueSignalForErrorHandling(
+        res,
+        errorHandling,
+      );
+    }
+  }
 
-  const props: Record<string, Signal<unknown>> = keys.reduce(
-    (props, resourceName) => ({
-      ...props,
-      [`${resourceName}Status`]: dictionary[resourceName].status,
-      [`${resourceName}Error`]: dictionary[resourceName].error,
-      [`${resourceName}IsLoading`]: dictionary[resourceName].isLoading,
-      [`${resourceName}Snapshot`]: dictionary[resourceName].snapshot,
-    }),
-    {},
-  );
-
-  const methods: Record<string, () => boolean> = keys.reduce(
-    (methods, resourceName) => {
-      const res = dictionary[resourceName];
-
-      if (isHttpResourceRef(res)) {
-        return {
-          ...methods,
-          [`${resourceName}HasValue`]: () => res.hasValue(),
-          [`_${resourceName}Reload`]: () => res.reload(),
-        };
-      } else if (isResourceRef(res)) {
-        return {
-          ...methods,
-          [`${resourceName}HasValue`]: () => res.hasValue(),
-          [`_${resourceName}Reload`]: () => res.reload(),
-        };
-      } else {
-        return {
-          ...methods,
-          [`${resourceName}HasValue`]: () => res.hasValue(),
-        };
-      }
-    },
-    {},
-  );
+  if (Object.keys(state).length === 0) {
+    return signalStoreFeature(
+      withProps(() => props),
+      withMethods(() => methods),
+    );
+  }
 
   return signalStoreFeature(
     withLinkedState(() => state),
