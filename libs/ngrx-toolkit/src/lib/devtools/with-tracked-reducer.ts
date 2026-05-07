@@ -39,7 +39,7 @@ export function withTrackedReducer<State extends object>(
             const result = caseReducer.reducer(event, state);
             const updaters = Array.isArray(result) ? result : [result];
 
-            updateState(store, event.type, ...updaters);
+            updateState(store, event, ...updaters);
           }),
         ),
       ),

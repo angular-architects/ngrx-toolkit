@@ -2,7 +2,7 @@ import { StateSource } from '@ngrx/signals';
 import { ReduxDevtoolsConfig } from '../provide-devtools-config';
 import { DevtoolsInnerOptions } from './devtools-feature';
 
-export type Action = { type: string };
+export type Action = { type: string; [key: string]: unknown };
 export type Connection = {
   send: (action: Action, state: Record<string, unknown>) => void;
 };
