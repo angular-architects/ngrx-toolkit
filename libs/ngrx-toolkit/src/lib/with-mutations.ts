@@ -118,25 +118,18 @@ function createMutationsFeature<Result extends MutationsDictionary>(
       keys.reduce(
         (acc, key) => ({
           ...acc,
-          [key]: Object.assign(
-            async (params: never) => {
-              const mutation = mutations[key];
-              if (!mutation) {
-                throw new Error(`Mutation ${key} not found`);
-              }
+          [key]: (() => {
+            const mutation = mutations[key];
+            if (!mutation) {
+              throw new Error(`Mutation ${key} not found`);
+            }
+
+            return Object.assign(async (params: never) => {
               const result = await mutation(params);
 
               return result;
-            },
-            {
-              status: mutations[key].status,
-              value: mutations[key].value,
-              isPending: mutations[key].isPending,
-              isSuccess: mutations[key].isSuccess,
-              error: mutations[key].error,
-              hasValue: mutations[key].hasValue,
-            },
-          ),
+            }, mutation);
+          })(),
         }),
         {} as MethodsDictionary,
       ),
