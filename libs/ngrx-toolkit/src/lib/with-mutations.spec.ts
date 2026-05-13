@@ -116,6 +116,31 @@ function createTestSetup(flatteningOperator = concatOp) {
 }
 
 describe('withMutations with rxMutation', () => {
+  // fix: assign properties of mutations in withMutation https://github.com/angular-architects/ngrx-toolkit/pull/288
+  it("does not lose the runtime properties of a mutation's direct reference when assigning it to a component field", fakeAsync(() => {
+    const testSetup = createTestSetup();
+    const store = testSetup.store;
+
+    // Simulates `readonly myMutation = this.store.increment` in a component.
+    const myMutation = store.increment;
+
+    expect(myMutation.status()).toEqual('idle');
+    expect(typeof myMutation.isPending).toEqual('function');
+    expect(myMutation.isPending()).toEqual(false);
+
+    myMutation(2);
+    expect(myMutation.status()).toEqual('pending');
+    expect(myMutation.isPending()).toEqual(true);
+
+    tick(2000);
+
+    expect(myMutation.status()).toEqual('success');
+    expect(myMutation.isPending()).toEqual(false);
+    expect(myMutation.error()).toEqual(undefined);
+
+    expect(store.counter()).toEqual(7);
+  }));
+
   it('should update the state', fakeAsync(() => {
     const testSetup = createTestSetup();
     const store = testSetup.store;
