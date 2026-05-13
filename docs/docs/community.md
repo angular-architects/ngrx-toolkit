@@ -28,11 +28,14 @@ Here are some links with respect to two types of community involvement:
 
 ## Content
 
-- [Use withResource to seamlessly combine Resources with Ngrx Signals Store! - Zoaib Khan](https://zoaibkhan.com/blog/use-withresource-to-seamlessly-combine-resources-with-ngrx/)
-- [Local Storage Sync with Ngrx Signal Store - Zoaib Khan](https://www.youtube.com/shorts/wbRxCCUrGvk)
-
-<!-- TODO - find a timestamp of a time Jason mentioned/used the Toolkit -->
-<!-- - [Jason Warner, various livestreams]() -->
+- Zoaib Khan
+  - [Blog post: "Use withResource to seamlessly combine Resources with Ngrx Signals Store!"](https://zoaibkhan.com/blog/use-withresource-to-seamlessly-combine-resources-with-ngrx/)
+  - [YouTube short: "Local Storage Sync with Ngrx Signal Store"](https://www.youtube.com/shorts/wbRxCCUrGvk)
+- Angular Space livestreams
+  - [Rainer's appearance](https://youtu.be/UUhZm52tigQ?t=2930), taking general Toolkit questions from Angular Space host Armen Vardanyan
+  - [Michael Small's appearance](https://youtu.be/X59d8GJnNhE?t=603), speaking about Mutations when they were being RFC'd, and `withResource`.
+- [Jason Warner (@xocomil) speaks about `withResource/withMutations` on a livestream](https://www.youtube.com/watch?v=kitcmXNj5K0&t=6344s)
+  - Michael Small is an active chat member on Jason's streams, so Jason has talked about the Toolkit a lot on stream, and probably will in the future if he keeps humoring Michael.
 
 ## Discord
 
