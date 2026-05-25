@@ -2,7 +2,9 @@ import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { patchState, signalStore, withState } from '@ngrx/signals';
 import { delay, Observable, of, Subject, switchMap, throwError } from 'rxjs';
 import { concatOp, exhaustOp, mergeOp, switchOp } from './flattening-operator';
+import { Mutation, MutationResult } from './mutation/mutation';
 import { rxMutation } from './mutation/rx-mutation';
+import { Assert, AssertNot, IsEqual } from './test-utils/types';
 import { withMutations } from './with-mutations';
 
 type Param =
@@ -543,5 +545,44 @@ describe('withMutations with rxMutation', () => {
     expect(typeof store.increment).toEqual('function');
     // @ts-expect-error Should not expose properties, only the method
     expect(store.increment.isPending).toBeUndefined();
+  });
+
+  it('types mutation method as plain callable Promise signature and returns nothing else from a mutation', () => {
+    // Test case for https://github.com/angular-architects/ngrx-toolkit/issues/286
+    const testSetup = createTestSetup();
+    const store = testSetup.store;
+
+    // Only the method is exposed
+    type _T1 = Assert<
+      IsEqual<
+        typeof store.increment,
+        (params: Param) => Promise<MutationResult<number>>
+      >
+    >;
+
+    // Other mutation properties not present
+    type _T2 = AssertNot<
+      IsEqual<typeof store.increment, Mutation<Param, number>>
+    >;
+
+    // _T2 in other words:
+
+    // CAN...
+    // Still can call mutation function
+    store.increment(0);
+
+    // CANNOT...
+    // @ts-expect-error should not expose properties, only method call
+    const status = store.increment.status;
+    // @ts-expect-error should not expose properties, only method call
+    const value = store.increment.value;
+    // @ts-expect-error should not expose properties, only method call
+    const isPending = store.increment.isPending;
+    // @ts-expect-error should not expose properties, only method call
+    const isSuccess = store.increment.isSuccess;
+    // @ts-expect-error should not expose properties, only method call
+    const error = store.increment.error;
+    // @ts-expect-error should not expose properties, only method call
+    const hasValue = store.increment.hasValue;
   });
 });
