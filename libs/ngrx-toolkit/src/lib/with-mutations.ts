@@ -10,7 +10,7 @@ import {
   withMethods,
   WritableStateSource,
 } from '@ngrx/signals';
-import { Mutation, MutationStatus } from './mutation/mutation';
+import { Mutation, MutationResult, MutationStatus } from './mutation/mutation';
 
 // NamedMutationMethods below will infer the actual parameter and return types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -33,7 +33,7 @@ type NamedMutationMethods<T extends MutationsDictionary> = {
     infer P,
     infer R
   >
-    ? Mutation<P, R>
+    ? (params: P) => Promise<MutationResult<R>>
     : never;
 };
 
