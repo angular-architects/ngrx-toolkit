@@ -534,4 +534,13 @@ describe('withMutations with rxMutation', () => {
       error: 'Test-Error',
     });
   });
+
+  it('does not expose mutation properties directly, only the method', async () => {
+    const testSetup = createTestSetup(switchOp);
+    const store = testSetup.store;
+
+    expect(typeof store.increment).toEqual('function');
+    // @ts-expect-error Should not expose properties, only the method
+    expect(store.increment.isPending).toBeUndefined();
+  });
 });
