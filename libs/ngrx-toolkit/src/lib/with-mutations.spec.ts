@@ -536,6 +536,7 @@ describe('withMutations with rxMutation', () => {
   });
 
   it('does not expose mutation properties directly, only the method', async () => {
+    // Test case for https://github.com/angular-architects/ngrx-toolkit/issues/286
     const testSetup = createTestSetup(switchOp);
     const store = testSetup.store;
 
