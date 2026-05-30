@@ -4,7 +4,6 @@ import {
   WritableStateSource,
 } from '@ngrx/signals';
 import { currentActionNames } from './internal/current-action-names';
-import { Action } from './internal/models';
 
 type PatchFn = typeof originalPatchState extends (
   arg1: infer First,
@@ -29,7 +28,7 @@ export const patchState: PatchFn = (state, action, ...rest) => {
  */
 export function updateState<State extends object>(
   stateSource: WritableStateSource<State>,
-  action: string | Action,
+  action: string,
   ...updaters: Array<
     Partial<NoInfer<State>> | PartialStateUpdater<NoInfer<State>>
   >

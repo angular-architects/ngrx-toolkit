@@ -41,7 +41,7 @@ The extensions don't activate during app initialization (as it is with `@ngrx/st
 import { updateState } from '@angular-architects/ngrx-toolkit';
 ```
 
-The Signal Store does not use the Redux pattern, so there are no action names involved by default. Instead, every action is referred to as a "Store Update". If you want to customize the action entry for better clarity, you can use the `updateState()` function instead of `patchState()`:
+The Signal Store does not use the Redux pattern, so there are no action names involved by default. Instead, every action is referred to as a "Store Update". If you want to customize the action name for better clarity, you can use the `updateState()` function instead of `patchState()`:
 
 ```typescript
 import { updateState } from '@angular-architects/ngrx-toolkit';
@@ -50,9 +50,6 @@ patchState(this.store, { loading: false });
 
 // updateState is a wrapper around patchState and has an action name as second parameter
 updateState(this.store, 'update loading', { loading: false });
-
-// updateState also accepts an action object with a mandatory type field
-updateState(this.store, { type: '[Book Store] bookSelected', payload: { bookId: '1' } }, { selectedBookId: '1' });
 ```
 
 ## `renameDevtoolsName()`
@@ -175,7 +172,7 @@ const Store = signalStore(
 ## Events tracking: `withTrackedReducer`
 
 `withTrackedReducer` tracks state changes within the events
-plugin. This utility automatically derives the event entry, streamlining
+plugin. This utility automatically derives the event name, streamlining
 the tracking process.
 
 To use it
