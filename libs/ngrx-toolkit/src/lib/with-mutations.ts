@@ -34,7 +34,7 @@ type NamedMutationMethods<T extends MutationsDictionary> = {
     infer R,
     infer E
   >
-    ? (params: P) => Promise<MutationResult<R>>
+    ? (params: P) => Promise<MutationResult<R, E>>
     : never;
 };
 
