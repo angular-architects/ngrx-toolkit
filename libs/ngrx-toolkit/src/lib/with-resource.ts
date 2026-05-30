@@ -94,7 +94,7 @@ type UnnamedResourceResult<
   } & ConditionalReloadMethod<T>;
 };
 
-type WidenedResource<T> = ResourceRef<T> | Resource<T> | HttpResourceRef<T>;
+type WidenedResource<T> = ResourceRef<T> | Resource<T>;
 
 export type ResourceDictionary = Record<string, WidenedResource<unknown>>;
 
@@ -322,9 +322,7 @@ function createUnnamedResource<ResourceValue>(
   function hasValue(): this is WidenedResource<
     Exclude<ResourceValue, undefined>
   > {
-    if (isHttpResourceRef(resource)) {
-      return resource.hasValue();
-    } else if (isResourceRef(resource)) {
+    if (isResourceRef(resource)) {
       return resource.hasValue();
     } else {
       return resource.hasValue();
@@ -338,7 +336,7 @@ function createUnnamedResource<ResourceValue>(
     snapshot: resource.snapshot,
   };
 
-  if (isHttpResourceRef(resource) || isResourceRef(resource)) {
+  if (isResourceRef(resource)) {
     return signalStoreFeature(
       withLinkedState(() => ({
         value: valueSignalForErrorHandling(resource, errorHandling),
@@ -377,13 +375,11 @@ function createNamedResource<Dictionary extends ResourceDictionary>(
     props[`${resourceName}Error`] = res.error;
     props[`${resourceName}IsLoading`] = res.isLoading;
     props[`${resourceName}Snapshot`] = res.snapshot;
-    methods[`${resourceName}HasValue`] = isHttpResourceRef(res)
+    methods[`${resourceName}HasValue`] = isResourceRef(res)
       ? () => res.hasValue()
-      : isResourceRef(res)
-        ? () => res.hasValue()
-        : () => res.hasValue();
+      : () => res.hasValue();
 
-    if (isHttpResourceRef(res) || isResourceRef(res)) {
+    if (isResourceRef(res)) {
       state[`${resourceName}Value`] = valueSignalForErrorHandling(
         res,
         errorHandling,
@@ -435,16 +431,17 @@ export function isResourceRef(value: unknown): value is ResourceRef<unknown> {
   );
 }
 
-export function isHttpResourceRef(
-  value: unknown,
-): value is HttpResourceRef<unknown> {
-  return (
-    isResourceRef(value) &&
-    'headers' in value &&
-    'statusCode' in value &&
-    'progress' in value
-  );
-}
+// This may be handy in the future
+// export function isHttpResourceRef(
+//   value: unknown,
+// ): value is HttpResourceRef<unknown> {
+//   return (
+//     isResourceRef(value) &&
+//     'headers' in value &&
+//     'statusCode' in value &&
+//     'progress' in value
+//   );
+// }
 
 //** Types for `mapToResource` */
 
