@@ -425,40 +425,6 @@ function createNamedResource<Dictionary extends ResourceDictionary>(
   );
 }
 
-export function isResourceRef(value: unknown): value is ResourceRef<unknown> {
-  return (
-    value !== null &&
-    typeof value === 'object' &&
-    'value' in value &&
-    isSignal(value.value) &&
-    'status' in value &&
-    'error' in value &&
-    'isLoading' in value &&
-    'snapshot' in value &&
-    'hasValue' in value &&
-    'reload' in value
-  );
-}
-export function isHttpResourceRef(
-  value: unknown,
-): value is HttpResourceRef<unknown> {
-  return (
-    value !== null &&
-    typeof value === 'object' &&
-    'value' in value &&
-    isSignal(value.value) &&
-    'status' in value &&
-    'error' in value &&
-    'isLoading' in value &&
-    'snapshot' in value &&
-    'hasValue' in value &&
-    'reload' in value &&
-    'headers' in value &&
-    'statusCode' in value &&
-    'progress' in value
-  );
-}
-
 export function isResource(value: unknown): value is Resource<unknown> {
   return (
     value !== null &&
@@ -470,6 +436,27 @@ export function isResource(value: unknown): value is Resource<unknown> {
     'isLoading' in value &&
     'snapshot' in value &&
     'hasValue' in value
+  );
+}
+
+export function isResourceRef(value: unknown): value is ResourceRef<unknown> {
+  return (
+    isResource(value) &&
+    'reload' in value &&
+    'set' in value &&
+    'update' in value &&
+    'asReadonly' in value
+  );
+}
+
+export function isHttpResourceRef(
+  value: unknown,
+): value is HttpResourceRef<unknown> {
+  return (
+    isResourceRef(value) &&
+    'headers' in value &&
+    'statusCode' in value &&
+    'progress' in value
   );
 }
 
