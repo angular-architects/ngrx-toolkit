@@ -21,20 +21,6 @@ import {
   withProps,
 } from '@ngrx/signals';
 
-// TODO - add other specifics of HttpResourceRef (headers, statusCode, progress)
-export type HttpResourceRefResult<T> = {
-  state: { value: T };
-  props: {
-    status: Signal<ResourceStatus>;
-    error: Signal<Error | undefined>;
-    isLoading: Signal<boolean>;
-    snapshot: Signal<ResourceSnapshot<T>>;
-  };
-  methods: {
-    hasValue(): this is Resource<Exclude<T, undefined>>;
-    _reload(): boolean;
-  };
-};
 export type ResourceResult<T> = {
   state: { value: T };
   props: {
