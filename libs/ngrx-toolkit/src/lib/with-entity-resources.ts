@@ -1,4 +1,12 @@
-import { ResourceRef, Signal, isSignal, linkedSignal } from '@angular/core';
+import {
+  Resource,
+  ResourceRef,
+  ResourceSnapshot,
+  ResourceStatus,
+  Signal,
+  isSignal,
+  linkedSignal,
+} from '@angular/core';
 import {
   SignalStoreFeature,
   SignalStoreFeatureResult,
@@ -17,6 +25,8 @@ import {
 import {
   NamedResourceResult,
   ResourceResult,
+  WidenedResource,
+  isResource,
   isResourceRef,
   withResource,
 } from './with-resource';
@@ -93,7 +103,7 @@ export function withEntityResources<
 >(
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
-  ) => ResourceRef<TypedEntityResourceValue<Entity>>,
+  ) => WidenedResource<TypedEntityResourceValue<Entity>>,
 ): SignalStoreFeature<Input, EntityResourceResult<Entity>>;
 
 export function withEntityResources<
@@ -111,7 +121,7 @@ export function withEntityResources<
 >(
   entityResourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
-  ) => ResourceRef<ResourceValue> | EntityDictionary,
+  ) => WidenedResource<ResourceValue> | EntityDictionary,
 ): SignalStoreFeature<Input> {
   return (store) => {
     const resourceOrDict = entityResourceFactory({
@@ -121,6 +131,8 @@ export function withEntityResources<
     });
 
     if (isResourceRef(resourceOrDict)) {
+      return createUnnamedEntityResource(resourceOrDict)(store);
+    } else if (isResource(resourceOrDict)) {
       return createUnnamedEntityResource(resourceOrDict)(store);
     }
     return createNamedEntityResources(resourceOrDict)(store);
@@ -134,12 +146,30 @@ export function withEntityResources<
  * to avoid the error throwing behavior of the Resource API.
  */
 function createUnnamedEntityResource<E extends Entity>(
-  resource: ResourceRef<TypedEntityResourceValue<E>>,
+  resource:
+    | ResourceRef<TypedEntityResourceValue<E>>
+    | Resource<TypedEntityResourceValue<E>>,
 ) {
   return signalStoreFeature(
     withResource(() => resource),
-    withLinkedState(({ value }) => {
-      const { ids, entityMap } = createEntityDerivations(value);
+    withLinkedState((store) => {
+      // `value` exists in either the `props` or `state`, but `store` here only
+      // infers the `state` case, so we have to do this bleh casting
+      const propsOrStateStore = store as {
+        value: Signal<TypedEntityResourceValue<E>>;
+        status: Signal<ResourceStatus>;
+        error: Signal<Error | undefined>;
+        isLoading: Signal<boolean>;
+        snapshot: Signal<ResourceSnapshot<TypedEntityResourceValue<E>>>;
+      };
+      const resourceValue = propsOrStateStore[
+        `value`
+      ] as Signal<EntityResourceValue>;
+      if (!isSignal(resourceValue)) {
+        throw new Error(`Resource's value ${name}Value does not exist`);
+      }
+
+      const { ids, entityMap } = createEntityDerivations(resourceValue);
 
       return {
         entityMap,
@@ -262,7 +292,10 @@ type EntityResourceValue = Entity[] | (Entity[] | undefined);
 
 type TypedEntityResourceValue<E extends Entity> = E[] | (E[] | undefined);
 
-export type EntityDictionary = Record<string, ResourceRef<EntityResourceValue>>;
+export type EntityDictionary = Record<
+  string,
+  ResourceRef<EntityResourceValue> | Resource<EntityResourceValue>
+>;
 
 type MergeNamedEntityStates<T extends EntityDictionary> = MergeUnion<
   {
