@@ -18,7 +18,7 @@ const dummyConnection: Connection = {
 
 function toDevtoolsAction(actions: (string | Action)[]): Action {
   if (!actions.length) {
-    return { type: 'Store Update' };
+    return { type: 'Store Update' } as Action;
   }
 
   const objects = actions.filter((a): a is Action => typeof a === 'object');
@@ -26,7 +26,9 @@ function toDevtoolsAction(actions: (string | Action)[]): Action {
     ...new Set(actions.map((a) => (typeof a === 'string' ? a : a.type))),
   ].join(', ');
 
-  return objects.length ? { ...objects[0], type } : { type };
+  return objects.length
+    ? ({ ...objects[0], type } as Action)
+    : ({ type } as Action);
 }
 
 /**

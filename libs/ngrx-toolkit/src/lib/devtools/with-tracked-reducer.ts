@@ -3,7 +3,6 @@ import {
   EmptyFeatureResult,
   getState,
   PartialStateUpdater,
-  patchState,
   SignalStoreFeature,
   signalStoreFeature,
   type,
@@ -16,7 +15,7 @@ import {
 } from '@ngrx/signals/events';
 import { tap } from 'rxjs/operators';
 import { GLITCH_TRACKING_FEATURE } from './features/with-glitch-tracking';
-import { currentActionNames } from './internal/current-action-names';
+import { updateState, asAction } from './update-state';
 import { DEVTOOL_FEATURE_NAMES } from './with-devtools';
 
 export function withTrackedReducer<State extends object>(
@@ -40,8 +39,7 @@ export function withTrackedReducer<State extends object>(
             const result = caseReducer.reducer(event, state);
             const updaters = Array.isArray(result) ? result : [result];
 
-            currentActionNames.add(event);
-            patchState(store, ...updaters);
+            updateState(store, asAction(event), ...updaters);
           }),
         ),
       ),
