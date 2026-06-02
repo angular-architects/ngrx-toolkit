@@ -218,12 +218,16 @@ const save = await store.save({...}); if (inc.status === 'error')
 ### Signal values
 
 ```ts
-// Signals
+// value: Signal<Result | undefined>;
+// status: Signal<MutationStatus>;
+// isPending: Signal<boolean>;
+// isSuccess: Signal<boolean>;
+// error: Signal<unknown>;
 
-// via store
-store.increment.value; // also status/error/isPending/status/hasValue;
+// via store in `withMutation`
+store.incrementValue;
 
-// via member variable
+// via member variable if defined outside of `withMutation`
 mutationName.value; // ^^^
 ```
 
@@ -288,9 +292,8 @@ export type Mutation<Parameter, Result> = {
   hasValue(): this is Mutation<Exclude<Parameter, undefined>, Result>; // type narrows `.value()`
 };
 
-// Accessed from store or variable
-storeName.mutationName.value; // or other signals
-mutationName.value; // ^^^
+storeName.mutationNameValue; // `withMutations`
+mutationName.value; // no `withMutations`
 ```
 
 #### Callbacks: `onSuccess` and `onError` (optional)

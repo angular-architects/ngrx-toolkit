@@ -38,6 +38,7 @@ const sidebars: SidebarsConfig = {
     },
   ],
   teamSidebar: ['team'],
+  communitySidebar: ['community'],
 
   // But you can create a sidebar manually
   /*

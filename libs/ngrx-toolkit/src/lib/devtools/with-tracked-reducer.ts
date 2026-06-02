@@ -15,7 +15,7 @@ import {
 } from '@ngrx/signals/events';
 import { tap } from 'rxjs/operators';
 import { GLITCH_TRACKING_FEATURE } from './features/with-glitch-tracking';
-import { updateState, asAction } from './update-state';
+import { asAction, updateState } from './update-state';
 import { DEVTOOL_FEATURE_NAMES } from './with-devtools';
 
 export function withTrackedReducer<State extends object>(
