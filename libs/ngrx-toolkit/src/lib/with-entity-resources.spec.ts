@@ -243,6 +243,56 @@ describe('withEntityResources', () => {
       expect(store.entities()).toEqual([]);
     });
 
+    it('does not support setAllEntities/addEntity/removeEntity for named which are of type Resource', async () => {
+      const Store = signalStore(
+        { providedIn: 'root', protectedState: false },
+        withEntityResources(() => ({
+          todos: withPreviousValue(
+            resource({
+              loader: () => Promise.resolve([] as Todo[]),
+              defaultValue: [],
+            }),
+          ),
+        })),
+      );
+
+      const store = TestBed.inject(Store);
+
+      await wait();
+
+      const invalidSetAll = () =>
+        patchState(
+          store,
+          // @ts-expect-error Resources which are of type Resource should not support entity updaters
+          setAllEntities(
+            [
+              { id: 1, title: 'A', completed: false },
+              { id: 2, title: 'B', completed: true },
+            ] as Todo[],
+            { collection: 'todos' },
+          ),
+        );
+
+      const invalidAdd = () =>
+        patchState(
+          store,
+          // @ts-expect-error Resources which are of type Resource should not support entity updaters
+          addEntity({ id: 3, title: 'C', completed: false } as Todo, {
+            collection: 'todos',
+          }),
+        );
+
+      const invalidRemove = () =>
+        // @ts-expect-error Resources which are of type Resource should not support entity updaters
+        patchState(store, removeEntity(2, { collection: 'todos' }));
+
+      expect(invalidSetAll).toBeDefined();
+      expect(invalidAdd).toBeDefined();
+      expect(invalidRemove).toBeDefined();
+      expect(store.todosIds()).toEqual([]);
+      expect(store.todosEntities()).toEqual([]);
+    });
+
     it('supports setAllEntities/addEntity/removeEntity for named', async () => {
       const Store = signalStore(
         { providedIn: 'root', protectedState: false },
