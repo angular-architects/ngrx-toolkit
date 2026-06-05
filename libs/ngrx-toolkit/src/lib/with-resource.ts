@@ -49,6 +49,22 @@ export type ResourceRefResult<T> = {
 
 type ReloadableResource<T> = ResourceRef<T> | HttpResourceRef<T>;
 
+type ResourceCoreKeys =
+  | 'value'
+  | 'status'
+  | 'error'
+  | 'isLoading'
+  | 'snapshot'
+  | 'hasValue';
+
+type AdditionalSignalProps<T extends WidenedResource<unknown>> = {
+  [Prop in keyof T as Prop extends ResourceCoreKeys
+    ? never
+    : T[Prop] extends Signal<unknown>
+      ? Prop
+      : never]: T[Prop];
+};
+
 type InferResourceValue<T extends WidenedResource<unknown>> =
   T['value'] extends Signal<infer S> ? S : never;
 
@@ -88,7 +104,7 @@ type UnnamedResourceResult<
     error: Signal<Error | undefined>;
     isLoading: Signal<boolean>;
     snapshot: Signal<ResourceSnapshot<InferResourceValue<T>>>;
-  };
+  } & AdditionalSignalProps<T>;
   methods: {
     hasValue(): this is Resource<Exclude<InferResourceValue<T>, undefined>>;
   } & ConditionalReloadMethod<T>;
@@ -97,6 +113,15 @@ type UnnamedResourceResult<
 type WidenedResource<T> = ResourceRef<T> | Resource<T>;
 
 export type ResourceDictionary = Record<string, WidenedResource<unknown>>;
+
+type NamedAdditionalSignalProps<T extends ResourceDictionary> = {
+  [ResourceName in keyof T & string]: {
+    [Prop in keyof AdditionalSignalProps<T[ResourceName]> &
+      string as `${ResourceName}${Capitalize<Prop>}`]: AdditionalSignalProps<
+      T[ResourceName]
+    >[Prop];
+  };
+}[keyof T & string];
 
 export type NamedResourceResult<
   T extends ResourceDictionary,
@@ -127,7 +152,7 @@ export type NamedResourceResult<
     [Prop in keyof T as `${Prop & string}Snapshot`]: Signal<
       ResourceSnapshot<T[Prop]['value'] extends Signal<infer S> ? S : never>
     >;
-  };
+  } & NamedAdditionalSignalProps<T>;
   methods: {
     [Prop in keyof T as `${Prop & string}HasValue`]: () => this is Resource<
       Exclude<InferResourceValue<T[Prop]>, undefined>
@@ -163,6 +188,8 @@ const defaultOptions: Required<ResourceOptions> = {
  *
  * Plain `Resource` values are exposed as signals on the store instance,
  * but are not part of state and therefore cannot be changed via `patchState`.
+ * Additional signal members on the resource (for example `foo`) are also
+ * exposed on the store as props.
  *
  * @usageNotes
  *
@@ -226,6 +253,8 @@ export function withResource<
  *
  * Plain `Resource` values are exposed as read-only signals with `<name>Value`
  * but are not stored in state.
+ * Additional signal members are exposed as read-only props using
+ * `<name><CapitalizedMember>`.
  *
  * @usageNotes
  *
@@ -334,6 +363,7 @@ function createUnnamedResource<ResourceValue>(
     error: resource.error,
     isLoading: resource.isLoading,
     snapshot: resource.snapshot,
+    ...extractAdditionalSignalProps(resource),
   };
 
   if (isResourceRef(resource)) {
@@ -375,6 +405,7 @@ function createNamedResource<Dictionary extends ResourceDictionary>(
     props[`${resourceName}Error`] = res.error;
     props[`${resourceName}IsLoading`] = res.isLoading;
     props[`${resourceName}Snapshot`] = res.snapshot;
+    assignPrefixedProps(props, resourceName, extractAdditionalSignalProps(res));
     methods[`${resourceName}HasValue`] = isResourceRef(res)
       ? () => res.hasValue()
       : () => res.hasValue();
@@ -429,6 +460,54 @@ export function isResourceRef(value: unknown): value is ResourceRef<unknown> {
     'update' in value &&
     'asReadonly' in value
   );
+}
+
+function extractAdditionalSignalProps(
+  resource: WidenedResource<unknown>,
+): Record<string, Signal<unknown>> {
+  const additionalSignals: Record<string, Signal<unknown>> = {};
+
+  for (const key of Object.keys(resource)) {
+    if (isResourceCoreKey(key)) {
+      continue;
+    }
+
+    const candidate = (resource as unknown as Record<string, unknown>)[key];
+    if (isSignal(candidate)) {
+      additionalSignals[key] = candidate;
+    }
+  }
+
+  return additionalSignals;
+}
+
+function isResourceCoreKey(key: string): key is ResourceCoreKeys {
+  return (
+    key === 'value' ||
+    key === 'status' ||
+    key === 'error' ||
+    key === 'isLoading' ||
+    key === 'snapshot' ||
+    key === 'hasValue'
+  );
+}
+
+function assignPrefixedProps(
+  target: Record<string, Signal<unknown>>,
+  resourceName: string,
+  source: Record<string, Signal<unknown>>,
+): void {
+  for (const key of Object.keys(source)) {
+    target[`${resourceName}${capitalizeKey(key)}`] = source[key];
+  }
+}
+
+function capitalizeKey(value: string): string {
+  if (value.length === 0) {
+    return value;
+  }
+
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
 // This may be handy in the future
