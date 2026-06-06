@@ -16,6 +16,10 @@ import {
 import { of } from 'rxjs';
 import { Assert, AssertNot, IsEqual, Satisfies } from './test-utils/types';
 import { ErrorHandling, mapToResource, withResource } from './with-resource';
+import {
+  restResourceReadable,
+  restResourceWritable,
+} from './with-resource/tests/util/custom-resource';
 import { Address, venice, vienna } from './with-resource/tests/util/fixtures';
 import { paramsForResourceTypes } from './with-resource/tests/util/params-for-resource-types';
 import { setupUnnamedResource } from './with-resource/tests/util/setup-unnamed-resource';
@@ -812,6 +816,143 @@ describe('withResource', () => {
           id: resource({ loader: () => Promise.resolve(1) }),
         })),
       );
+    });
+
+    it('can call custom named and extract extra properties', async () => {
+      // TODO - move this whole test so this can `wait` can be re-used
+      const wait = (ms = 0) =>
+        new Promise((resolve) => setTimeout(resolve, ms));
+
+      const Store = signalStore(
+        { providedIn: 'root', protectedState: false },
+        withResource(() => ({
+          idWritable: restResourceWritable(() => 'a'),
+          idReadable: restResourceReadable(() => 'a'),
+        })),
+      );
+      const store = TestBed.inject(Store);
+
+      await wait();
+
+      expect(store.idWritableValue()).toBe('a');
+      expect(store.idReadableValue()).toBe('a');
+      expect(store.idWritableStuff()).toBe('a stuff');
+      expect(store.idReadableStuff()).toBe('a stuff');
+
+      patchState(store, { idWritableValue: 'b' });
+      // @ts-expect-error - readabke resoruces should not have their value patchable
+      patchState(store, { idReadableValue: 'b' });
+
+      expect(store.idWritableValue()).toBe('b');
+      expect(store.idReadableValue()).toBe('a');
+      expect(store.idWritableStuff()).toBe('b stuff');
+      expect(store.idReadableStuff()).toBe('a stuff');
+    });
+    it('can call custom unnamed writable and extract extra properties', async () => {
+      // TODO - move this whole test so this can `wait` can be re-used
+      const wait = (ms = 0) =>
+        new Promise((resolve) => setTimeout(resolve, ms));
+
+      const Store = signalStore(
+        { providedIn: 'root', protectedState: false },
+        withResource(() => restResourceWritable(() => 'a')),
+      );
+      const store = TestBed.inject(Store);
+
+      await wait();
+
+      expect(store.value()).toBe('a');
+      expect(store.stuff()).toBe('a stuff');
+
+      patchState(store, { value: 'b' });
+
+      expect(store.value()).toBe('b');
+      expect(store.stuff()).toBe('b stuff');
+    });
+    it('can call custom unnamed readable and extract extra properties', async () => {
+      // TODO - move this whole test so this can `wait` can be re-used
+      const wait = (ms = 0) =>
+        new Promise((resolve) => setTimeout(resolve, ms));
+
+      const Store = signalStore(
+        { providedIn: 'root', protectedState: false },
+        withResource(() => restResourceReadable(() => 'a')),
+      );
+      const store = TestBed.inject(Store);
+
+      await wait();
+
+      expect(store.value()).toBe('a');
+      expect(store.stuff()).toBe('a stuff');
+
+      // @ts-expect-error - readabke resoruces should not have their value patchable
+      patchState(store, { value: 'b' });
+
+      expect(store.value()).toBe('a');
+      expect(store.stuff()).toBe('a stuff');
+    });
+    it('can call custom unnamed readable and a named readable and extract extra properties', async () => {
+      // TODO - move this whole test so this can `wait` can be re-used
+      const wait = (ms = 0) =>
+        new Promise((resolve) => setTimeout(resolve, ms));
+
+      const Store = signalStore(
+        { providedIn: 'root', protectedState: false },
+        withResource(() => restResourceReadable(() => 'a')),
+        withResource(() => ({
+          id: restResourceReadable(() => 'a'),
+        })),
+      );
+      const store = TestBed.inject(Store);
+
+      await wait();
+
+      expect(store.value()).toBe('a');
+      expect(store.stuff()).toBe('a stuff');
+
+      expect(store.idValue()).toBe('a');
+      expect(store.idStuff()).toBe('a stuff');
+
+      // @ts-expect-error - readabke resoruces should not have their value patchable
+      patchState(store, { value: 'b' });
+      // @ts-expect-error - readable resources should not have their value patchable
+      patchState(store, { idValue: 'b' });
+
+      expect(store.value()).toBe('a');
+      expect(store.stuff()).toBe('a stuff');
+      expect(store.idValue()).toBe('a');
+      expect(store.idStuff()).toBe('a stuff');
+    });
+    it('can call custom unnamed writable and a named readable and extract extra properties', async () => {
+      // TODO - move this whole test so this can `wait` can be re-used
+      const wait = (ms = 0) =>
+        new Promise((resolve) => setTimeout(resolve, ms));
+
+      const Store = signalStore(
+        { providedIn: 'root', protectedState: false },
+        withResource(() => restResourceWritable(() => 'a')),
+        withResource(() => ({
+          id: restResourceReadable(() => 'a'),
+        })),
+      );
+      const store = TestBed.inject(Store);
+
+      await wait();
+
+      expect(store.value()).toBe('a');
+      expect(store.stuff()).toBe('a stuff');
+
+      expect(store.idValue()).toBe('a');
+      expect(store.idStuff()).toBe('a stuff');
+
+      patchState(store, { value: 'b' });
+      // @ts-expect-error - readable resources should not have their value patchable
+      patchState(store, { idValue: 'b' });
+
+      expect(store.value()).toBe('b');
+      expect(store.stuff()).toBe('b stuff');
+      expect(store.idValue()).toBe('a');
+      expect(store.idStuff()).toBe('a stuff');
     });
   });
 });

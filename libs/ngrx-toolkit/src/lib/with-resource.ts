@@ -57,7 +57,7 @@ type ResourceCoreKeys =
   | 'snapshot'
   | 'hasValue';
 
-type AdditionalSignalProps<T extends WidenedResource<unknown>> = {
+type AdditionalSignalProps<T extends Resource<unknown>> = {
   [Prop in keyof T as Prop extends ResourceCoreKeys
     ? never
     : T[Prop] extends Signal<unknown>
@@ -65,10 +65,10 @@ type AdditionalSignalProps<T extends WidenedResource<unknown>> = {
       : never]: T[Prop];
 };
 
-type InferResourceValue<T extends WidenedResource<unknown>> =
+type InferResourceValue<T extends Resource<unknown>> =
   T['value'] extends Signal<infer S> ? S : never;
 
-type ConditionalReloadMethod<T extends WidenedResource<unknown>> =
+type ConditionalReloadMethod<T extends Resource<unknown>> =
   T extends ReloadableResource<unknown>
     ? { _reload(): boolean }
     : Record<never, never>;
@@ -80,14 +80,14 @@ type NonPatchableResourceStateMarker = {
 };
 
 type ResourceValueType<
-  T extends WidenedResource<unknown>,
+  T extends Resource<unknown>,
   HasUndefinedErrorHandling extends boolean,
 > = HasUndefinedErrorHandling extends true
   ? InferResourceValue<T> | undefined
   : InferResourceValue<T>;
 
 type UnnamedResourceResult<
-  T extends WidenedResource<unknown>,
+  T extends Resource<unknown>,
   HasUndefinedErrorHandling extends boolean,
 > = {
   state: T extends ReloadableResource<unknown>
@@ -110,18 +110,34 @@ type UnnamedResourceResult<
   } & ConditionalReloadMethod<T>;
 };
 
-type WidenedResource<T> = ResourceRef<T> | Resource<T>;
+export type ResourceDictionary = Record<string, Resource<unknown>>;
 
-export type ResourceDictionary = Record<string, WidenedResource<unknown>>;
+// Without this, only one resource would be able to have its additional signal props extracted
+// When there are two or more named resources,
+//     neither additional property can be indexed for certain,
+//     because it would be a union of the two's additional properties,
+//     and TS cannot pick the correct one when indexing into it.
+//     So there would be no resolution of a particular resource's additional property.
+// This type util makes this type mapping an intersection, so all additional properties
+//     of all resources are preserved, but also can be indexed for a particular resource.
+// https://stackoverflow.com/a/50375286 explanation, with relevant TS doc links
+type UnionToIntersection<T> = (
+  T extends unknown ? (arg: T) => void : never
+) extends (arg: infer R) => void
+  ? R
+  : Record<never, never>;
 
-type NamedAdditionalSignalProps<T extends ResourceDictionary> = {
-  [ResourceName in keyof T & string]: {
-    [Prop in keyof AdditionalSignalProps<T[ResourceName]> &
-      string as `${ResourceName}${Capitalize<Prop>}`]: AdditionalSignalProps<
-      T[ResourceName]
-    >[Prop];
-  };
-}[keyof T & string];
+type NamedAdditionalSignalProps<T extends ResourceDictionary> =
+  UnionToIntersection<
+    {
+      [ResourceName in keyof T & string]: {
+        [Prop in keyof AdditionalSignalProps<T[ResourceName]> &
+          string as `${ResourceName}${Capitalize<Prop>}`]: AdditionalSignalProps<
+          T[ResourceName]
+        >[Prop];
+      };
+    }[keyof T & string]
+  >;
 
 export type NamedResourceResult<
   T extends ResourceDictionary,
@@ -130,7 +146,7 @@ export type NamedResourceResult<
   state: {
     [Prop in keyof T as T[Prop] extends ReloadableResource<unknown>
       ? `${Prop & string}Value`
-      : never]: T[Prop] extends WidenedResource<unknown>
+      : never]: T[Prop] extends Resource<unknown>
       ? ResourceValueType<T[Prop], HasUndefinedErrorHandling>
       : never;
   } & NonPatchableResourceStateMarker;
@@ -138,7 +154,7 @@ export type NamedResourceResult<
     [Prop in keyof T as T[Prop] extends ReloadableResource<unknown>
       ? never
       : `${Prop & string}Value`]: Signal<
-      T[Prop] extends WidenedResource<unknown>
+      T[Prop] extends Resource<unknown>
         ? ResourceValueType<T[Prop], HasUndefinedErrorHandling>
         : never
     >;
@@ -213,7 +229,7 @@ const defaultOptions: Required<ResourceOptions> = {
  */
 export function withResource<
   Input extends SignalStoreFeatureResult,
-  ResourceType extends WidenedResource<unknown>,
+  ResourceType extends Resource<unknown>,
 >(
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
@@ -222,7 +238,7 @@ export function withResource<
 
 export function withResource<
   Input extends SignalStoreFeatureResult,
-  ResourceType extends WidenedResource<unknown>,
+  ResourceType extends Resource<unknown>,
 >(
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
@@ -232,7 +248,7 @@ export function withResource<
 
 export function withResource<
   Input extends SignalStoreFeatureResult,
-  ResourceType extends WidenedResource<unknown>,
+  ResourceType extends Resource<unknown>,
 >(
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
@@ -275,7 +291,7 @@ export function withResource<
  * ```
  *
  * @param resourceFactory A factory function that receives the store's props,
- * methods, and state signals. It must return a `Record<string, WidenedResource>`.
+ * methods, and state signals. It must return a `Record<string, Resource>`.
  * @param resourceOptions Allows to configure the error handling behavior.
  */
 export function withResource<
@@ -313,7 +329,7 @@ export function withResource<
 >(
   resourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
-  ) => WidenedResource<ResourceValue> | ResourceDictionary,
+  ) => Resource<ResourceValue> | ResourceDictionary,
   resourceOptions?: ResourceOptions,
 ): SignalStoreFeature<Input> {
   const options: Required<ResourceOptions> = {
@@ -345,12 +361,10 @@ export function withResource<
 }
 
 function createUnnamedResource<ResourceValue>(
-  resource: WidenedResource<ResourceValue>,
+  resource: Resource<ResourceValue>,
   errorHandling: ErrorHandling,
 ) {
-  function hasValue(): this is WidenedResource<
-    Exclude<ResourceValue, undefined>
-  > {
+  function hasValue(): this is Resource<Exclude<ResourceValue, undefined>> {
     if (isResourceRef(resource)) {
       return resource.hasValue();
     } else {
@@ -463,7 +477,7 @@ export function isResourceRef(value: unknown): value is ResourceRef<unknown> {
 }
 
 function extractAdditionalSignalProps(
-  resource: WidenedResource<unknown>,
+  resource: Resource<unknown>,
 ): Record<string, Signal<unknown>> {
   const additionalSignals: Record<string, Signal<unknown>> = {};
 
@@ -584,7 +598,7 @@ type MappedResource<
  *
  * @param store The store instance to map the resource to.
  * @param name The name of the resource to map.
- * @returns `WidenedResource<T>`
+ * @returns `Resource<T>`
  */
 export function mapToResource<
   Name extends ResourceNames<Store>,
@@ -674,17 +688,17 @@ export function mapToResource<
  * a breaking change.
  */
 function valueSignalForErrorHandling<T>(
-  res: WidenedResource<T>,
+  res: Resource<T>,
   errorHandling: 'undefined value',
 ): Signal<T | undefined>;
 
 function valueSignalForErrorHandling<T>(
-  res: WidenedResource<T>,
+  res: Resource<T>,
   errorHandling: ErrorHandling,
 ): Signal<T>;
 
 function valueSignalForErrorHandling<T>(
-  res: WidenedResource<T>,
+  res: Resource<T>,
   errorHandling: ErrorHandling,
 ): Signal<T | undefined> {
   const originalSignal = res.value;
