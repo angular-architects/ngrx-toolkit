@@ -27,9 +27,6 @@ import {
 import {
   NamedResourceResult,
   ResourceResult,
-  WidenedResource,
-  isResource,
-  isResourceRef,
   withResource,
 } from './with-resource';
 
@@ -132,7 +129,7 @@ export function withEntityResources<
 >(
   entityResourceFactory: (
     store: Input['props'] & Input['methods'] & StateSignals<Input['state']>,
-  ) => WidenedResource<ResourceValue> | EntityDictionary,
+  ) => Resource<ResourceValue> | EntityDictionary,
 ): SignalStoreFeature<Input> {
   return (store) => {
     const resourceOrDict = entityResourceFactory({
@@ -141,9 +138,9 @@ export function withEntityResources<
       ...store.methods,
     });
 
-    if (isResourceRef(resourceOrDict)) {
+    if (isEntityResourceRef(resourceOrDict)) {
       return createUnnamedEntityResourceRef(resourceOrDict)(store);
-    } else if (isResource(resourceOrDict)) {
+    } else if (isEntityResource(resourceOrDict)) {
       return createUnnamedEntityResource(resourceOrDict)(store);
     }
     return createNamedEntityResources(resourceOrDict)(store);
@@ -232,7 +229,7 @@ function createNamedEntityResources<Dictionary extends EntityDictionary>(
   const keys = Object.keys(dictionary);
 
   const stateFactories = keys
-    .filter((name) => isResourceRef(dictionary[name]))
+    .filter((name) => isEntityResourceRef(dictionary[name]))
     .map((name) => {
       return (store: Record<string, unknown>) => {
         const resourceValue = store[
@@ -252,7 +249,7 @@ function createNamedEntityResources<Dictionary extends EntityDictionary>(
     });
 
   const propsFactories = keys
-    .filter((name) => !isResourceRef(dictionary[name]))
+    .filter((name) => !isEntityResourceRef(dictionary[name]))
     .map((name) => {
       return (store: Record<string, unknown>) => {
         const resourceValue = store[
@@ -523,4 +520,32 @@ function createComputedEntities<E extends Entity>(
   return () => {
     return ids().map((id) => entityMap()[id]);
   };
+}
+
+export function isEntityResource(
+  value: unknown,
+): value is Resource<EntityResourceValue> {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    'value' in value &&
+    isSignal(value.value) &&
+    'status' in value &&
+    'error' in value &&
+    'isLoading' in value &&
+    'snapshot' in value &&
+    'hasValue' in value
+  );
+}
+
+export function isEntityResourceRef(
+  value: unknown,
+): value is ResourceRef<EntityResourceValue> {
+  return (
+    isEntityResource(value) &&
+    'reload' in value &&
+    'set' in value &&
+    'update' in value &&
+    'asReadonly' in value
+  );
 }
