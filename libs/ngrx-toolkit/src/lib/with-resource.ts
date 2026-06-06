@@ -524,18 +524,6 @@ function capitalizeKey(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-// This may be handy in the future
-// export function isHttpResourceRef(
-//   value: unknown,
-// ): value is HttpResourceRef<unknown> {
-//   return (
-//     isResourceRef(value) &&
-//     'headers' in value &&
-//     'statusCode' in value &&
-//     'progress' in value
-//   );
-// }
-
 //** Types for `mapToResource` */
 
 type NamedResource<Name extends string, T> = {
