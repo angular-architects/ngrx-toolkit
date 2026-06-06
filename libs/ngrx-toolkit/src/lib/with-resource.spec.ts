@@ -330,6 +330,107 @@ describe('withResource', () => {
           expect(store.idWritableStuff()).toBe('b stuff');
           expect(store.idReadableStuff()).toBe('a stuff');
         });
+
+        it('can supply custom unnamed (writable and unwritable) and custom named (writable and unwritable) and extract custom extra signal properties', async () => {
+          const UnnamedWritableAndNamedComboStore = signalStore(
+            { providedIn: 'root', protectedState: false },
+            withResource(() => restResourceWritable(() => 'a')),
+            withResource(() => ({
+              idWritable: restResourceWritable(() => 'a'),
+              idReadable: restResourceReadable(() => 'a'),
+            })),
+          );
+          const unnamedWritableAndNamedComboStore = TestBed.inject(
+            UnnamedWritableAndNamedComboStore,
+          );
+
+          await wait();
+
+          expect(unnamedWritableAndNamedComboStore.value()).toBe('a');
+          expect(unnamedWritableAndNamedComboStore.stuff()).toBe('a stuff');
+          expect(unnamedWritableAndNamedComboStore.idWritableValue()).toBe('a');
+          expect(unnamedWritableAndNamedComboStore.idReadableValue()).toBe('a');
+          expect(unnamedWritableAndNamedComboStore.idWritableStuff()).toBe(
+            'a stuff',
+          );
+          expect(unnamedWritableAndNamedComboStore.idReadableStuff()).toBe(
+            'a stuff',
+          );
+
+          patchState(unnamedWritableAndNamedComboStore, {
+            idWritableValue: 'b',
+          });
+          patchState(unnamedWritableAndNamedComboStore, { value: 'b' });
+          patchState(unnamedWritableAndNamedComboStore, {
+            // @ts-expect-error - readable resources should not have their value patchable
+            idReadableValue: 'b',
+          });
+
+          expect(unnamedWritableAndNamedComboStore.value()).toBe('b');
+          expect(unnamedWritableAndNamedComboStore.stuff()).toBe('b stuff');
+          expect(unnamedWritableAndNamedComboStore.idWritableValue()).toBe('b');
+          expect(unnamedWritableAndNamedComboStore.idReadableValue()).toBe('a');
+          expect(unnamedWritableAndNamedComboStore.idWritableStuff()).toBe(
+            'b stuff',
+          );
+          expect(unnamedWritableAndNamedComboStore.idReadableStuff()).toBe(
+            'a stuff',
+          );
+
+          const UnnamedUnwritableAndNamedComboStore = signalStore(
+            { providedIn: 'root', protectedState: false },
+            withResource(() => restResourceReadable(() => 'a')),
+            withResource(() => ({
+              idWritable: restResourceWritable(() => 'a'),
+              idReadable: restResourceReadable(() => 'a'),
+            })),
+          );
+          const unnamedUnwritableAndNamedComboStore = TestBed.inject(
+            UnnamedUnwritableAndNamedComboStore,
+          );
+
+          await wait();
+
+          expect(unnamedUnwritableAndNamedComboStore.value()).toBe('a');
+          expect(unnamedUnwritableAndNamedComboStore.stuff()).toBe('a stuff');
+          expect(unnamedUnwritableAndNamedComboStore.idWritableValue()).toBe(
+            'a',
+          );
+          expect(unnamedUnwritableAndNamedComboStore.idReadableValue()).toBe(
+            'a',
+          );
+          expect(unnamedUnwritableAndNamedComboStore.idWritableStuff()).toBe(
+            'a stuff',
+          );
+          expect(unnamedUnwritableAndNamedComboStore.idReadableStuff()).toBe(
+            'a stuff',
+          );
+
+          patchState(unnamedUnwritableAndNamedComboStore, {
+            idWritableValue: 'b',
+          });
+          // @ts-expect-error - readable resources should not have their value patchable
+          patchState(unnamedUnwritableAndNamedComboStore, { value: 'b' });
+          patchState(unnamedUnwritableAndNamedComboStore, {
+            // @ts-expect-error - readable resources should not have their value patchable
+            idReadableValue: 'b',
+          });
+
+          expect(unnamedUnwritableAndNamedComboStore.value()).toBe('a');
+          expect(unnamedUnwritableAndNamedComboStore.stuff()).toBe('a stuff');
+          expect(unnamedUnwritableAndNamedComboStore.idWritableValue()).toBe(
+            'b',
+          );
+          expect(unnamedUnwritableAndNamedComboStore.idReadableValue()).toBe(
+            'a',
+          );
+          expect(unnamedUnwritableAndNamedComboStore.idWritableStuff()).toBe(
+            'b stuff',
+          );
+          expect(unnamedUnwritableAndNamedComboStore.idReadableStuff()).toBe(
+            'a stuff',
+          );
+        });
       });
 
       describe('override protection', () => {
