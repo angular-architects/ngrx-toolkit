@@ -381,6 +381,33 @@ describe('withResource', () => {
             'userValue',
           );
         });
+
+        //TODO wait for https://github.com/ngrx/platform/pull/4932 and then add 'value' to the list
+        it.each([
+          'status',
+          'error',
+          'isLoading',
+          '_reload',
+          'hasValue',
+          'stuff',
+        ])(
+          `warns if %s is not a member of the store with a custom extended resource`,
+          (memberName) => {
+            const Store = signalStore(
+              { providedIn: 'root' },
+              withProps(() => ({ [memberName]: true })),
+              withResource(() => restResourceWritable(() => 'a')),
+            );
+
+            TestBed.inject(Store);
+
+            expect(warningSpy).toHaveBeenCalledWith(
+              '@ngrx/signals: SignalStore members cannot be overridden.',
+              'Trying to override:',
+              memberName,
+            );
+          },
+        );
       });
 
       it('works also with list/detail use case', async () => {
