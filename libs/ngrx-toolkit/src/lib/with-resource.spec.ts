@@ -269,6 +269,72 @@ describe('withResource', () => {
       });
 
       describe('extra properties checks', () => {
+        describe('extra properties go to `props` so they cannot be written to', () => {
+          it('for unnamed writables', async () => {
+            const Store = signalStore(
+              { providedIn: 'root', protectedState: false },
+              withResource(() => restResourceWritable(() => 'a')),
+            );
+
+            const store = TestBed.inject(Store);
+
+            await wait();
+
+            expect(store.stuff()).toBe('a stuff');
+
+            // @ts-expect-error - extra properties should not be patchable
+            patchState(store, { stuff: 'b stuff' });
+          });
+          it('for unnamed readables', async () => {
+            const Store = signalStore(
+              { providedIn: 'root', protectedState: false },
+              withResource(() => restResourceReadable(() => 'a')),
+            );
+
+            const store = TestBed.inject(Store);
+
+            await wait();
+
+            expect(store.stuff()).toBe('a stuff');
+
+            // @ts-expect-error - extra properties should not be patchable
+            patchState(store, { stuff: 'b stuff' });
+          });
+          it('for named readables', async () => {
+            const Store = signalStore(
+              { providedIn: 'root', protectedState: false },
+              withResource(() => ({
+                name: restResourceReadable(() => 'a'),
+              })),
+            );
+
+            const store = TestBed.inject(Store);
+
+            await wait();
+
+            expect(store.nameStuff()).toBe('a stuff');
+
+            // @ts-expect-error - extra properties should not be patchable
+            patchState(store, { nameStuff: 'b stuff' });
+          });
+          it('for named writables', async () => {
+            const Store = signalStore(
+              { providedIn: 'root', protectedState: false },
+              withResource(() => ({
+                name: restResourceWritable(() => 'a'),
+              })),
+            );
+
+            const store = TestBed.inject(Store);
+
+            await wait();
+
+            expect(store.nameStuff()).toBe('a stuff');
+
+            // @ts-expect-error - extra properties should not be patchable
+            patchState(store, { nameStuff: 'b stuff' });
+          });
+        });
         it('can call custom unnamed writable resource and extract custom extra signal properties', async () => {
           const Store = signalStore(
             { providedIn: 'root', protectedState: false },
