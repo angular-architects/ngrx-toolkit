@@ -17,9 +17,9 @@ import { of } from 'rxjs';
 import { Assert, AssertNot, IsEqual, Satisfies } from './test-utils/types';
 import { ErrorHandling, mapToResource, withResource } from './with-resource';
 import {
-  restResourceReadable,
-  restResourceWritable,
-} from './with-resource/tests/util/custom-resource';
+  stuffExtendedResourceReadable,
+  stuffExtendedResourceWritable,
+} from './with-resource/tests/util/custom-extended-resources';
 import { Address, venice, vienna } from './with-resource/tests/util/fixtures';
 import { paramsForResourceTypes } from './with-resource/tests/util/params-for-resource-types';
 import { setupUnnamedResource } from './with-resource/tests/util/setup-unnamed-resource';
@@ -273,7 +273,7 @@ describe('withResource', () => {
           it('for unnamed writables', async () => {
             const Store = signalStore(
               { providedIn: 'root', protectedState: false },
-              withResource(() => restResourceWritable(() => 'a')),
+              withResource(() => stuffExtendedResourceWritable(() => 'a')),
             );
 
             const store = TestBed.inject(Store);
@@ -288,7 +288,7 @@ describe('withResource', () => {
           it('for unnamed readables', async () => {
             const Store = signalStore(
               { providedIn: 'root', protectedState: false },
-              withResource(() => restResourceReadable(() => 'a')),
+              withResource(() => stuffExtendedResourceReadable(() => 'a')),
             );
 
             const store = TestBed.inject(Store);
@@ -304,7 +304,7 @@ describe('withResource', () => {
             const Store = signalStore(
               { providedIn: 'root', protectedState: false },
               withResource(() => ({
-                name: restResourceReadable(() => 'a'),
+                name: stuffExtendedResourceReadable(() => 'a'),
               })),
             );
 
@@ -321,7 +321,7 @@ describe('withResource', () => {
             const Store = signalStore(
               { providedIn: 'root', protectedState: false },
               withResource(() => ({
-                name: restResourceWritable(() => 'a'),
+                name: stuffExtendedResourceWritable(() => 'a'),
               })),
             );
 
@@ -338,7 +338,7 @@ describe('withResource', () => {
         it('can call custom unnamed writable resource and extract custom extra signal properties', async () => {
           const Store = signalStore(
             { providedIn: 'root', protectedState: false },
-            withResource(() => restResourceWritable(() => 'a')),
+            withResource(() => stuffExtendedResourceWritable(() => 'a')),
           );
           const store = TestBed.inject(Store);
 
@@ -355,7 +355,7 @@ describe('withResource', () => {
         it('can call custom unnamed readable resource and extract custom extra signal properties', async () => {
           const Store = signalStore(
             { providedIn: 'root', protectedState: false },
-            withResource(() => restResourceReadable(() => 'a')),
+            withResource(() => stuffExtendedResourceReadable(() => 'a')),
           );
           const store = TestBed.inject(Store);
 
@@ -374,8 +374,8 @@ describe('withResource', () => {
           const Store = signalStore(
             { providedIn: 'root', protectedState: false },
             withResource(() => ({
-              idWritable: restResourceWritable(() => 'a'),
-              idReadable: restResourceReadable(() => 'a'),
+              idWritable: stuffExtendedResourceWritable(() => 'a'),
+              idReadable: stuffExtendedResourceReadable(() => 'a'),
             })),
           );
           const store = TestBed.inject(Store);
@@ -400,10 +400,10 @@ describe('withResource', () => {
         it('can supply custom unnamed (writable and unwritable) and custom named (writable and unwritable) and extract custom extra signal properties', async () => {
           const UnnamedWritableAndNamedComboStore = signalStore(
             { providedIn: 'root', protectedState: false },
-            withResource(() => restResourceWritable(() => 'a')),
+            withResource(() => stuffExtendedResourceWritable(() => 'a')),
             withResource(() => ({
-              idWritable: restResourceWritable(() => 'a'),
-              idReadable: restResourceReadable(() => 'a'),
+              idWritable: stuffExtendedResourceWritable(() => 'a'),
+              idReadable: stuffExtendedResourceReadable(() => 'a'),
             })),
           );
           const unnamedWritableAndNamedComboStore = TestBed.inject(
@@ -445,10 +445,10 @@ describe('withResource', () => {
 
           const UnnamedUnwritableAndNamedComboStore = signalStore(
             { providedIn: 'root', protectedState: false },
-            withResource(() => restResourceReadable(() => 'a')),
+            withResource(() => stuffExtendedResourceReadable(() => 'a')),
             withResource(() => ({
-              idWritable: restResourceWritable(() => 'a'),
-              idReadable: restResourceReadable(() => 'a'),
+              idWritable: stuffExtendedResourceWritable(() => 'a'),
+              idReadable: stuffExtendedResourceReadable(() => 'a'),
             })),
           );
           const unnamedUnwritableAndNamedComboStore = TestBed.inject(
@@ -563,7 +563,7 @@ describe('withResource', () => {
             const Store = signalStore(
               { providedIn: 'root' },
               withProps(() => ({ [memberName]: true })),
-              withResource(() => restResourceWritable(() => 'a')),
+              withResource(() => stuffExtendedResourceWritable(() => 'a')),
             );
 
             TestBed.inject(Store);

@@ -2,7 +2,7 @@ import { computed, Resource, ResourceRef, Signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
 
-export function restResourceWritable(
+export function stuffExtendedResourceWritable(
   params?: () => string | undefined,
 ): ResourceRef<string | undefined> & { stuff: Signal<string> } {
   const resource = rxResource({
@@ -30,7 +30,7 @@ export function restResourceWritable(
   };
 }
 
-export function restResourceReadable(
+export function stuffExtendedResourceReadable(
   params?: () => string | undefined,
 ): Resource<string | undefined> & { stuff: Signal<string> } {
   const resource = rxResource({
